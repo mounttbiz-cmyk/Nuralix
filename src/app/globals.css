@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root, [data-theme="light"] {
+  --bg:          #F8FAFC;   /* Crisp enterprise slate-light paper */
+  --surface:     #FFFFFF;   /* Pure white card surface */
+  --surface-2:   #F1F5F9;   /* Subtle elevated slate */
+  --line:        #E2E8F0;   /* Clean border */
+  --line-strong: #CBD5E1;
+  --text:        #0F172A;   /* Deep slate text */
+  --text-muted:  #64748B;   /* Slate muted */
+  --brass:       #B2891E;   /* Rich gold matching ribbon logo */
+  --brass-soft:  #FEF9E7;
+  --jade:        #10B981;   /* Emerald jade */
+  --rust:        #EF4444;   /* Crimson rust */
+  --amber:       #F59E0B;
+  --shadow:      0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.03);
+  --grid:        #EDF2F7;
+
+  /* Motion tokens (§4.1) */
+  --dur-instant: 90ms;
+  --dur-fast:    150ms;
+  --dur-base:    240ms;
+  --dur-slow:    420ms;
+  --dur-story:   1200ms;
+
+  --ease-out:    cubic-bezier(.2,.8,.2,1);
+  --ease-in:     cubic-bezier(.4,0,1,1);
+  --ease-spring: cubic-bezier(.34,1.4,.64,1);
+}
+
+[data-theme="dark"] {
+  /* Refined, lighter enterprise dark palette (comfortable slate-navy, NOT pitch black) */
+  --bg:          #111823;   /* Soft slate navy */
+  --surface:     #182232;   /* Elevated slate surface */
+  --surface-2:   #212E42;   /* Interactive slate layer */
+  --line:        #2B3C55;   /* Refined borders */
+  --line-strong: #3E5373;
+  --text:        #F8FAFC;   /* Crisp clean high contrast white */
+  --text-muted:  #94A3B8;   /* Balanced slate muted */
+  --brass:       #E5B83B;   /* Radiant metallic gold matching ribbon logo */
+  --brass-soft:  #2D2511;
+  --jade:        #34D399;
+  --rust:        #F87171;
+  --amber:       #FBBF24;
+  --shadow:      none;      /* Dark separates with value, not shadow */
+  --grid:        #1E2A3C;
+}
+
+/* Base resets & Enterprise Typography */
+html {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  color-scheme: light dark;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Theme switch transition: §4.2 rule 7 - 150ms crossfade on background and border colors only */
+body, [data-surface] {
+  transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out);
+}
+
+/* Numeric & tabular figures */
+.num-tabular {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Document surface (§3): Text serif at generous measure */
+.surface-document {
+  font-family: "Newsreader", "Source Serif 4", Georgia, serif;
+  max-width: 72ch;
+  line-height: 1.6;
+}
+
+[data-theme="dark"] .surface-document {
+  line-height: 1.65;
+}
+
+/* Instrument surface (§3): Dense, numeric, sans-serif, tabular figures, hairline rules */
+.surface-instrument {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tactile micro-interactions (§4.3) */
+.btn-tactile {
+  transition: transform var(--dur-instant) var(--ease-out), background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+
+.btn-tactile:active {
+  transform: translateY(1px);
+}
+
+@media (hover: hover) {
+  .card-hover {
+    transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  }
+  .card-hover:hover {
+    border-color: var(--line-strong);
+  }
+}
+
+/* Accessibility: Reduced motion baseline (§4.5) */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

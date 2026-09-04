@@ -1,0 +1,48 @@
+import { ThemeTokens } from "../schemas/theme";
+
+export const defaultTheme: ThemeTokens = {
+  id: "theme_default_brass",
+  name: "Nuralix Boardroom & Precision",
+  light: {
+    bg: "#F4F6F8",
+    surface: "#FFFFFF",
+    surface2: "#EDF1F5",
+    line: "#D9E0E7",
+    lineStrong: "#B9C4CF",
+    text: "#0E1620",
+    textMuted: "#5A6875",
+    brass: "#8A6A12",
+    brassSoft: "#F3E9C9",
+    jade: "#1E7A52",
+    rust: "#A63D26",
+    amber: "#A9740A",
+    shadow: "0 1px 2px rgba(14,22,32,.06), 0 4px 12px rgba(14,22,32,.05)",
+    grid: "#E4E9EE",
+  },
+  dark: {
+    bg: "#0B1016",
+    surface: "#131A22",
+    surface2: "#1A232D",
+    line: "#24303B",
+    lineStrong: "#33414F",
+    text: "#E9EEF3",
+    textMuted: "#8A99A8",
+    brass: "#C9A227",
+    brassSoft: "#2A2413",
+    jade: "#3FA97C",
+    rust: "#C0563E",
+    amber: "#E0A526",
+    shadow: "none",
+    grid: "#1C2530",
+  },
+  typography: {
+    sans: "Geist, -apple-system, sans-serif",
+    serif: "Newsreader, Source Serif 4, Georgia, serif",
+  },
+  radii: {
+    input: "4px",
+    card: "10px",
+    modal: "16px",
+  },
+  isDefault: true,
+};
