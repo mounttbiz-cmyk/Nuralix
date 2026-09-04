@@ -30,6 +30,18 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState<"briefing" | "simulator" | "health">("briefing");
   const [simRun, setSimRun] = useState(false);
   const [simProgress, setSimProgress] = useState(1000);
+  const [hasSession, setHasSession] = useState(false);
+
+  useEffect(() => {
+    try {
+      const session = localStorage.getItem("nuralix_user_session");
+      if (session) {
+        setHasSession(true);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   const handleSimulate = () => {
     setSimRun(true);
@@ -89,19 +101,31 @@ export default function LandingPage() {
             <div className="hidden sm:block w-24">
               <ThemeSwitch compact />
             </div>
-            <Link
-              href="/login"
-              className="px-3.5 py-1.5 rounded-xl border border-line bg-surface text-xs font-semibold text-text hover:bg-surface-2 transition-all btn-tactile shadow-xs"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/login?signup=true"
-              className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white text-xs font-bold shadow-md transition-all btn-tactile flex items-center gap-1.5"
-            >
-              <span>Launch Free OS</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            {hasSession ? (
+              <Link
+                href="/dashboard"
+                className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white text-xs font-bold shadow-md transition-all btn-tactile flex items-center gap-1.5"
+              >
+                <span>Open Dashboard</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-3.5 py-1.5 rounded-xl border border-line bg-surface text-xs font-semibold text-text hover:bg-surface-2 transition-all btn-tactile shadow-xs"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/login?signup=true"
+                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white text-xs font-bold shadow-md transition-all btn-tactile flex items-center gap-1.5"
+                >
+                  <span>Launch Free OS</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -126,13 +150,23 @@ export default function LandingPage() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
-          <Link
-            href="/login?signup=true"
-            className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-brass text-white font-bold text-sm shadow-xl hover:brightness-110 transition-all btn-tactile flex items-center justify-center gap-2"
-          >
-            <span>Assemble Your Custom Business OS</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          {hasSession ? (
+            <Link
+              href="/dashboard"
+              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-brass text-white font-bold text-sm shadow-xl hover:brightness-110 transition-all btn-tactile flex items-center justify-center gap-2"
+            >
+              <span>Go to Your Live Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          ) : (
+            <Link
+              href="/login?signup=true"
+              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-brass text-white font-bold text-sm shadow-xl hover:brightness-110 transition-all btn-tactile flex items-center justify-center gap-2"
+            >
+              <span>Assemble Your Custom Business OS</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          )}
           <a
             href="#interactive-demo"
             className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-line bg-surface hover:bg-surface-2 text-text font-semibold text-sm transition-all btn-tactile flex items-center justify-center gap-2"

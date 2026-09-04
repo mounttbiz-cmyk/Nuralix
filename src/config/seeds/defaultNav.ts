@@ -5,7 +5,7 @@ export const defaultNavItems: NavItem[] = [
   {
     id: "nav_dashboard",
     label: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: "LayoutDashboard",
     order: 1,
     mobileTab: true,

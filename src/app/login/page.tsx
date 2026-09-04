@@ -8,37 +8,56 @@ import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [authMode, setAuthMode] = useState<"register" | "signin">("signin");
   const [isSuperadminMode, setIsSuperadminMode] = useState(false);
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [adminPasscode, setAdminPasscode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Business Login handler (Google or email)
-  const handleBusinessLogin = (provider: "google" | "email" | "demo") => {
+  // Check URL query for signup flag
+  React.useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("signup") === "true") {
+        setAuthMode("register");
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
+  // Business Login/Registration handler
+  const handleBusinessAuth = (e?: React.FormEvent, provider: "google" | "email" | "demo" = "email") => {
+    if (e) e.preventDefault();
     setLoading(true);
     setError(null);
 
     setTimeout(() => {
       // Set business session
       const userSession = {
-        id: "usr_business_owner",
+        id: `usr_${Date.now()}`,
         email: provider === "google" ? "founder@apexanalytics.io" : email || "founder@mycompany.com",
-        name: "Alex Vance",
+        name: fullName || (provider === "google" ? "Alex Vance" : "Founder"),
         role: "owner",
         provider,
         authenticatedAt: new Date().toISOString(),
       };
       localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
 
-      // Check if business profile already exists
-      const existingProfile = localStorage.getItem("nuralix_business_profile");
-      if (existingProfile && provider !== "demo") {
-        router.push("/");
-      } else {
-        // New businesses proceed directly to questionnaire: What they are & What they need
+      if (authMode === "register" || provider === "demo") {
+        // New registration always proceeds to company intake details
         router.push("/onboarding");
+      } else {
+        // Sign in checks if business profile exists
+        const existingProfile = localStorage.getItem("nuralix_business_profile");
+        if (existingProfile) {
+          router.push("/dashboard");
+        } else {
+          router.push("/onboarding");
+        }
       }
     }, 600);
   };
@@ -99,22 +118,50 @@ export default function LoginPage() {
       <div className="max-w-md w-full mx-auto my-auto py-8">
         <div className="p-6 sm:p-8 rounded-2xl border border-line bg-surface shadow-theme space-y-6">
           {!isSuperadminMode ? (
-            /* Business Login Form */
+            /* Business Auth Form */
             <>
+              {/* Tab Switcher: Sign In vs Register */}
+              <div className="flex items-center p-1 rounded-xl bg-surface-2 border border-line">
+                <button
+                  type="button"
+                  onClick={() => setAuthMode("register")}
+                  className={`flex-1 py-1.5 text-xs rounded-lg font-bold transition-all ${
+                    authMode === "register"
+                      ? "bg-surface text-text shadow-sm border border-line"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  Create Account
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthMode("signin")}
+                  className={`flex-1 py-1.5 text-xs rounded-lg font-bold transition-all ${
+                    authMode === "signin"
+                      ? "bg-surface text-text shadow-sm border border-line"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  Sign In
+                </button>
+              </div>
+
               <div className="space-y-1.5 text-center sm:text-left">
                 <h1 className="text-xl font-bold text-text tracking-tight font-sans">
-                  Sign in to your Business OS
+                  {authMode === "register" ? "Register Your Business" : "Sign in to your Business OS"}
                 </h1>
                 <p className="text-xs text-text-muted leading-relaxed">
-                  Autonomous executive AI, adaptive dashboards, and decision simulation tailored to your business.
+                  {authMode === "register"
+                    ? "Create your founder profile to calibrate your custom AI executive team and company metrics."
+                    : "Autonomous executive AI, adaptive dashboards, and decision simulation tailored to your business."}
                 </p>
               </div>
 
-              {/* One-Click Google Login */}
+              {/* One-Click Google Auth */}
               <button
                 id="btn-google-login"
                 type="button"
-                onClick={() => handleBusinessLogin("google")}
+                onClick={() => handleBusinessAuth(undefined, "google")}
                 disabled={loading}
                 className="w-full py-2.5 px-4 rounded-xl border border-line bg-surface-2 hover:bg-surface text-text font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-3 btn-tactile hover:border-line-strong"
               >
@@ -137,55 +184,91 @@ export default function LoginPage() {
                     d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                   />
                 </svg>
-                <span>Continue with Google</span>
+                <span>{authMode === "register" ? "Sign up with Google" : "Continue with Google"}</span>
               </button>
 
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-line" />
                 <span className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
-                  or with business email
+                  or with email
                 </span>
                 <div className="flex-1 h-px bg-line" />
               </div>
 
-              {/* Email Login Option */}
-              <div className="space-y-3">
+              {/* Email Form */}
+              <form onSubmit={e => handleBusinessAuth(e, "email")} className="space-y-3">
+                {authMode === "register" && (
+                  <div>
+                    <label className="text-xs font-semibold text-text block mb-1">
+                      Founder / Owner Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Alex Morgan"
+                      value={fullName}
+                      onChange={e => setFullName(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
+                    />
+                  </div>
+                )}
+
                 <div>
                   <label className="text-xs font-semibold text-text block mb-1">
-                    Work Email Address
+                    Work Email Address *
                   </label>
                   <input
                     id="input-login-email"
                     type="email"
-                    placeholder="founder@company.com"
+                    required
+                    placeholder="e.g. founder@company.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="w-full text-xs px-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
                   />
                 </div>
 
+                <div>
+                  <label className="text-xs font-semibold text-text block mb-1">
+                    Password *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full text-xs px-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
+                  />
+                </div>
+
                 <button
                   id="btn-login-email"
-                  type="button"
-                  onClick={() => handleBusinessLogin("email")}
+                  type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 rounded-lg bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile transition-all"
+                  className="w-full py-2.5 rounded-lg bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile transition-all mt-2"
                 >
-                  {loading ? "Signing in…" : "Continue with Email"}
+                  {loading
+                    ? authMode === "register"
+                      ? "Creating Account…"
+                      : "Signing in…"
+                    : authMode === "register"
+                    ? "Create Account & Start Company Intake →"
+                    : "Sign In to Business OS →"}
                 </button>
-              </div>
+              </form>
 
               {/* Quick Onboarding Demo Option */}
               <div className="pt-2 border-t border-line">
                 <button
                   id="btn-demo-intake"
                   type="button"
-                  onClick={() => handleBusinessLogin("demo")}
+                  onClick={() => handleBusinessAuth(undefined, "demo")}
                   className="w-full py-2 px-3 rounded-lg border border-line text-xs font-semibold text-text-muted hover:text-text hover:bg-surface-2 transition-all flex items-center justify-between"
                 >
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-brass" />
-                    <span>Setup New Business (Launch Intake)</span>
+                    <span>Explore Interactive Demo Intake</span>
                   </span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>

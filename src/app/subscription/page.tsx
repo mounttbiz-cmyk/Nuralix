@@ -121,7 +121,7 @@ export default function SubscriptionPage() {
       setCurrentPlan("starter");
       notify("Public Starter plan selected! Launching your Business OS…");
       setTimeout(() => {
-        router.push("/");
+        router.push("/dashboard");
       }, 900);
       return;
     }
@@ -142,7 +142,7 @@ export default function SubscriptionPage() {
       setSelectedPlanForModal(null);
       notify(`Success! You are now on the ${planName} plan.`);
       setTimeout(() => {
-        router.push("/");
+        router.push("/dashboard");
       }, 1000);
     }, 1200);
   };
@@ -159,7 +159,7 @@ export default function SubscriptionPage() {
 
       {/* Top Bar with Brand & Nav */}
       <header className="max-w-6xl w-full mx-auto flex items-center justify-between pb-6 border-b border-line">
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/dashboard" className="flex items-center gap-3 group">
           <div className="w-9 h-9 rounded-xl bg-surface border border-line flex items-center justify-center p-1 shadow-sm group-hover:scale-105 transition-transform">
             <Image
               src="/logo.png"
@@ -180,7 +180,7 @@ export default function SubscriptionPage() {
 
         <div className="flex items-center gap-4">
           <Link
-            href="/"
+            href="/dashboard"
             className="text-xs text-text-muted hover:text-text font-medium flex items-center gap-1 transition-colors"
           >
             <span>Skip to Dashboard</span>

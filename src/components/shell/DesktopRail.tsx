@@ -48,7 +48,7 @@ export function DesktopRail({
     <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-surface border-r border-line select-none z-30">
       {/* Brand Header */}
       <div className="p-4 border-b border-line">
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/dashboard" className="flex items-center gap-3 group">
           <div className="w-9 h-9 rounded-lg bg-surface-2 border border-line flex items-center justify-center p-1 shadow-sm group-hover:scale-105 transition-transform">
             <Image
               src="/logo.png"
@@ -74,7 +74,7 @@ export function DesktopRail({
       <div className="flex-1 overflow-y-auto p-3 space-y-4">
         {/* Customize Dashboard Option in side panel */}
         <Link
-          href="/?customize=true"
+          href="/dashboard?customize=true"
           className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-semibold text-brass bg-brass-soft/50 border border-brass/30 hover:bg-brass-soft transition-all btn-tactile w-full shadow-xs"
         >
           <Sliders className="w-3.5 h-3.5 text-brass shrink-0" />
@@ -92,7 +92,7 @@ export function DesktopRail({
               </div>
               <nav className="space-y-0.5">
                 {items.map(item => {
-                  const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+                  const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
                   return (
                     <Link
                       key={item.id}

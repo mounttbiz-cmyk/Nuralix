@@ -19,7 +19,7 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
 
   // Primary 4 tabs + 5th is "More"
   const primaryTabs: { id: string; label: string; href: string; icon: string }[] = [
-    { id: "tab_dash", label: "Dashboard", href: "/", icon: "LayoutDashboard" },
+    { id: "tab_dash", label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" },
     { id: "tab_chat", label: "Chat", href: "/chat", icon: "MessageSquare" },
     { id: "tab_gaps", label: "Gaps", href: "/gaps", icon: "AlertTriangle" },
     { id: "tab_tasks", label: "Tasks", href: "/tasks", icon: "CheckSquare" },
@@ -39,7 +39,7 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
       >
         <div className="grid grid-cols-5 h-14 items-center justify-around px-1">
           {primaryTabs.map(tab => {
-            const isActive = pathname === tab.href || (tab.href !== "/" && pathname.startsWith(tab.href));
+            const isActive = pathname === tab.href || (tab.href !== "/dashboard" && pathname.startsWith(tab.href));
             return (
               <Link
                 key={tab.id}
