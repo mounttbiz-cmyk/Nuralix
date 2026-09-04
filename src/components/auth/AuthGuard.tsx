@@ -11,7 +11,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     // Check if user has authenticated
     const session = localStorage.getItem("nuralix_user_session");
     if (!session) {
-      router.push("/login");
+      router.push("/landing");
     } else {
       setChecked(true);
     }

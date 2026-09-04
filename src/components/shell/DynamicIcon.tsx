@@ -12,6 +12,7 @@ import {
   ShieldAlert,
   HelpCircle,
   Sliders,
+  CreditCard,
   LucideProps,
 } from "lucide-react";
 
@@ -29,6 +30,7 @@ const ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   ShieldAlert,
   HelpCircle,
   Sliders,
+  CreditCard,
 };
 
 export function DynamicIcon({ name, ...props }: { name: string } & LucideProps) {

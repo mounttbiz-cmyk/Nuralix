@@ -277,7 +277,7 @@ export default function OnboardingPage() {
         localStorage.setItem("nuralix_business_profile", JSON.stringify(profile));
 
         setTimeout(() => {
-          router.push("/");
+          router.push("/subscription");
         }, 800);
       }
     }, 700);

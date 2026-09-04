@@ -41,7 +41,7 @@ export function DesktopRail({
 
   const handleLogout = () => {
     localStorage.removeItem("nuralix_user_session");
-    window.location.href = "/login";
+    window.location.href = "/landing";
   };
 
   return (
