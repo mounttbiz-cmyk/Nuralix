@@ -7,7 +7,7 @@ import { ProvenanceBadge } from "@/components/ui/Badge";
 
 export default function SimulatorPage() {
   const [selectedTemplateKey, setSelectedTemplateKey] = useState(defaultScenarioTemplates[0].key);
-  const [salary, setSalary] = useState(120000);
+  const [salary, setSalary] = useState(1500000);
   const [rampMonths, setRampMonths] = useState(4);
   const [iterations, setIterations] = useState(1000);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -17,7 +17,7 @@ export default function SimulatorPage() {
 
   // Dynamic calculations based on inputs
   const monthlySalaryLoaded = Math.round((salary * 1.3) / 12);
-  const breakevenMonth = Math.round(rampMonths + (monthlySalaryLoaded / 6500));
+  const breakevenMonth = Math.round(rampMonths + (monthlySalaryLoaded / 65000));
   const p10Net = Math.round(-1 * (salary * 0.28));
   const p50Net = Math.round(salary * 0.35);
   const p90Net = Math.round(salary * 0.74);
@@ -80,7 +80,7 @@ export default function SimulatorPage() {
             <div className="space-y-3 text-xs">
               <div>
                 <label className="font-medium text-text block mb-1">
-                  Annual Base Salary ($)
+                  Annual Base Salary (₹)
                 </label>
                 <input
                   type="number"
@@ -115,7 +115,7 @@ export default function SimulatorPage() {
                   Fixed at 1.30x (Taxes, Healthcare, Software Seat licenses, Hardware).
                 </p>
                 <div className="text-xs font-bold text-brass num-tabular pt-1">
-                  Monthly Loaded Cost: ${monthlySalaryLoaded.toLocaleString()}/mo
+                  Monthly Loaded Cost: ₹{monthlySalaryLoaded.toLocaleString("en-IN")}/mo
                 </div>
               </div>
             </div>
@@ -221,7 +221,7 @@ export default function SimulatorPage() {
               <div className="p-3.5 rounded-lg border border-rust/30 bg-rust/10 text-center">
                 <span className="text-[10px] font-bold text-rust uppercase block">P10 (Pessimistic)</span>
                 <span className="text-lg font-bold num-tabular text-text block mt-1">
-                  ${p10Net.toLocaleString()}
+                  -₹{Math.abs(p10Net).toLocaleString("en-IN")}
                 </span>
                 <span className="text-[11px] text-text-muted">Breakeven: Mo {breakevenMonth + 3}</span>
               </div>
@@ -229,7 +229,7 @@ export default function SimulatorPage() {
               <div className="p-3.5 rounded-lg border border-brass bg-brass-soft/20 text-center ring-1 ring-brass/30">
                 <span className="text-[10px] font-bold text-brass uppercase block">P50 (Expected)</span>
                 <span className="text-lg font-bold num-tabular text-text block mt-1">
-                  +${p50Net.toLocaleString()}
+                  +₹{p50Net.toLocaleString("en-IN")}
                 </span>
                 <span className="text-[11px] text-text-muted">Breakeven: Mo {breakevenMonth}</span>
               </div>
@@ -237,7 +237,7 @@ export default function SimulatorPage() {
               <div className="p-3.5 rounded-lg border border-jade/30 bg-jade/10 text-center">
                 <span className="text-[10px] font-bold text-jade uppercase block">P90 (Optimistic)</span>
                 <span className="text-lg font-bold num-tabular text-text block mt-1">
-                  +${p90Net.toLocaleString()}
+                  +₹{p90Net.toLocaleString("en-IN")}
                 </span>
                 <span className="text-[11px] text-text-muted">Breakeven: Mo {Math.max(2, breakevenMonth - 2)}</span>
               </div>
@@ -245,7 +245,7 @@ export default function SimulatorPage() {
 
             {/* Verifiable Probability Rule (§10.2) */}
             <div className="p-3 rounded-lg bg-surface-2 border border-line text-xs leading-relaxed text-text">
-              <strong>Model Safety Verdict:</strong> In <strong>894 of 1,000 runs</strong>, cash reserves stayed above your $20,000 floor. Maximum capital drawdown occurs in Month {rampMonths} at -$31,200.
+              <strong>Model Safety Verdict:</strong> In <strong>894 of 1,000 runs</strong>, cash reserves stayed above your ₹15,00,000 floor. Maximum capital drawdown occurs in Month {rampMonths} at -₹3,12,000.
             </div>
 
             {/* Commit to Decision (§10.4) */}

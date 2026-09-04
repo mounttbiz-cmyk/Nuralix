@@ -398,7 +398,9 @@ export default function AnalyticsPage() {
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-text-muted">Revenue per FTE</span>
-                  <span className="font-mono font-bold text-text">${Math.round(revPerHead / 1000)}k</span>
+                  <span className="font-mono font-bold text-text">
+                    ₹{revPerHead >= 100000 ? `${(revPerHead / 100000).toFixed(1)}L` : revPerHead.toLocaleString("en-IN")}
+                  </span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-surface-2 overflow-hidden flex">
                   <div className="bg-text-muted/30 h-full w-[30%]" />
@@ -406,9 +408,9 @@ export default function AnalyticsPage() {
                   <div className="bg-emerald-500 h-full w-[20%]" />
                 </div>
                 <div className="flex justify-between text-[10px] text-text-muted mt-1 font-mono">
-                  <span>P25: $35k</span>
-                  <span>Median: $52k</span>
-                  <span>P75: $85k</span>
+                  <span>P25: ₹12L</span>
+                  <span>Median: ₹18L</span>
+                  <span>P75: ₹28L</span>
                 </div>
               </div>
             </div>

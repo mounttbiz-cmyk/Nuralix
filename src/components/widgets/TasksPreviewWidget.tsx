@@ -18,7 +18,7 @@ export function TasksPreviewWidget() {
   const [tasks, setTasks] = useState<TaskItem[]>([
     {
       id: "t_1",
-      title: "Audit discretionary SaaS tool spend for $1,200/mo savings",
+      title: "Audit discretionary SaaS tool spend for ₹12,000/mo savings",
       owner: "CFO AI (Marcus)",
       due: "Today",
       completed: false,

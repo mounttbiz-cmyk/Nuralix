@@ -5,7 +5,7 @@ import { CheckSquare, Plus, CheckCircle2, Circle, Clock, Tag } from "lucide-reac
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState([
-    { id: "1", title: "Audit discretionary SaaS tool spend for $1,200/mo savings", status: "todo", owner: "Marcus (CFO)", priority: "high", gap: "Cash Runway" },
+    { id: "1", title: "Audit discretionary SaaS tool spend for ₹12,000/mo savings", status: "todo", owner: "Marcus (CFO)", priority: "high", gap: "Cash Runway" },
     { id: "2", title: "Draft enterprise SLA & multi-year contract for top account", status: "in_progress", owner: "Astra (CEO)", priority: "critical", gap: "Client Concentration" },
     { id: "3", title: "Launch secondary customer acquisition sprint on LinkedIn", status: "todo", owner: "Elena (CMO)", priority: "medium", gap: "Channel Concentration" },
     { id: "4", title: "Document sales script & handover discovery calls", status: "done", owner: "Founder", priority: "high", gap: "Founder Dependency" },

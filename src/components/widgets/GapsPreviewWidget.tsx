@@ -12,7 +12,7 @@ export function GapsPreviewWidget() {
       title: "One customer represents 38% of total revenue",
       severity: "critical",
       category: "Risk",
-      impact: "$18,500/mo at risk",
+      impact: "₹1,85,000/mo at risk",
       effort: "project",
     },
     {
@@ -20,7 +20,7 @@ export function GapsPreviewWidget() {
       title: "CAC payback period exceeds 14 months (benchmark: 12)",
       severity: "high",
       category: "Growth",
-      impact: "Trapping $24,000 working capital",
+      impact: "Trapping ₹2,40,000 working capital",
       effort: "quick win",
     },
     {

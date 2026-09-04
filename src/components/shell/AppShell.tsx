@@ -7,7 +7,7 @@ import { MobileHeader } from "./MobileHeader";
 import { MobileBottomBar } from "./MobileBottomBar";
 import { ChatDock, ContextChip } from "./ChatDock";
 import { NavItem } from "@/config/schemas/nav";
-import { Sparkles } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -76,11 +76,10 @@ export function AppShell({
         type="button"
         onClick={() => setChatOpen(true)}
         aria-label="Open AI Executive Chat"
-        className="hidden md:flex fixed bottom-6 right-6 z-30 items-center gap-2 px-3.5 py-2.5 rounded-full bg-brass text-white font-medium text-xs shadow-lg hover:brightness-110 btn-tactile"
+        className="hidden md:flex fixed bottom-6 right-6 z-30 items-center gap-2 px-4 py-2.5 rounded-full bg-brass text-white font-semibold text-xs shadow-lg hover:brightness-110 btn-tactile cursor-pointer"
       >
-        <Sparkles className="w-4 h-4 text-white" />
+        <MessageSquare className="w-4 h-4 text-white" />
         <span>Ask Executive AI</span>
-        <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/20 font-mono">⌘J</span>
       </button>
 
       {/* Slide-over Chat Dock */}

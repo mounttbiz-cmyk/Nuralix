@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ContainerTile } from "../ui/ContainerTile";
 import { ProvenanceBadge } from "../ui/Badge";
 import { ShieldCheck, ChevronRight, TrendingUp } from "lucide-react";
@@ -15,13 +15,54 @@ export function HealthScoreWidget({
   delta = 4.2,
 }: HealthScoreProps) {
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
+  const [runwayMo, setRunwayMo] = useState("7.2");
+  const [revPerHead, setRevPerHead] = useState("₹18.4L");
+  const [industryName, setIndustryName] = useState("B2B SaaS");
+
+  useEffect(() => {
+    try {
+      const savedStr = localStorage.getItem("nuralix_business_profile");
+      if (savedStr) {
+        const saved = JSON.parse(savedStr);
+        if (saved.cashOnHand && saved.monthlyNetBurn) {
+          const r = Math.max(1, (Number(saved.cashOnHand) / Math.max(1, Number(saved.monthlyNetBurn)))).toFixed(1);
+          setRunwayMo(r);
+        }
+        if (saved.annualRevenue && saved.teamSize) {
+          const rph = Math.round(Number(saved.annualRevenue) / Math.max(1, Number(saved.teamSize)));
+          if (rph >= 10000000) {
+            setRevPerHead(`₹${(rph / 10000000).toFixed(1)}Cr`);
+          } else if (rph >= 100000) {
+            setRevPerHead(`₹${(rph / 100000).toFixed(1)}L`);
+          } else {
+            setRevPerHead(`₹${rph.toLocaleString("en-IN")}`);
+          }
+        }
+        if (saved.industry) {
+          const names: Record<string, string> = {
+            it_tech: "IT & Tech Services",
+            saas: "B2B SaaS",
+            d2c: "E-Commerce & Retail",
+            agency: "Agency & Professional Services",
+            healthcare: "Healthcare & Clinics",
+            manufacturing: "Manufacturing & Physical Goods",
+            finance: "Financial Services & Wealth",
+            real_estate: "Real Estate & Property",
+          };
+          setIndustryName(names[saved.industry] || saved.industry.toUpperCase());
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   const components = [
-    { key: "financial", name: "Financial", score: 82, weight: "25%", detail: "Healthy gross margins (78%), runway 7.2 mo." },
+    { key: "financial", name: "Financial", score: 82, weight: "25%", detail: `Healthy gross margins (78%), runway ${runwayMo} mo.` },
     { key: "growth", name: "Growth", score: 68, weight: "20%", detail: "CAC payback at 14.2 mo drags performance." },
     { key: "customer", name: "Customer", score: 84, weight: "20%", detail: "Logo retention 94%, NRR 108%." },
     { key: "operations", name: "Operations", score: 71, weight: "20%", detail: "Founder sales bottleneck, 2 SOPs missing." },
-    { key: "team", name: "Team", score: 88, weight: "15%", detail: "High revenue/head ($184k), no key man vacancy." },
+    { key: "team", name: "Team", score: 88, weight: "15%", detail: `High revenue/head (${revPerHead}), no key man vacancy.` },
   ];
 
   // SVG circular gauge calculation
@@ -82,7 +123,7 @@ export function HealthScoreWidget({
               <span>+{delta}% vs last month</span>
             </div>
             <p className="text-xs text-text-muted leading-relaxed">
-              Based on active ledger data, unit economics, and 24 operational benchmarks for B2B SaaS.
+              Based on active ledger data, unit economics, and 24 operational benchmarks for {industryName}.
             </p>
           </div>
         </div>

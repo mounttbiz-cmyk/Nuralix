@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ContainerTile } from "../ui/ContainerTile";
 import { Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -11,14 +11,41 @@ interface BriefingWidgetProps {
 }
 
 export function BriefingWidget({
-  companyName = "Apex Analytics",
+  companyName: propCompanyName = "Apex Technologies",
   ceoName = "Astra",
 }: BriefingWidgetProps) {
+  const [companyName, setCompanyName] = useState(propCompanyName);
+  const [founderName, setFounderName] = useState("Founder");
+  const [industryLabel, setIndustryLabel] = useState("Technology");
+  const [monthlyRev, setMonthlyRev] = useState(500000);
+  const [burn, setBurn] = useState(150000);
+  const [cash, setCash] = useState(1200000);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("nuralix_business_profile");
+      if (saved) {
+        const p = JSON.parse(saved);
+        if (p.name) setCompanyName(p.name);
+        if (p.founderName) setFounderName(p.founderName);
+        if (p.industryLabel) setIndustryLabel(p.industryLabel);
+        else if (p.industry) setIndustryLabel(p.industry);
+        if (p.revenue) setMonthlyRev(Number(p.revenue));
+        if (p.burn) setBurn(Number(p.burn));
+        if (p.cash) setCash(Number(p.cash));
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
+  const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : "18+";
+
   const briefingLines = [
-    "Revenues climbed 6.4% over the last 30 days to reach $48,200 MRR, led by expansion in your mid-market accounts.",
-    "However, cash burn rose by $1,800 due to annual tooling renewals, nudging runway down slightly to 7.2 months.",
-    "Customer acquisition cost increased to $380, largely driven by ad saturation in your primary search channel.",
-    "Your highest-priority decision today: Top client concentration sits at 38%. We recommend scheduling renewal negotiations or testing the price adjustment scenario.",
+    `Monthly operating revenues for ${companyName} are holding at ₹${monthlyRev.toLocaleString("en-IN")}, maintaining solid unit economics in ${industryLabel}.`,
+    `Monthly net burn sits at ₹${burn.toLocaleString("en-IN")} against ₹${cash.toLocaleString("en-IN")} liquid bank reserves, preserving ${runwayMonths} months of verified runway.`,
+    `Capital efficiency remains in the top quartile. Discretionary software tooling and vendor subscriptions are under active watch by Marcus (CFO AI).`,
+    `Priority directive for ${founderName}: Dilute top-client concentration below 25% by advancing secondary deal pipelines in the next 60 days.`,
   ];
 
   return (
@@ -38,7 +65,7 @@ export function BriefingWidget({
             </span>
           </div>
 
-          {/* Document Surface Serif Prose (§3 & §8.3) */}
+          {/* Document Surface Serif Prose */}
           <div className="surface-document py-4 space-y-2.5 text-xs sm:text-sm text-text">
             {briefingLines.map((line, idx) => (
               <p
@@ -59,14 +86,14 @@ export function BriefingWidget({
         <div className="pt-3 border-t border-line flex items-center justify-between text-xs">
           <Link
             href="/gaps"
-            className="inline-flex items-center gap-1.5 text-brass hover:underline font-medium text-xs btn-tactile"
+            className="inline-flex items-center gap-1.5 text-brass hover:underline font-medium text-xs btn-tactile cursor-pointer"
           >
-            <span>Review client concentration gap</span>
+            <span>Review active gap playbooks</span>
             <ArrowRight className="w-3 h-3" />
           </Link>
           <Link
             href="/simulator"
-            className="text-text-muted hover:text-text text-xs"
+            className="text-text-muted hover:text-text text-xs cursor-pointer"
           >
             Open Simulator
           </Link>

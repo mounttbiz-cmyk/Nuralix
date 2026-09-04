@@ -1,4 +1,3 @@
-import React from "react";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -12,6 +11,7 @@ import {
   Settings,
   ShieldAlert,
   HelpCircle,
+  Sliders,
   LucideProps,
 } from "lucide-react";
 
@@ -27,6 +27,8 @@ const ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   Zap,
   Settings,
   ShieldAlert,
+  HelpCircle,
+  Sliders,
 };
 
 export function DynamicIcon({ name, ...props }: { name: string } & LucideProps) {

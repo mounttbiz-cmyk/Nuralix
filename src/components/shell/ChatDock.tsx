@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Send, Sparkles, Tag, ChevronDown, CheckCircle2, ArrowRight } from "lucide-react";
+import { X, Send, Sparkles, Tag, ChevronDown, CheckCircle2, ArrowRight, Maximize2, Minimize2, MessageSquare } from "lucide-react";
 
 export interface ContextChip {
   id: string;
@@ -41,6 +41,7 @@ export function ChatDock({
   activeContextChips = [],
   onRemoveChip,
 }: ChatDockProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "msg_1",
@@ -48,13 +49,13 @@ export function ChatDock({
       senderName: "Astra",
       role: "CEO AI",
       avatar: "👑",
-      content: "Good morning. I've reviewed your latest pipeline numbers and runway metrics. How can I assist with your executive priorities today?",
+      content: "Good morning. I've reviewed your latest telemetry and runway metrics. How can I assist with your executive priorities today?",
       timestamp: "09:00 AM",
-      situation: "Q3 pipeline is currently 2.4x quota; cash runway sits at 7.2 months.",
-      analysis: "Top client represents 38% of total revenue ($18,500/mo of $48,000 MRR). This triggers our Layer 1 critical concentration rule.",
-      recommendation: "Prioritize closing the two late-stage mid-market prospects to reduce concentration under 25% within 60 days.",
-      risks: "If top account churns or slows payment, runway drops from 7.2 to 4.1 months immediately.",
-      opportunities: "Cross-selling the enterprise telemetry tier could yield an extra $4,200/mo with zero incremental CAC.",
+      situation: "Active operations pipeline is healthy; cash runway sits at 8.0 months.",
+      analysis: "Top client represents 35% of total recurring income (₹1,75,000/mo of ₹5,00,000 monthly revenue). This triggers our Layer 1 concentration safeguard.",
+      recommendation: "Prioritize closing secondary accounts to reduce top-client concentration under 25% within 60 days.",
+      risks: "If top account slows payment, runway decreases from 8.0 to 4.5 months.",
+      opportunities: "Expanding higher-tier retained service could yield an extra ₹85,000/mo with minimal delivery overhead.",
       nextSteps: [
         "Create task: Review contract renewal terms for primary client",
         "Run scenario simulation: Model 15% pricing increase vs 5% churn",
@@ -108,13 +109,13 @@ export function ChatDock({
         avatar: "📊",
         content: `Regarding "${question}": Here is our verified financial assessment based on your active trailing metrics.`,
         timestamp: "Just now",
-        situation: "Assessing capital allocation against your $12,400 monthly burn and $89,000 cash reserve.",
+        situation: "Assessing capital allocation against your ₹1,24,000 monthly burn and ₹8,90,000 cash reserve.",
         analysis: "Your gross margin of 78% gives room for targeted reinvestment, but CAC payback is currently 14.2 months (benchmark median is 12 months).",
         recommendation: "Hold on senior hiring until pipeline coverage crosses 3.2x quota. Focus existing budget on reducing CAC payback.",
         risks: "Premature hiring would shorten runway by 2.1 months before the new hire completes ramp-up.",
-        opportunities: "Repricing your Starter tier from $99 to $149 can generate an immediate $3,800/mo recurring gross profit.",
+        opportunities: "Repricing your Starter tier from ₹999 to ₹1,499 can generate an immediate ₹38,000/mo recurring gross profit.",
         nextSteps: [
-          "Create task: Audit vendor SaaS subscriptions for quick $1,200/mo savings",
+          "Create task: Audit vendor SaaS subscriptions for quick ₹12,000/mo savings",
           "Run simulation: Model adding 1 AE with 4-month ramp-up",
         ],
         provenance: "from_data",
@@ -130,13 +131,15 @@ export function ChatDock({
     <div
       role="dialog"
       aria-label="AI Executive Team Chat"
-      className="fixed inset-y-0 right-0 z-50 flex w-full md:w-[480px] lg:w-[440px] bg-surface border-l border-line shadow-2xl flex-col transition-all duration-base ease-out-custom"
+      className={`fixed inset-y-0 right-0 z-50 flex bg-surface border-l border-line shadow-2xl flex-col transition-all duration-300 ease-in-out ${
+        isExpanded ? "w-full inset-x-0" : "w-full md:w-[500px] lg:w-[480px]"
+      }`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-line bg-surface">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-brass/15 text-brass flex items-center justify-center font-bold text-xs">
-            <Sparkles className="w-4 h-4" />
+            <MessageSquare className="w-4 h-4" />
           </div>
           <div>
             <div className="font-semibold text-xs text-text flex items-center gap-1.5">
@@ -149,13 +152,19 @@ export function ChatDock({
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <span className="hidden sm:inline-block text-[10px] text-text-muted font-mono px-1.5 py-0.5 rounded bg-surface-2 border border-line">
-            ⌘J
-          </span>
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1.5 rounded-md text-text-muted hover:text-text hover:bg-surface-2 btn-tactile cursor-pointer"
+            title={isExpanded ? "Collapse to side panel" : "Extend to full screen"}
+            aria-label={isExpanded ? "Collapse to side panel" : "Extend to full screen"}
+          >
+            {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-text-muted hover:text-text hover:bg-surface-2 btn-tactile"
+            className="p-1.5 rounded-md text-text-muted hover:text-text hover:bg-surface-2 btn-tactile cursor-pointer"
             aria-label="Close AI Executive Chat"
           >
             <X className="w-4 h-4" />
@@ -299,31 +308,7 @@ export function ChatDock({
         )}
       </div>
 
-      {/* Suggested Quick Prompts (§11.4) */}
-      <div className="px-3 py-1.5 bg-surface-2/40 border-t border-line flex items-center gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap">
-        <span className="text-[10px] text-text-muted font-medium shrink-0">Ask:</span>
-        <button
-          type="button"
-          onClick={() => setInput("What should I do about our top client being 38% of revenue?")}
-          className="px-2 py-0.5 rounded-full border border-line bg-surface text-text hover:border-brass transition-colors"
-        >
-          Top client risk?
-        </button>
-        <button
-          type="button"
-          onClick={() => setInput("Can we afford to hire two senior engineers before Q4?")}
-          className="px-2 py-0.5 rounded-full border border-line bg-surface text-text hover:border-brass transition-colors"
-        >
-          Can I afford 2 engineers?
-        </button>
-        <button
-          type="button"
-          onClick={() => setInput("Simulate raising Starter price by 25%")}
-          className="px-2 py-0.5 rounded-full border border-line bg-surface text-text hover:border-brass transition-colors"
-        >
-          Model 25% price increase
-        </button>
-      </div>
+
 
       {/* Composer */}
       <form onSubmit={handleSend} className="p-3 border-t border-line bg-surface">

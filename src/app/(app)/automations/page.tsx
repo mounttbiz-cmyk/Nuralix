@@ -455,7 +455,7 @@ export default function AutomationsPage() {
                   required
                   value={newTrigger}
                   onChange={e => setNewTrigger(e.target.value)}
-                  placeholder="e.g. When software renewal invoice exceeds $1,000/mo"
+                  placeholder="e.g. When software renewal invoice exceeds ₹25,000/mo"
                   className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
                 />
               </div>

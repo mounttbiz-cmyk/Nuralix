@@ -65,7 +65,7 @@ export default function KnowledgeHubPage() {
       version: "v3.1",
       author: "CFO / Finance",
       indexed: true,
-      content: `### Financial Controls Policy\n- Any vendor contract exceeding $2,500/yr requires dual sign-off from Department Head and CFO.\n- Discretionary SaaS subscriptions are audited monthly by Marcus AI.\n- Target cash runway must never breach 6.0 months without board disclosure.`,
+      content: `### Financial Controls Policy\n- Any vendor contract exceeding ₹50,000/yr requires dual sign-off from Department Head and CFO.\n- Discretionary SaaS subscriptions are audited monthly by Marcus AI.\n- Target cash runway must never breach 6.0 months without board disclosure.`,
     },
     {
       id: "doc-3",

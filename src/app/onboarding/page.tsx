@@ -11,11 +11,17 @@ import {
   Layers,
   Target,
   Users,
-  DollarSign,
   TrendingUp,
   AlertTriangle,
   Zap,
-  HelpCircle
+  HelpCircle,
+  Laptop,
+  ShoppingBag,
+  Cloud,
+  Briefcase,
+  Stethoscope,
+  Factory,
+  Landmark
 } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 
@@ -31,13 +37,13 @@ export default function OnboardingPage() {
   const [customBusinessType, setCustomBusinessType] = useState<string>("");
   const [businessModel, setBusinessModel] = useState<string>("subscription");
   const [companyName, setCompanyName] = useState<string>("Apex Technologies");
-  const [founderName, setFounderName] = useState<string>("Alex Morgan");
-  const [website, setWebsite] = useState<string>("apextech.com");
-  const [teamSize, setTeamSize] = useState<string>("14");
-  const [annualRevenue, setAnnualRevenue] = useState<string>("600000");
-  const [monthlyRevenue, setMonthlyRevenue] = useState<string>("50000");
-  const [monthlyBurn, setMonthlyBurn] = useState<string>("15000");
-  const [cashOnHand, setCashOnHand] = useState<string>("120000");
+  const [founderName, setFounderName] = useState<string>("Alex Sharma");
+  const [website, setWebsite] = useState<string>("apextech.in");
+  const [teamSize, setTeamSize] = useState<string>("15");
+  const [annualRevenue, setAnnualRevenue] = useState<string>("6000000");
+  const [monthlyRevenue, setMonthlyRevenue] = useState<string>("500000");
+  const [monthlyBurn, setMonthlyBurn] = useState<string>("150000");
+  const [cashOnHand, setCashOnHand] = useState<string>("1200000");
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -66,57 +72,80 @@ export default function OnboardingPage() {
       id: "it",
       title: "IT & Technology Services",
       desc: "Custom development, IT infrastructure, cloud engineering, and tech consultancy.",
-      icon: "💻",
+      icon: "laptop",
     },
     {
       id: "real_estate",
       title: "Real Estate & Property",
       desc: "Property portfolios, commercial leasing, brokerage, asset yields, and tenancy.",
-      icon: "🏢",
+      icon: "building",
     },
     {
       id: "d2c",
       title: "E-Commerce & Retail",
       desc: "AOV, ROAS, SKU margins, repeat purchase frequency, and inventory cash cycle.",
-      icon: "🛍️",
+      icon: "shopping",
     },
     {
       id: "saas",
       title: "B2B SaaS & Cloud Platforms",
       desc: "Recurring ARR/MRR subscriptions, CAC payback, NRR, and churn telemetry.",
-      icon: "☁️",
+      icon: "cloud",
     },
     {
       id: "agency",
       title: "Agency & Professional Services",
       desc: "Team billable utilisation, project margins, retainer pipeline, and realization.",
-      icon: "⚡",
+      icon: "briefcase",
     },
     {
       id: "healthcare",
       title: "Healthcare & Clinics",
       desc: "Patient volume, practitioner utilisation, recurring care, and clinic margins.",
-      icon: "🏥",
+      icon: "stethoscope",
     },
     {
       id: "manufacturing",
       title: "Manufacturing & Physical Goods",
       desc: "Capacity utilisation, unit economics, supply lead time, and distributor cycles.",
-      icon: "🏭",
+      icon: "factory",
     },
     {
       id: "finance",
       title: "Financial Services & Wealth",
       desc: "AUM, advisory fees, portfolio performance, compliance, and asset management.",
-      icon: "📈",
+      icon: "landmark",
     },
     {
       id: "other",
       title: "Others (Custom Business)",
       desc: "Specify your exact established business type (e.g. Hospitality, Logistics, etc.)",
-      icon: "✨",
+      icon: "layers",
     },
   ];
+
+  const getCategoryIcon = (id: string) => {
+    switch (id) {
+      case "it":
+        return <Laptop className="w-5 h-5 text-brass" />;
+      case "real_estate":
+        return <Building2 className="w-5 h-5 text-brass" />;
+      case "d2c":
+        return <ShoppingBag className="w-5 h-5 text-brass" />;
+      case "saas":
+        return <Cloud className="w-5 h-5 text-brass" />;
+      case "agency":
+        return <Briefcase className="w-5 h-5 text-brass" />;
+      case "healthcare":
+        return <Stethoscope className="w-5 h-5 text-brass" />;
+      case "manufacturing":
+        return <Factory className="w-5 h-5 text-brass" />;
+      case "finance":
+        return <Landmark className="w-5 h-5 text-brass" />;
+      default:
+        return <Layers className="w-5 h-5 text-brass" />;
+    }
+  };
 
   const needsOptions = [
     {
@@ -175,16 +204,16 @@ export default function OnboardingPage() {
   const validateStep2 = () => {
     const newErrors: Record<string, string> = {};
     if (!companyName.trim()) {
-      newErrors.companyName = "Company Name is compulsory";
+      newErrors.companyName = "Company Name is required";
     }
     if (!founderName.trim()) {
-      newErrors.founderName = "Founder / Boss Name is compulsory";
+      newErrors.founderName = "Founder Name is required";
     }
     if (!teamSize.trim() || Number(teamSize) <= 0) {
-      newErrors.teamSize = "Valid Team Size is compulsory";
+      newErrors.teamSize = "Valid Team Size is required";
     }
     if (!annualRevenue.trim() || Number(annualRevenue) <= 0) {
-      newErrors.annualRevenue = "Company Annual Income / Revenue is compulsory";
+      newErrors.annualRevenue = "Company Annual Income / Revenue is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -210,7 +239,7 @@ export default function OnboardingPage() {
 
     const statuses = [
       `Persisting company profile for ${companyName}…`,
-      `Calibrating benchmarks for established ${resolvedIndustryLabel.toUpperCase()} business…`,
+      `Calibrating Indian benchmarks (INR ₹) for established ${resolvedIndustryLabel.toUpperCase()} business…`,
       `Configuring Astra (CEO) and Marcus (CFO) executive agents for ${founderName}…`,
       "Running deterministic Layer 1 gap analysis…",
       "Synthesizing your opening executive briefing…",
@@ -229,18 +258,19 @@ export default function OnboardingPage() {
         // Save completed profile
         const profile = {
           name: companyName.trim() || "My Company",
-          founderName: founderName.trim() || "Executive",
+          founderName: founderName.trim() || "Founder",
           website: website.trim(),
           industry: businessType === "other" && customBusinessType.trim() ? customBusinessType.trim() : businessType,
           industryLabel: resolvedIndustryLabel,
           industryKey: businessType,
           customBusinessType: businessType === "other" ? customBusinessType.trim() : "",
           businessModel,
+          currency: "INR",
           teamSize: Number(teamSize) || 10,
-          annualRevenue: Number(annualRevenue) || 600000,
-          revenue: Number(monthlyRevenue) || (Number(annualRevenue) ? Math.round(Number(annualRevenue) / 12) : 50000),
-          burn: Number(monthlyBurn) || 15000,
-          cash: Number(cashOnHand) || 120000,
+          annualRevenue: Number(annualRevenue) || 6000000,
+          revenue: Number(monthlyRevenue) || (Number(annualRevenue) ? Math.round(Number(annualRevenue) / 12) : 500000),
+          burn: Number(monthlyBurn) || 150000,
+          cash: Number(cashOnHand) || 1200000,
           needs: selectedNeeds,
           completedAt: new Date().toISOString(),
         };
@@ -314,19 +344,21 @@ export default function OnboardingPage() {
                             setErrors(prev => ({ ...prev, customBusinessType: "" }));
                           }
                         }}
-                        className={`p-4 rounded-xl border transition-all cursor-pointer btn-tactile ${
+                        className={`p-4 rounded-xl border transition-all cursor-pointer btn-tactile flex items-start gap-3 ${
                           isSelected
                             ? "bg-surface-2 border-brass ring-1 ring-brass/30 shadow-sm"
                             : "bg-surface-2/50 border-line hover:border-line-strong"
                         }`}
                       >
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-xl">{type.icon}</span>
-                          <span className="text-xs font-bold text-text">{type.title}</span>
+                        <div className="w-9 h-9 rounded-lg bg-surface border border-line flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                          {getCategoryIcon(type.id)}
                         </div>
-                        <p className="text-[11px] text-text-muted leading-relaxed">
-                          {type.desc}
-                        </p>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-bold text-text block mb-1">{type.title}</span>
+                          <p className="text-[11px] text-text-muted leading-relaxed">
+                            {type.desc}
+                          </p>
+                        </div>
                       </div>
                     );
                   })}
@@ -335,9 +367,9 @@ export default function OnboardingPage() {
                 {/* Custom Category Input for 'Others' */}
                 {businessType === "other" && (
                   <div className="p-4 rounded-xl bg-brass-soft/40 border border-brass/40 space-y-2 animate-fade-in">
-                    <label className="text-xs font-bold text-text flex items-center gap-1">
+                    <label className="text-xs font-bold text-text flex items-center">
                       <span>Specify Your Business Industry / Type</span>
-                      <span className="text-rust">*</span>
+                      <span className="text-rust font-bold ml-1">*</span>
                     </label>
                     <input
                       type="text"
@@ -360,9 +392,6 @@ export default function OnboardingPage() {
                         {errors.customBusinessType}
                       </p>
                     )}
-                    <p className="text-[10px] text-text-muted">
-                      Your custom sector will be used to calibrate your intelligence feeds and dashboard cards.
-                    </p>
                   </div>
                 )}
 
@@ -389,7 +418,6 @@ export default function OnboardingPage() {
                   </h1>
                   <p className="text-xs text-text-muted mt-1 leading-relaxed">
                     Used to calculate your real cash runway, revenue per head, and detect early solvency gaps.
-                    Fields marked with <span className="text-rust font-bold">(*) are compulsory</span>.
                   </p>
                 </div>
 
@@ -398,7 +426,7 @@ export default function OnboardingPage() {
                   <div className="p-3 rounded-lg bg-rust/10 border border-rust/30 flex items-start gap-2.5 text-xs text-rust">
                     <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                     <div className="space-y-0.5">
-                      <span className="font-bold">Please complete all compulsory fields to proceed:</span>
+                      <span className="font-bold">Please complete required fields to proceed:</span>
                       <ul className="list-disc list-inside text-[11px] opacity-90">
                         {Object.values(errors).map((err, i) => (
                           <li key={i}>{err}</li>
@@ -409,11 +437,11 @@ export default function OnboardingPage() {
                 )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  {/* Company Name - COMPULSORY */}
+                  {/* Company Name */}
                   <div>
-                    <label className="font-semibold text-text mb-1 flex items-center justify-between">
+                    <label className="font-semibold text-text mb-1 flex items-center">
                       <span>Company Name</span>
-                      <span className="text-rust font-bold text-[11px]">* Compulsory</span>
+                      <span className="text-rust font-bold ml-1">*</span>
                     </label>
                     <input
                       type="text"
@@ -422,7 +450,7 @@ export default function OnboardingPage() {
                         setCompanyName(e.target.value);
                         if (errors.companyName) setErrors(prev => ({ ...prev, companyName: "" }));
                       }}
-                      placeholder="e.g. Apex Global Ltd"
+                      placeholder="e.g. Apex Global Pvt Ltd"
                       className={`w-full px-3 py-2 rounded-lg bg-surface-2 border text-text focus:ring-1 focus:ring-brass ${
                         errors.companyName ? "border-rust ring-1 ring-rust/50" : "border-line"
                       }`}
@@ -432,11 +460,11 @@ export default function OnboardingPage() {
                     )}
                   </div>
 
-                  {/* Founder / Boss Name - COMPULSORY */}
+                  {/* Founder Name */}
                   <div>
-                    <label className="font-semibold text-text mb-1 flex items-center justify-between">
-                      <span>Founder / Boss Name</span>
-                      <span className="text-rust font-bold text-[11px]">* Compulsory</span>
+                    <label className="font-semibold text-text mb-1 flex items-center">
+                      <span>Founder Name</span>
+                      <span className="text-rust font-bold ml-1">*</span>
                     </label>
                     <input
                       type="text"
@@ -445,7 +473,7 @@ export default function OnboardingPage() {
                         setFounderName(e.target.value);
                         if (errors.founderName) setErrors(prev => ({ ...prev, founderName: "" }));
                       }}
-                      placeholder="e.g. Alex Morgan (CEO)"
+                      placeholder="e.g. Alex Sharma"
                       className={`w-full px-3 py-2 rounded-lg bg-surface-2 border text-text focus:ring-1 focus:ring-brass ${
                         errors.founderName ? "border-rust ring-1 ring-rust/50" : "border-line"
                       }`}
@@ -455,11 +483,11 @@ export default function OnboardingPage() {
                     )}
                   </div>
 
-                  {/* Team Size - COMPULSORY */}
+                  {/* Team Size */}
                   <div>
-                    <label className="font-semibold text-text mb-1 flex items-center justify-between">
+                    <label className="font-semibold text-text mb-1 flex items-center">
                       <span>Team Size (FTEs)</span>
-                      <span className="text-rust font-bold text-[11px]">* Compulsory</span>
+                      <span className="text-rust font-bold ml-1">*</span>
                     </label>
                     <input
                       type="number"
@@ -479,18 +507,18 @@ export default function OnboardingPage() {
                     )}
                   </div>
 
-                  {/* Company Annual Income / Revenue - COMPULSORY */}
+                  {/* Company Annual Income / Revenue (INR ₹) */}
                   <div>
-                    <label className="font-semibold text-text mb-1 flex items-center justify-between">
-                      <span>Company Annual Income / Revenue ($)</span>
-                      <span className="text-rust font-bold text-[11px]">* Compulsory</span>
+                    <label className="font-semibold text-text mb-1 flex items-center">
+                      <span>Company Annual Income / Revenue (₹)</span>
+                      <span className="text-rust font-bold ml-1">*</span>
                     </label>
                     <input
                       type="number"
                       min="0"
                       value={annualRevenue}
                       onChange={e => handleAnnualRevenueChange(e.target.value)}
-                      placeholder="e.g. 600000"
+                      placeholder="e.g. 6000000"
                       className={`w-full px-3 py-2 rounded-lg bg-surface-2 border text-text focus:ring-1 focus:ring-brass font-mono ${
                         errors.annualRevenue ? "border-rust ring-1 ring-rust/50" : "border-line"
                       }`}
@@ -500,40 +528,38 @@ export default function OnboardingPage() {
                     ) : (
                       annualRevenue && Number(annualRevenue) > 0 && (
                         <p className="text-[10px] text-text-muted mt-1 font-mono">
-                          ≈ ${Math.round(Number(annualRevenue) / 12).toLocaleString()} / month
+                          ≈ ₹{Math.round(Number(annualRevenue) / 12).toLocaleString("en-IN")} / month
                         </p>
                       )
                     )}
                   </div>
 
-                  {/* Monthly Net Burn ($) */}
+                  {/* Monthly Net Burn (INR ₹) */}
                   <div>
                     <label className="font-semibold text-text block mb-1">
-                      Monthly Net Burn ($)
+                      Monthly Net Burn (₹)
                     </label>
                     <input
                       type="number"
                       value={monthlyBurn}
                       onChange={e => setMonthlyBurn(e.target.value)}
-                      placeholder="e.g. 15000"
+                      placeholder="e.g. 150000"
                       className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass font-mono"
                     />
-                    <p className="text-[10px] text-text-muted mt-0.5">Average monthly operating expenses minus gross revenue</p>
                   </div>
 
-                  {/* Cash on Hand ($) */}
+                  {/* Cash on Hand (INR ₹) */}
                   <div>
                     <label className="font-semibold text-text block mb-1">
-                      Cash on Hand / Reserves ($)
+                      Cash on Hand / Reserves (₹)
                     </label>
                     <input
                       type="number"
                       value={cashOnHand}
                       onChange={e => setCashOnHand(e.target.value)}
-                      placeholder="e.g. 120000"
+                      placeholder="e.g. 1200000"
                       className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass font-mono"
                     />
-                    <p className="text-[10px] text-text-muted mt-0.5">Liquid bank balance for runway computation</p>
                   </div>
 
                   {/* Website URL */}
@@ -543,7 +569,7 @@ export default function OnboardingPage() {
                       type="text"
                       value={website}
                       onChange={e => setWebsite(e.target.value)}
-                      placeholder="e.g. apexglobal.com"
+                      placeholder="e.g. apexglobal.in"
                       className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
                     />
                   </div>
@@ -635,7 +661,7 @@ export default function OnboardingPage() {
                     onClick={handleCompleteSetup}
                     className="px-6 py-3 rounded-xl bg-brass text-white font-bold text-xs shadow-lg hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer"
                   >
-                    <Sparkles className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4" />
                     <span>Assemble My Custom Business OS</span>
                   </button>
                 </div>

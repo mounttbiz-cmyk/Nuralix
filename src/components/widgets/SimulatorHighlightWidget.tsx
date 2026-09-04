@@ -36,7 +36,7 @@ export function SimulatorHighlightWidget() {
               </h2>
             </div>
             <p className="text-[11px] text-text-muted">
-              Monte Carlo forecast (1,000 runs) · Ramp-up: 4 months · Salary: $120k loaded
+              Monte Carlo forecast (1,000 runs) · Ramp-up: 4 months · Salary: ₹15L loaded
             </p>
           </div>
 
@@ -107,19 +107,19 @@ export function SimulatorHighlightWidget() {
           <div className="grid grid-cols-3 gap-2 text-center">
             <div className="p-2.5 rounded-lg border border-line bg-surface-2/40">
               <span className="text-[10px] uppercase font-bold text-rust block">P10 (Pessimistic)</span>
-              <span className="text-sm font-bold num-tabular text-text block mt-1">-$28,400</span>
+              <span className="text-sm font-bold num-tabular text-text block mt-1">-₹2,84,000</span>
               <span className="text-[10px] text-text-muted">Breakeven: Mo 10</span>
             </div>
 
             <div className="p-2.5 rounded-lg border border-brass/50 bg-brass-soft/20">
               <span className="text-[10px] uppercase font-bold text-brass block">P50 (Expected)</span>
-              <span className="text-sm font-bold num-tabular text-text block mt-1">+$42,000</span>
+              <span className="text-sm font-bold num-tabular text-text block mt-1">+₹4,20,000</span>
               <span className="text-[10px] text-text-muted">Breakeven: Mo 7</span>
             </div>
 
             <div className="p-2.5 rounded-lg border border-jade/30 bg-jade/10">
               <span className="text-[10px] uppercase font-bold text-jade block">P90 (Optimistic)</span>
-              <span className="text-sm font-bold num-tabular text-text block mt-1">+$89,200</span>
+              <span className="text-sm font-bold num-tabular text-text block mt-1">+₹8,92,000</span>
               <span className="text-[10px] text-text-muted">Breakeven: Mo 5</span>
             </div>
           </div>
@@ -128,7 +128,7 @@ export function SimulatorHighlightWidget() {
         {/* Footer */}
         <div className="pt-2 border-t border-line flex items-center justify-between text-xs">
           <span className="text-text-muted">
-            In <strong>842 of 1,000 runs</strong>, cash reserve never fell below your $20k safety floor.
+            In <strong>842 of 1,000 runs</strong>, cash reserve never fell below your ₹15L safety floor.
           </span>
           <Link
             href="/simulator"

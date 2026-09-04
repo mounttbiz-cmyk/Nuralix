@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ContainerTile } from "../ui/ContainerTile";
 import { ProvenanceBadge } from "../ui/Badge";
 import { TrendingUp, TrendingDown, HelpCircle, MessageSquare } from "lucide-react";
+import Link from "next/link";
 
 interface KpiItem {
   id: string;
@@ -18,11 +19,39 @@ interface KpiItem {
 }
 
 export function KpiGridWidget() {
+  const [industryLabel, setIndustryLabel] = useState("IT & Technology Services");
+  const [monthlyRev, setMonthlyRev] = useState(500000);
+  const [annualRev, setAnnualRev] = useState(6000000);
+  const [burn, setBurn] = useState(150000);
+  const [cash, setCash] = useState(1200000);
+  const [teamSize, setTeamSize] = useState(15);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("nuralix_business_profile");
+      if (saved) {
+        const p = JSON.parse(saved);
+        if (p.industryLabel) setIndustryLabel(p.industryLabel);
+        else if (p.industry) setIndustryLabel(p.industry);
+        if (p.revenue) setMonthlyRev(Number(p.revenue));
+        if (p.annualRevenue) setAnnualRev(Number(p.annualRevenue));
+        if (p.burn) setBurn(Number(p.burn));
+        if (p.cash) setCash(Number(p.cash));
+        if (p.teamSize) setTeamSize(Number(p.teamSize));
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
+  const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : "18+";
+  const revPerHead = Math.round(annualRev / (teamSize || 1));
+
   const kpis: KpiItem[] = [
     {
       id: "mrr",
       label: "Monthly Recurring Revenue",
-      value: "$48,200",
+      value: `₹${monthlyRev.toLocaleString("en-IN")}`,
       delta: "+6.4%",
       direction: "up",
       sentiment: "positive",
@@ -33,34 +62,34 @@ export function KpiGridWidget() {
     {
       id: "runway",
       label: "Estimated Cash Runway",
-      value: "7.2 mo",
-      delta: "-0.4 mo",
-      direction: "down",
-      sentiment: "negative",
-      basis: "vs last month",
-      sparkline: [9.1, 8.6, 8.2, 7.8, 7.6, 7.2],
+      value: `${runwayMonths} mo`,
+      delta: "+0.8 mo",
+      direction: "up",
+      sentiment: Number(runwayMonths) >= 6 ? "positive" : "negative",
+      basis: "healthy buffer",
+      sparkline: [7.2, 7.4, 7.6, 7.8, 7.9, Number(runwayMonths) || 8.0],
       provenance: "from_data",
     },
     {
-      id: "nrr",
-      label: "Net Revenue Retention",
-      value: "108.4%",
-      delta: "+2.1%",
+      id: "rev_head",
+      label: "Annual Revenue Per Head",
+      value: `₹${revPerHead.toLocaleString("en-IN")}`,
+      delta: "+8.2%",
       direction: "up",
       sentiment: "positive",
-      basis: "vs Q2 average",
+      basis: `${teamSize} FTEs`,
       sparkline: [102, 104, 105, 106, 107, 108],
       provenance: "from_data",
     },
     {
-      id: "cac_payback",
-      label: "CAC Payback Period",
-      value: "14.2 mo",
-      delta: "+1.3 mo",
+      id: "gross_margin",
+      label: "Gross Margin Efficiency",
+      value: "82.4%",
+      delta: "+2.3%",
       direction: "up",
-      sentiment: "negative", // Longer payback is worse
-      basis: "vs benchmark median (12 mo)",
-      sparkline: [11, 12, 12.5, 13, 13.8, 14.2],
+      sentiment: "positive",
+      basis: "top quartile",
+      sparkline: [76, 78, 79, 80, 81, 82.4],
       provenance: "benchmark",
     },
   ];
@@ -74,10 +103,10 @@ export function KpiGridWidget() {
               Core Performance Indicators
             </h2>
             <p className="text-[11px] text-text-muted">
-              Live telemetry matched to B2B SaaS Growth stage benchmarks
+              Live telemetry matched to {industryLabel} in Indian Rupees (₹)
             </p>
           </div>
-          <span className="text-[11px] text-text-muted">Updated 10m ago</span>
+          <span className="text-[11px] text-text-muted font-mono">Updated just now</span>
         </div>
 
         {/* 4-column KPI cards grid */}
@@ -96,7 +125,7 @@ export function KpiGridWidget() {
 
               {/* Value and sparkline */}
               <div className="flex items-baseline justify-between pt-1">
-                <span className="text-2xl font-bold num-tabular text-text tracking-tight">
+                <span className="text-xl sm:text-2xl font-bold num-tabular text-text tracking-tight font-mono">
                   {kpi.value}
                 </span>
 
@@ -110,7 +139,7 @@ export function KpiGridWidget() {
                 </svg>
               </div>
 
-              {/* Delta & Basis with 'Why did this move?' (§8.3) */}
+              {/* Delta & Basis with 'Why did this move?' */}
               <div className="flex items-center justify-between pt-1 border-t border-line/60 text-[11px]">
                 <div
                   className={`inline-flex items-center gap-1 font-semibold num-tabular ${
@@ -126,13 +155,13 @@ export function KpiGridWidget() {
                   <span className="text-text-muted font-normal ml-0.5">{kpi.basis}</span>
                 </div>
 
-                <button
-                  type="button"
-                  title="Why did this move? Ask AI"
-                  className="text-text-muted hover:text-brass p-0.5 rounded btn-tactile"
+                <Link
+                  href="/chat"
+                  title="Discuss with AI Executive"
+                  className="text-text-muted hover:text-brass p-0.5 rounded btn-tactile cursor-pointer"
                 >
                   <MessageSquare className="w-3 h-3" />
-                </button>
+                </Link>
               </div>
             </div>
           ))}

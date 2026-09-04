@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { resolveTenantConfig, TenantContext } from "@/config/resolver";
 import { RenderWidget } from "@/components/widgets/WidgetRegistry";
 import { WidgetDef } from "@/config/schemas/widget";
+import { useSearchParams } from "next/navigation";
 import {
   Layers,
   Sliders,
@@ -16,8 +17,10 @@ import {
   CheckCircle2,
   X
 } from "lucide-react";
+import { Suspense } from "react";
 
-export default function DashboardPage() {
+function DashboardContent() {
+  const searchParams = useSearchParams();
   const [selectedIndustry, setSelectedIndustry] = useState<TenantContext["industry"]>("saas");
   const [selectedModel, setSelectedModel] = useState<TenantContext["businessModel"]>("subscription");
   const [companyName, setCompanyName] = useState("Apex Analytics");
@@ -45,6 +48,13 @@ export default function DashboardPage() {
 
   // User's custom layout state (allowing user to customize the website dashboard)
   const [isEditingLayout, setIsEditingLayout] = useState(false);
+
+  // Sync customize parameter from URL (e.g. side panel Customize Dashboard button)
+  useEffect(() => {
+    if (searchParams.get("customize") === "true") {
+      setIsEditingLayout(true);
+    }
+  }, [searchParams]);
   const [activeWidgets, setActiveWidgets] = useState<WidgetDef[]>(baseConfig.widgets);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -269,3 +279,12 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-text-muted">Loading dashboard...</div>}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
