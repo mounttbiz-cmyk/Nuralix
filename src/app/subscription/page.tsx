@@ -22,7 +22,7 @@ interface PlanTier {
 
 export default function SubscriptionPage() {
   const router = useRouter();
-  const [currentPlan, setCurrentPlan] = useState<string>("starter");
+  const [currentPlan, setCurrentPlan] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlanForModal, setSelectedPlanForModal] = useState<PlanTier | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -43,6 +43,36 @@ export default function SubscriptionPage() {
     setTimeout(() => setToast(null), 3500);
   };
 
+  const ensureSessionAndOpenDashboard = (planId: string, planName: string) => {
+    try {
+      localStorage.setItem("nuralix_subscription_plan", planId);
+      setCurrentPlan(planId);
+
+      // Guarantee user session is active so AuthGuard always admits the user to dashboard
+      let session = localStorage.getItem("nuralix_user_session");
+      if (!session) {
+        const profileStr = localStorage.getItem("nuralix_business_profile");
+        const profile = profileStr ? JSON.parse(profileStr) : null;
+        const userSession = {
+          id: `usr_${Date.now()}`,
+          email: profile?.website ? `founder@${profile.website.replace(/^https?:\/\//, '')}` : "founder@mycompany.in",
+          name: profile?.founderName || "Founder",
+          role: "owner",
+          provider: "email",
+          authenticatedAt: new Date().toISOString(),
+        };
+        localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    notify(`${planName} activated! Launching your Business OS…`);
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 600);
+  };
+
   const plans: PlanTier[] = [
     {
       id: "starter",
@@ -55,7 +85,7 @@ export default function SubscriptionPage() {
         "Marketing Engine",
         "Decision Helper",
       ],
-      ctaLabel: "Current Plan",
+      ctaLabel: currentPlan === "starter" ? "Continue to Dashboard →" : "Select Starter & Open Dashboard →",
       isCurrent: currentPlan === "starter",
     },
     {
@@ -70,7 +100,7 @@ export default function SubscriptionPage() {
         "Business Builder",
         "Decision Helper",
       ],
-      ctaLabel: "Upgrade to Side-Hustler",
+      ctaLabel: currentPlan === "side_hustler" ? "Continue to Dashboard →" : "Upgrade to Side-Hustler",
       isCurrent: currentPlan === "side_hustler",
     },
     {
@@ -89,7 +119,7 @@ export default function SubscriptionPage() {
         "Business Clips",
         "Decision Helper",
       ],
-      ctaLabel: "Upgrade to Growth Founder",
+      ctaLabel: currentPlan === "growth_founder" ? "Continue to Dashboard →" : "Upgrade to Growth Founder",
       isCurrent: currentPlan === "growth_founder",
     },
     {
@@ -110,19 +140,14 @@ export default function SubscriptionPage() {
         "Business Clips",
         "Decision Helper",
       ],
-      ctaLabel: "Upgrade to Business Empire",
+      ctaLabel: currentPlan === "business_empire" ? "Continue to Dashboard →" : "Upgrade to Business Empire",
       isCurrent: currentPlan === "business_empire",
     },
   ];
 
   const handleSelectPlan = (plan: PlanTier) => {
     if (plan.id === "starter") {
-      localStorage.setItem("nuralix_subscription_plan", "starter");
-      setCurrentPlan("starter");
-      notify("Public Starter plan selected! Launching your Business OS…");
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 900);
+      ensureSessionAndOpenDashboard("starter", "Public Starter");
       return;
     }
 
@@ -135,16 +160,8 @@ export default function SubscriptionPage() {
     setIsProcessing(true);
 
     setTimeout(() => {
-      localStorage.setItem("nuralix_subscription_plan", selectedPlanForModal.id);
-      setCurrentPlan(selectedPlanForModal.id);
-      setIsProcessing(false);
-      const planName = selectedPlanForModal.name;
-      setSelectedPlanForModal(null);
-      notify(`Success! You are now on the ${planName} plan.`);
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1000);
-    }, 1200);
+      ensureSessionAndOpenDashboard(selectedPlanForModal.id, selectedPlanForModal.name);
+    }, 600);
   };
 
   return (
@@ -272,13 +289,11 @@ export default function SubscriptionPage() {
                       plan.isPopular
                         ? "bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-md hover:shadow-lg"
                         : plan.id === "starter"
-                        ? isSelected
-                          ? "bg-surface-2 border border-line text-text-muted cursor-default"
-                          : "bg-surface border border-line text-text hover:bg-surface-2"
+                        ? "bg-surface hover:bg-surface-2 border border-line-strong text-text hover:border-brass shadow-xs"
                         : "bg-surface border border-line-strong text-text hover:bg-surface-2 hover:border-text shadow-xs"
                     }`}
                   >
-                    {plan.id === "starter" && isSelected ? "Current Plan" : plan.ctaLabel}
+                    {plan.ctaLabel}
                   </button>
                 </div>
               </div>

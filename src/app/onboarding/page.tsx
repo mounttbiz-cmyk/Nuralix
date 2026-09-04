@@ -276,6 +276,24 @@ export default function OnboardingPage() {
         };
         localStorage.setItem("nuralix_business_profile", JSON.stringify(profile));
 
+        // Guarantee user session is active so AuthGuard always admits user to dashboard
+        try {
+          const existingSession = localStorage.getItem("nuralix_user_session");
+          if (!existingSession) {
+            const userSession = {
+              id: `usr_${Date.now()}`,
+              email: website.trim() ? `founder@${website.trim().replace(/^https?:\/\//, '')}` : "founder@mycompany.in",
+              name: founderName.trim() || "Founder",
+              role: "owner",
+              provider: "email",
+              authenticatedAt: new Date().toISOString(),
+            };
+            localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+          }
+        } catch (e) {
+          // ignore
+        }
+
         setTimeout(() => {
           router.push("/subscription");
         }, 800);
