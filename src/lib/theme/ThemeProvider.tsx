@@ -54,7 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem("nuralix-theme") as ThemeMode | null;
-    const initialMode = stored && ["light", "dark", "system"].includes(stored) ? stored : "dark";
+    const initialMode = stored === "light" ? "light" : "dark";
     setThemeState(initialMode);
     applyTheme(initialMode);
 

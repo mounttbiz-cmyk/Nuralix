@@ -133,22 +133,28 @@ body.is-hover .cur__dot{transform:scale(.4)}
 
 .btn{
   position:relative;display:inline-flex;align-items:center;gap:10px;
-  padding:13px 24px;border-radius:100px;font-size:13px;letter-spacing:.02em;font-weight:500;
-  border:1px solid var(--hair);background:var(--glass);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  overflow:hidden;transition:border-color .4s,color .4s,transform .5s var(--ease),box-shadow .5s;
+  padding:13px 24px;border-radius:100px;font-size:13px;letter-spacing:.02em;font-weight:600;
+  border:1px solid rgba(255,255,255,.24);background:rgba(12,18,32,.75);
+  color:#FFFFFF !important;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  overflow:hidden;transition:border-color .4s,color .4s,transform .5s var(--ease),box-shadow .5s,background .4s;
   will-change:transform;white-space:nowrap;
 }
 .btn::before{content:"";position:absolute;inset:0;background:radial-gradient(120px 120px at var(--mx,50%) var(--my,50%), color-mix(in srgb,var(--accent) 34%, transparent), transparent 70%);opacity:0;transition:opacity .4s}
 .btn:hover::before{opacity:1}
-.btn:hover{border-color:color-mix(in srgb,var(--accent) 55%,transparent);box-shadow:0 0 34px -8px color-mix(in srgb,var(--accent) 55%,transparent)}
-.btn span{position:relative;z-index:1}
-.btn--solid{background:var(--white);color:#05060A;border-color:transparent}
+.btn:hover{border-color:var(--accent);box-shadow:0 0 34px -6px color-mix(in srgb,var(--accent) 65%,transparent);color:#FFFFFF !important}
+.btn span{position:relative;z-index:1;color:#FFFFFF !important}
+.btn--solid{background:#FFFFFF !important;color:#05060A !important;border-color:transparent !important;font-weight:700}
+.btn--solid span{color:#05060A !important}
 .btn--solid::before{background:radial-gradient(120px 120px at var(--mx,50%) var(--my,50%), color-mix(in srgb,var(--accent) 70%, transparent), transparent 70%)}
-.btn--solid:hover{box-shadow:0 0 44px -6px color-mix(in srgb,var(--accent) 70%,transparent)}
+.btn--solid:hover{background:#F0F6FF !important;box-shadow:0 0 44px -6px rgba(255,255,255,0.7) !important}
+.btn--nav{background:rgba(255,255,255,.12) !important;border:1px solid rgba(255,255,255,.32) !important;color:#FFFFFF !important;font-weight:600}
+.btn--nav span{color:#FFFFFF !important}
+.btn--nav:hover{background:rgba(0,217,255,.18) !important;border-color:var(--accent) !important;box-shadow:0 0 24px rgba(0,217,255,0.45) !important}
 .btn--lg{padding:18px 34px;font-size:15px}
-.btn__ar{transition:transform .45s var(--ease)}
+.btn__ar{transition:transform .45s var(--ease);color:inherit}
 .btn:hover .btn__ar{transform:translateX(5px)}
+.hero__cta{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 
 /* burger */
 .burger{display:none;width:44px;height:44px;align-items:center;justify-content:center;position:relative;z-index:81}

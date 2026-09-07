@@ -21,6 +21,7 @@ import {
   Cable,
   Workflow
 } from "lucide-react";
+import { IntegrationLogo } from "@/components/ui/IntegrationLogo";
 
 interface IntegrationItem {
   id: string;
@@ -358,8 +359,8 @@ export default function IntegrationsPage() {
         <div className="p-6 rounded-2xl border border-brass/40 bg-surface shadow-2xl space-y-5 animate-fade-in ring-1 ring-brass/20">
           <div className="flex items-start justify-between pb-4 border-b border-line gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-surface-2 border border-line flex items-center justify-center text-2xl shadow-inner">
-                {inspectItem.logo}
+              <div className="w-12 h-12 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2.5 shadow-inner">
+                <IntegrationLogo id={inspectItem.id} className="w-8 h-8" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -465,8 +466,10 @@ export default function IntegrationsPage() {
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl">{item.logo}</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2 shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                    <IntegrationLogo id={item.id} className="w-6 h-6" />
+                  </div>
                   <div>
                     <h3 className="text-xs font-bold text-text group-hover:text-brass transition-colors">
                       {item.name}

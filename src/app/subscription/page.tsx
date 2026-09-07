@@ -78,41 +78,41 @@ export default function SubscriptionPage() {
     {
       id: "free",
       name: "Nuralix Free / Demo",
-      tagline: "Experience the foundational capabilities of Nuralix OS.",
+      tagline: "Try Nuralix free to see how it works.",
       price: "₹0",
       period: "/forever",
       color: "border-emerald-400/30 text-emerald-400",
-      badge: "Conversion Tier",
+      badge: "Free Trial",
       features: [
-        "Executive Dashboard & Telemetry",
-        "Basic AI Workspace (Astra CEO preview)",
-        "Business Health Score Calculation",
-        "Limited Knowledge Hub (up to 5 SOPs)",
-        "Basic Tools (Profit & ROI Calculator)",
-        "Standard Executive Reports",
-        "Limited Tasks & Execution",
-        "Standard AI usage quota",
+        "Business Dashboard",
+        "CEO AI Assistant (Astra)",
+        "Company Health Score",
+        "Profit & ROI Calculators",
+        "Save up to 5 Documents & SOPs",
+        "Daily Business Briefings",
+        "Task Manager",
+        "Free AI questions",
       ],
-      ctaLabel: currentPlan === "free" ? "Continue to Dashboard →" : "Select Free & Open Dashboard",
+      ctaLabel: currentPlan === "free" ? "Continue to Dashboard →" : "Start Free & Open Dashboard",
       isCurrent: currentPlan === "free",
     },
     {
       id: "starter",
       name: "Nuralix Starter",
-      tagline: "Operational intelligence for early-stage & small businesses.",
+      tagline: "For small businesses & growing founders.",
       price: "₹1,999",
       period: "/month",
       color: "border-blue-400/30 text-blue-400",
       badge: "Small Business",
       features: [
-        "Full AI Workspace",
-        "Astra (CEO AI) + Basic CFO, Sales & Marketing agents",
-        "Knowledge Hub with document search",
-        "Executive Briefings & Task Management",
-        "Core Tools (Profit, Break-Even, CAC, LTV)",
-        "Basic Analytics & Trend Telemetry",
-        "Limited Automations (3 active pipelines)",
-        "Essential Integrations (Google, Slack)",
+        "Everything in Free, plus:",
+        "4 AI Assistants (CEO, CFO, Sales & Marketing)",
+        "Core Calculators (Break-Even, Cash Flow, CAC, LTV)",
+        "Unlimited Document & SOP Storage",
+        "Automated Daily Executive Briefings",
+        "3 Active Automated Workflows",
+        "Connect with Google Workspace & Slack",
+        "Assign tasks to team members",
       ],
       ctaLabel: currentPlan === "starter" ? "Continue to Dashboard →" : "Upgrade to Starter",
       isCurrent: currentPlan === "starter",
@@ -120,22 +120,21 @@ export default function SubscriptionPage() {
     {
       id: "pro",
       name: "Nuralix Professional",
-      tagline: "The complete AI executive operating system for scaling enterprises.",
+      tagline: "The complete AI executive team for scaling companies.",
       price: "₹5,999",
       period: "/month",
       color: "border-purple-400/40 text-purple-400",
       badge: "Most Popular",
       isPopular: true,
       features: [
-        "Full AI Executive Team (All 7 Specialist Agents)",
-        "All 25 Advanced Specialized Business Tools",
-        "Decision Simulator (1,000 Monte Carlo runs)",
-        "Predictive Analytics & Forecasting Models",
-        "Automated Daily Executive Briefings",
-        "Visual Workflow Builder & Autonomous Pipelines",
-        "Extended Business & Automation Integrations",
-        "Team Collaboration & Role-Based Permissions",
-        "Advanced Company Memory & SOP Retrieval",
+        "Everything in Starter, plus:",
+        "All 7 AI Executives (CEO, CFO, Marketing, Sales, HR, Ops, Strategy)",
+        "All 25 Business Tools & Calculators",
+        "Decision Simulator (Test hiring, pricing & scale)",
+        "Revenue & Cash Forecasting",
+        "Visual Drag-and-Drop Workflow Builder",
+        "Connect with Stripe, QuickBooks, WhatsApp & Zoom",
+        "Multi-User Team Access & Permissions",
       ],
       ctaLabel: currentPlan === "pro" ? "Continue to Dashboard →" : "Upgrade to Professional",
       isCurrent: currentPlan === "pro",
@@ -143,21 +142,20 @@ export default function SubscriptionPage() {
     {
       id: "enterprise",
       name: "Nuralix Business / Enterprise",
-      tagline: "Deep automation, digital twins, enterprise security & integrations.",
+      tagline: "For larger teams needing custom tools, security & integrations.",
       price: "₹19,999",
       period: "/month",
       color: "border-amber-400/40 text-amber-400",
-      badge: "Enterprise Grade",
+      badge: "Enterprise",
       features: [
-        "Very High / Unlimited Enterprise AI Usage",
-        "Advanced Business Simulation & Scenario Commit",
-        "Digital Twin Telemetry & Predictive Solvency Guard",
-        "Multi-Agent Executive Collaboration Protocols",
-        "Full Integration Suite + Custom Webhooks & REST API",
-        "Advanced Team Permissions, RBAC & Audit Logs",
-        "Enterprise SSO (Google, Okta SAML, Azure AD)",
-        "Custom Workflows & SLA Guarantee",
-        "Dedicated Solution Architect & Priority Support",
+        "Everything in Professional, plus:",
+        "Unlimited AI questions & analysis",
+        "Complete Virtual Business Simulation",
+        "Advanced Custom Automations & Workflows",
+        "Connect with HubSpot, Salesforce & Databases",
+        "Full API Access & Custom Webhooks",
+        "Single Sign-On (Google, Okta, Microsoft)",
+        "Activity & Security Audit Logs",
       ],
       ctaLabel: currentPlan === "enterprise" ? "Continue to Dashboard →" : "Upgrade to Enterprise",
       isCurrent: currentPlan === "enterprise",
@@ -214,13 +212,13 @@ export default function SubscriptionPage() {
         <div className="text-center space-y-2 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brass-soft border border-brass/30 text-brass text-[11px] font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Business Capability Tiers</span>
+            <span>Plans & Pricing</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight font-sans">
-            Choose the Right Operating Power for Your Enterprise
+            Choose the Plan That Fits Your Business
           </h1>
           <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
-            Nuralix scales with your business: experience the intelligence early, then unlock automated execution, visual workflows, and multi-agent teams.
+            Start free to see what Nuralix can do, or choose a plan with more tools, AI executives, and automated workflows.
           </p>
         </div>
 

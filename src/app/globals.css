@@ -4,36 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
-:root, [data-theme="light"] {
-  --bg:          #F8FAFC;   /* Crisp enterprise slate-light paper */
-  --surface:     #FFFFFF;   /* Pure white card surface */
-  --surface-2:   #F1F5F9;   /* Subtle elevated slate */
-  --line:        #E2E8F0;   /* Clean border */
-  --line-strong: #CBD5E1;
-  --text:        #0F172A;   /* Deep slate text */
-  --text-muted:  #64748B;   /* Slate muted */
-  --brass:       #B2891E;   /* Rich gold matching ribbon logo */
-  --brass-soft:  #FEF9E7;
-  --jade:        #10B981;   /* Emerald jade */
-  --rust:        #EF4444;   /* Crimson rust */
-  --amber:       #F59E0B;
-  --shadow:      0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.03);
-  --grid:        #EDF2F7;
-
-  /* Motion tokens (§4.1) */
-  --dur-instant: 90ms;
-  --dur-fast:    150ms;
-  --dur-base:    240ms;
-  --dur-slow:    420ms;
-  --dur-story:   1200ms;
-
-  --ease-out:    cubic-bezier(.2,.8,.2,1);
-  --ease-in:     cubic-bezier(.4,0,1,1);
-  --ease-spring: cubic-bezier(.34,1.4,.64,1);
-}
-
-[data-theme="dark"] {
-  /* Refined, lighter enterprise dark palette (comfortable slate-navy, NOT pitch black) */
+:root, [data-theme="dark"] {
+  /* Refined enterprise dark palette as default (comfortable slate-navy) */
   --bg:          #111823;   /* Soft slate navy */
   --surface:     #182232;   /* Elevated slate surface */
   --surface-2:   #212E42;   /* Interactive slate layer */
@@ -48,6 +20,34 @@
   --amber:       #FBBF24;
   --shadow:      none;      /* Dark separates with value, not shadow */
   --grid:        #1E2A3C;
+
+  /* Motion tokens (§4.1) */
+  --dur-instant: 90ms;
+  --dur-fast:    150ms;
+  --dur-base:    240ms;
+  --dur-slow:    420ms;
+  --dur-story:   1200ms;
+
+  --ease-out:    cubic-bezier(.2,.8,.2,1);
+  --ease-in:     cubic-bezier(.4,0,1,1);
+  --ease-spring: cubic-bezier(.34,1.4,.64,1);
+}
+
+[data-theme="light"] {
+  --bg:          #F8FAFC;   /* Crisp enterprise slate-light paper */
+  --surface:     #FFFFFF;   /* Pure white card surface */
+  --surface-2:   #F1F5F9;   /* Subtle elevated slate */
+  --line:        #E2E8F0;   /* Clean border */
+  --line-strong: #CBD5E1;
+  --text:        #0F172A;   /* Deep slate text */
+  --text-muted:  #64748B;   /* Slate muted */
+  --brass:       #B2891E;   /* Rich gold matching ribbon logo */
+  --brass-soft:  #FEF9E7;
+  --jade:        #10B981;   /* Emerald jade */
+  --rust:        #EF4444;   /* Crimson rust */
+  --amber:       #F59E0B;
+  --shadow:      0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.03);
+  --grid:        #EDF2F7;
 }
 
 /* Sleek custom scrollbars matching Nuralix brass/slate design across the whole dashboard & website */
