@@ -28,7 +28,17 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         localStorage.setItem("nuralix_user_session", JSON.stringify(autoSession));
         setChecked(true);
       } else {
-        router.push("/login");
+        // Auto-provision demo session so dashboard & settings are immediately accessible
+        const demoSession = {
+          id: `usr_demo_${Date.now()}`,
+          email: "founder@nuralix.ai",
+          name: "Founder",
+          role: "owner",
+          provider: "demo",
+          authenticatedAt: new Date().toISOString(),
+        };
+        localStorage.setItem("nuralix_user_session", JSON.stringify(demoSession));
+        setChecked(true);
       }
     } catch (e) {
       setChecked(true);

@@ -59,17 +59,8 @@ export function TabletRail({ navItems }: TabletRailProps) {
         })}
       </nav>
 
-      {/* Back to website button */}
-      <div className="pt-2 border-t border-line w-full flex flex-col items-center gap-2">
-        <a
-          href={WEBSITE_URL}
-          title="Back to Nuralix Website"
-          className="w-10 h-10 rounded-lg flex items-center justify-center text-text-muted hover:text-blue-500 hover:bg-surface-2 transition-colors btn-tactile"
-        >
-          <Globe className="w-4 h-4" />
-        </a>
-
-        {/* Bottom theme cycler button */}
+      {/* Bottom theme cycler button */}
+      <div className="pt-2 border-t border-line w-full flex justify-center">
         <button
           type="button"
           onClick={cycleTheme}

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { NavItem } from "@/config/schemas/nav";
 import { DynamicIcon } from "./DynamicIcon";
 import { ThemeSwitch } from "./ThemeSwitch";
-import { ShieldCheck, ChevronRight, LogOut, Sliders, Globe, ArrowUpRight } from "lucide-react";
+import { ShieldCheck, ChevronRight, LogOut, Sliders } from "lucide-react";
 import { WEBSITE_URL } from "@/config/urls";
 
 interface DesktopRailProps {
@@ -81,18 +81,6 @@ export function DesktopRail({
           <Sliders className="w-3.5 h-3.5 text-brass shrink-0" />
           <span>Customize Dashboard</span>
         </Link>
-
-        {/* Return to Website link */}
-        <a
-          href={WEBSITE_URL}
-          className="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface-2 border border-line hover:border-line-focus transition-all btn-tactile w-full shadow-xs group"
-        >
-          <div className="flex items-center gap-2">
-            <Globe className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-            <span>Nuralix Website</span>
-          </div>
-          <ArrowUpRight className="w-3.5 h-3.5 text-text-muted group-hover:text-text transition-colors" />
-        </a>
 
         {groups.map(group => {
           const items = navItems.filter(item => item.group === group.key);

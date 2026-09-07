@@ -39,13 +39,6 @@ export function MobileHeader({
       </Link>
 
       <div className="flex items-center gap-1.5">
-        <a
-          href={WEBSITE_URL}
-          title="Nuralix Website"
-          className="w-8 h-8 rounded-lg flex items-center justify-center border border-line bg-surface-2 text-text-muted hover:text-blue-500 btn-tactile"
-        >
-          <Globe className="w-3.5 h-3.5" />
-        </a>
 
         {onOpenChat && (
           <button
