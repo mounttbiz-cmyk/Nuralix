@@ -75,8 +75,8 @@ export function AppShell({
       <button
         type="button"
         onClick={() => setChatOpen(true)}
-        aria-label="Open AI Executive Chat"
-        className="hidden md:flex fixed bottom-6 right-6 z-30 items-center gap-2 px-4 py-2.5 rounded-full bg-brass text-white font-semibold text-xs shadow-lg hover:brightness-110 btn-tactile cursor-pointer"
+        aria-label="Open AI Workspace"
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full bg-brass text-white shadow-xl hover:brightness-110 active:scale-95 transition-all text-xs font-bold border border-brass/50 font-sans cursor-pointer"
       >
         <MessageSquare className="w-4 h-4 text-white" />
         <span>Ask Executive AI</span>

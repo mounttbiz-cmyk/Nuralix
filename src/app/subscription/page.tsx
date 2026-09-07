@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Check, Shield, ArrowRight, Sparkles, CheckCircle2, X } from "lucide-react";
+import { Check, Shield, ArrowRight, Sparkles, CheckCircle2, X, Building2, Zap } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 
 interface PlanTier {
@@ -13,7 +13,8 @@ interface PlanTier {
   tagline: string;
   price: string;
   period: string;
-  words: string;
+  color: string;
+  badge?: string;
   isPopular?: boolean;
   features: string[];
   ctaLabel: string;
@@ -22,7 +23,7 @@ interface PlanTier {
 
 export default function SubscriptionPage() {
   const router = useRouter();
-  const [currentPlan, setCurrentPlan] = useState<string>("");
+  const [currentPlan, setCurrentPlan] = useState<string>("free");
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlanForModal, setSelectedPlanForModal] = useState<PlanTier | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -75,328 +76,312 @@ export default function SubscriptionPage() {
 
   const plans: PlanTier[] = [
     {
-      id: "starter",
-      name: "Public Starter",
-      tagline: "Try Nuralix free, forever.",
+      id: "free",
+      name: "Nuralix Free / Demo",
+      tagline: "Experience the foundational capabilities of Nuralix OS.",
       price: "₹0",
-      period: "/month",
-      words: "35,000 words / month",
+      period: "/forever",
+      color: "border-emerald-400/30 text-emerald-400",
+      badge: "Conversion Tier",
       features: [
-        "Marketing Engine",
-        "Decision Helper",
+        "Executive Dashboard & Telemetry",
+        "Basic AI Workspace (Astra CEO preview)",
+        "Business Health Score Calculation",
+        "Limited Knowledge Hub (up to 5 SOPs)",
+        "Basic Tools (Profit & ROI Calculator)",
+        "Standard Executive Reports",
+        "Limited Tasks & Execution",
+        "Standard AI usage quota",
       ],
-      ctaLabel: currentPlan === "starter" ? "Continue to Dashboard →" : "Select Starter & Open Dashboard →",
+      ctaLabel: currentPlan === "free" ? "Continue to Dashboard →" : "Select Free & Open Dashboard",
+      isCurrent: currentPlan === "free",
+    },
+    {
+      id: "starter",
+      name: "Nuralix Starter",
+      tagline: "Operational intelligence for early-stage & small businesses.",
+      price: "₹1,999",
+      period: "/month",
+      color: "border-blue-400/30 text-blue-400",
+      badge: "Small Business",
+      features: [
+        "Full AI Workspace",
+        "Astra (CEO AI) + Basic CFO, Sales & Marketing agents",
+        "Knowledge Hub with document search",
+        "Executive Briefings & Task Management",
+        "Core Tools (Profit, Break-Even, CAC, LTV)",
+        "Basic Analytics & Trend Telemetry",
+        "Limited Automations (3 active pipelines)",
+        "Essential Integrations (Google, Slack)",
+      ],
+      ctaLabel: currentPlan === "starter" ? "Continue to Dashboard →" : "Upgrade to Starter",
       isCurrent: currentPlan === "starter",
     },
     {
-      id: "side_hustler",
-      name: "Side-Hustler",
-      tagline: "Build & market your idea.",
-      price: "₹499",
+      id: "pro",
+      name: "Nuralix Professional",
+      tagline: "The complete AI executive operating system for scaling enterprises.",
+      price: "₹5,999",
       period: "/month",
-      words: "120,000 words / month",
-      features: [
-        "Marketing Engine",
-        "Business Builder",
-        "Decision Helper",
-      ],
-      ctaLabel: currentPlan === "side_hustler" ? "Continue to Dashboard →" : "Upgrade to Side-Hustler",
-      isCurrent: currentPlan === "side_hustler",
-    },
-    {
-      id: "growth_founder",
-      name: "Growth Founder",
-      tagline: "Charts, images, clips & voice.",
-      price: "₹2,499",
-      period: "/month",
-      words: "600,000 words / month",
+      color: "border-purple-400/40 text-purple-400",
+      badge: "Most Popular",
       isPopular: true,
       features: [
-        "Marketing Engine",
-        "Business Builder",
-        "Chart Intelligence",
-        "Image Studio",
-        "Business Clips",
-        "Decision Helper",
+        "Full AI Executive Team (All 7 Specialist Agents)",
+        "All 25 Advanced Specialized Business Tools",
+        "Decision Simulator (1,000 Monte Carlo runs)",
+        "Predictive Analytics & Forecasting Models",
+        "Automated Daily Executive Briefings",
+        "Visual Workflow Builder & Autonomous Pipelines",
+        "Extended Business & Automation Integrations",
+        "Team Collaboration & Role-Based Permissions",
+        "Advanced Company Memory & SOP Retrieval",
       ],
-      ctaLabel: currentPlan === "growth_founder" ? "Continue to Dashboard →" : "Upgrade to Growth Founder",
-      isCurrent: currentPlan === "growth_founder",
+      ctaLabel: currentPlan === "pro" ? "Continue to Dashboard →" : "Upgrade to Professional",
+      isCurrent: currentPlan === "pro",
     },
     {
-      id: "business_empire",
-      name: "Business Empire",
-      tagline: "Every tool, unlimited scale.",
-      price: "₹24,999",
+      id: "enterprise",
+      name: "Nuralix Business / Enterprise",
+      tagline: "Deep automation, digital twins, enterprise security & integrations.",
+      price: "₹19,999",
       period: "/month",
-      words: "6,000,000 words / month",
+      color: "border-amber-400/40 text-amber-400",
+      badge: "Enterprise Grade",
       features: [
-        "Marketing Engine",
-        "Business Builder",
-        "Chart Intelligence",
-        "Image Studio",
-        "Financial Planner",
-        "Growth Analyzer",
-        "Diagram Builder",
-        "Business Clips",
-        "Decision Helper",
+        "Very High / Unlimited Enterprise AI Usage",
+        "Advanced Business Simulation & Scenario Commit",
+        "Digital Twin Telemetry & Predictive Solvency Guard",
+        "Multi-Agent Executive Collaboration Protocols",
+        "Full Integration Suite + Custom Webhooks & REST API",
+        "Advanced Team Permissions, RBAC & Audit Logs",
+        "Enterprise SSO (Google, Okta SAML, Azure AD)",
+        "Custom Workflows & SLA Guarantee",
+        "Dedicated Solution Architect & Priority Support",
       ],
-      ctaLabel: currentPlan === "business_empire" ? "Continue to Dashboard →" : "Upgrade to Business Empire",
-      isCurrent: currentPlan === "business_empire",
+      ctaLabel: currentPlan === "enterprise" ? "Continue to Dashboard →" : "Upgrade to Enterprise",
+      isCurrent: currentPlan === "enterprise",
     },
   ];
 
-  const handleSelectPlan = (plan: PlanTier) => {
-    if (plan.id === "starter") {
-      ensureSessionAndOpenDashboard("starter", "Public Starter");
-      return;
-    }
-
-    // Open simulated Razorpay checkout modal
-    setSelectedPlanForModal(plan);
-  };
-
-  const confirmPaymentAndUpgrade = () => {
-    if (!selectedPlanForModal) return;
-    setIsProcessing(true);
-
-    setTimeout(() => {
-      ensureSessionAndOpenDashboard(selectedPlanForModal.id, selectedPlanForModal.name);
-    }, 600);
-  };
-
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col justify-between p-4 sm:p-6 lg:p-10 select-none">
+    <div className="min-h-screen bg-bg text-text p-4 sm:p-6 lg:p-8 flex flex-col justify-between">
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-surface border border-jade shadow-2xl text-xs font-semibold text-jade flex items-center gap-2 animate-bounce">
-          <CheckCircle2 className="w-4 h-4 text-jade" />
+        <div className="fixed top-6 right-6 z-50 p-4 rounded-xl bg-surface border border-brass/40 shadow-2xl text-xs font-semibold text-text flex items-center gap-2 animate-fade-in ring-1 ring-brass/20">
+          <Sparkles className="w-4 h-4 text-brass" />
           <span>{toast}</span>
         </div>
       )}
 
-      {/* Top Bar with Brand & Nav */}
-      <header className="max-w-6xl w-full mx-auto flex items-center justify-between pb-6 border-b border-line">
-        <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl bg-surface border border-line flex items-center justify-center p-1 shadow-sm group-hover:scale-105 transition-transform">
-            <Image
-              src="/logo.png"
-              alt="Nuralix Logo"
-              width={28}
-              height={28}
-              className="object-contain"
-              priority
-            />
-          </div>
-          <div>
-            <span className="font-extrabold text-sm tracking-tight text-text font-sans">Nuralix</span>
-            <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-brass-soft text-brass font-bold uppercase">
-              Subscription
-            </span>
-          </div>
-        </Link>
+      {/* Top Header */}
+      <div className="max-w-7xl w-full mx-auto pb-6 border-b border-line flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-3 group">
+            <div className="w-9 h-9 rounded-xl bg-surface border border-line flex items-center justify-center p-1 shadow-sm group-hover:scale-105 transition-transform">
+              <Image
+                src="/logo.png"
+                alt="Nuralix Logo"
+                width={28}
+                height={28}
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <span className="font-extrabold text-sm tracking-tight text-text font-sans">Nuralix</span>
+              <span className="text-[10px] ml-2 px-1.5 py-0.2 rounded bg-brass-soft text-brass font-bold uppercase">
+                Capability Tiers
+              </span>
+            </div>
+          </Link>
+        </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="text-xs text-text-muted hover:text-text font-medium flex items-center gap-1 transition-colors"
+            className="text-xs font-semibold text-text-muted hover:text-text btn-tactile px-3 py-1.5 rounded-lg border border-line bg-surface-2"
           >
-            <span>Skip to Dashboard</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            Go to Dashboard →
           </Link>
-          <div className="w-28">
+          <div className="w-32">
             <ThemeSwitch compact />
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Main Pricing Header */}
-      <main className="max-w-6xl w-full mx-auto my-auto py-8">
-        <div className="text-center space-y-2 mb-10">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-text tracking-tight font-sans">
-            Choose Your Plan
+      {/* Main Container */}
+      <div className="max-w-7xl w-full mx-auto my-auto py-8 space-y-8">
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brass-soft border border-brass/30 text-brass text-[11px] font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Business Capability Tiers</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight font-sans">
+            Choose the Right Operating Power for Your Enterprise
           </h1>
-          <p className="text-sm text-text-muted">
-            Pick the tier that fits your stage. Cancel anytime.
+          <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
+            Nuralix scales with your business: experience the intelligence early, then unlock automated execution, visual workflows, and multi-agent teams.
           </p>
         </div>
 
-        {/* 4-Column Pricing Cards Grid */}
+        {/* 4 Plans Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
-          {plans.map((plan) => {
-            const isSelected = currentPlan === plan.id;
-            return (
-              <div
-                key={plan.id}
-                className={`relative flex flex-col justify-between p-6 rounded-2xl transition-all duration-200 ${
-                  plan.isPopular
-                    ? "bg-surface border-2 border-[#0284c7] shadow-xl ring-1 ring-[#0284c7]/30 scale-[1.02] z-10"
-                    : "bg-surface border border-line shadow-theme hover:border-line-strong"
-                }`}
-              >
-                {/* Most Popular Badge */}
-                {plan.isPopular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#0284c7] text-white text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1 shadow-md">
-                    <span>👑</span>
-                    <span>MOST POPULAR</span>
-                  </div>
-                )}
+          {plans.map(p => (
+            <div
+              key={p.id}
+              className={`rounded-2xl border p-5 sm:p-6 flex flex-col justify-between transition-all relative ${
+                p.isPopular
+                  ? "bg-surface border-brass shadow-2xl ring-2 ring-brass/30 scale-[1.02]"
+                  : "bg-surface/80 border-line hover:border-line-strong shadow-theme"
+              }`}
+            >
+              {p.badge && (
+                <div
+                  className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm ${
+                    p.isPopular
+                      ? "bg-brass text-white shadow-brass/30"
+                      : "bg-surface-2 border border-line text-text-muted"
+                  }`}
+                >
+                  {p.badge}
+                </div>
+              )}
 
+              <div className="space-y-4">
                 <div>
-                  {/* Title & Tagline */}
-                  <div className="space-y-1">
-                    <h2 className="text-base font-bold text-text font-sans">
-                      {plan.name}
-                    </h2>
-                    <p className="text-xs text-text-muted">
-                      {plan.tagline}
-                    </p>
-                  </div>
+                  <h3 className="text-sm font-bold text-text">{p.name}</h3>
+                  <p className="text-[11px] text-text-muted mt-0.5 min-h-[2rem] leading-relaxed">
+                    {p.tagline}
+                  </p>
+                </div>
 
-                  {/* Price */}
-                  <div className="my-5 flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-text font-sans tracking-tight">
-                      {plan.price}
-                    </span>
-                    <span className="text-xs text-text-muted font-normal">
-                      {plan.period}
-                    </span>
-                  </div>
+                <div className="pt-2 border-t border-line flex items-baseline gap-1">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-text font-mono tracking-tight">
+                    {p.price}
+                  </span>
+                  <span className="text-xs text-text-muted">{p.period}</span>
+                </div>
 
-                  {/* Word limit line */}
-                  <div className="text-xs text-text-muted font-medium mb-5 pb-4 border-b border-line">
-                    {plan.words}
-                  </div>
-
-                  {/* Feature Checklist */}
-                  <ul className="space-y-2.5 mb-6 text-xs text-text">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2.5">
-                        <span className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                          <Check className="w-3 h-3 stroke-[2.5]" />
-                        </span>
-                        <span className="font-medium text-text/90">{feature}</span>
+                {/* Features List */}
+                <div className="pt-2 border-t border-line space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted block">
+                    Capabilities Included:
+                  </span>
+                  <ul className="space-y-2 text-xs">
+                    {p.features.map((feat, fIdx) => (
+                      <li key={fIdx} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-jade shrink-0 mt-0.5" />
+                        <span className="text-text text-[11px] leading-tight">{feat}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-
-                {/* Card Action Button */}
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectPlan(plan)}
-                    className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all btn-tactile ${
-                      plan.isPopular
-                        ? "bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-md hover:shadow-lg"
-                        : plan.id === "starter"
-                        ? "bg-surface hover:bg-surface-2 border border-line-strong text-text hover:border-brass shadow-xs"
-                        : "bg-surface border border-line-strong text-text hover:bg-surface-2 hover:border-text shadow-xs"
-                    }`}
-                  >
-                    {plan.ctaLabel}
-                  </button>
-                </div>
               </div>
-            );
-          })}
+
+              {/* Action Button */}
+              <div className="pt-5 mt-4 border-t border-line">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (p.id === "free" || p.isCurrent) {
+                      ensureSessionAndOpenDashboard(p.id, p.name);
+                    } else {
+                      setSelectedPlanForModal(p);
+                    }
+                  }}
+                  className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs transition-all btn-tactile cursor-pointer text-center ${
+                    p.isPopular
+                      ? "bg-brass text-white shadow-md hover:brightness-110"
+                      : p.isCurrent
+                      ? "bg-surface-2 border border-brass text-brass hover:bg-brass-soft"
+                      : "bg-surface-2 hover:bg-surface border border-line text-text hover:border-line-strong"
+                  }`}
+                >
+                  {p.ctaLabel}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Footer Notes */}
-        <div className="mt-12 text-center space-y-2 text-xs text-text-muted">
-          <div className="flex items-center justify-center gap-2">
-            <Shield className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Secure payments via Razorpay</span>
-            <span>·</span>
-            <span>Cancel anytime</span>
+        {/* Enterprise Security Banner */}
+        <div className="p-4 rounded-xl border border-line bg-surface text-center flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-text-muted">
+          <div className="flex items-center gap-2 mx-auto sm:mx-0">
+            <Shield className="w-4 h-4 text-brass shrink-0" />
+            <span>Bank-grade 256-bit encryption. Multi-tenant privacy guarantees for enterprise ledgers.</span>
           </div>
-          <p className="text-[11px] text-text-muted/70">
-            Side-Hustler & Solo Founder both map to the Pro tier on checkout.
-          </p>
+          <Link href="/dashboard" className="text-brass font-bold hover:underline shrink-0">
+            Skip directly to Dashboard →
+          </Link>
         </div>
-      </main>
+      </div>
 
-      {/* Simulated Razorpay Indian Payment Gateway Modal */}
+      {/* Payment Confirmation Modal */}
       {selectedPlanForModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="max-w-md w-full rounded-2xl bg-surface border border-line p-6 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md p-6 rounded-2xl border border-line bg-surface shadow-2xl space-y-4 animate-scale-up">
             <div className="flex items-center justify-between pb-3 border-b border-line">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-600/10 text-blue-600 flex items-center justify-center font-bold text-xs">
-                  ₹
-                </div>
+                <Sparkles className="w-4 h-4 text-brass" />
+                <h3 className="text-sm font-bold text-text">Confirm Subscription</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPlanForModal(null)}
+                className="text-xs text-text-muted hover:text-text cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="p-3.5 rounded-xl bg-surface-2 border border-line flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-text">Razorpay Indian Checkout</h3>
-                  <span className="text-[10px] text-emerald-500 font-semibold flex items-center gap-1">
-                    <Shield className="w-3 h-3" /> Secure 256-bit Encrypted
-                  </span>
+                  <div className="font-bold text-text">{selectedPlanForModal.name}</div>
+                  <div className="text-[11px] text-text-muted">{selectedPlanForModal.tagline}</div>
+                </div>
+                <div className="text-base font-bold font-mono text-brass">
+                  {selectedPlanForModal.price}
                 </div>
               </div>
+
+              <p className="text-[11px] text-text-muted leading-relaxed">
+                You are activating {selectedPlanForModal.name}. All features, AI agents, specialized tools, and workflows will be unlocked immediately for your workspace.
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setSelectedPlanForModal(null)}
-                className="p-1 rounded-md text-text-muted hover:text-text"
+                className="px-3 py-1.5 rounded-lg border border-line text-text-muted hover:text-text cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                Cancel
               </button>
-            </div>
-
-            <div className="p-4 rounded-xl bg-surface-2 border border-line space-y-2">
-              <div className="flex justify-between text-xs text-text-muted">
-                <span>Selected Plan:</span>
-                <strong className="text-text">{selectedPlanForModal.name}</strong>
-              </div>
-              <div className="flex justify-between text-xs text-text-muted">
-                <span>Billing Cycle:</span>
-                <span className="text-text">Monthly (Recurring)</span>
-              </div>
-              <div className="flex justify-between text-sm font-bold text-text pt-2 border-t border-line">
-                <span>Total Amount Payable:</span>
-                <span className="text-brass text-base font-mono">{selectedPlanForModal.price}</span>
-              </div>
-            </div>
-
-            {/* Indian payment options list */}
-            <div className="space-y-2 text-xs">
-              <span className="font-semibold text-text-muted block text-[11px] uppercase tracking-wider">
-                Select Indian Payment Mode (Simulated)
-              </span>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="p-2 rounded-lg border border-brass bg-brass-soft/30 font-semibold text-text">
-                  UPI / QR
-                </div>
-                <div className="p-2 rounded-lg border border-line bg-surface-2 font-medium text-text-muted">
-                  NetBanking
-                </div>
-                <div className="p-2 rounded-lg border border-line bg-surface-2 font-medium text-text-muted">
-                  Debit / Cards
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2 pt-2">
               <button
                 type="button"
-                onClick={confirmPaymentAndUpgrade}
                 disabled={isProcessing}
-                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg transition-all btn-tactile flex items-center justify-center gap-2"
+                onClick={() => {
+                  setIsProcessing(true);
+                  setTimeout(() => {
+                    setIsProcessing(false);
+                    ensureSessionAndOpenDashboard(selectedPlanForModal.id, selectedPlanForModal.name);
+                    setSelectedPlanForModal(null);
+                  }, 800);
+                }}
+                className="px-4 py-2 rounded-lg bg-brass text-white font-bold btn-tactile hover:brightness-110 cursor-pointer disabled:opacity-50"
               >
-                {isProcessing ? (
-                  <span>Authorizing via Razorpay…</span>
-                ) : (
-                  <span>Pay {selectedPlanForModal.price} & Activate Plan</span>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedPlanForModal(null)}
-                className="w-full py-2 text-xs text-text-muted hover:text-text font-medium text-center"
-              >
-                Cancel & Return
+                {isProcessing ? "Activating OS…" : `Confirm & Launch OS`}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <div className="text-center text-[11px] text-text-muted pt-4">
+        Nuralix OS v3 · Enterprise Capability Matrix
+      </div>
     </div>
   );
 }

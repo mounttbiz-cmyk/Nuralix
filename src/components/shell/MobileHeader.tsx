@@ -45,7 +45,7 @@ export function MobileHeader({
             type="button"
             onClick={onOpenChat}
             className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full bg-brass-soft text-brass border border-brass/30 btn-tactile"
-            aria-label="Open AI Executive Chat"
+            aria-label="Open AI Workspace"
           >
             <Sparkles className="w-3.5 h-3.5 text-brass" />
             <span>AI Executive</span>

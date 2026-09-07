@@ -165,7 +165,7 @@ export function ChatDock({
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-md text-text-muted hover:text-text hover:bg-surface-2 btn-tactile cursor-pointer"
-            aria-label="Close AI Executive Chat"
+            aria-label="Close AI Workspace"
           >
             <X className="w-4 h-4" />
           </button>

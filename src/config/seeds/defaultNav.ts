@@ -1,7 +1,7 @@
 import { NavItem } from "../schemas/nav";
 
 export const defaultNavItems: NavItem[] = [
-  // Core items & mobile tabs
+  // 1. CORE
   {
     id: "nav_dashboard",
     label: "Dashboard",
@@ -14,14 +14,16 @@ export const defaultNavItems: NavItem[] = [
   },
   {
     id: "nav_chat",
-    label: "AI Executive Chat",
+    label: "AI Workspace",
     href: "/chat",
-    icon: "MessageSquare",
+    icon: "Sparkles",
     order: 2,
     mobileTab: true,
     group: "core",
     enabled: true,
   },
+
+  // 2. EXECUTIVE INTELLIGENCE
   {
     id: "nav_gaps",
     label: "Gap Register",
@@ -44,21 +46,11 @@ export const defaultNavItems: NavItem[] = [
     enabled: true,
   },
   {
-    id: "nav_tasks",
-    label: "Tasks & Execution",
-    href: "/tasks",
-    icon: "CheckSquare",
-    order: 5,
-    mobileTab: true,
-    group: "management",
-    enabled: true,
-  },
-  {
     id: "nav_analytics",
     label: "Adaptive Analytics",
     href: "/analytics",
     icon: "TrendingUp",
-    order: 6,
+    order: 5,
     mobileTab: false,
     group: "intelligence",
     enabled: true,
@@ -68,9 +60,31 @@ export const defaultNavItems: NavItem[] = [
     label: "Knowledge Hub",
     href: "/knowledge",
     icon: "BookOpen",
+    order: 6,
+    mobileTab: false,
+    group: "intelligence",
+    enabled: true,
+  },
+  {
+    id: "nav_tools",
+    label: "Tools",
+    href: "/tools",
+    icon: "Wrench",
     order: 7,
     mobileTab: false,
     group: "intelligence",
+    enabled: true,
+  },
+
+  // 3. OPERATIONS & EXECUTION
+  {
+    id: "nav_tasks",
+    label: "Tasks & Execution",
+    href: "/tasks",
+    icon: "CheckSquare",
+    order: 8,
+    mobileTab: true,
+    group: "management",
     enabled: true,
   },
   {
@@ -78,7 +92,7 @@ export const defaultNavItems: NavItem[] = [
     label: "Executive Briefings",
     href: "/reports",
     icon: "FileText",
-    order: 8,
+    order: 9,
     mobileTab: false,
     group: "management",
     enabled: true,
@@ -88,9 +102,41 @@ export const defaultNavItems: NavItem[] = [
     label: "Automations",
     href: "/automations",
     icon: "Zap",
-    order: 9,
+    order: 10,
     mobileTab: false,
     group: "management",
+    enabled: true,
+  },
+  {
+    id: "nav_workflows",
+    label: "Workflows",
+    href: "/workflows",
+    icon: "GitBranch",
+    order: 11,
+    mobileTab: false,
+    group: "management",
+    enabled: true,
+  },
+
+  // 4. PLATFORM
+  {
+    id: "nav_integrations",
+    label: "Integrations",
+    href: "/integrations",
+    icon: "Layers",
+    order: 12,
+    mobileTab: false,
+    group: "system",
+    enabled: true,
+  },
+  {
+    id: "nav_team",
+    label: "Team & Permissions",
+    href: "/team",
+    icon: "Users",
+    order: 13,
+    mobileTab: false,
+    group: "system",
     enabled: true,
   },
   {
@@ -98,7 +144,7 @@ export const defaultNavItems: NavItem[] = [
     label: "Settings",
     href: "/settings/appearance",
     icon: "Settings",
-    order: 10,
+    order: 14,
     mobileTab: false,
     group: "system",
     enabled: true,
@@ -108,21 +154,9 @@ export const defaultNavItems: NavItem[] = [
     label: "Plans & Billing",
     href: "/subscription",
     icon: "CreditCard",
-    order: 11,
+    order: 15,
     mobileTab: false,
     group: "system",
     enabled: true,
   },
-  {
-    id: "nav_help",
-    label: "Help & FAQs",
-    href: "/help",
-    icon: "HelpCircle",
-    order: 12,
-    mobileTab: false,
-    group: "system",
-    enabled: true,
-  },
-  // Note: Superadmin Plane removed from normal business navigation per user instructions.
-  // Superadmin is accessible strictly via /admin/login by authorized developers.
 ];

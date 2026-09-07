@@ -9,7 +9,7 @@ export const NavItemSchema = z.object({
   badge: z.string().optional(),
   mobileTab: z.boolean().default(false), // true if one of the 5 primary items on phone
   group: z.enum(["core", "intelligence", "management", "system"]).default("core"),
-  requiredPlan: z.enum(["starter", "growth", "enterprise"]).optional(),
+  requiredPlan: z.enum(["free", "starter", "pro", "growth", "enterprise"]).optional(),
   enabled: z.boolean().default(true),
 });
 
