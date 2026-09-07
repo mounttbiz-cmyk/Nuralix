@@ -53,7 +53,7 @@ export default function AdminLayout({
       <header className="sticky top-0 z-40 bg-surface border-b border-line px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
-            href="/"
+            href="/dashboard"
             className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text btn-tactile"
           >
             <ArrowLeft className="w-3.5 h-3.5" />

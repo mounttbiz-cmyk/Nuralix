@@ -8,7 +8,7 @@ import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [authMode, setAuthMode] = useState<"register" | "signin">("signin");
+  const [authMode, setAuthMode] = useState<"register" | "signin">("register");
   const [isSuperadminMode, setIsSuperadminMode] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -17,11 +17,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Check URL query for signup flag
+  // Check URL query for auth mode flag
   React.useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("signup") === "true") {
+      if (params.get("signin") === "true") {
+        setAuthMode("signin");
+      } else if (params.get("signup") === "true") {
         setAuthMode("register");
       }
     } catch (e) {

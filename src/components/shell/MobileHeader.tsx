@@ -3,8 +3,9 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Sun, Moon, Sparkles } from "lucide-react";
+import { Sun, Moon, Sparkles, Globe } from "lucide-react";
 import { useTheme } from "@/lib/theme/ThemeProvider";
+import { WEBSITE_URL } from "@/config/urls";
 
 interface MobileHeaderProps {
   companyName?: string;
@@ -19,7 +20,7 @@ export function MobileHeader({
 
   return (
     <header className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 h-14 bg-surface/95 backdrop-blur-md border-b border-line pt-[env(safe-area-inset-top)]">
-      <Link href="/" className="flex items-center gap-2.5">
+      <Link href="/dashboard" className="flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-lg bg-surface-2 border border-line flex items-center justify-center p-1 shadow-sm">
           <Image
             src="/logo.png"
@@ -38,6 +39,14 @@ export function MobileHeader({
       </Link>
 
       <div className="flex items-center gap-1.5">
+        <a
+          href={WEBSITE_URL}
+          title="Nuralix Website"
+          className="w-8 h-8 rounded-lg flex items-center justify-center border border-line bg-surface-2 text-text-muted hover:text-blue-500 btn-tactile"
+        >
+          <Globe className="w-3.5 h-3.5" />
+        </a>
+
         {onOpenChat && (
           <button
             type="button"

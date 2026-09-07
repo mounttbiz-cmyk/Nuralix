@@ -6,8 +6,9 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NavItem } from "@/config/schemas/nav";
 import { DynamicIcon } from "./DynamicIcon";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Globe } from "lucide-react";
 import { useTheme } from "@/lib/theme/ThemeProvider";
+import { WEBSITE_URL } from "@/config/urls";
 
 interface TabletRailProps {
   navItems: NavItem[];
@@ -21,9 +22,9 @@ export function TabletRail({ navItems }: TabletRailProps) {
     <aside className="hidden md:flex lg:hidden flex-col items-center w-16 h-screen sticky top-0 bg-surface border-r border-line select-none z-30 py-3">
       {/* Brand Icon with Ribbon Logo */}
       <Link
-        href="/"
+        href="/dashboard"
         className="w-10 h-10 rounded-lg bg-surface-2 border border-line flex items-center justify-center p-1 shadow-sm mb-6"
-        title="Nuralix OS"
+        title="Nuralix Dashboard"
       >
         <Image
           src="/logo.png"
@@ -58,8 +59,17 @@ export function TabletRail({ navItems }: TabletRailProps) {
         })}
       </nav>
 
-      {/* Bottom theme cycler button */}
-      <div className="pt-2 border-t border-line w-full flex justify-center">
+      {/* Back to website button */}
+      <div className="pt-2 border-t border-line w-full flex flex-col items-center gap-2">
+        <a
+          href={WEBSITE_URL}
+          title="Back to Nuralix Website"
+          className="w-10 h-10 rounded-lg flex items-center justify-center text-text-muted hover:text-blue-500 hover:bg-surface-2 transition-colors btn-tactile"
+        >
+          <Globe className="w-4 h-4" />
+        </a>
+
+        {/* Bottom theme cycler button */}
         <button
           type="button"
           onClick={cycleTheme}
