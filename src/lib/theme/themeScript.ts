@@ -3,14 +3,11 @@ export const themeInitScript = `
 (function() {
   try {
     var stored = localStorage.getItem('nuralix-theme');
-    var theme = 'system';
-    if (stored === 'light' || stored === 'dark' || stored === 'system') {
+    var theme = 'dark';
+    if (stored === 'light' || stored === 'dark') {
       theme = stored;
     }
     var resolved = theme;
-    if (theme === 'system') {
-      resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
     document.documentElement.setAttribute('data-theme', resolved);
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(resolved);
@@ -24,6 +21,7 @@ export const themeInitScript = `
     meta.content = resolved;
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'dark');
+    document.documentElement.classList.add('dark');
   }
 })();
 `;

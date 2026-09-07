@@ -15,7 +15,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>("system");
+  const [theme, setThemeState] = useState<ThemeMode>("dark");
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("dark");
   const [mounted, setMounted] = useState(false);
 
@@ -46,7 +46,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const cycleTheme = () => {
-    const cycleOrder: ThemeMode[] = ["light", "dark", "system"];
+    const cycleOrder: ThemeMode[] = ["dark", "light", "system"];
     const nextIndex = (cycleOrder.indexOf(theme) + 1) % cycleOrder.length;
     setTheme(cycleOrder[nextIndex]);
   };
@@ -54,7 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem("nuralix-theme") as ThemeMode | null;
-    const initialMode = stored && ["light", "dark", "system"].includes(stored) ? stored : "system";
+    const initialMode = stored && ["light", "dark", "system"].includes(stored) ? stored : "dark";
     setThemeState(initialMode);
     applyTheme(initialMode);
 

@@ -36,14 +36,14 @@ export default function OnboardingPage() {
   const [businessType, setBusinessType] = useState<string>("saas");
   const [customBusinessType, setCustomBusinessType] = useState<string>("");
   const [businessModel, setBusinessModel] = useState<string>("subscription");
-  const [companyName, setCompanyName] = useState<string>("Apex Technologies");
-  const [founderName, setFounderName] = useState<string>("Alex Sharma");
-  const [website, setWebsite] = useState<string>("apextech.in");
-  const [teamSize, setTeamSize] = useState<string>("15");
-  const [annualRevenue, setAnnualRevenue] = useState<string>("6000000");
-  const [monthlyRevenue, setMonthlyRevenue] = useState<string>("500000");
-  const [monthlyBurn, setMonthlyBurn] = useState<string>("150000");
-  const [cashOnHand, setCashOnHand] = useState<string>("1200000");
+  const [companyName, setCompanyName] = useState<string>("");
+  const [founderName, setFounderName] = useState<string>("");
+  const [website, setWebsite] = useState<string>("");
+  const [teamSize, setTeamSize] = useState<string>("");
+  const [annualRevenue, setAnnualRevenue] = useState<string>("");
+  const [monthlyRevenue, setMonthlyRevenue] = useState<string>("");
+  const [monthlyBurn, setMonthlyBurn] = useState<string>("");
+  const [cashOnHand, setCashOnHand] = useState<string>("");
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -54,6 +54,8 @@ export default function OnboardingPage() {
     const num = Number(val);
     if (!isNaN(num) && num > 0) {
       setMonthlyRevenue(Math.round(num / 12).toString());
+    } else {
+      setMonthlyRevenue("");
     }
     if (errors.annualRevenue) {
       setErrors(prev => ({ ...prev, annualRevenue: "" }));
@@ -61,11 +63,7 @@ export default function OnboardingPage() {
   };
 
   // What they need right now (multi-select goals and pain points)
-  const [selectedNeeds, setSelectedNeeds] = useState<string[]>([
-    "extend_runway",
-    "fix_concentration",
-    "founder_bottleneck",
-  ]);
+  const [selectedNeeds, setSelectedNeeds] = useState<string[]>([]);
 
   const businessTypes = [
     {
