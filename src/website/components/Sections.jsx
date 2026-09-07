@@ -299,18 +299,15 @@ export const Vision = () => (
 /* ---------------------------------------------------------------- contact */
 export function Contact () {
   const [email, setEmail] = useState('');
-  const [note, setNote] = useState('Opens your mail app — nothing is stored on this page.');
+  const [note, setNote] = useState('Enter your email to begin your executive onboarding.');
   const [alert, setAlert] = useState(false);
 
   const submit = e => {
     e.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setNote('Please enter a valid email address.'); setAlert(true); return;
+      setNote('Please enter a valid business email address.'); setAlert(true); return;
     }
-    const subject = encodeURIComponent('Starting a conversation with Nuralix');
-    const body = encodeURIComponent(`Hi Nuralix,\n\nI'd like to talk about a project.\n\nMy email: ${email.trim()}\n\n`);
-    window.location.href = `mailto:${CONTACT.email}?subject=${subject}&body=${body}`;
-    setNote('Opening your mail app…'); setAlert(true);
+    window.location.href = `${DASHBOARD_URL}?email=${encodeURIComponent(email.trim())}`;
   };
 
   const social = (label, url) => url
@@ -322,23 +319,28 @@ export function Contact () {
       <div className="wrap">
         <div className="contact__grid">
           <div>
-            <p className="eyebrow rv">Contact</p>
+            <p className="eyebrow rv">Start with Nuralix</p>
             <h2 className="h-xl rv" id="contact-h" data-d="1">Ready to build<br />what&rsquo;s next?</h2>
             <form className="field rv" data-d="2" onSubmit={submit} noValidate>
               <label htmlFor="email" style={{ position: 'absolute', left: -9999 }}>Your email address</label>
               <input
-                id="email" type="email" name="email" placeholder="your@email.com"
+                id="email" type="email" name="email" placeholder="founder@company.com"
                 autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required
               />
-              <button type="submit" aria-label="Start a conversation">
+              <button type="submit" aria-label="Start with Nuralix">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M5 12h13M12 5l7 7-7 7" />
                 </svg>
               </button>
             </form>
-            <p className="small rv" data-d="3" style={{ marginTop: 16, fontSize: 12, color: alert ? 'var(--accent)' : 'var(--ink-faint)' }}>
+            <p className="small rv" data-d="3" style={{ marginTop: 14, fontSize: 12.5, color: alert ? '#f87171' : 'var(--ink-faint)' }}>
               {note}
             </p>
+            <div className="rv" data-d="4" style={{ marginTop: 20 }}>
+              <MagneticButton className="btn--solid btn--lg" href={DASHBOARD_URL}>
+                <span>Start with Nuralix</span><span className="btn__ar" aria-hidden="true">→</span>
+              </MagneticButton>
+            </div>
           </div>
 
           <div className="rv" data-d="2">

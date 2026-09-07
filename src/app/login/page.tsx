@@ -17,13 +17,18 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Check URL query for auth mode flag
+  // Check URL query for auth mode and email flag
   React.useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.get("signin") === "true") {
         setAuthMode("signin");
       } else if (params.get("signup") === "true") {
+        setAuthMode("register");
+      }
+      const qEmail = params.get("email");
+      if (qEmail) {
+        setEmail(qEmail);
         setAuthMode("register");
       }
     } catch (e) {
