@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { themeInitScript } from "@/lib/theme/themeScript";
 import { ThemeProvider } from "@/lib/theme/ThemeProvider";
+import { AuthProvider } from "@/lib/firebase/authContext";
 
 export const metadata: Metadata = {
   title: "Nuralix — AI Business Operating System",
@@ -27,7 +28,9 @@ export default function RootLayout({
       </head>
       <body className="bg-bg text-text antialiased selection:bg-brass selection:text-white min-h-screen">
         <ThemeProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

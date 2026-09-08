@@ -26,6 +26,7 @@ import {
   Radio
 } from "lucide-react";
 import { IntegrationLogo } from "@/components/ui/IntegrationLogo";
+import { isFirebaseConfigured, firebaseConfig } from "@/lib/firebase/config";
 
 interface IntegrationItem {
   id: string;
@@ -179,6 +180,16 @@ const CATALOG_DEFINITIONS: Omit<IntegrationItem, "status">[] = [
     permissions: ["Read spreadsheet data", "Append telemetry rows"],
     usedBy: ["Tools", "Adaptive Analytics"],
   },
+  {
+    id: "firebase",
+    name: "Google Firebase",
+    category: "data",
+    tagline: "Cloud Authentication, Firestore NoSQL real-time database, and cloud backend infrastructure.",
+    services: ["Firebase Auth (Email & Google)", "Cloud Firestore Database", "Firebase Storage", "Real-Time Sync"],
+    permissions: ["Authenticate founders & team members", "Read/write company documents to Firestore"],
+    usedBy: ["Authentication Service", "Executive Data Layer", "Onboarding Engine"],
+    configSummary: "Client SDK installed and configured. Ready for environment variables.",
+  },
 ];
 
 export default function IntegrationsPage() {
@@ -213,6 +224,17 @@ export default function IntegrationsPage() {
 
         const merged: IntegrationItem[] = CATALOG_DEFINITIONS.map(def => {
           const stored = storedMap.get(def.id);
+          if (def.id === "firebase") {
+            return {
+              ...def,
+              status: isFirebaseConfigured ? "connected" : stored?.status || "pending_connection",
+              apiKey: isFirebaseConfigured ? firebaseConfig.apiKey : stored?.apiKey || null,
+              configSummary: isFirebaseConfigured
+                ? `Active Firebase Project: ${firebaseConfig.projectId} · Cloud Auth & Firestore Enabled`
+                : "SDK installed. Add Firebase credentials to .env.local to link cloud project.",
+              updatedAt: stored?.updatedAt || new Date().toISOString(),
+            };
+          }
           return {
             ...def,
             status: stored ? stored.status : "not_connected",
