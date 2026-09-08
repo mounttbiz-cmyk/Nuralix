@@ -113,8 +113,10 @@ export default function LoginPage() {
         const hostname = typeof window !== "undefined" ? window.location.hostname : "localhost";
 
         if (code === "auth/unauthorized-domain") {
+          const isVercel = hostname.endsWith(".vercel.app");
+          const recommendedDomain = isVercel ? "vercel.app" : hostname;
           setError(
-            `Domain "${hostname}" is not authorized in Firebase Console. Go to Firebase Console → Authentication → Settings → Authorized domains, and click "Add domain" for "${hostname}". Alternatively, sign in with Email & Password below.`
+            `Domain authorization required in Firebase. In Firebase Console → Authentication → Settings → Authorized domains, click "Add domain" and enter "${recommendedDomain}" (this authorizes all your Vercel deployments permanently). Alternatively, sign in with Email & Password below.`
           );
         } else if (code === "auth/invalid-credential" || code === "auth/wrong-password") {
           setError("Incorrect password or invalid email credential.");
@@ -216,9 +218,24 @@ export default function LoginPage() {
             <>
               {/* Error Alert */}
               {error && (
-                <div className="p-3 rounded-lg bg-rust/10 border border-rust/30 text-rust text-xs font-medium flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <div className="flex-1 leading-relaxed">{error}</div>
+                <div className="p-3 rounded-lg bg-rust/10 border border-rust/30 text-rust text-xs font-medium space-y-2">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <div className="flex-1 leading-relaxed">{error}</div>
+                  </div>
+                  {error.includes("Authorized domains") && (
+                    <div className="pl-6 pt-1">
+                      <a
+                        href="https://console.firebase.google.com/project/nuralix-24360/authentication/settings"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rust/20 hover:bg-rust/30 text-rust font-semibold text-[11px] transition-colors"
+                      >
+                        <span>Open Firebase Authorized Domains</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
 
