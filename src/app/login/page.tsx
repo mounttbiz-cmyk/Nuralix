@@ -110,7 +110,13 @@ export default function LoginPage() {
       } catch (err: any) {
         setLoading(false);
         const code = err.code || "";
-        if (code === "auth/invalid-credential" || code === "auth/wrong-password") {
+        const hostname = typeof window !== "undefined" ? window.location.hostname : "localhost";
+
+        if (code === "auth/unauthorized-domain") {
+          setError(
+            `Domain "${hostname}" is not authorized in Firebase Console. Go to Firebase Console → Authentication → Settings → Authorized domains, and click "Add domain" for "${hostname}". Alternatively, sign in with Email & Password below.`
+          );
+        } else if (code === "auth/invalid-credential" || code === "auth/wrong-password") {
           setError("Incorrect password or invalid email credential.");
         } else if (code === "auth/user-not-found") {
           setError("No account found with this email. Click 'Create Account' above to register.");
@@ -121,7 +127,9 @@ export default function LoginPage() {
         } else if (code === "auth/popup-blocked") {
           setError("Popup was blocked by your browser. Please allow popups for localhost.");
         } else {
-          setError(err.message || "Authentication failed. Please try again.");
+          const rawMsg = err.message || "Authentication failed. Please try again.";
+          const cleanMsg = rawMsg.replace(/^Firebase:\s*/i, "").replace(/FirebaseError:\s*/i, "").replace(/\(auth\/[^)]+\)\.?/i, "").trim();
+          setError(cleanMsg || "Authentication failed. Please try again.");
         }
         return;
       }
@@ -206,38 +214,11 @@ export default function LoginPage() {
           {!isSuperadminMode ? (
             /* Business Auth Form */
             <>
-              {/* Firebase Project Status Indicator */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl border border-line bg-surface-2/60 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${isFirebaseConfigured ? "bg-emerald-400 animate-pulse" : "bg-amber-400 animate-pulse"}`} />
-                  <span className="font-semibold text-text">
-                    {isFirebaseConfigured ? "Firebase Cloud Connected" : "Firebase Project Setup"}
-                  </span>
-                  {isFirebaseConfigured ? (
-                    <span className="text-[10px] text-text-muted px-1.5 py-0.5 rounded bg-surface border border-line">
-                      {firebaseConfig.projectId}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-amber-500 font-bold px-1.5 py-0.5 rounded bg-amber-500/10">
-                      Keys Needed
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowFirebaseModal(true)}
-                  className="text-[11px] font-bold px-2 py-0.5 rounded border border-line bg-surface text-text hover:border-line-strong transition-all flex items-center gap-1"
-                >
-                  <span>{isFirebaseConfigured ? "View Keys" : "Connect Project"}</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-
               {/* Error Alert */}
               {error && (
                 <div className="p-3 rounded-lg bg-rust/10 border border-rust/30 text-rust text-xs font-medium flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <div className="flex-1">{error}</div>
+                  <div className="flex-1 leading-relaxed">{error}</div>
                 </div>
               )}
 
@@ -279,7 +260,7 @@ export default function LoginPage() {
                 </h1>
                 <p className="text-xs text-text-muted leading-relaxed">
                   {authMode === "register"
-                    ? "Create your founder profile with Firebase authentication to calibrate your custom AI executive team."
+                    ? "Create your founder profile to calibrate your custom AI executive team and company metrics."
                     : "Autonomous executive AI, adaptive dashboards, and decision simulation tailored to your business."}
                 </p>
               </div>
@@ -311,7 +292,7 @@ export default function LoginPage() {
                     d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                   />
                 </svg>
-                <span>{authMode === "register" ? "Sign up with Google (Firebase)" : "Continue with Google (Firebase)"}</span>
+                <span>{authMode === "register" ? "Sign up with Google" : "Continue with Google"}</span>
               </button>
 
               <div className="flex items-center gap-3">
@@ -377,11 +358,11 @@ export default function LoginPage() {
                 >
                   {loading
                     ? authMode === "register"
-                      ? "Creating Account in Firebase…"
-                      : "Signing in with Firebase…"
+                      ? "Creating Account…"
+                      : "Signing in…"
                     : authMode === "register"
-                    ? "Create Firebase Account & Continue →"
-                    : "Sign In with Firebase →"}
+                    ? "Create Account & Continue →"
+                    : "Sign In to Business OS →"}
                 </button>
               </form>
 
