@@ -127,7 +127,7 @@ export default function LoginPage() {
         } else if (code === "auth/popup-closed-by-user") {
           setError("Google Sign-In popup was closed before completing.");
         } else if (code === "auth/popup-blocked") {
-          setError("Popup was blocked by your browser. Please allow popups for localhost.");
+          setError("Popup was blocked by your browser. Please allow popups for this site.");
         } else {
           const rawMsg = err.message || "Authentication failed. Please try again.";
           const cleanMsg = rawMsg.replace(/^Firebase:\s*/i, "").replace(/FirebaseError:\s*/i, "").replace(/\(auth\/[^)]+\)\.?/i, "").trim();

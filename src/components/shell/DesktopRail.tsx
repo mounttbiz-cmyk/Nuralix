@@ -9,6 +9,8 @@ import { DynamicIcon } from "./DynamicIcon";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { ShieldCheck, ChevronRight, LogOut, Sliders, Search } from "lucide-react";
 import { WEBSITE_URL } from "@/config/urls";
+import { auth } from "@/lib/firebase/config";
+import { signOut } from "firebase/auth";
 
 interface DesktopRailProps {
   navItems: NavItem[];
@@ -42,7 +44,14 @@ export function DesktopRail({
         .toUpperCase() || "NB"
     : "NB";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      if (auth) {
+        await signOut(auth);
+      }
+    } catch (e) {
+      // ignore
+    }
     localStorage.removeItem("nuralix_user_session");
     window.location.href = WEBSITE_URL;
   };
