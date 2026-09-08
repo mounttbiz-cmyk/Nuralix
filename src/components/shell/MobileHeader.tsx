@@ -3,18 +3,20 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Sun, Moon, Sparkles, Globe } from "lucide-react";
+import { Sun, Moon, Sparkles, Globe, Search } from "lucide-react";
 import { useTheme } from "@/lib/theme/ThemeProvider";
 import { WEBSITE_URL } from "@/config/urls";
 
 interface MobileHeaderProps {
   companyName?: string;
   onOpenChat?: () => void;
+  onOpenSearch?: () => void;
 }
 
 export function MobileHeader({
   companyName = "Apex Labs",
   onOpenChat,
+  onOpenSearch,
 }: MobileHeaderProps) {
   const { resolvedTheme, cycleTheme } = useTheme();
 
@@ -39,6 +41,17 @@ export function MobileHeader({
       </Link>
 
       <div className="flex items-center gap-2">
+        {onOpenSearch && (
+          <button
+            type="button"
+            onClick={onOpenSearch}
+            className="w-8 h-8 rounded-xl flex items-center justify-center border border-white/[0.08] bg-surface-2/80 text-text-muted hover:text-cyan-400 btn-tactile"
+            aria-label="Open search"
+          >
+            <Search className="w-3.5 h-3.5" />
+          </button>
+        )}
+
         {onOpenChat && (
           <button
             type="button"

@@ -6,6 +6,7 @@ import { TabletRail } from "./TabletRail";
 import { MobileHeader } from "./MobileHeader";
 import { MobileBottomBar } from "./MobileBottomBar";
 import { ChatDock, ContextChip } from "./ChatDock";
+import { CommandPalette } from "@/components/search/CommandPalette";
 import { NavItem } from "@/config/schemas/nav";
 import { MessageSquare } from "lucide-react";
 
@@ -23,8 +24,21 @@ export function AppShell({
   industry: initialIndustry = "B2B SaaS",
 }: AppShellProps) {
   const [chatOpen, setChatOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [companyName, setCompanyName] = useState(initialCompanyName);
   const [industry, setIndustry] = useState(initialIndustry);
+
+  // Global keyboard shortcut for ⌘K / Ctrl+K
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   React.useEffect(() => {
     try {
@@ -59,15 +73,27 @@ export function AppShell({
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[300px] bg-gradient-to-tl from-cyan-500/5 via-transparent to-transparent blur-3xl pointer-events-none -z-10" />
 
       {/* Desktop Left Rail (lg+) */}
-      <DesktopRail navItems={navItems} companyName={companyName} industry={industry} />
+      <DesktopRail
+        navItems={navItems}
+        companyName={companyName}
+        industry={industry}
+        onOpenSearch={() => setSearchOpen(true)}
+      />
 
       {/* Tablet Icon Rail (md) */}
-      <TabletRail navItems={navItems} />
+      <TabletRail
+        navItems={navItems}
+        onOpenSearch={() => setSearchOpen(true)}
+      />
 
       {/* Main Column */}
       <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0 md:ml-16 lg:ml-64">
         {/* Mobile Header (xs/sm) */}
-        <MobileHeader companyName={companyName} onOpenChat={() => setChatOpen(true)} />
+        <MobileHeader
+          companyName={companyName}
+          onOpenChat={() => setChatOpen(true)}
+          onOpenSearch={() => setSearchOpen(true)}
+        />
 
         {/* Page Content Container with Container Queries support */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1560px] w-full mx-auto">
@@ -89,6 +115,12 @@ export function AppShell({
         <MessageSquare className="w-4 h-4 text-white group-hover:rotate-6 transition-transform" />
         <span>Ask Executive AI</span>
       </button>
+
+      {/* Universal Command Palette / Spotlight Search Modal */}
+      <CommandPalette
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
 
       {/* Slide-over Chat Dock */}
       <ChatDock

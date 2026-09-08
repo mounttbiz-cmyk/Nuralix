@@ -7,19 +7,21 @@ import { usePathname } from "next/navigation";
 import { NavItem } from "@/config/schemas/nav";
 import { DynamicIcon } from "./DynamicIcon";
 import { ThemeSwitch } from "./ThemeSwitch";
-import { ShieldCheck, ChevronRight, LogOut, Sliders } from "lucide-react";
+import { ShieldCheck, ChevronRight, LogOut, Sliders, Search } from "lucide-react";
 import { WEBSITE_URL } from "@/config/urls";
 
 interface DesktopRailProps {
   navItems: NavItem[];
   companyName?: string;
   industry?: string;
+  onOpenSearch?: () => void;
 }
 
 export function DesktopRail({
   navItems,
   companyName = "Apex Labs",
   industry = "B2B SaaS",
+  onOpenSearch,
 }: DesktopRailProps) {
   const pathname = usePathname();
 
@@ -78,15 +80,19 @@ export function DesktopRail({
 
       {/* Quick Command Prompt / Search bar */}
       <div className="px-3 pt-3">
-        <Link
-          href="/chat"
-          className="flex items-center justify-between px-3 py-2 rounded-xl bg-surface-2 border border-line text-text-muted hover:text-text hover:border-cyan-500/30 transition-all text-xs group"
+        <button
+          type="button"
+          onClick={onOpenSearch}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-surface-2 border border-line text-text-muted hover:text-text hover:border-cyan-500/30 transition-all text-xs group cursor-pointer"
         >
-          <span className="text-[11px] font-medium">Search</span>
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-surface border border-line text-text-muted font-mono font-semibold group-hover:border-cyan-500/30">
+          <div className="flex items-center gap-2 min-w-0">
+            <Search className="w-3.5 h-3.5 text-text-muted group-hover:text-cyan-400 transition-colors shrink-0" />
+            <span className="text-[11px] font-medium truncate">Search tools, pages…</span>
+          </div>
+          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-surface border border-line text-text-muted font-mono font-semibold group-hover:border-cyan-500/30 shrink-0">
             ⌘K
           </kbd>
-        </Link>
+        </button>
       </div>
 
       {/* Nav List grouped */}

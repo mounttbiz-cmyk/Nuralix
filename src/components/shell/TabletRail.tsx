@@ -6,15 +6,16 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NavItem } from "@/config/schemas/nav";
 import { DynamicIcon } from "./DynamicIcon";
-import { Sun, Moon, Globe } from "lucide-react";
+import { Sun, Moon, Globe, Search } from "lucide-react";
 import { useTheme } from "@/lib/theme/ThemeProvider";
 import { WEBSITE_URL } from "@/config/urls";
 
 interface TabletRailProps {
   navItems: NavItem[];
+  onOpenSearch?: () => void;
 }
 
-export function TabletRail({ navItems }: TabletRailProps) {
+export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
   const pathname = usePathname();
   const { resolvedTheme, cycleTheme } = useTheme();
 
@@ -23,7 +24,7 @@ export function TabletRail({ navItems }: TabletRailProps) {
       {/* Brand Icon with Ribbon Logo */}
       <Link
         href="/dashboard"
-        className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-transparent border border-cyan-500/30 flex items-center justify-center p-1.5 shadow-sm mb-6 hover:scale-105 transition-transform"
+        className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-transparent border border-cyan-500/30 flex items-center justify-center p-1.5 shadow-sm mb-3 hover:scale-105 transition-transform"
         title="Nuralix Dashboard"
       >
         <Image
@@ -34,6 +35,16 @@ export function TabletRail({ navItems }: TabletRailProps) {
           className="object-contain"
         />
       </Link>
+
+      {/* Quick Search Button */}
+      <button
+        type="button"
+        onClick={onOpenSearch}
+        title="Search tools, pages… (⌘K)"
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-text-muted hover:text-cyan-400 hover:bg-surface-2 transition-all btn-tactile mb-3"
+      >
+        <Search className="w-5 h-5" />
+      </button>
 
       {/* Icon Navigation list */}
       <nav className="flex-1 flex flex-col items-center gap-2 overflow-y-auto w-full px-2">
