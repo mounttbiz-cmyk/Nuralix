@@ -9,6 +9,7 @@ import { ChatDock, ContextChip } from "./ChatDock";
 import { CommandPalette } from "@/components/search/CommandPalette";
 import { NavItem } from "@/config/schemas/nav";
 import { MessageSquare } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -23,6 +24,7 @@ export function AppShell({
   companyName: initialCompanyName = "Apex Analytics",
   industry: initialIndustry = "B2B SaaS",
 }: AppShellProps) {
+  const pathname = usePathname();
   const [chatOpen, setChatOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [companyName, setCompanyName] = useState(initialCompanyName);
@@ -101,20 +103,22 @@ export function AppShell({
         </main>
       </div>
 
-      {/* Floating AI Executive Launcher Button (Desktop & Tablet) */}
-      <button
-        type="button"
-        onClick={() => setChatOpen(true)}
-        aria-label="Open AI Workspace"
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 text-white shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 active:scale-95 transition-all text-xs font-bold border border-cyan-400/40 font-sans cursor-pointer group"
-      >
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
-        </span>
-        <MessageSquare className="w-4 h-4 text-white group-hover:rotate-6 transition-transform" />
-        <span>Ask Executive AI</span>
-      </button>
+      {/* Floating AI Executive Launcher Button (Desktop & Tablet) - hidden on /chat */}
+      {pathname !== "/chat" && (
+        <button
+          type="button"
+          onClick={() => setChatOpen(true)}
+          aria-label="Open AI Workspace"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 text-white shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 active:scale-95 transition-all text-xs font-bold border border-cyan-400/40 font-sans cursor-pointer group"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+          </span>
+          <MessageSquare className="w-4 h-4 text-white group-hover:rotate-6 transition-transform" />
+          <span>Ask Executive AI</span>
+        </button>
+      )}
 
       {/* Universal Command Palette / Spotlight Search Modal */}
       <CommandPalette

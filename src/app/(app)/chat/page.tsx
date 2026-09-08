@@ -20,9 +20,16 @@ import {
   CheckCircle2,
   Sliders,
   ChevronRight,
-  Bot
+  Bot,
+  PanelRightClose,
+  PanelRightOpen,
+  Search,
+  Activity,
+  Zap,
+  Clock,
+  ShieldAlert,
+  Info
 } from "lucide-react";
-import { ProvenanceBadge } from "@/components/ui/Badge";
 
 interface AgentMeta {
   id: string;
@@ -32,8 +39,10 @@ interface AgentMeta {
   badge: string;
   color: string;
   summary: string;
-  quickTools: { name: string; href: string; iconName?: string }[];
+  quickTools: { name: string; href: string }[];
   promptSuggestions: string[];
+  kpis: string[];
+  telemetryFeeds: string[];
 }
 
 const EXECUTIVE_AGENTS: AgentMeta[] = [
@@ -55,6 +64,8 @@ const EXECUTIVE_AGENTS: AgentMeta[] = [
       "Review my runway and recommend our next 90-day focus.",
       "How should I allocate budget between sales and product?",
     ],
+    kpis: ["Liquid Runway", "Overall Health Score", "Strategic Moats"],
+    telemetryFeeds: ["Executive Ledger", "Daily Check-Ins", "Gap Register"],
   },
   {
     id: "cfo",
@@ -75,6 +86,8 @@ const EXECUTIVE_AGENTS: AgentMeta[] = [
       "What is our target break-even milestone in Indian Rupees?",
       "Calculate runway extension if we reduce tooling by 15%.",
     ],
+    kpis: ["Net Monthly Burn", "Gross Profit Margin", "Cash Inflow Velocity"],
+    telemetryFeeds: ["Stripe Invoicing", "Zoho Books / QuickBooks", "Banking Ledger"],
   },
   {
     id: "marketing",
@@ -86,15 +99,16 @@ const EXECUTIVE_AGENTS: AgentMeta[] = [
     summary: "CAC, ROAS efficiency, organic funnels, brand positioning, and demand generation economics.",
     quickTools: [
       { name: "CAC Calculator", href: "/tools?tool=cac" },
-      { name: "ROAS Calculator", href: "/tools?tool=roas" },
-      { name: "Campaign Analyzer", href: "/tools?tool=campaign" },
-      { name: "Marketing Forecast", href: "/tools?tool=marketing_forecast" },
+      { name: "Pricing Simulator", href: "/tools?tool=pricing" },
+      { name: "Knowledge Hub", href: "/knowledge" },
     ],
     promptSuggestions: [
       "How can we reduce our blended customer acquisition cost (CAC)?",
-      "Benchmark our ROAS against Indian SaaS standards.",
+      "Benchmark our marketing spend against Indian SaaS standards.",
       "Suggest high-converting inbound content topics for our ICP.",
     ],
+    kpis: ["Blended CAC", "LTV:CAC Ratio", "Channel Concentration"],
+    telemetryFeeds: ["Ad Platforms", "Website Traffic", "Lead Telemetry"],
   },
   {
     id: "sales",
@@ -105,16 +119,17 @@ const EXECUTIVE_AGENTS: AgentMeta[] = [
     color: "text-blue-400 bg-blue-400/10 border-blue-400/30",
     summary: "Pipeline velocity, enterprise deal structuring, lead scoring, and sales representative quotas.",
     quickTools: [
-      { name: "Lead Scoring", href: "/tools?tool=lead_scoring" },
-      { name: "Pipeline Analyzer", href: "/tools?tool=pipeline" },
-      { name: "Deal Simulator", href: "/tools?tool=deal_simulator" },
-      { name: "Customer LTV", href: "/tools?tool=ltv" },
+      { name: "Pricing Simulator", href: "/tools?tool=pricing" },
+      { name: "Execution Queue", href: "/tasks" },
+      { name: "Gap Register", href: "/gaps" },
     ],
     promptSuggestions: [
       "Audit our deal qualification criteria to improve close rates.",
       "How do we transition mid-market deals to annual contracts?",
       "Simulate revenue impact of closing 3 enterprise accounts.",
     ],
+    kpis: ["Pipeline Velocity", "Average Deal Size", "Win Rate %"],
+    telemetryFeeds: ["Google Calendar", "Slack Sales Room", "CRM Pipeline"],
   },
   {
     id: "hr",
@@ -126,14 +141,16 @@ const EXECUTIVE_AGENTS: AgentMeta[] = [
     summary: "Headcount planning, talent retention, hiring cost, organizational structure, and compensation benchmarks.",
     quickTools: [
       { name: "Hiring Simulator", href: "/tools?tool=hiring" },
-      { name: "Workforce Planner", href: "/tools?tool=workforce" },
-      { name: "Compensation Guide", href: "/tools?tool=comp" },
+      { name: "Team Roster", href: "/team" },
+      { name: "Tasks Queue", href: "/tasks" },
     ],
     promptSuggestions: [
-      "What is the fully loaded cost of hiring 2 senior developers in India?",
+      "What is the fully loaded cost of hiring 2 senior engineers in India?",
       "Evaluate our revenue per employee vs peers.",
-      "Draft performance milestone incentives for our sales team.",
+      "Draft performance milestone incentives for our key leaders.",
     ],
+    kpis: ["Revenue per FTE", "Headcount Payroll Load", "Team Capacity Index"],
+    telemetryFeeds: ["HR & Payroll Roster", "Slack Morale", "Calendar Load"],
   },
   {
     id: "operations",
@@ -144,16 +161,17 @@ const EXECUTIVE_AGENTS: AgentMeta[] = [
     color: "text-cyan-400 bg-cyan-400/10 border-cyan-400/30",
     summary: "Process optimization, workflow automation, operational bottlenecks, vendor SLAs, and delivery margins.",
     quickTools: [
-      { name: "Capacity Planner", href: "/tools?tool=capacity" },
-      { name: "Process Analyzer", href: "/tools?tool=process" },
       { name: "Workflows Builder", href: "/workflows" },
-      { name: "Inventory Simulator", href: "/tools?tool=inventory" },
+      { name: "Automations Engine", href: "/automations" },
+      { name: "Tasks Queue", href: "/tasks" },
     ],
     promptSuggestions: [
       "Where are the biggest operational bottlenecks in our delivery cycle?",
       "How can we automate client onboarding handoffs?",
       "Review our vendor software subscriptions for redundancy.",
     ],
+    kpis: ["Delivery SLA Rate", "Cycle Time to Close", "Unbilled Scope Creep"],
+    telemetryFeeds: ["Help Desk (Zendesk)", "Slack Ops", "Execution Queue"],
   },
   {
     id: "strategy",
@@ -164,22 +182,23 @@ const EXECUTIVE_AGENTS: AgentMeta[] = [
     color: "text-orange-400 bg-orange-400/10 border-orange-400/30",
     summary: "Defensibility analysis, competitive moats, market expansion playbooks, and strategic partnerships.",
     quickTools: [
-      { name: "SWOT Analyzer", href: "/tools?tool=swot" },
       { name: "Market Entry Simulator", href: "/tools?tool=market_entry" },
-      { name: "Competitor Analyzer", href: "/tools?tool=competitor" },
+      { name: "Scenario Planner", href: "/tools?tool=scenario_planner" },
       { name: "Expansion Simulator", href: "/tools?tool=expansion" },
     ],
     promptSuggestions: [
       "Evaluate our competitive moat against legacy enterprise players.",
       "What are the highest-margin expansion vectors for next year?",
-      "Structure a defensibility framework for our platform data.",
+      "Structure a defensibility framework for our proprietary data.",
     ],
+    kpis: ["Gross Margin Defensibility", "Expansion Payback", "Partner Retention"],
+    telemetryFeeds: ["Market Telemetry", "Competitive Intel", "Platform Data"],
   },
 ];
 
 interface ChatMessage {
   id: string;
-  sender: "user" | "agent";
+  sender: "agent" | "user";
   agentId: string;
   agentName: string;
   avatar: string;
@@ -189,14 +208,16 @@ interface ChatMessage {
   nextSteps?: string[];
 }
 
-export default function AIWorkspacePage() {
+export default function ChatWorkspacePage() {
   const [activeAgentId, setActiveAgentId] = useState<string>("ceo");
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showDossier, setShowDossier] = useState(true);
+  const [searchRoster, setSearchRoster] = useState("");
   const [companyProfile, setCompanyProfile] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initial messages per agent
+  // Initial seed conversations for each agent
   const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>({
     ceo: [
       {
@@ -221,23 +242,23 @@ export default function AIWorkspacePage() {
         avatar: "📊",
         timestamp: "Just now",
         content:
-          "Greetings. Marcus here. I oversee your Indian Rupee balance sheet, monthly burn, liquidity runways, and unit economics. All figures align with current ledger benchmarks.",
+          "Marcus online. Cash burn, working capital, and unit economics are under surveillance. Your current liquid runway stands at 7.2 months. What financial model should we analyze?",
         provider: "nuralix-ai",
-        nextSteps: ["Open Cash Flow Tool", "Review Vendor Subscriptions", "Calculate Break-Even Threshold"],
+        nextSteps: ["Open Cash Flow Forecast", "Analyze Tooling Overheads", "Calculate Break-Even Threshold"],
       },
     ],
     marketing: [
       {
-        id: "msg_init_mktg",
+        id: "msg_init_mkt",
         sender: "agent",
         agentId: "marketing",
         agentName: "Elena (Marketing AI)",
         avatar: "🎯",
         timestamp: "Just now",
         content:
-          "Hello! Elena on deck. I track customer acquisition costs, campaign ROAS, organic positioning, and ICP buyer qualification. How can we accelerate growth today?",
+          "Elena ready. I'm tracking your inbound channel distribution, CAC payback velocity, and positioning resonance. How can we accelerate demand today?",
         provider: "nuralix-ai",
-        nextSteps: ["Simulate CAC Payback", "Audit Inbound Conversion", "Review Competitor Ads"],
+        nextSteps: ["Audit Inbound Conversion Rates", "Calculate Blended CAC", "Plan ICP Retargeting Campaign"],
       },
     ],
     sales: [
@@ -279,7 +300,7 @@ export default function AIWorkspacePage() {
         content:
           "David active. I optimize your day-to-day workflow pipelines, eliminate manual friction, and ensure customer delivery SLAs remain in the top quartile.",
         provider: "nuralix-ai",
-        nextSteps: ["Launch Workflows Builder", "Audit Delivery Delays", "Connect Zapier & Webhooks"],
+        nextSteps: ["Launch Workflows Builder", "Audit Delivery Delays", "Review Vendor Subscriptions"],
       },
     ],
     strategy: [
@@ -293,7 +314,7 @@ export default function AIWorkspacePage() {
         content:
           "Rohan here. I analyze competitive defensibility, market expansion opportunities, pricing power moats, and strategic alliances.",
         provider: "nuralix-ai",
-        nextSteps: ["Open SWOT Analyzer", "Simulate Tier-2 City Expansion", "Map Platform Defensibility"],
+        nextSteps: ["Open Market Entry Simulator", "Simulate Tier-2 City Expansion", "Map Platform Defensibility"],
       },
     ],
   });
@@ -376,7 +397,7 @@ export default function AIWorkspacePage() {
         agentName: activeAgent.name + ` (${activeAgent.role})`,
         avatar: activeAgent.avatar,
         timestamp: "Just now",
-        content: `Acknowledged for ${companyProfile?.name || "Apex Technologies"}. Based on current financial reserves (₹${Number(companyProfile?.cash || 1200000).toLocaleString("en-IN")}), I recommend maintaining strict capital discipline while executing on this initiative.`,
+        content: `Acknowledged for ${companyProfile?.name || "Apex Analytics"}. Based on current financial reserves (₹${Number(companyProfile?.cash || 1200000).toLocaleString("en-IN")}), I recommend maintaining strict capital discipline while executing on this initiative.`,
         provider: "nuralix-ai",
       };
       setConversations(prev => ({
@@ -388,226 +409,435 @@ export default function AIWorkspacePage() {
     }
   };
 
+  const handleResetConversation = () => {
+    const defaultMsg = conversations[activeAgentId]?.[0];
+    if (defaultMsg) {
+      setConversations(prev => ({
+        ...prev,
+        [activeAgentId]: [defaultMsg],
+      }));
+    }
+  };
+
+  const filteredAgents = EXECUTIVE_AGENTS.filter(
+    a =>
+      a.name.toLowerCase().includes(searchRoster.toLowerCase()) ||
+      a.role.toLowerCase().includes(searchRoster.toLowerCase()) ||
+      a.summary.toLowerCase().includes(searchRoster.toLowerCase())
+  );
+
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-line">
+    <div className="h-[calc(100vh-5.5rem)] flex flex-col space-y-3 animate-fade-in">
+      {/* Top Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-line shrink-0">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-brass/10 border border-brass/30 flex items-center justify-center text-brass">
+            <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
               <Sparkles className="w-4 h-4" />
             </div>
-            <h1 className="text-lg font-bold text-text">AI Workspace</h1>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-brass-soft text-brass font-bold uppercase tracking-wider">
-              Executive Suite
+            <h1 className="text-base sm:text-lg font-bold text-text font-sans">AI Executive Suite</h1>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold uppercase tracking-wider font-mono">
+              7 Autonomous Advisors
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
-            Universal intelligence command center. Converse with your specialist AI executive team and launch connected tools.
+          <p className="text-[11px] text-text-muted mt-0.5">
+            Converse directly with your specialized AI executive team and trigger deterministic playbooks.
           </p>
         </div>
 
-        {/* Company Telemetry pill */}
-        <div className="flex items-center gap-2 text-[11px] bg-surface-2 border border-line px-3 py-1.5 rounded-lg text-text-muted shrink-0">
-          <Building2 className="w-3.5 h-3.5 text-brass" />
-          <span className="font-semibold text-text">{companyProfile?.name || "Apex Technologies"}</span>
+        {/* Company Telemetry Header Badge */}
+        <div className="flex items-center gap-3 text-xs bg-surface-2/60 border border-line px-3 py-1.5 rounded-xl text-text-muted shrink-0">
+          <div className="flex items-center gap-1.5 font-semibold text-text">
+            <Building2 className="w-3.5 h-3.5 text-brass" />
+            <span>{companyProfile?.name || "Apex Analytics"}</span>
+          </div>
           <span>·</span>
-          <span>₹{Number(companyProfile?.revenue || 500000).toLocaleString("en-IN")}/mo</span>
-        </div>
-      </div>
-
-      {/* Agents Selection Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-        {EXECUTIVE_AGENTS.map(agent => {
-          const isSelected = agent.id === activeAgentId;
-          return (
-            <button
-              key={agent.id}
-              type="button"
-              onClick={() => setActiveAgentId(agent.id)}
-              className={`p-2.5 rounded-xl border text-left transition-all btn-tactile cursor-pointer flex flex-col justify-between ${
-                isSelected
-                  ? "bg-surface-2 border-brass ring-1 ring-brass/40 shadow-sm"
-                  : "bg-surface border-line hover:border-line-strong opacity-80 hover:opacity-100"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-1 mb-1.5">
-                <span className="text-lg">{agent.avatar}</span>
-                <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase border ${agent.color}`}>
-                  {agent.role.replace(" AI", "")}
-                </span>
-              </div>
-              <div>
-                <div className="text-xs font-bold text-text truncate">{agent.name}</div>
-                <div className="text-[10px] text-text-muted truncate">{agent.badge}</div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Active Agent Detail Bar & Embedded Quick Tools */}
-      <div className="p-3.5 rounded-xl border border-line bg-surface flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line flex items-center justify-center text-xl shrink-0 shadow-inner">
-            {activeAgent.avatar}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-text">{activeAgent.name} ({activeAgent.role})</span>
-              <span className="text-[10px] text-brass bg-brass-soft px-1.5 py-0.2 rounded font-semibold">
-                Active Desk
-              </span>
-            </div>
-            <p className="text-[11px] text-text-muted mt-0.5">{activeAgent.summary}</p>
-          </div>
-        </div>
-
-        {/* Quick Tools Launchers (§ Embedded in relevant agents) */}
-        <div className="flex items-center gap-2 flex-wrap shrink-0">
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
-            <Wrench className="w-3 h-3 text-brass" />
-            <span>Agent Tools:</span>
+          <span className="font-mono text-[11px] text-jade">
+            ₹{Number(companyProfile?.revenue || 500000).toLocaleString("en-IN")}/mo
           </span>
-          {activeAgent.quickTools.map((tool, idx) => (
-            <Link
-              key={idx}
-              href={tool.href}
-              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-surface-2 hover:bg-surface border border-line hover:border-line-strong text-text btn-tactile inline-flex items-center gap-1 shadow-2xs"
-            >
-              <span>{tool.name}</span>
-              <ArrowRight className="w-2.5 h-2.5 text-text-muted" />
-            </Link>
-          ))}
+          <span>·</span>
+          <span className="text-[11px] font-mono text-cyan-400">
+            Runway {companyProfile?.cash ? (companyProfile.cash / (companyProfile.burn || 150000)).toFixed(1) : "7.2"}mo
+          </span>
         </div>
       </div>
 
-      {/* Main Conversation Stream */}
-      <div className="rounded-2xl border border-line bg-surface shadow-theme flex flex-col h-[520px] overflow-hidden">
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-          {currentMessages.map(msg => {
-            const isUser = msg.sender === "user";
-            return (
-              <div
-                key={msg.id}
-                className={`flex gap-3 max-w-2xl ${isUser ? "ml-auto flex-row-reverse" : "mr-auto"}`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 border ${
-                    isUser
-                      ? "bg-brass text-white border-brass"
-                      : "bg-surface-2 border-line text-text"
+      {/* Main Workspace Layout (2 or 3 Columns) */}
+      <div className="flex-1 flex gap-3 min-h-0 overflow-hidden">
+        {/* ============================================================ */}
+        {/* LEFT COLUMN: EXECUTIVE AI DIRECTORY / ROSTER */}
+        {/* ============================================================ */}
+        <aside className="w-64 lg:w-72 shrink-0 bg-surface border border-line rounded-2xl flex flex-col overflow-hidden shadow-theme">
+          {/* Roster Search / Header */}
+          <div className="p-3 border-b border-line bg-surface-2/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                Executive Roster
+              </span>
+              <span className="text-[10px] font-mono text-cyan-400">7 Active</span>
+            </div>
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-text-muted absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchRoster}
+                onChange={e => setSearchRoster(e.target.value)}
+                placeholder="Filter advisors…"
+                className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-surface border border-line text-xs text-text placeholder:text-text-muted/60 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              />
+            </div>
+          </div>
+
+          {/* Roster List */}
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            {filteredAgents.map(agent => {
+              const isActive = agent.id === activeAgentId;
+
+              return (
+                <button
+                  key={agent.id}
+                  type="button"
+                  onClick={() => setActiveAgentId(agent.id)}
+                  className={`w-full p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-2.5 ${
+                    isActive
+                      ? "bg-cyan-500/10 border-cyan-500/40 text-text shadow-sm"
+                      : "bg-transparent border-transparent hover:bg-surface-2/60 hover:border-line text-text-muted hover:text-text"
                   }`}
                 >
-                  {msg.avatar}
-                </div>
-
-                <div className="space-y-1.5 max-w-lg">
-                  <div className={`flex items-center gap-2 text-[10px] ${isUser ? "justify-end" : ""}`}>
-                    <span className="font-bold text-text">{msg.agentName}</span>
-                    <span className="text-text-muted">{msg.timestamp}</span>
-                    {msg.provider && (
-                      <span className="px-1.5 py-0.2 rounded bg-surface-2 border border-line text-[9px] font-mono text-brass">
-                        {msg.provider === "gemini" ? "⚡ Gemini Live" : "✨ Nuralix AI"}
-                      </span>
-                    )}
-                  </div>
-
-                  <div
-                    className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
-                      isUser
-                        ? "bg-brass text-white font-medium rounded-tr-none shadow-sm"
-                        : "bg-surface-2 border border-line text-text rounded-tl-none shadow-xs"
-                    }`}
-                  >
-                    <div className="whitespace-pre-wrap">{msg.content}</div>
-
-                    {/* Next Steps Chips if provided */}
-                    {msg.nextSteps && msg.nextSteps.length > 0 && (
-                      <div className="mt-3 pt-2.5 border-t border-line/60 space-y-1.5">
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3 text-jade" />
-                          <span>Recommended Action Playbooks:</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {msg.nextSteps.map((step, sIdx) => (
-                            <button
-                              key={sIdx}
-                              type="button"
-                              onClick={() => handleSendMessage(step)}
-                              className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface border border-line hover:border-brass text-text cursor-pointer hover:text-brass transition-colors"
-                            >
-                              → {step}
-                            </button>
-                          ))}
-                        </div>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="relative shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-surface border border-line flex items-center justify-center text-lg shadow-sm">
+                        {agent.avatar}
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                      <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-surface animate-pulse" />
+                    </div>
 
-          {isTyping && (
-            <div className="flex gap-3 mr-auto max-w-lg">
-              <div className="w-8 h-8 rounded-lg bg-surface-2 border border-line flex items-center justify-center text-sm shrink-0">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-text truncate">
+                          {agent.name}
+                        </span>
+                        <span
+                          className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold uppercase border ${agent.color}`}
+                        >
+                          {agent.role.replace(" AI", "")}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-text-muted truncate mt-0.5">
+                        {agent.badge}
+                      </p>
+                    </div>
+                  </div>
+
+                  <ChevronRight
+                    className={`w-4 h-4 shrink-0 transition-transform ${
+                      isActive ? "text-cyan-400 translate-x-0.5" : "text-text-muted/40"
+                    }`}
+                  />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Bottom Controls */}
+          <div className="p-3 border-t border-line bg-surface-2/40 flex items-center justify-between text-xs">
+            <span className="text-[11px] text-text-muted">Direct Session</span>
+            <button
+              type="button"
+              onClick={handleResetConversation}
+              title="Reset current conversation thread"
+              className="px-2 py-1 rounded-lg bg-surface border border-line text-[10px] text-text-muted hover:text-text hover:border-line-strong flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* ============================================================ */}
+        {/* CENTER COLUMN: ACTIVE EXECUTIVE DESK & CHAT STREAM */}
+        {/* ============================================================ */}
+        <section className="flex-1 flex flex-col bg-surface border border-line rounded-2xl overflow-hidden shadow-theme min-w-0">
+          {/* Active Desk Header */}
+          <div className="p-3 sm:px-4 border-b border-line bg-surface-2/40 flex items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-surface border border-line flex items-center justify-center text-xl shrink-0 shadow-sm">
                 {activeAgent.avatar}
               </div>
-              <div className="p-3.5 rounded-2xl bg-surface-2 border border-line text-xs rounded-tl-none flex items-center gap-2 text-text-muted">
-                <div className="w-2 h-2 rounded-full bg-brass animate-pulse" />
-                <span>{activeAgent.name} is synthesizing business telemetry…</span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-text">
+                    {activeAgent.name} ({activeAgent.role})
+                  </span>
+                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono font-semibold uppercase flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Live Desk</span>
+                  </span>
+                </div>
+                <p className="text-[11px] text-text-muted truncate mt-0.5">
+                  {activeAgent.summary}
+                </p>
               </div>
             </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
 
-        {/* Prompt Suggestions Bar */}
-        <div className="px-4 py-2 border-t border-line bg-surface-2/40 flex items-center gap-2 overflow-x-auto text-xs">
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider shrink-0 flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-brass" />
-            <span>Suggested:</span>
-          </span>
-          {activeAgent.promptSuggestions.map((prompt, pIdx) => (
-            <button
-              key={pIdx}
-              type="button"
-              onClick={() => handleSendMessage(prompt)}
-              className="shrink-0 px-2.5 py-1 rounded-lg bg-surface border border-line hover:border-line-strong text-[11px] text-text-muted hover:text-text cursor-pointer transition-colors"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
+            {/* Header Right Actions */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Quick Tools Launchers */}
+              <div className="hidden sm:flex items-center gap-1.5">
+                {activeAgent.quickTools.map((tool, idx) => (
+                  <Link
+                    key={idx}
+                    href={tool.href}
+                    className="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-surface hover:bg-surface-2 border border-line text-text hover:text-cyan-400 hover:border-cyan-500/30 transition-all inline-flex items-center gap-1"
+                  >
+                    <span>{tool.name}</span>
+                    <ArrowRight className="w-2.5 h-2.5 text-text-muted" />
+                  </Link>
+                ))}
+              </div>
 
-        {/* Message Input Box */}
-        <div className="p-3 sm:p-4 border-t border-line bg-surface">
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              handleSendMessage();
-            }}
-            className="flex items-center gap-2"
-          >
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={e => setInputMessage(e.target.value)}
-              placeholder={`Ask ${activeAgent.name} (${activeAgent.role}) about strategy, runway, metrics, or execution…`}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-surface-2 border border-line text-xs text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
-            />
-            <button
-              type="submit"
-              disabled={!inputMessage.trim() || isTyping}
-              className="px-4 py-2.5 rounded-xl bg-brass text-white text-xs font-bold shadow-sm hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>Send</span>
-              <Send className="w-3.5 h-3.5" />
-            </button>
-          </form>
-        </div>
+              {/* Dossier Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setShowDossier(prev => !prev)}
+                title={showDossier ? "Hide Executive Dossier" : "Show Executive Dossier"}
+                className={`p-2 rounded-lg border text-xs transition-all cursor-pointer ${
+                  showDossier
+                    ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30"
+                    : "bg-surface border-line text-text-muted hover:text-text"
+                }`}
+              >
+                {showDossier ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Conversation Stream */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+            {currentMessages.map(msg => {
+              const isUser = msg.sender === "user";
+
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex gap-3 max-w-3xl ${isUser ? "ml-auto flex-row-reverse" : "mr-auto"}`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 border mt-0.5 shadow-sm ${
+                      isUser
+                        ? "bg-brass text-white border-brass"
+                        : "bg-surface-2 border-line text-text"
+                    }`}
+                  >
+                    {msg.avatar}
+                  </div>
+
+                  <div className="space-y-1.5 max-w-2xl min-w-0">
+                    <div className={`flex items-center gap-2 text-[10px] ${isUser ? "justify-end" : ""}`}>
+                      <span className="font-bold text-text">{msg.agentName}</span>
+                      <span className="text-text-muted">{msg.timestamp}</span>
+                      {msg.provider && (
+                        <span className="px-1.5 py-0.2 rounded bg-surface-2 border border-line text-[9px] font-mono text-cyan-400">
+                          ✨ Nuralix AI · Live Synthesis
+                        </span>
+                      )}
+                    </div>
+
+                    <div
+                      className={`p-4 rounded-2xl text-xs leading-relaxed shadow-sm ${
+                        isUser
+                          ? "bg-brass text-white font-medium rounded-tr-none shadow-md"
+                          : "bg-surface-2/70 border border-line text-text rounded-tl-none"
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap">{msg.content}</div>
+
+                      {/* Interactive Action Playbooks */}
+                      {msg.nextSteps && msg.nextSteps.length > 0 && (
+                        <div className="mt-3 pt-2.5 border-t border-line/60 space-y-1.5">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-jade" />
+                            <span>Recommended Action Playbooks:</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {msg.nextSteps.map((step, sIdx) => (
+                              <button
+                                key={sIdx}
+                                type="button"
+                                onClick={() => handleSendMessage(step)}
+                                className="text-[10px] font-medium px-2.5 py-1 rounded-lg bg-surface border border-line hover:border-cyan-500/40 text-text cursor-pointer hover:text-cyan-400 transition-all btn-tactile"
+                              >
+                                → {step}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {isTyping && (
+              <div className="flex gap-3 mr-auto max-w-lg">
+                <div className="w-8 h-8 rounded-xl bg-surface-2 border border-line flex items-center justify-center text-sm shrink-0">
+                  {activeAgent.avatar}
+                </div>
+                <div className="p-3.5 rounded-2xl bg-surface-2 border border-line text-xs rounded-tl-none flex items-center gap-2.5 text-text-muted">
+                  <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                  <span>{activeAgent.name} is synthesizing verified business telemetry…</span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Pinned Bottom Input & Prompt Suggestions Dock */}
+          <div className="border-t border-line bg-surface shrink-0">
+            {/* Prompt Suggestions Carousel */}
+            <div className="px-4 py-2 border-b border-line/50 bg-surface-2/30 flex items-center gap-2 overflow-x-auto text-xs no-scrollbar">
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider shrink-0 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-cyan-400" />
+                <span>Suggested:</span>
+              </span>
+              {activeAgent.promptSuggestions.map((prompt, pIdx) => (
+                <button
+                  key={pIdx}
+                  type="button"
+                  onClick={() => handleSendMessage(prompt)}
+                  className="shrink-0 px-2.5 py-1 rounded-lg bg-surface border border-line hover:border-cyan-500/30 text-[11px] text-text-muted hover:text-text cursor-pointer transition-all"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+
+            {/* Input Bar */}
+            <div className="p-3 sm:p-4">
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  handleSendMessage();
+                }}
+                className="flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  value={inputMessage}
+                  onChange={e => setInputMessage(e.target.value)}
+                  placeholder={`Ask ${activeAgent.name} (${activeAgent.role}) about strategy, runway, financial models, or execution…`}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-surface-2 border border-line text-xs text-text placeholder:text-text-muted/60 focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
+                />
+                <button
+                  type="submit"
+                  disabled={!inputMessage.trim() || isTyping}
+                  className="px-4 py-2.5 rounded-xl bg-brass text-white text-xs font-bold shadow-md hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed btn-tactile inline-flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
+                >
+                  <span>Send</span>
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+              <div className="mt-1.5 flex items-center justify-between text-[10px] text-text-muted px-1">
+                <span className="flex items-center gap-1">
+                  <Info className="w-3 h-3 text-cyan-400" />
+                  <span>Verified company ledger & telemetry synced</span>
+                </span>
+                <span className="font-mono">Press ↵ to send</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* RIGHT COLUMN: EXECUTIVE DOSSIER & CONNECTED TELEMETRY */}
+        {/* ============================================================ */}
+        {showDossier && (
+          <aside className="hidden xl:flex w-72 lg:w-80 shrink-0 bg-surface border border-line rounded-2xl flex-col overflow-y-auto p-4 shadow-theme space-y-4 animate-fade-in">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-2 border-b border-line">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-cyan-400" />
+                <span className="text-xs font-bold text-text font-sans">Executive Dossier</span>
+              </div>
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-surface-2 border border-line text-text-muted uppercase">
+                {activeAgent.role}
+              </span>
+            </div>
+
+            {/* Strategic Mandate */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted block">
+                Strategic Mandate
+              </span>
+              <p className="text-[11px] text-text-muted leading-relaxed bg-surface-2/50 p-3 rounded-xl border border-line">
+                {activeAgent.summary}
+              </p>
+            </div>
+
+            {/* Monitored KPIs */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center justify-between">
+                <span>Monitored Metrics</span>
+                <Activity className="w-3 h-3 text-jade" />
+              </span>
+              <div className="space-y-1.5">
+                {activeAgent.kpis.map((kpi, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2 rounded-lg bg-surface-2/40 border border-line text-xs"
+                  >
+                    <span className="text-[11px] font-medium text-text">{kpi}</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-jade/15 text-jade border border-jade/30 font-bold uppercase">
+                      Healthy
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Connected Data Feeds */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center justify-between">
+                <span>Active Telemetry Bridges</span>
+                <Zap className="w-3 h-3 text-cyan-400" />
+              </span>
+              <div className="space-y-1.5">
+                {activeAgent.telemetryFeeds.map((feed, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2 rounded-lg bg-surface-2/40 border border-line text-xs"
+                  >
+                    <span className="text-[11px] text-text-muted">{feed}</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Strategic Playbooks */}
+            <div className="space-y-2 pt-2 border-t border-line">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted block">
+                Direct Action Playbooks
+              </span>
+              <div className="space-y-1.5">
+                {activeAgent.quickTools.map((tool, idx) => (
+                  <Link
+                    key={idx}
+                    href={tool.href}
+                    className="w-full p-2 rounded-xl bg-surface-2 hover:bg-surface border border-line hover:border-cyan-500/30 text-text transition-all flex items-center justify-between text-xs group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Wrench className="w-3 h-3 text-cyan-400 group-hover:rotate-12 transition-transform" />
+                      <span className="text-[11px] font-semibold">{tool.name}</span>
+                    </div>
+                    <ArrowRight className="w-3 h-3 text-text-muted group-hover:text-cyan-400 transition-colors" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );
