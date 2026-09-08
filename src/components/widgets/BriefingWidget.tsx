@@ -50,52 +50,85 @@ export function BriefingWidget({
 
   return (
     <ContainerTile span={2} id="widget_daily_briefing">
-      <div className="flex flex-col h-full justify-between">
+      <div className="flex flex-col h-full justify-between space-y-4">
         <div>
           {/* Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-line">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-brass" />
-              <h2 className="text-xs font-semibold text-text uppercase tracking-wider">
-                Today's Executive Briefing
-              </h2>
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans flex items-center gap-1.5">
+                  <span>Executive AI Briefing</span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-300 font-mono font-semibold">
+                    Autonomous
+                  </span>
+                </h2>
+                <span className="text-[10px] text-text-muted">
+                  Synthesized by {ceoName} (Chief Executive AI)
+                </span>
+              </div>
             </div>
-            <span className="text-[10px] text-text-muted font-medium">
-              Signed by {ceoName} (CEO AI)
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted font-mono border border-white/[0.08]">
+              Live Feed
             </span>
           </div>
 
-          {/* Document Surface Serif Prose */}
-          <div className="surface-document py-4 space-y-2.5 text-xs sm:text-sm text-text">
-            {briefingLines.map((line, idx) => (
-              <p
-                key={idx}
-                className={`leading-relaxed ${
-                  idx === briefingLines.length - 1
-                    ? "font-semibold text-brass pt-1 border-t border-line/60"
-                    : "text-text"
-                }`}
-              >
-                {line}
+          {/* Structured Intelligence Cards */}
+          <div className="py-3 space-y-2.5">
+            <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] hover:border-white/12 transition-colors space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs">📈</span>
+                <span className="text-[11px] font-bold text-cyan-400 uppercase tracking-wider font-mono">
+                  Revenue & Growth Trajectory
+                </span>
+              </div>
+              <p className="text-xs text-text-muted leading-relaxed pl-5">
+                Monthly operating revenue for <strong className="text-white">{companyName}</strong> is stable at <strong className="text-white">₹{monthlyRev.toLocaleString("en-IN")}</strong> with healthy top-quartile gross margins for {industryLabel}.
               </p>
-            ))}
+            </div>
+
+            <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] hover:border-white/12 transition-colors space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs">🛡️</span>
+                <span className="text-[11px] font-bold text-jade uppercase tracking-wider font-mono">
+                  Capital Reserves & Buffer
+                </span>
+              </div>
+              <p className="text-xs text-text-muted leading-relaxed pl-5">
+                Net burn at <strong className="text-white">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-white">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-jade">{runwayMonths} month</strong> runway runway buffer.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs">⚡</span>
+                <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">
+                  Priority Directive for {founderName}
+                </span>
+              </div>
+              <p className="text-xs text-slate-200 leading-relaxed pl-5 font-medium">
+                Dilute top-client concentration below 25% by advancing secondary deal pipelines within the next 60 days.
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-3 border-t border-line flex items-center justify-between text-xs">
+        <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs">
           <Link
-            href="/gaps"
-            className="inline-flex items-center gap-1.5 text-brass hover:underline font-medium text-xs btn-tactile cursor-pointer"
+            href="/chat"
+            className="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-semibold text-xs btn-tactile cursor-pointer group"
           >
-            <span>Review active gap playbooks</span>
-            <ArrowRight className="w-3 h-3" />
+            <span>Ask Astra to elaborate</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
-            href="/simulator"
+            href="/gaps"
             className="text-text-muted hover:text-text text-xs cursor-pointer"
           >
-            Open Simulator
+            Review Gap Playbooks →
           </Link>
         </div>
       </div>

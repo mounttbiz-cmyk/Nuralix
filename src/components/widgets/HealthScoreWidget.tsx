@@ -72,11 +72,11 @@ export function HealthScoreWidget({
 
   return (
     <ContainerTile span={2} id="widget_health_score">
-      <div>
-        <div className="flex items-center justify-between pb-3 border-b border-line">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-jade" />
-            <h2 className="text-xs font-semibold text-text uppercase tracking-wider">
+            <span className="beacon-dot" />
+            <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
               Business Health Score
             </h2>
           </div>
@@ -84,91 +84,123 @@ export function HealthScoreWidget({
         </div>
 
         {/* Main Gauge & Metrics */}
-        <div className="flex flex-col @sm:flex-row items-center gap-6 py-4">
-          {/* Circular SVG Gauge */}
+        <div className="flex flex-col @sm:flex-row items-center gap-6 py-2">
+          {/* Circular SVG Gauge with Glowing Gradient Arc */}
           <div className="relative flex items-center justify-center shrink-0">
-            <svg className="w-28 h-28 transform -rotate-90">
+            <svg className="w-32 h-32 transform -rotate-90 drop-shadow-md">
+              <defs>
+                <linearGradient id="health-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#10B981" />
+                  <stop offset="60%" stopColor="#00D9FF" />
+                  <stop offset="100%" stopColor="#6366F1" />
+                </linearGradient>
+              </defs>
               <circle
-                cx="56"
-                cy="56"
+                cx="64"
+                cy="64"
                 r={radius}
                 className="stroke-surface-2"
-                strokeWidth="7"
+                strokeWidth="8"
                 fill="transparent"
               />
               <circle
-                cx="56"
-                cy="56"
+                cx="64"
+                cy="64"
                 r={radius}
-                className="stroke-brass transition-all duration-story ease-out-custom"
-                strokeWidth="7"
+                stroke="url(#health-grad)"
+                strokeWidth="8"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
                 fill="transparent"
+                className="transition-all duration-story ease-out-custom"
               />
             </svg>
             <div className="absolute flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold num-tabular text-text leading-none">
+              <span className="text-3xl sm:text-4xl font-black num-tabular text-white font-mono leading-none tracking-tight">
                 {score}
               </span>
-              <span className="text-[10px] text-text-muted font-medium mt-0.5">out of 100</span>
+              <span className="text-[10px] text-cyan-400 font-semibold font-mono mt-1 uppercase tracking-wider">
+                Optimal
+              </span>
             </div>
           </div>
 
           {/* Context & Delta */}
-          <div className="flex-1 space-y-1.5 text-center @sm:text-left">
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-jade/10 text-jade border border-jade/20">
-              <TrendingUp className="w-3 h-3" />
+          <div className="flex-1 space-y-2 text-center @sm:text-left">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-jade/15 text-jade border border-jade/30 font-mono">
+              <TrendingUp className="w-3.5 h-3.5" />
               <span>+{delta}% vs last month</span>
             </div>
             <p className="text-xs text-text-muted leading-relaxed">
-              Based on active ledger data, unit economics, and 24 operational benchmarks for {industryName}.
+              Composite telemetry synthesized across cash runway, revenue per FTE, and 24 operational benchmarks for {industryName}.
             </p>
           </div>
         </div>
 
-        {/* Component Breakdown Table (§8.3) */}
-        <div className="space-y-1.5 pt-2 border-t border-line">
-          <div className="text-[10px] font-semibold uppercase text-text-muted px-1 tracking-wider">
-            Category Breakdown
+        {/* Component Breakdown with Progress Bars */}
+        <div className="space-y-2 pt-3 border-t border-white/[0.08]">
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase text-text-muted/80 px-1 tracking-widest font-mono">
+            <span>Category Performance</span>
+            <span>Weight</span>
           </div>
-          <div className="grid grid-cols-1 @xs:grid-cols-5 gap-1.5">
-            {components.map(comp => (
-              <button
-                key={comp.key}
-                type="button"
-                onClick={() => setSelectedComponent(selectedComponent === comp.key ? null : comp.key)}
-                className={`p-2 rounded-lg border text-left transition-all btn-tactile ${
-                  selectedComponent === comp.key
-                    ? "border-brass bg-brass-soft/20 shadow-sm"
-                    : "border-line bg-surface-2/60 hover:bg-surface-2"
-                }`}
-              >
-                <div className="flex items-center justify-between text-[11px] text-text-muted">
-                  <span className="truncate">{comp.name}</span>
-                  <span className="font-mono text-[9px]">{comp.weight}</span>
-                </div>
-                <div className="text-sm font-bold num-tabular text-text mt-0.5">
-                  {comp.score}
-                </div>
-              </button>
-            ))}
+
+          <div className="grid grid-cols-1 @xs:grid-cols-5 gap-2">
+            {components.map(comp => {
+              const isSelected = selectedComponent === comp.key;
+              return (
+                <button
+                  key={comp.key}
+                  type="button"
+                  onClick={() => setSelectedComponent(isSelected ? null : comp.key)}
+                  className={`p-2.5 rounded-xl border text-left transition-all btn-tactile ${
+                    isSelected
+                      ? "border-cyan-400/50 bg-cyan-500/15 shadow-sm ring-1 ring-cyan-500/30"
+                      : "border-white/[0.07] bg-surface-2/60 hover:bg-surface-2 hover:border-white/15"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[11px] text-text-muted">
+                    <span className="truncate font-medium">{comp.name}</span>
+                    <span className="font-mono text-[9px] text-text-muted/70">{comp.weight}</span>
+                  </div>
+                  <div className="text-sm sm:text-base font-black num-tabular text-white font-mono mt-1">
+                    {comp.score}
+                  </div>
+                  {/* Miniature progress bar */}
+                  <div className="w-full h-1 bg-surface rounded-full overflow-hidden mt-1.5">
+                    <div
+                      className={`h-full rounded-full ${
+                        comp.score >= 80
+                          ? "bg-gradient-to-r from-emerald-500 to-cyan-400"
+                          : comp.score >= 70
+                          ? "bg-gradient-to-r from-cyan-400 to-indigo-500"
+                          : "bg-gradient-to-r from-amber-400 to-rust"
+                      }`}
+                      style={{ width: `${comp.score}%` }}
+                    />
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
           {/* Expandable breakdown explanation */}
           {selectedComponent && (
-            <div className="mt-2 p-2.5 rounded-lg bg-surface-2 border border-line text-xs text-text animate-fade-in flex items-center justify-between">
-              <span>
-                <strong>{components.find(c => c.key === selectedComponent)?.name}:</strong>{" "}
-                {components.find(c => c.key === selectedComponent)?.detail}
-              </span>
+            <div className="mt-2 p-3 rounded-xl bg-surface-2/80 border border-cyan-500/30 text-xs text-text animate-fade-in flex items-start justify-between gap-3">
+              <div className="space-y-0.5">
+                <span className="font-bold text-cyan-400 font-mono text-[11px] uppercase tracking-wider block">
+                  {components.find(c => c.key === selectedComponent)?.name} Analysis
+                </span>
+                <p className="text-text-muted text-xs leading-relaxed">
+                  {components.find(c => c.key === selectedComponent)?.detail}
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setSelectedComponent(null)}
-                className="text-[10px] text-text-muted hover:text-text font-medium ml-2"
+                className="text-[10px] px-2 py-0.5 rounded-lg bg-surface border border-white/10 text-text-muted hover:text-text font-medium shrink-0"
               >
-                Close
+                Dismiss
               </button>
             </div>
           )}

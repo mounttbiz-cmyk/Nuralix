@@ -19,9 +19,9 @@ export function MobileHeader({
   const { resolvedTheme, cycleTheme } = useTheme();
 
   return (
-    <header className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 h-14 bg-surface/95 backdrop-blur-md border-b border-line pt-[env(safe-area-inset-top)]">
+    <header className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 h-14 bg-[#080C16]/95 backdrop-blur-xl border-b border-white/[0.08] pt-[env(safe-area-inset-top)]">
       <Link href="/dashboard" className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-surface-2 border border-line flex items-center justify-center p-1 shadow-sm">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-transparent border border-cyan-500/30 flex items-center justify-center p-1 shadow-sm">
           <Image
             src="/logo.png"
             alt="Nuralix Logo"
@@ -31,24 +31,23 @@ export function MobileHeader({
           />
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-xs tracking-tight text-text leading-tight font-sans">Nuralix</span>
+          <span className="font-extrabold text-xs tracking-tight text-white leading-tight font-sans">Nuralix</span>
           <span className="text-[10px] text-text-muted leading-tight truncate max-w-[120px]">
             {companyName}
           </span>
         </div>
       </Link>
 
-      <div className="flex items-center gap-1.5">
-
+      <div className="flex items-center gap-2">
         {onOpenChat && (
           <button
             type="button"
             onClick={onOpenChat}
-            className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full bg-brass-soft text-brass border border-brass/30 btn-tactile"
+            className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 btn-tactile"
             aria-label="Open AI Workspace"
           >
-            <Sparkles className="w-3.5 h-3.5 text-brass" />
-            <span>AI Executive</span>
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Copilot</span>
           </button>
         )}
 
@@ -56,12 +55,12 @@ export function MobileHeader({
           type="button"
           onClick={cycleTheme}
           aria-label="Cycle theme"
-          className="w-8 h-8 rounded-lg flex items-center justify-center border border-line bg-surface-2 text-text-muted hover:text-text btn-tactile"
+          className="w-8 h-8 rounded-xl flex items-center justify-center border border-white/[0.08] bg-surface-2/80 text-text-muted hover:text-text btn-tactile"
         >
           {resolvedTheme === "dark" ? (
-            <Moon className="w-3.5 h-3.5 text-brass" />
+            <Moon className="w-3.5 h-3.5 text-cyan-400" />
           ) : (
-            <Sun className="w-3.5 h-3.5 text-brass" />
+            <Sun className="w-3.5 h-3.5 text-cyan-400" />
           )}
         </button>
       </div>

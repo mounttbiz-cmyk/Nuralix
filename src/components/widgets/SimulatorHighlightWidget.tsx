@@ -27,17 +27,24 @@ export function SimulatorHighlightWidget() {
     <ContainerTile span={4} id="widget_simulator_highlight">
       <div className="space-y-4">
         {/* Header */}
-        <div className="flex flex-col @sm:flex-row @sm:items-center justify-between gap-2 pb-3 border-b border-line">
-          <div>
-            <div className="flex items-center gap-2">
-              <Compass className="w-4 h-4 text-brass" />
-              <h2 className="text-xs font-semibold text-text uppercase tracking-wider">
-                Decision Simulator: Hire Senior AE
-              </h2>
+        <div className="flex flex-col @sm:flex-row @sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <Compass className="w-4 h-4" />
             </div>
-            <p className="text-[11px] text-text-muted">
-              Monte Carlo forecast (1,000 runs) · Ramp-up: 4 months · Salary: ₹15L loaded
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+                  Decision Simulator: Sales AE Expansion
+                </h2>
+                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-300 font-mono font-semibold">
+                  Monte Carlo (1,000 runs)
+                </span>
+              </div>
+              <p className="text-[11px] text-text-muted">
+                Ramp-up: 4 months · Salary: ₹15L loaded · Expected quota: ₹60L ARR
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -46,10 +53,10 @@ export function SimulatorHighlightWidget() {
               type="button"
               onClick={runMonteCarlo}
               disabled={isRunning}
-              className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md bg-brass text-white shadow-sm hover:brightness-110 disabled:opacity-50 btn-tactile"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-md shadow-cyan-500/20 hover:brightness-110 disabled:opacity-50 btn-tactile cursor-pointer"
             >
-              <Play className="w-3 h-3 fill-current" />
-              <span>{isRunning ? `Simulating (${iterations})…` : "Re-run Model"}</span>
+              <Play className={`w-3 h-3 fill-current ${isRunning ? "animate-spin" : ""}`} />
+              <span>{isRunning ? `Simulating (${iterations})…` : "Re-run Simulation"}</span>
             </button>
           </div>
         </div>
@@ -57,84 +64,93 @@ export function SimulatorHighlightWidget() {
         {/* Fan Chart & Confidence Bands (§10.3) */}
         <div className="grid grid-cols-1 @lg:grid-cols-3 gap-4 items-center">
           {/* Fan Chart Preview */}
-          <div className="p-4 rounded-lg bg-surface-2/60 border border-line @lg:col-span-2 space-y-2">
+          <div className="p-4 rounded-xl bg-surface-2/50 border border-white/[0.07] @lg:col-span-2 space-y-2">
             <div className="flex items-center justify-between text-xs text-text-muted">
-              <span>Cumulative Net Cash Impact (12-Month Horizon)</span>
-              <span className="text-[10px] font-mono">P10 — P50 — P90</span>
+              <span className="font-medium text-slate-200">Cumulative Net Cash Impact (12-Month Horizon)</span>
+              <span className="text-[10px] font-mono text-cyan-400 font-semibold">P10 — P50 — P90 Confidence Band</span>
             </div>
 
             {/* SVG Visualizing Fan Band */}
             <div className="relative h-28 w-full">
               <svg className="w-full h-full" viewBox="0 0 400 100" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="fan-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#00D9FF" stopOpacity="0.08" />
+                    <stop offset="60%" stopColor="#6366F1" stopOpacity="0.22" />
+                    <stop offset="100%" stopColor="#10B981" stopOpacity="0.28" />
+                  </linearGradient>
+                </defs>
+
                 {/* Zero axis */}
-                <line x1="0" y1="45" x2="400" y2="45" stroke="var(--line-strong)" strokeDasharray="3,3" />
+                <line x1="0" y1="45" x2="400" y2="45" stroke="rgba(255,255,255,0.15)" strokeDasharray="3,3" />
 
                 {/* Shaded P10-P90 Confidence Band */}
                 <polygon
                   points="0,45 80,55 160,70 240,65 320,40 400,15 400,60 320,85 240,92 160,88 80,68 0,45"
-                  fill="var(--brass)"
-                  fillOpacity="0.15"
+                  fill="url(#fan-grad)"
                 />
 
                 {/* P50 Expected Median Line */}
                 <polyline
                   points="0,45 80,60 160,78 240,75 320,58 400,35"
                   fill="none"
-                  stroke="var(--brass)"
+                  stroke="#00D9FF"
                   strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
 
                 {/* Current Baseline trajectory */}
                 <polyline
                   points="0,45 80,48 160,52 240,56 320,60 400,64"
                   fill="none"
-                  stroke="var(--text-muted)"
+                  stroke="#64748B"
                   strokeWidth="1.5"
                   strokeDasharray="4,4"
                 />
               </svg>
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-text-muted">
-              <span>Month 0 (Hire)</span>
-              <span>Month 4 (Ramp complete)</span>
-              <span className="text-jade font-semibold">Month 7 (Breakeven)</span>
-              <span>Month 12</span>
+            <div className="flex items-center justify-between text-[11px] text-text-muted font-mono">
+              <span>Mo 0 (Hire)</span>
+              <span>Mo 4 (Ramp)</span>
+              <span className="text-jade font-semibold">Mo 7 (Breakeven)</span>
+              <span>Mo 12 (+₹4.2L)</span>
             </div>
           </div>
 
           {/* Three Outcome Columns (Worst, Expected, Best) (§10.3) */}
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="p-2.5 rounded-lg border border-line bg-surface-2/40">
-              <span className="text-[10px] uppercase font-bold text-rust block">P10 (Pessimistic)</span>
-              <span className="text-sm font-bold num-tabular text-text block mt-1">-₹2,84,000</span>
-              <span className="text-[10px] text-text-muted">Breakeven: Mo 10</span>
+            <div className="p-3 rounded-xl border border-rust/30 bg-rust/10 space-y-1">
+              <span className="text-[10px] uppercase font-bold text-rust block font-mono">P10 Bear</span>
+              <span className="text-sm sm:text-base font-black num-tabular text-white font-mono block">-₹2.84L</span>
+              <span className="text-[10px] text-text-muted block">Breakeven: Mo 10</span>
             </div>
 
-            <div className="p-2.5 rounded-lg border border-brass/50 bg-brass-soft/20">
-              <span className="text-[10px] uppercase font-bold text-brass block">P50 (Expected)</span>
-              <span className="text-sm font-bold num-tabular text-text block mt-1">+₹4,20,000</span>
-              <span className="text-[10px] text-text-muted">Breakeven: Mo 7</span>
+            <div className="p-3 rounded-xl border border-cyan-400/50 bg-cyan-500/15 ring-1 ring-cyan-500/30 space-y-1">
+              <span className="text-[10px] uppercase font-bold text-cyan-400 block font-mono">P50 Expected</span>
+              <span className="text-sm sm:text-base font-black num-tabular text-white font-mono block">+₹4.20L</span>
+              <span className="text-[10px] text-cyan-300 block">Breakeven: Mo 7</span>
             </div>
 
-            <div className="p-2.5 rounded-lg border border-jade/30 bg-jade/10">
-              <span className="text-[10px] uppercase font-bold text-jade block">P90 (Optimistic)</span>
-              <span className="text-sm font-bold num-tabular text-text block mt-1">+₹8,92,000</span>
-              <span className="text-[10px] text-text-muted">Breakeven: Mo 5</span>
+            <div className="p-3 rounded-xl border border-jade/30 bg-jade/10 space-y-1">
+              <span className="text-[10px] uppercase font-bold text-jade block font-mono">P90 Bull</span>
+              <span className="text-sm sm:text-base font-black num-tabular text-white font-mono block">+₹8.92L</span>
+              <span className="text-[10px] text-text-muted block">Breakeven: Mo 5</span>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="pt-2 border-t border-line flex items-center justify-between text-xs">
+        <div className="pt-3 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
           <span className="text-text-muted">
-            In <strong>842 of 1,000 runs</strong>, cash reserve never fell below your ₹15L safety floor.
+            In <strong className="text-white">842 of 1,000 runs</strong>, cash reserve never breached your ₹15L safety floor.
           </span>
           <Link
             href="/simulator"
-            className="inline-flex items-center gap-1.5 text-brass hover:underline font-medium btn-tactile"
+            className="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-semibold btn-tactile cursor-pointer"
           >
-            <span>Full Scenario Sandbox</span>
+            <span>Launch Full Scenario Sandbox</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

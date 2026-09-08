@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ContainerTile } from "../ui/ContainerTile";
 import { ProvenanceBadge } from "../ui/Badge";
-import { TrendingUp, TrendingDown, HelpCircle, MessageSquare } from "lucide-react";
+import { TrendingUp, TrendingDown, HelpCircle, MessageSquare, DollarSign, Clock, Users, Percent, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 interface KpiItem {
@@ -14,7 +14,11 @@ interface KpiItem {
   direction: "up" | "down";
   sentiment: "positive" | "negative";
   basis: string;
-  sparkline: number[];
+  color: string;
+  gradientId: string;
+  icon: React.ReactNode;
+  points: string;
+  areaPoints: string;
   provenance: "from_data" | "benchmark" | "estimate";
 }
 
@@ -56,7 +60,11 @@ export function KpiGridWidget() {
       direction: "up",
       sentiment: "positive",
       basis: "vs last month",
-      sparkline: [38, 41, 42, 45, 46, 48],
+      color: "#00D9FF",
+      gradientId: "grad-mrr",
+      icon: <DollarSign className="w-4 h-4 text-cyan-400" />,
+      points: "0,20 15,16 30,17 45,9 60,7 75,3",
+      areaPoints: "0,20 15,16 30,17 45,9 60,7 75,3 75,25 0,25",
       provenance: "from_data",
     },
     {
@@ -66,19 +74,27 @@ export function KpiGridWidget() {
       delta: "+0.8 mo",
       direction: "up",
       sentiment: Number(runwayMonths) >= 6 ? "positive" : "negative",
-      basis: "healthy buffer",
-      sparkline: [7.2, 7.4, 7.6, 7.8, 7.9, Number(runwayMonths) || 8.0],
+      basis: "liquid capital",
+      color: "#F59E0B",
+      gradientId: "grad-runway",
+      icon: <Clock className="w-4 h-4 text-amber-400" />,
+      points: "0,19 15,18 30,14 45,13 60,9 75,5",
+      areaPoints: "0,19 15,18 30,14 45,13 60,9 75,5 75,25 0,25",
       provenance: "from_data",
     },
     {
       id: "rev_head",
-      label: "Annual Revenue Per Head",
+      label: "Annual Revenue / Head",
       value: `₹${revPerHead.toLocaleString("en-IN")}`,
       delta: "+8.2%",
       direction: "up",
       sentiment: "positive",
-      basis: `${teamSize} FTEs`,
-      sparkline: [102, 104, 105, 106, 107, 108],
+      basis: `${teamSize} team members`,
+      color: "#8B5CF6",
+      gradientId: "grad-revhead",
+      icon: <Users className="w-4 h-4 text-violet-400" />,
+      points: "0,18 15,15 30,16 45,10 60,8 75,4",
+      areaPoints: "0,18 15,15 30,16 45,10 60,8 75,4 75,25 0,25",
       provenance: "from_data",
     },
     {
@@ -88,8 +104,12 @@ export function KpiGridWidget() {
       delta: "+2.3%",
       direction: "up",
       sentiment: "positive",
-      basis: "top quartile",
-      sparkline: [76, 78, 79, 80, 81, 82.4],
+      basis: "top 10% quartile",
+      color: "#10B981",
+      gradientId: "grad-margin",
+      icon: <Percent className="w-4 h-4 text-emerald-400" />,
+      points: "0,17 15,14 30,15 45,11 60,7 75,3",
+      areaPoints: "0,17 15,14 30,15 45,11 60,7 75,3 75,25 0,25",
       provenance: "benchmark",
     },
   ];
@@ -97,59 +117,92 @@ export function KpiGridWidget() {
   return (
     <ContainerTile span={4} id="widget_kpi_board">
       <div className="space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-line">
-          <div>
-            <h2 className="text-xs font-semibold text-text uppercase tracking-wider">
-              Core Performance Indicators
-            </h2>
-            <p className="text-[11px] text-text-muted">
-              Live telemetry matched to {industryLabel} in Indian Rupees (₹)
-            </p>
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/[0.08]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+                Core Performance Indicators
+              </h2>
+              <p className="text-[11px] text-text-muted">
+                Continuous telemetry tailored for {industryLabel} in Indian Rupees (₹)
+              </p>
+            </div>
           </div>
-          <span className="text-[11px] text-text-muted font-mono">Updated just now</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted border border-white/[0.08] font-mono">
+              Live Stream
+            </span>
+          </div>
         </div>
 
         {/* 4-column KPI cards grid */}
-        <div className="grid grid-cols-1 @sm:grid-cols-2 @lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 @sm:grid-cols-2 @lg:grid-cols-4 gap-3.5">
           {kpis.map(kpi => (
             <div
               key={kpi.id}
-              className="p-3.5 rounded-lg bg-surface-2/60 border border-line flex flex-col justify-between space-y-2 card-hover"
+              className="p-4 rounded-xl bg-surface-2/50 border border-white/[0.07] hover:border-white/15 flex flex-col justify-between space-y-3 transition-all duration-200 group relative overflow-hidden"
             >
-              <div className="flex items-start justify-between">
-                <span className="text-xs text-text-muted font-medium truncate max-w-[140px]">
-                  {kpi.label}
-                </span>
+              {/* Top ambient color glow */}
+              <div
+                className="absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-10 pointer-events-none -mr-8 -mt-8"
+                style={{ backgroundColor: kpi.color }}
+              />
+
+              <div className="flex items-start justify-between relative z-10">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-surface/80 border border-white/[0.08]">
+                    {kpi.icon}
+                  </div>
+                  <span className="text-xs text-text-muted font-medium truncate max-w-[130px]">
+                    {kpi.label}
+                  </span>
+                </div>
                 <ProvenanceBadge type={kpi.provenance} />
               </div>
 
-              {/* Value and sparkline */}
-              <div className="flex items-baseline justify-between pt-1">
-                <span className="text-xl sm:text-2xl font-bold num-tabular text-text tracking-tight font-mono">
+              {/* Value and SVG Sparkline with Gradient Fill */}
+              <div className="flex items-end justify-between pt-1 relative z-10">
+                <div className="text-2xl sm:text-3xl font-extrabold num-tabular text-white tracking-tight font-mono">
                   {kpi.value}
-                </span>
+                </div>
 
-                {/* SVG Mini Sparkline */}
-                <svg className="w-16 h-6 stroke-brass fill-none stroke-[1.75]" viewBox="0 0 60 20">
+                {/* SVG Sparkline */}
+                <svg className="w-20 h-7 shrink-0 overflow-visible" viewBox="0 0 75 25">
+                  <defs>
+                    <linearGradient id={kpi.gradientId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={kpi.color} stopOpacity="0.35" />
+                      <stop offset="100%" stopColor={kpi.color} stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <polygon
+                    points={kpi.areaPoints}
+                    fill={`url(#${kpi.gradientId})`}
+                  />
                   <polyline
-                    points="0,18 12,14 24,15 36,9 48,7 60,3"
+                    points={kpi.points}
+                    fill="none"
+                    stroke={kpi.color}
+                    strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </svg>
               </div>
 
-              {/* Delta & Basis with 'Why did this move?' */}
-              <div className="flex items-center justify-between pt-1 border-t border-line/60 text-[11px]">
+              {/* Delta & Basis with 'Discuss with AI' */}
+              <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[11px] relative z-10">
                 <div
                   className={`inline-flex items-center gap-1 font-semibold num-tabular ${
                     kpi.sentiment === "positive" ? "text-jade" : "text-rust"
                   }`}
                 >
                   {kpi.direction === "up" ? (
-                    <TrendingUp className="w-3 h-3" />
+                    <TrendingUp className="w-3.5 h-3.5" />
                   ) : (
-                    <TrendingDown className="w-3 h-3" />
+                    <TrendingDown className="w-3.5 h-3.5" />
                   )}
                   <span>{kpi.delta}</span>
                   <span className="text-text-muted font-normal ml-0.5">{kpi.basis}</span>
@@ -157,10 +210,10 @@ export function KpiGridWidget() {
 
                 <Link
                   href="/chat"
-                  title="Discuss with AI Executive"
-                  className="text-text-muted hover:text-brass p-0.5 rounded btn-tactile cursor-pointer"
+                  title="Ask Copilot about this metric"
+                  className="p-1 rounded-lg text-text-muted hover:text-cyan-400 hover:bg-white/[0.06] transition-colors btn-tactile cursor-pointer"
                 >
-                  <MessageSquare className="w-3 h-3" />
+                  <MessageSquare className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>

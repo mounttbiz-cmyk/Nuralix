@@ -35,7 +35,7 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
       {/* Bottom Fixed Tab Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-line pb-[env(safe-area-inset-bottom)]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#080C16]/95 backdrop-blur-xl border-t border-white/[0.08] pb-[env(safe-area-inset-bottom)]"
       >
         <div className="grid grid-cols-5 h-14 items-center justify-around px-1">
           {primaryTabs.map(tab => {
@@ -44,8 +44,8 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
               <Link
                 key={tab.id}
                 href={tab.href}
-                className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 rounded-md transition-colors btn-tactile ${
-                  isActive ? "text-brass font-medium" : "text-text-muted hover:text-text"
+                className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 rounded-xl transition-all btn-tactile ${
+                  isActive ? "text-cyan-400 font-semibold" : "text-text-muted hover:text-text"
                 }`}
               >
                 <DynamicIcon name={tab.icon} className="w-5 h-5 mb-0.5" />
@@ -58,8 +58,8 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
           <button
             type="button"
             onClick={() => setMoreOpen(!moreOpen)}
-            className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 rounded-md transition-colors btn-tactile ${
-              moreOpen ? "text-brass font-medium" : "text-text-muted hover:text-text"
+            className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 rounded-xl transition-all btn-tactile ${
+              moreOpen ? "text-cyan-400 font-semibold" : "text-text-muted hover:text-text"
             }`}
             aria-expanded={moreOpen}
             aria-label="More navigation links"

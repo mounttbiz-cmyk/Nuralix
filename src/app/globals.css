@@ -5,21 +5,28 @@
 @tailwind utilities;
 
 :root, [data-theme="dark"] {
-  /* Refined enterprise dark palette as default (comfortable slate-navy) */
-  --bg:          #111823;   /* Soft slate navy */
-  --surface:     #182232;   /* Elevated slate surface */
-  --surface-2:   #212E42;   /* Interactive slate layer */
-  --line:        #2B3C55;   /* Refined borders */
-  --line-strong: #3E5373;
+  /* High-end Cosmic Obsidian & Void Palette */
+  --bg:          #07090E;   /* Deepest cosmic obsidian */
+  --surface:     #0D131F;   /* Elevated obsidian surface with rich blue undertone */
+  --surface-2:   #131B2C;   /* Interactive layer */
+  --line:        rgba(255, 255, 255, 0.08);   /* Refined hairline border */
+  --line-strong: rgba(255, 255, 255, 0.16);
   --text:        #F8FAFC;   /* Crisp clean high contrast white */
   --text-muted:  #94A3B8;   /* Balanced slate muted */
-  --brass:       #E5B83B;   /* Radiant metallic gold matching ribbon logo */
-  --brass-soft:  #2D2511;
-  --jade:        #34D399;
-  --rust:        #F87171;
-  --amber:       #FBBF24;
-  --shadow:      none;      /* Dark separates with value, not shadow */
-  --grid:        #1E2A3C;
+  
+  /* Primary metallic & neon accents matching Nuralix branding */
+  --cyan:        #00D9FF;   /* Nuralix electric cyan */
+  --cyan-soft:   rgba(0, 217, 255, 0.12);
+  --violet:      #6366F1;   /* Royal violet / indigo */
+  --violet-soft: rgba(99, 102, 241, 0.12);
+  --brass:       #00D9FF;   /* Primary accent maps to brilliant cyan */
+  --brass-soft:  rgba(0, 217, 255, 0.12);
+  --gold:        #F59E0B;   /* Warm champagne gold */
+  --jade:        #10B981;   /* Cyber emerald */
+  --rust:        #F43F5E;   /* Rose crimson */
+  --amber:       #F59E0B;   /* Amber */
+  --shadow:      0 12px 36px 0 rgba(0, 0, 0, 0.45);
+  --grid:        rgba(255, 255, 255, 0.03);
 
   /* Motion tokens (§4.1) */
   --dur-instant: 90ms;
@@ -41,11 +48,16 @@
   --line-strong: #CBD5E1;
   --text:        #0F172A;   /* Deep slate text */
   --text-muted:  #64748B;   /* Slate muted */
-  --brass:       #B2891E;   /* Rich gold matching ribbon logo */
-  --brass-soft:  #FEF9E7;
-  --jade:        #10B981;   /* Emerald jade */
-  --rust:        #EF4444;   /* Crimson rust */
-  --amber:       #F59E0B;
+  --cyan:        #0098B8;
+  --cyan-soft:   rgba(0, 152, 184, 0.10);
+  --violet:      #4F46E5;
+  --violet-soft: rgba(79, 70, 229, 0.10);
+  --brass:       #0284C7;
+  --brass-soft:  rgba(2, 132, 199, 0.10);
+  --gold:        #D97706;
+  --jade:        #059669;
+  --rust:        #E11D48;
+  --amber:       #D97706;
   --shadow:      0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.03);
   --grid:        #EDF2F7;
 }
@@ -142,11 +154,57 @@ body, [data-surface] {
 
 @media (hover: hover) {
   .card-hover {
-    transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+    transition: transform 200ms var(--ease-out), border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
   }
   .card-hover:hover {
-    border-color: var(--line-strong);
+    border-color: rgba(0, 217, 255, 0.35);
+    box-shadow: 0 16px 36px -12px rgba(0, 217, 255, 0.12);
+    transform: translateY(-1.5px);
   }
+}
+
+/* Glassmorphic card styling & lighting */
+.glass-card {
+  position: relative;
+  background: rgba(13, 19, 31, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.05);
+}
+
+/* Hairline gradient accent along top edge of card */
+.hairline-accent::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.45), rgba(99, 102, 241, 0.45), transparent);
+  pointer-events: none;
+}
+
+/* Live beacon status animation */
+@keyframes beaconPulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.beacon-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background-color: var(--jade);
+  animation: beaconPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 /* Accessibility: Reduced motion baseline (§4.5) */

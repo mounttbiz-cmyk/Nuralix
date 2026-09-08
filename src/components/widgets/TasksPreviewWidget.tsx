@@ -50,52 +50,65 @@ export function TasksPreviewWidget() {
 
   return (
     <ContainerTile span={2} id="widget_priority_tasks">
-      <div className="flex flex-col h-full justify-between space-y-3">
+      <div className="flex flex-col h-full justify-between space-y-4">
         <div>
-          <div className="flex items-center justify-between pb-2.5 border-b border-line">
-            <div className="flex items-center gap-2">
-              <CheckSquare className="w-3.5 h-3.5 text-jade" />
-              <h2 className="text-xs font-semibold text-text uppercase tracking-wider">
-                Execution Queue
-              </h2>
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-jade/15 border border-jade/30 flex items-center justify-center text-jade">
+                <CheckSquare className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+                  Autonomous Execution Queue
+                </h2>
+                <span className="text-[10px] text-text-muted">
+                  Assigned across AI executives and founder
+                </span>
+              </div>
             </div>
-            <span className="text-[10px] text-text-muted">
-              {tasks.filter(t => !t.completed).length} open
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-semibold font-mono border border-cyan-500/30">
+              {tasks.filter(t => !t.completed).length} Pending
             </span>
           </div>
 
-          <div className="divide-y divide-line/60 pt-1">
+          <div className="space-y-2.5 pt-3">
             {tasks.map(task => (
               <div
                 key={task.id}
                 onClick={() => toggleTask(task.id)}
-                className="py-2.5 flex items-start gap-2.5 cursor-pointer group"
+                className={`p-3 rounded-xl border flex items-start gap-3 cursor-pointer transition-all ${
+                  task.completed
+                    ? "bg-surface-2/20 border-white/[0.04] opacity-60"
+                    : "bg-surface-2/40 border-white/[0.06] hover:border-white/15 hover:bg-surface-2/70"
+                }`}
               >
                 <button
                   type="button"
-                  className="mt-0.5 text-text-muted group-hover:text-brass transition-colors"
+                  className="mt-0.5 shrink-0 text-text-muted group-hover:text-cyan-400 transition-colors"
                   aria-label={task.completed ? "Mark incomplete" : "Mark completed"}
                 >
                   {task.completed ? (
                     <CheckCircle2 className="w-4 h-4 text-jade" />
                   ) : (
-                    <Circle className="w-4 h-4 text-line-strong" />
+                    <Circle className="w-4 h-4 text-text-muted hover:text-cyan-400" />
                   )}
                 </button>
                 <div className="flex-1 min-w-0">
                   <div
-                    className={`text-xs font-medium ${
-                      task.completed ? "line-through text-text-muted" : "text-text"
+                    className={`text-xs font-semibold leading-snug transition-colors ${
+                      task.completed ? "line-through text-text-muted/60" : "text-text"
                     }`}
                   >
                     {task.title}
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-text-muted mt-0.5">
-                    <span className="text-brass">{task.owner}</span>
-                    <span>·</span>
-                    <span>{task.due}</span>
-                    <span>·</span>
-                    <span className="truncate">{task.source}</span>
+                  <div className="flex flex-wrap items-center gap-2 text-[10px] text-text-muted mt-1.5 font-mono">
+                    <span className="px-1.5 py-0.2 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/25 font-sans font-medium">
+                      {task.owner}
+                    </span>
+                    <span className="text-white/20">·</span>
+                    <span className="text-amber-400 font-medium font-sans">{task.due}</span>
+                    <span className="text-white/20">·</span>
+                    <span className="truncate text-text-muted/80">{task.source}</span>
                   </div>
                 </div>
               </div>
@@ -103,13 +116,13 @@ export function TasksPreviewWidget() {
           </div>
         </div>
 
-        <div className="pt-2 border-t border-line">
+        <div className="pt-3 border-t border-white/[0.08]">
           <Link
             href="/tasks"
-            className="flex items-center justify-between text-xs text-brass hover:underline font-medium btn-tactile"
+            className="flex items-center justify-between text-xs text-cyan-400 hover:text-cyan-300 font-semibold btn-tactile group"
           >
             <span>View Kanban Board & Action Plans</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
       </div>

@@ -116,84 +116,155 @@ function DashboardContent() {
         </div>
       )}
 
-      {/* Top Header & Tenant Profile Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-line bg-surface shadow-theme">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-brass-soft flex items-center justify-center text-brass">
-            <Layers className="w-5 h-5" />
+      {/* Top Header & Executive Command Center */}
+      <div className="glass-card hairline-accent p-5 sm:p-6 space-y-4">
+        {/* Live Status Beacon & Timeframe Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+          <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-surface-2/70 border border-white/[0.08] text-[11px]">
+            <span className="beacon-dot" />
+            <span className="font-semibold text-text">Autonomous Intelligence Engine</span>
+            <span className="text-white/20">|</span>
+            <span className="text-cyan-400 font-medium">Telemetry Synced Live</span>
+            <span className="text-white/20">|</span>
+            <span className="font-mono text-[10px] text-text-muted">v{baseConfig.version} Registry</span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-text font-sans">{companyName} Dashboard</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2 text-text-muted border border-line font-mono font-semibold">
-                v{baseConfig.version} Registry
-              </span>
-            </div>
-            <p className="text-xs text-text-muted">
-              Widgets and telemetry configured for {selectedIndustry.toUpperCase()} growth stage.
-            </p>
+
+          <div className="flex items-center gap-1.5 p-0.5 bg-surface-2/60 rounded-xl border border-white/[0.06] text-xs">
+            {["Live Today", "7D Trend", "Month to Date", "Q3 Live"].map((tf, i) => (
+              <button
+                key={tf}
+                type="button"
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                  i === 0
+                    ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-xs"
+                    : "text-text-muted hover:text-text"
+                }`}
+              >
+                {tf}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Action Controls: Profile Selector + Customize Dashboard Button */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Profile Switcher */}
-          <div className="flex items-center gap-1 p-1 bg-surface-2 rounded-xl border border-line">
-            {[
-              { ind: "saas", mod: "subscription", label: "B2B SaaS" },
-              { ind: "d2c", mod: "one-time", label: "D2C Brand" },
-              { ind: "agency", mod: "retainer", label: "Agency" },
-            ].map(profile => {
-              const isActive = selectedIndustry === profile.ind;
-              return (
-                <button
-                  key={profile.ind}
-                  type="button"
-                  onClick={() => {
-                    setSelectedIndustry(profile.ind as any);
-                    setSelectedModel(profile.mod as any);
-                  }}
-                  className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all btn-tactile ${
-                    isActive
-                      ? "bg-surface text-text shadow-sm border border-line font-bold"
-                      : "text-text-muted hover:text-text"
-                  }`}
-                >
-                  {profile.label}
-                </button>
-              );
-            })}
+        {/* Main Title, Profile Switcher & Action Controls */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight font-sans">
+                {companyName}
+              </h1>
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-cyan-300 border border-cyan-500/30 font-semibold font-mono tracking-normal">
+                {selectedIndustry.toUpperCase()} · Growth Plan
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl">
+              Real-time enterprise dashboard synthesized by Nuralix AI. Cross-correlating cash reserves, unit economics, and operational playbooks.
+            </p>
           </div>
 
-          {/* Customize Dashboard Button */}
-          <button
-            type="button"
-            onClick={() => setIsEditingLayout(!isEditingLayout)}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all btn-tactile ${
-              isEditingLayout
-                ? "bg-brass text-white border-brass shadow-md font-bold"
-                : "bg-surface border-line text-text hover:bg-surface-2"
-            }`}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>{isEditingLayout ? "Editing Dashboard…" : "Customize Dashboard"}</span>
-          </button>
+          {/* Action Controls: Profile Selector + Customize Dashboard Button */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Profile Switcher */}
+            <div className="flex items-center gap-1 p-1 bg-surface-2/70 rounded-xl border border-white/[0.08]">
+              {[
+                { ind: "saas", mod: "subscription", label: "B2B SaaS" },
+                { ind: "d2c", mod: "one-time", label: "D2C Brand" },
+                { ind: "agency", mod: "retainer", label: "Agency" },
+              ].map(profile => {
+                const isActive = selectedIndustry === profile.ind;
+                return (
+                  <button
+                    key={profile.ind}
+                    type="button"
+                    onClick={() => {
+                      setSelectedIndustry(profile.ind as any);
+                      setSelectedModel(profile.mod as any);
+                    }}
+                    className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all btn-tactile ${
+                      isActive
+                        ? "bg-cyan-500/20 text-cyan-300 shadow-sm border border-cyan-500/30 font-semibold"
+                        : "text-text-muted hover:text-text hover:bg-white/[0.04]"
+                    }`}
+                  >
+                    {profile.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Customize Dashboard Button */}
+            <button
+              type="button"
+              onClick={() => setIsEditingLayout(!isEditingLayout)}
+              className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-2 transition-all btn-tactile ${
+                isEditingLayout
+                  ? "bg-gradient-to-r from-cyan-500 to-indigo-600 text-white border-cyan-400 shadow-lg shadow-cyan-500/25 font-bold"
+                  : "bg-surface-2/80 border-white/[0.08] text-text hover:bg-surface-2 hover:border-white/15"
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+              <span>{isEditingLayout ? "Exit Layout Editor" : "Customize Layout"}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Quick-Glance Executive KPI Ribbon */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+          <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Overall Health</span>
+              <span className="text-base font-extrabold text-white font-mono">82 / 100</span>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-jade/15 text-jade font-semibold font-mono border border-jade/30">
+              Optimal
+            </span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Liquid Runway</span>
+              <span className="text-base font-extrabold text-cyan-400 font-mono">8.0 mo</span>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-semibold font-mono border border-cyan-500/30">
+              Safe Zone
+            </span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Execution Queue</span>
+              <span className="text-base font-extrabold text-white font-mono">3 Active</span>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-300 font-semibold font-mono border border-violet-500/30">
+              On Schedule
+            </span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Bottleneck Gaps</span>
+              <span className="text-base font-extrabold text-amber-400 font-mono">3 Flagged</span>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 font-semibold font-mono border border-amber-500/30">
+              Action Ready
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Interactive Dashboard Customization Panel */}
       {isEditingLayout && (
-        <div className="p-5 rounded-2xl border-2 border-brass/50 bg-surface shadow-xl space-y-4 animate-fade-in">
-          <div className="flex items-center justify-between pb-3 border-b border-line">
+        <div className="p-5 rounded-2xl border border-cyan-500/40 bg-surface/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/10 space-y-4 animate-fade-in">
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
             <div>
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-brass" />
-                <h2 className="text-xs font-bold text-text uppercase tracking-wider font-sans">
-                  Customize Your Dashboard
+                <Sliders className="w-4 h-4 text-cyan-400" />
+                <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+                  Customize Executive Layout
                 </h2>
               </div>
               <p className="text-xs text-text-muted mt-0.5">
-                Toggle cards, change column widths, and personalize your executive view.
+                Toggle widget visibility, adjust grid column spans, or reset to optimal preset.
               </p>
             </div>
 
@@ -201,16 +272,16 @@ function DashboardContent() {
               <button
                 type="button"
                 onClick={handleResetLayout}
-                className="px-3 py-1 text-xs font-semibold rounded-lg border border-line text-text-muted hover:text-text hover:bg-surface-2 flex items-center gap-1"
+                className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-white/[0.08] text-text-muted hover:text-text hover:bg-surface-2 flex items-center gap-1.5 transition-all"
               >
-                <RotateCcw className="w-3 h-3" />
-                <span>Reset Default</span>
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset Preset</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleSaveLayout}
-                className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-brass text-white shadow-md hover:brightness-110 flex items-center gap-1.5 btn-tactile"
+                className="px-4 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20 hover:brightness-110 flex items-center gap-1.5 btn-tactile"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>Save Layout</span>
@@ -223,18 +294,18 @@ function DashboardContent() {
             {activeWidgets.map(widget => (
               <div
                 key={widget.id}
-                className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs transition-all ${
+                className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs transition-all ${
                   widget.enabled
-                    ? "bg-surface-2/70 border-brass/40"
-                    : "bg-surface-2/20 border-line opacity-60"
+                    ? "bg-surface-2/80 border-cyan-500/40 shadow-xs"
+                    : "bg-surface-2/20 border-white/[0.06] opacity-50"
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <button
                     type="button"
                     onClick={() => toggleWidgetVisibility(widget.id)}
-                    className={`p-1 rounded-md transition-colors ${
-                      widget.enabled ? "text-brass hover:text-rust" : "text-text-muted hover:text-brass"
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      widget.enabled ? "text-cyan-400 bg-cyan-500/15 hover:text-rust" : "text-text-muted hover:text-cyan-400"
                     }`}
                     title={widget.enabled ? "Hide from dashboard" : "Show on dashboard"}
                   >
@@ -251,10 +322,10 @@ function DashboardContent() {
                         key={span}
                         type="button"
                         onClick={() => changeWidgetSpan(widget.id, span)}
-                        className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold transition-all ${
+                        className={`text-[10px] px-2.5 py-1 rounded-lg font-mono font-semibold transition-all ${
                           widget.defaultSpan === span
-                            ? "bg-brass text-white"
-                            : "bg-surface border border-line text-text-muted hover:text-text"
+                            ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                            : "bg-surface border border-white/[0.08] text-text-muted hover:text-text"
                         }`}
                       >
                         {span === 4 ? "Full" : "Half"}
@@ -269,7 +340,7 @@ function DashboardContent() {
       )}
 
       {/* Dynamic 4-column Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {activeWidgets
           .filter(w => w.enabled)
           .map(widget => (

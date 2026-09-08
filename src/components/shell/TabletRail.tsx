@@ -19,18 +19,18 @@ export function TabletRail({ navItems }: TabletRailProps) {
   const { resolvedTheme, cycleTheme } = useTheme();
 
   return (
-    <aside className="hidden md:flex lg:hidden flex-col items-center w-16 h-screen sticky top-0 bg-surface border-r border-line select-none z-30 py-3">
+    <aside className="hidden md:flex lg:hidden flex-col items-center w-16 h-screen sticky top-0 bg-[#080C16]/95 backdrop-blur-2xl border-r border-white/[0.07] select-none z-30 py-3">
       {/* Brand Icon with Ribbon Logo */}
       <Link
         href="/dashboard"
-        className="w-10 h-10 rounded-lg bg-surface-2 border border-line flex items-center justify-center p-1 shadow-sm mb-6"
+        className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-transparent border border-cyan-500/30 flex items-center justify-center p-1.5 shadow-sm mb-6 hover:scale-105 transition-transform"
         title="Nuralix Dashboard"
       >
         <Image
           src="/logo.png"
           alt="Nuralix Logo"
-          width={28}
-          height={28}
+          width={26}
+          height={26}
           className="object-contain"
         />
       </Link>
@@ -44,15 +44,15 @@ export function TabletRail({ navItems }: TabletRailProps) {
               key={item.id}
               href={item.href}
               title={item.label}
-              className={`relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors btn-tactile group ${
+              className={`relative flex items-center justify-center w-10 h-10 rounded-xl transition-all btn-tactile group ${
                 isActive
-                  ? "bg-surface-2 text-brass border border-line-strong"
-                  : "text-text-muted hover:text-text hover:bg-surface-2/60"
+                  ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-sm"
+                  : "text-text-muted hover:text-text hover:bg-white/[0.05]"
               }`}
             >
-              <DynamicIcon name={item.icon} className="w-5 h-5" />
+              <DynamicIcon name={item.icon} className={`w-5 h-5 ${isActive ? "text-cyan-400" : "text-text-muted"}`} />
               {item.badge && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brass" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-surface" />
               )}
             </Link>
           );

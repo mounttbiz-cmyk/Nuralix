@@ -36,6 +36,15 @@ const config: Config = {
           DEFAULT: "var(--brass)",
           soft: "var(--brass-soft)",
         },
+        cyan: {
+          DEFAULT: "var(--cyan)",
+          soft: "var(--cyan-soft)",
+        },
+        violet: {
+          DEFAULT: "var(--violet)",
+          soft: "var(--violet-soft)",
+        },
+        gold: "var(--gold)",
         jade: "var(--jade)",
         rust: "var(--rust)",
         amber: "var(--amber)",
