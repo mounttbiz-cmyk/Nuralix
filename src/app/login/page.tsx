@@ -365,22 +365,6 @@ export default function LoginPage() {
                     : "Sign In to Business OS →"}
                 </button>
               </form>
-
-              {/* Quick Onboarding Demo Option */}
-              <div className="pt-2 border-t border-line">
-                <button
-                  id="btn-demo-intake"
-                  type="button"
-                  onClick={() => handleBusinessAuth(undefined, "demo")}
-                  className="w-full py-2 px-3 rounded-lg border border-line text-xs font-semibold text-text-muted hover:text-text hover:bg-surface-2 transition-all flex items-center justify-between"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-brass" />
-                    <span>Explore Demo Intake (Bypass Login)</span>
-                  </span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
             </>
           ) : (
             /* Developer / Superadmin Portal Login */
