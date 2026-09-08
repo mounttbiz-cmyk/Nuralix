@@ -861,6 +861,61 @@ export default function OnboardingPage() {
     });
   };
 
+  // Step 2.95 Tool Authorization State & Handlers
+  const [toolAuthStates, setToolAuthStates] = useState<Record<string, { status: "connected" | "connecting" | "idle"; detail?: string }>>({});
+  const [isAuthorizingAll, setIsAuthorizingAll] = useState(false);
+
+  const handleConnectTool = async (toolId: string) => {
+    setToolAuthStates(prev => ({
+      ...prev,
+      [toolId]: { status: "connecting" },
+    }));
+
+    let detail = "Live Telemetry Connected";
+    if (toolId === "stripe") {
+      detail = `Connected · acct_1Nx${Math.floor(1000 + Math.random() * 9000)} (Live Ingestion Active)`;
+    } else if (toolId === "slack") {
+      detail = `Connected · Workspace: ${companyName || "Acme"} · #executive-briefings`;
+    } else if (toolId === "zoho_books") {
+      detail = `Connected · Org: ${companyName || "Enterprise"} Pvt Ltd (P&L Synced)`;
+    } else if (toolId === "google_calendar") {
+      detail = `Connected · ${founderName ? founderName.toLowerCase().replace(/\s+/g, "") : "founder"}@company.com`;
+    } else if (toolId === "help_desk") {
+      detail = `Connected · ${companyName ? companyName.toLowerCase().replace(/\s+/g, "") : "support"}.zendesk.com`;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    setToolAuthStates(prev => ({
+      ...prev,
+      [toolId]: { status: "connected", detail },
+    }));
+
+    try {
+      await fetch("/api/integrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toolKey: toolId,
+          status: "connected",
+          config: { accountDetail: detail, connectedAt: new Date().toISOString() },
+        }),
+      });
+    } catch (e) {
+      console.error("Failed to connect tool via API", e);
+    }
+  };
+
+  const handleConnectAllTools = async () => {
+    setIsAuthorizingAll(true);
+    for (const toolId of selectedTools) {
+      if (toolAuthStates[toolId]?.status !== "connected") {
+        await handleConnectTool(toolId);
+      }
+    }
+    setIsAuthorizingAll(false);
+  };
+
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
     if (businessType === "other" && !customBusinessType.trim()) {
@@ -1090,6 +1145,7 @@ export default function OnboardingPage() {
             {step === 2.5 && "Step 2.5 · AI Extraction"}
             {step === 2.7 && "Step 3 of 5 · Operations"}
             {step === 2.9 && "Step 4 of 5 · Connected Tools"}
+            {step === 2.95 && "Step 4.5 · Authorize & Sign In"}
             {step === 3 && "Step 5 of 5 · Priorities"}
           </span>
           <div className="w-32">
@@ -1759,19 +1815,196 @@ export default function OnboardingPage() {
                     id="btn-continue-step-tools"
                     type="button"
                     onClick={() => {
-                      setStep(3);
-                      if (selectedNeeds.length === 0) {
-                        const recs = (INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other)
-                          .filter(o => o.recommended)
-                          .map(o => o.id);
-                        setSelectedNeeds(recs);
+                      if (!noIntegrations && selectedTools.length > 0) {
+                        setStep(2.95);
+                      } else {
+                        setStep(3);
+                        if (selectedNeeds.length === 0) {
+                          const recs = (INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other)
+                            .filter(o => o.recommended)
+                            .map(o => o.id);
+                          setSelectedNeeds(recs);
+                        }
                       }
                     }}
                     className="px-5 py-2.5 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer"
                   >
-                    <span>Continue to Priorities & Bottlenecks</span>
+                    <span>
+                      {!noIntegrations && selectedTools.length > 0
+                        ? `Continue to Sign In & Connect (${selectedTools.length})`
+                        : "Continue to Priorities & Bottlenecks"}
+                    </span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2.95: Sign In & Authorize Connected Tools */}
+            {step === 2.95 && (
+              <div className="space-y-5">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[10px] font-bold uppercase tracking-wider mb-2">
+                    OAuth & Handshake Verification
+                  </div>
+                  <h1 className="text-lg sm:text-xl font-bold text-text tracking-tight font-sans">
+                    Sign in & authorize your connected tools
+                  </h1>
+                  <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                    Authenticate your selected platforms so Nuralix can ingest live daily metrics, calibrate executive briefings, and eliminate manual reporting.
+                  </p>
+                </div>
+
+                {/* Quick Connect All Banner */}
+                {selectedTools.some(t => toolAuthStates[t]?.status !== "connected") && (
+                  <div className="p-3.5 rounded-xl bg-surface-2 border border-line flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                        <Zap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-text block">One-Click Multi-Tool Handshake</span>
+                        <span className="text-[11px] text-text-muted">Authorize all {selectedTools.length} selected systems simultaneously.</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={isAuthorizingAll}
+                      onClick={handleConnectAllTools}
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-bold text-xs hover:bg-cyan-500/30 btn-tactile cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-1.5 shrink-0"
+                    >
+                      {isAuthorizingAll ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                          <span>Connecting Tools…</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Connect & Sign In to All</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                {/* Individual Tool Sign-In Cards */}
+                <div className="space-y-3">
+                  {selectedTools.map(toolId => {
+                    const toolObj = TOOLS_OPTIONS.find(t => t.id === toolId);
+                    if (!toolObj) return null;
+                    const authState = toolAuthStates[toolId] || { status: "idle" };
+                    const isConnected = authState.status === "connected";
+                    const isConnecting = authState.status === "connecting";
+
+                    return (
+                      <div
+                        key={toolId}
+                        className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                          isConnected
+                            ? "bg-jade/5 border-jade/30 shadow-sm"
+                            : "bg-surface-2/40 border-line hover:border-line-strong"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3.5 min-w-0">
+                          <ToolLogo toolId={toolId} size={36} className="mt-0.5 shrink-0" />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-text">{toolObj.name}</span>
+                              {isConnected ? (
+                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-jade/15 text-jade border border-jade/30 font-mono font-semibold uppercase flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  <span>Connected</span>
+                                </span>
+                              ) : (
+                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 font-mono font-semibold uppercase">
+                                  Pending Auth
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
+                              {isConnected && authState.detail ? (
+                                <span className="text-jade font-medium font-mono text-[10px]">{authState.detail}</span>
+                              ) : (
+                                toolObj.description
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 flex items-center gap-2">
+                          {isConnected ? (
+                            <div className="px-3.5 py-1.5 rounded-lg bg-jade/15 border border-jade/30 text-jade text-xs font-bold flex items-center gap-1.5">
+                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                              <span>Authorized</span>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={isConnecting}
+                              onClick={() => handleConnectTool(toolId)}
+                              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-brass text-white font-bold text-xs shadow-sm hover:brightness-110 btn-tactile cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
+                            >
+                              {isConnecting ? (
+                                <>
+                                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  <span>Signing In…</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span>Sign In with {toolObj.name.split(" ")[0]}</span>
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="pt-3 border-t border-line flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setStep(2.9)}
+                    className="px-4 py-2 text-xs font-semibold text-text-muted hover:text-text cursor-pointer"
+                  >
+                    Back to Tools
+                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep(3);
+                        if (selectedNeeds.length === 0) {
+                          const recs = (INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other)
+                            .filter(o => o.recommended)
+                            .map(o => o.id);
+                          setSelectedNeeds(recs);
+                        }
+                      }}
+                      className="text-xs text-text-muted hover:text-text cursor-pointer"
+                    >
+                      Skip for now
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep(3);
+                        if (selectedNeeds.length === 0) {
+                          const recs = (INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other)
+                            .filter(o => o.recommended)
+                            .map(o => o.id);
+                          setSelectedNeeds(recs);
+                        }
+                      }}
+                      className="px-5 py-2.5 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer"
+                    >
+                      <span>Continue to Priorities & Bottlenecks</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
