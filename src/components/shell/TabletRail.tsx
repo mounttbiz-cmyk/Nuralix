@@ -19,7 +19,7 @@ export function TabletRail({ navItems }: TabletRailProps) {
   const { resolvedTheme, cycleTheme } = useTheme();
 
   return (
-    <aside className="hidden md:flex lg:hidden flex-col items-center w-16 h-screen fixed inset-y-0 left-0 bg-[#080C16]/95 backdrop-blur-2xl border-r border-white/[0.07] select-none z-30 py-3">
+    <aside className="hidden md:flex lg:hidden flex-col items-center w-16 h-screen fixed inset-y-0 left-0 bg-surface/95 dark:bg-[#080C16]/95 backdrop-blur-2xl border-r border-line select-none z-30 py-3 transition-colors">
       {/* Brand Icon with Ribbon Logo */}
       <Link
         href="/dashboard"

@@ -4,12 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Layers,
-  CreditCard,
-  MessageSquare,
-  FileSpreadsheet,
-  Calendar,
-  LifeBuoy,
-  Radio,
   Phone,
   Check,
   Save,
@@ -17,6 +11,8 @@ import {
   AlertCircle,
   Palette
 } from "lucide-react";
+import { ToolLogo } from "@/components/tools/ToolLogo";
+import { PhoneCountryInput } from "@/components/ui/PhoneCountryInput";
 
 const TOOLS_OPTIONS = [
   {
@@ -24,42 +20,36 @@ const TOOLS_OPTIONS = [
     name: "Stripe",
     category: "Payments & Revenue",
     description: "Automatic sync of invoices, ARR/MRR subscriptions, refunds, and daily cash inflow.",
-    icon: CreditCard,
   },
   {
     id: "slack",
     name: "Slack",
     category: "Team Communication",
     description: "Executive channel alerts, solvency warnings, and bidirectional AI assistant bot.",
-    icon: MessageSquare,
   },
   {
     id: "zoho_books",
     name: "Zoho Books / QuickBooks",
     category: "Accounting & Ledgers",
     description: "P&L synchronization, vendor expenses, GST reconciliation, and burn tracking.",
-    icon: FileSpreadsheet,
   },
   {
     id: "google_calendar",
     name: "Google Calendar",
     category: "Meetings & Workload",
     description: "Meeting load telemetry, client discovery calls, and executive time-burn diagnostics.",
-    icon: Calendar,
   },
   {
     id: "help_desk",
     name: "Help Desk (Zendesk / Freshdesk)",
     category: "Support & Customer Health",
     description: "Escalated ticket volume, SLA response times, and customer churn indicators.",
-    icon: LifeBuoy,
   },
   {
     id: "none",
     name: "None of the above / I don't use any of these",
     category: "Manual Data Collection Mode",
     description: "Zero integrations required. We will collect your daily pulse via a 60-second in-app or WhatsApp check-in.",
-    icon: Radio,
   },
 ];
 
@@ -188,7 +178,6 @@ export default function SettingsToolsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {TOOLS_OPTIONS.map(tool => {
                 const isSelected = tool.id === "none" ? noIntegrations : selectedTools.includes(tool.id);
-                const Icon = tool.icon;
 
                 return (
                   <div
@@ -200,13 +189,7 @@ export default function SettingsToolsPage() {
                         : "bg-surface-2/40 border-line hover:border-line-strong"
                     }`}
                   >
-                    <div
-                      className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 shadow-sm transition-colors ${
-                        isSelected ? "bg-brass text-white border-brass" : "bg-surface border-line text-text-muted"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </div>
+                    <ToolLogo toolId={tool.id} size={36} className="mt-0.5" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-xs font-bold text-text">{tool.name}</span>
@@ -269,12 +252,9 @@ export default function SettingsToolsPage() {
                   <label className="text-[11px] font-semibold text-text block">
                     Founder / Primary WhatsApp Number
                   </label>
-                  <input
-                    type="tel"
+                  <PhoneCountryInput
                     value={whatsappNumber}
-                    onChange={e => setWhatsappNumber(e.target.value)}
-                    placeholder="e.g. +91 98765 43210"
-                    className="w-full px-3 py-2 rounded-lg bg-surface border border-line text-xs text-text font-mono placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
+                    onChange={setWhatsappNumber}
                   />
                 </div>
               )}

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db, DEFAULT_BUSINESS_ID } from "@/lib/db";
+import { generateDynamicCheckInQuestions } from "@/lib/checkin/generateQuestions";
 
 // Outbound scheduled job trigger for WhatsApp check-in
 export async function POST() {
@@ -16,23 +17,11 @@ export async function POST() {
       });
     }
 
-    // Determine dynamic questions
-    const connectedTools = business.connected_tools ? JSON.parse(business.connected_tools) : [];
-    const hasStripe = connectedTools.includes("stripe") || connectedTools.includes("zoho_books");
-    const hasHelpDesk = connectedTools.includes("help_desk");
+    // Determine dynamic questions linked to recent problems and active tasks
+    const { questions: dynamicQuestions } = generateDynamicCheckInQuestions(DEFAULT_BUSINESS_ID);
+    const questions = dynamicQuestions.map((q, idx) => `${idx + 1}. [${q.badge}] ${q.title}`);
 
-    const questions: string[] = [];
-    if (!hasStripe) {
-      questions.push("1. How was revenue/sales today?");
-    }
-    questions.push(`${questions.length + 1}. Any problems or blockers today?`);
-    questions.push(`${questions.length + 1}. Anything urgent or unusual?`);
-    questions.push(`${questions.length + 1}. Any team or HR issues?`);
-    if (!hasHelpDesk) {
-      questions.push(`${questions.length + 1}. Anything tech/IT related?`);
-    }
-
-    const message = `👋 Hi ${business.founder_name || "Founder"}, this is your Nuralix Daily Check-In for ${business.name}!\n\n${questions.join("\n")}\n\nReply directly with your updates in 1-2 lines (or voice note).`;
+    const message = `👋 Hi ${business.founder_name || "Founder"}, this is your Nuralix Daily Check-In for ${business.name}!\n\n${questions.join("\n\n")}\n\nReply directly with your updates in 1-2 lines (or voice note).`;
 
     // In production, dispatch via Twilio / Meta API here.
     // For local environment, we return the outbound payload ready for inspection.

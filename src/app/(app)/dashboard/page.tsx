@@ -5,6 +5,7 @@ import { resolveTenantConfig, TenantContext } from "@/config/resolver";
 import { RenderWidget } from "@/components/widgets/WidgetRegistry";
 import { WidgetDef } from "@/config/schemas/widget";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   Layers,
   Sliders,
@@ -26,16 +27,19 @@ function DashboardContent() {
   const [selectedIndustry, setSelectedIndustry] = useState<TenantContext["industry"]>("saas");
   const [selectedModel, setSelectedModel] = useState<TenantContext["businessModel"]>("subscription");
   const [companyName, setCompanyName] = useState("Apex Analytics");
+  const [selectedTimeframe, setSelectedTimeframe] = useState("Live Today");
 
   // Daily Check-In State
   const [checkinData, setCheckinData] = useState<{
     isCompletedToday: boolean;
     todayCheckin: any;
     questionRules: { skipRevenue: boolean; skipTech: boolean };
+    questions: any[];
   }>({
     isCompletedToday: false,
     todayCheckin: null,
     questionRules: { skipRevenue: false, skipTech: false },
+    questions: [],
   });
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
 
@@ -49,6 +53,7 @@ function DashboardContent() {
           isCompletedToday: Boolean(data.isCompletedToday),
           todayCheckin: data.todayCheckin,
           questionRules: data.questionRules || { skipRevenue: false, skipTech: false },
+          questions: data.questions || [],
         });
       }
     } catch (err) {
@@ -215,14 +220,18 @@ function DashboardContent() {
           </div>
 
           <div className="flex items-center gap-1.5 p-0.5 bg-surface-2/60 rounded-xl border border-line text-xs">
-            {["Live Today", "7D Trend", "Month to Date", "Q3 Live"].map((tf, i) => (
+            {["Live Today", "7D Trend", "Month to Date", "Q3 Live"].map(tf => (
               <button
                 key={tf}
                 type="button"
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
-                  i === 0
+                onClick={() => {
+                  setSelectedTimeframe(tf);
+                  notify(`Timeframe changed to ${tf}`);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all btn-tactile cursor-pointer ${
+                  selectedTimeframe === tf
                     ? "bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30 shadow-xs"
-                    : "text-text-muted hover:text-text"
+                    : "text-text-muted hover:text-text hover:bg-surface"
                 }`}
               >
                 {tf}
@@ -281,7 +290,7 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setIsEditingLayout(!isEditingLayout)}
-              className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-2 transition-all btn-tactile ${
+              className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-2 transition-all btn-tactile cursor-pointer ${
                 isEditingLayout
                   ? "bg-gradient-to-r from-cyan-500 to-indigo-600 text-white border-cyan-400 shadow-lg shadow-cyan-500/25 font-bold"
                   : "bg-surface-2/80 border-line text-text hover:bg-surface-2 hover:border-line-strong"
@@ -295,45 +304,57 @@ function DashboardContent() {
 
         {/* Quick-Glance Executive KPI Ribbon */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
-          <div className="p-3 rounded-xl bg-surface-2/40 border border-line flex items-center justify-between">
+          <Link
+            href="/analytics"
+            className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-cyan-500/40 hover:bg-surface-2/70 flex items-center justify-between transition-all group cursor-pointer"
+          >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Overall Health</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Overall Health</span>
               <span className="text-base font-extrabold text-slate-900 dark:text-white font-mono">82 / 100</span>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-jade/15 text-jade font-semibold font-mono border border-jade/30">
               Optimal
             </span>
-          </div>
+          </Link>
 
-          <div className="p-3 rounded-xl bg-surface-2/40 border border-line flex items-center justify-between">
+          <Link
+            href="/simulator"
+            className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-cyan-500/40 hover:bg-surface-2/70 flex items-center justify-between transition-all group cursor-pointer"
+          >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Liquid Runway</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Liquid Runway</span>
               <span className="text-base font-extrabold text-cyan-600 dark:text-cyan-400 font-mono">8.0 mo</span>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 font-semibold font-mono border border-cyan-500/30">
               Safe Zone
             </span>
-          </div>
+          </Link>
 
-          <div className="p-3 rounded-xl bg-surface-2/40 border border-line flex items-center justify-between">
+          <Link
+            href="/tasks"
+            className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-cyan-500/40 hover:bg-surface-2/70 flex items-center justify-between transition-all group cursor-pointer"
+          >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Execution Queue</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Execution Queue</span>
               <span className="text-base font-extrabold text-slate-900 dark:text-white font-mono">3 Active</span>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-700 dark:text-violet-300 font-semibold font-mono border border-violet-500/30">
               On Schedule
             </span>
-          </div>
+          </Link>
 
-          <div className="p-3 rounded-xl bg-surface-2/40 border border-line flex items-center justify-between">
+          <Link
+            href="/gaps"
+            className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-cyan-500/40 hover:bg-surface-2/70 flex items-center justify-between transition-all group cursor-pointer"
+          >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Bottleneck Gaps</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Bottleneck Gaps</span>
               <span className="text-base font-extrabold text-amber-600 dark:text-amber-400 font-mono">3 Flagged</span>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold font-mono border border-amber-500/30">
               Action Ready
             </span>
-          </div>
+          </Link>
         </div>
       </div>
 
@@ -443,6 +464,7 @@ function DashboardContent() {
           setTimeout(() => setToast(null), 4000);
         }}
         questionRules={checkinData.questionRules}
+        questions={checkinData.questions}
       />
     </div>
   );

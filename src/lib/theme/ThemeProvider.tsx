@@ -46,15 +46,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const cycleTheme = () => {
-    const cycleOrder: ThemeMode[] = ["dark", "light", "system"];
-    const nextIndex = (cycleOrder.indexOf(theme) + 1) % cycleOrder.length;
-    setTheme(cycleOrder[nextIndex]);
+    setThemeState(prev => {
+      const cycleOrder: ThemeMode[] = ["dark", "light", "system"];
+      const nextIndex = (cycleOrder.indexOf(prev) + 1) % cycleOrder.length;
+      const nextMode = cycleOrder[nextIndex];
+      localStorage.setItem("nuralix-theme", nextMode);
+      applyTheme(nextMode);
+      return nextMode;
+    });
   };
 
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem("nuralix-theme") as ThemeMode | null;
-    const initialMode = stored === "light" ? "light" : "dark";
+    const initialMode: ThemeMode = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
     setThemeState(initialMode);
     applyTheme(initialMode);
 
@@ -81,7 +86,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       mediaQuery.removeEventListener("change", handleSystemChange);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [theme]);
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, cycleTheme }}>

@@ -32,9 +32,9 @@ export function ThemeSwitch({ compact = false }: ThemeSwitchProps) {
             key={opt.mode}
             type="button"
             onClick={() => setTheme(opt.mode)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1 px-2 text-xs font-medium rounded-md btn-tactile transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1 px-2 text-xs font-medium rounded-md btn-tactile transition-all cursor-pointer ${
               isActive
-                ? "bg-surface text-text shadow-sm border border-line-strong font-semibold"
+                ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
                 : "text-text-muted hover:text-text hover:bg-surface/50"
             }`}
             title={`Switch to ${opt.label} mode (⌘⇧L to cycle)`}

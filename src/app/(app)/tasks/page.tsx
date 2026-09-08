@@ -96,20 +96,46 @@ export default function TasksPage() {
     handleUpdateStatus(taskId, nextStatus);
   };
 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const notify = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
   // Create Custom Task
-  const handleCreateTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTitle.trim()) return;
+  const handleCreateTask = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const titleClean = newTitle.trim();
+    if (!titleClean) return;
+
     setIsSubmitting(true);
+
+    const tempId = `task_${Date.now()}`;
+    const newTaskItem: TaskItem = {
+      id: tempId,
+      title: titleClean,
+      owner: newOwner,
+      gap: newGap || "General Execution",
+      priority: newPriority,
+      status: newStatus,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Optimistic immediate update so user sees it right away
+    setTasks(prev => [newTaskItem, ...prev]);
+    setIsAddModalOpen(false);
+    setNewTitle("");
+    notify("Task successfully added to execution queue!");
 
     try {
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: newTitle.trim(),
+          title: titleClean,
           owner: newOwner,
-          gap: newGap,
+          gap: newGap || "General Execution",
           priority: newPriority,
           status: newStatus,
         }),
@@ -117,12 +143,10 @@ export default function TasksPage() {
 
       const data = await res.json();
       if (res.ok && data.task) {
-        setTasks(prev => [data.task, ...prev]);
-        setIsAddModalOpen(false);
-        setNewTitle("");
+        setTasks(prev => prev.map(t => (t.id === tempId ? data.task : t)));
       }
     } catch (err) {
-      console.error("Failed to create task", err);
+      console.error("Failed to sync task to database", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -130,6 +154,14 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-surface border border-jade shadow-2xl text-xs font-semibold text-jade flex items-center gap-2 animate-bounce">
+          <CheckCircle2 className="w-4 h-4 text-jade" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-line">
         <div>
@@ -352,6 +384,7 @@ export default function TasksPage() {
                 </button>
                 <button
                   type="submit"
+                  onClick={() => handleCreateTask()}
                   disabled={isSubmitting || !newTitle.trim()}
                   className="px-4 py-2 rounded-lg bg-brass text-white font-bold text-xs hover:brightness-110 shadow-sm cursor-pointer disabled:opacity-50"
                 >

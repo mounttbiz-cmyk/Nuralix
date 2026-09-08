@@ -94,6 +94,46 @@ export function IntegrationLogo({ id, className = "w-7 h-7" }: { id: string; cla
         </svg>
       );
 
+    case "zoho_books":
+    case "zoho":
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none">
+          <rect x="2" y="3" width="9" height="8" rx="1.5" fill="#E42528" />
+          <rect x="13" y="3" width="9" height="8" rx="1.5" fill="#2BA342" />
+          <rect x="2" y="13" width="9" height="8" rx="1.5" fill="#0C77B9" />
+          <rect x="13" y="13" width="9" height="8" rx="1.5" fill="#F4901E" />
+          <path d="M6 7h2M6 17h2M17 7h2M17 17h2" stroke="#FFF" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+      );
+
+    case "google_calendar":
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none">
+          <rect x="2" y="2" width="20" height="20" rx="4" fill="#FFFFFF" />
+          <path d="M2 7h20V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3z" fill="#4285F4" />
+          <path d="M2 7v13a2 2 0 0 0 2 2h3V7H2z" fill="#34A853" />
+          <path d="M17 22h3a2 2 0 0 0 2-2V7h-5v15z" fill="#EA4335" />
+          <path d="M7 22h10v-4H7v4z" fill="#FBBC05" />
+          <text x="12" y="16" textAnchor="middle" fill="#1A73E8" fontSize="8" fontWeight="bold" fontFamily="sans-serif">
+            31
+          </text>
+        </svg>
+      );
+
+    case "help_desk":
+    case "zendesk":
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none">
+          <rect width="24" height="24" rx="5" fill="#03363D" />
+          <path d="M6 12a6 6 0 0 1 6-6v6H6z" fill="#17494D" />
+          <path d="M6 12h6v6L6 12z" fill="#E8F4E8" />
+          <path d="M12 6h6L12 12V6z" fill="#E8F4E8" />
+          <path d="M12 12h6a6 6 0 0 1-6 6V12z" fill="#03363D" />
+          <circle cx="15" cy="9" r="2.5" fill="#69C99E" />
+          <circle cx="9" cy="15" r="2.5" fill="#69C99E" />
+        </svg>
+      );
+
     case "hubspot":
       return (
         <svg className={className} viewBox="0 0 24 24" fill="none">

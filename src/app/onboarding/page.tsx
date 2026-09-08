@@ -34,6 +34,8 @@ import {
   FileSpreadsheet
 } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
+import { ToolLogo } from "@/components/tools/ToolLogo";
+import { PhoneCountryInput } from "@/components/ui/PhoneCountryInput";
 
 // Proper Indian Numbering System formatting (e.g. 12,00,000 / 1,50,000)
 const formatINR = (val: string | number): string => {
@@ -337,44 +339,329 @@ const TOOLS_OPTIONS = [
     name: "Stripe",
     category: "Payments & Revenue",
     description: "Automatic sync of invoices, ARR/MRR subscriptions, refunds, and daily cash inflow.",
-    icon: CreditCard,
   },
   {
     id: "slack",
     name: "Slack",
     category: "Team Communication",
     description: "Executive channel alerts, solvency warnings, and bidirectional AI assistant bot.",
-    icon: MessageSquare,
   },
   {
     id: "zoho_books",
     name: "Zoho Books / QuickBooks",
     category: "Accounting & Ledgers",
     description: "P&L synchronization, vendor expenses, GST reconciliation, and burn tracking.",
-    icon: FileSpreadsheet,
   },
   {
     id: "google_calendar",
     name: "Google Calendar",
     category: "Meetings & Workload",
     description: "Meeting load telemetry, client discovery calls, and executive time-burn diagnostics.",
-    icon: Calendar,
   },
   {
     id: "help_desk",
     name: "Help Desk (Zendesk / Freshdesk)",
     category: "Support & Customer Health",
     description: "Escalated ticket volume, SLA response times, and customer churn indicators.",
-    icon: LifeBuoy,
   },
   {
     id: "none",
     name: "None of the above / I don't use any of these",
     category: "Manual Data Collection Mode",
     description: "Zero integrations required. We will collect your daily pulse via a 60-second in-app or WhatsApp check-in.",
-    icon: Radio,
   },
 ];
+
+const INDUSTRY_PRIORITIES: Record<string, { id: string; title: string; detail: string; category: string; recommended?: boolean }[]> = {
+  saas: [
+    {
+      id: "saas_churn",
+      title: "Reduce Churn & Expand Net Revenue Retention (NRR)",
+      detail: "Set automated alert triggers on usage drops and account friction prior to contract renewals.",
+      category: "Retention",
+      recommended: true,
+    },
+    {
+      id: "saas_cac",
+      title: "Shorten CAC Payback Period Below 12 Months",
+      detail: "Audit paid acquisition channel saturation and optimize conversion to sales demo.",
+      category: "Growth",
+      recommended: true,
+    },
+    {
+      id: "extend_runway",
+      title: "Extend Cash Runway & Control Cloud Server Burn",
+      detail: "Audit AWS/GCP workloads and discretionary vendor subscriptions to stretch runway.",
+      category: "Financial",
+    },
+    {
+      id: "saas_pricing",
+      title: "Reprice Tiers & Seat-Based Monetization",
+      detail: "Simulate pricing tier elasticities and annual contract upfront advances.",
+      category: "Pricing",
+    },
+    {
+      id: "founder_bottleneck",
+      title: "Remove Founder Bottleneck from Enterprise Closing",
+      detail: "Codify closing playbook so sales team can demo and close independently.",
+      category: "Operations",
+    },
+    {
+      id: "board_intelligence",
+      title: "Automate Board-Ready ARR Reporting & Telemetry",
+      detail: "Instrument real-time ARR waterfall, cohort telemetry, and gap diagnostics.",
+      category: "Strategy",
+    },
+  ],
+  it: [
+    {
+      id: "it_util",
+      title: "Elevate Billable Engineering Utilisation (>82%)",
+      detail: "Maximize client realization hours and minimize bench idle burn.",
+      category: "Operations",
+      recommended: true,
+    },
+    {
+      id: "it_concentration",
+      title: "Eliminate Single-Client Account Concentration Risk",
+      detail: "De-risk primary client representing >25% of company revenues.",
+      category: "Risk",
+      recommended: true,
+    },
+    {
+      id: "it_retainers",
+      title: "Transition from T&M to High-Margin Managed Retainers",
+      detail: "Productize recurring SLAs with upfront quarterly billing cycles.",
+      category: "Pricing",
+    },
+    {
+      id: "it_bench",
+      title: "Optimize Developer Bench & Accelerate Sourcing",
+      detail: "Reduce recruitment cycles and align talent bench to forward project pipeline.",
+      category: "Talent",
+    },
+    {
+      id: "founder_bottleneck",
+      title: "Standardize Delivery Playbooks & Eliminate Founder Reviews",
+      detail: "Empower project leads to run client scrums and milestone sign-offs independently.",
+      category: "Operations",
+    },
+    {
+      id: "it_collections",
+      title: "Accelerate Milestone Cash Collections & Reduce DSO",
+      detail: "Enforce payment milestones before staging release to protect cash flow.",
+      category: "Financial",
+    },
+  ],
+  d2c: [
+    {
+      id: "d2c_roas",
+      title: "Improve Blended ROAS & Lower First-Order CAC",
+      detail: "Audit Meta/Google ad efficiency, creative fatigue, and landing page dropoffs.",
+      category: "Acquisition",
+      recommended: true,
+    },
+    {
+      id: "d2c_inventory",
+      title: "Prevent Stockouts & Shorten Cash Conversion Cycle",
+      detail: "Synchronize inventory reorder lead times with working capital availability.",
+      category: "Supply Chain",
+      recommended: true,
+    },
+    {
+      id: "d2c_rto",
+      title: "Reduce Courier Return-to-Origin (RTO) Losses",
+      detail: "Implement OTP address verification and COD-to-prepaid customer conversion.",
+      category: "Logistics",
+    },
+    {
+      id: "d2c_ltv",
+      title: "Elevate Repeat Purchase Frequency & 90-Day LTV",
+      detail: "Automate post-purchase WhatsApp and email re-engagement flows.",
+      category: "Retention",
+    },
+    {
+      id: "d2c_margins",
+      title: "Protect Contribution Margin After Packaging & Shipping",
+      detail: "Model unit economics elasticity against carrier courier rate increases.",
+      category: "Pricing",
+    },
+  ],
+  real_estate: [
+    {
+      id: "re_occupancy",
+      title: "Elevate Portfolio Occupancy & Commercial Yields",
+      detail: "Accelerate tenant acquisition pipeline and optimize long-term lease spreads.",
+      category: "Revenue",
+      recommended: true,
+    },
+    {
+      id: "re_closing",
+      title: "Shorten High-Ticket Deal Closing & Syndication Velocity",
+      detail: "Standardize investor diligence data room and automate buyer follow-ups.",
+      category: "Sales",
+      recommended: true,
+    },
+    {
+      id: "re_collections",
+      title: "Automate Rent Invoicing & Overdue Escalations",
+      detail: "Eliminate overdue tenant arrears with automated GST reconciliation.",
+      category: "Cash Flow",
+    },
+    {
+      id: "re_dscr",
+      title: "De-risk Debt-Service Coverage Ratio (DSCR)",
+      detail: "Stress-test debt amortization obligations against fluctuating tenant vacancy.",
+      category: "Financial",
+    },
+    {
+      id: "re_pipeline",
+      title: "Centralize Broker Partner Network & Commission Tracking",
+      detail: "Instrument channel partner visibility and prevent broker leakages.",
+      category: "Operations",
+    },
+  ],
+  agency: [
+    {
+      id: "agency_founder",
+      title: "Break Past Founder-Led Sales & Deal Dependency",
+      detail: "Systematize inbound pitch decks and enable Account Executives to close.",
+      category: "Operations",
+      recommended: true,
+    },
+    {
+      id: "agency_margins",
+      title: "Eliminate Project Scope Creep & Margin Erosion",
+      detail: "Track client revisions and automate change-request billings.",
+      category: "Profitability",
+      recommended: true,
+    },
+    {
+      id: "agency_retainers",
+      title: "Convert One-Off Projects into Recurring Monthly Retainers",
+      detail: "Package ongoing strategic advisory and maintenance retainers.",
+      category: "Revenue",
+    },
+    {
+      id: "agency_dso",
+      title: "Accelerate Client Receivable Collections (DSO < 30 Days)",
+      detail: "Automate milestone invoicing and require retainer payments at month start.",
+      category: "Cash Flow",
+    },
+    {
+      id: "agency_churn",
+      title: "Standardize Client Onboarding & Account Retention",
+      detail: "Set up 30-60-90 day milestone review cadences to prevent account churn.",
+      category: "Retention",
+    },
+  ],
+  healthcare: [
+    {
+      id: "health_throughput",
+      title: "Maximize Doctor & Procedure Room Utilisation",
+      detail: "Balance clinical appointment scheduling and reduce idle room hours.",
+      category: "Operations",
+      recommended: true,
+    },
+    {
+      id: "health_noshow",
+      title: "Lower Patient Appointment No-Show Rate Below 5%",
+      detail: "Automate WhatsApp appointment confirmations and 24-hour reminders.",
+      category: "Retention",
+      recommended: true,
+    },
+    {
+      id: "health_equipment",
+      title: "Accelerate High-Value Diagnostic Equipment Payback",
+      detail: "Monitor scanning volume and drive referral partnership volume.",
+      category: "Capital",
+    },
+    {
+      id: "health_recurring",
+      title: "Launch Recurring Preventive Care & Wellness Memberships",
+      detail: "Create steady predictable cash inflow through annual wellness care subscriptions.",
+      category: "Revenue",
+    },
+  ],
+  manufacturing: [
+    {
+      id: "mfg_capacity",
+      title: "Elevate Plant Capacity Utilisation Above 80%",
+      detail: "Minimize machine idle downtime and optimize batch changeover schedules.",
+      category: "Operations",
+      recommended: true,
+    },
+    {
+      id: "mfg_materials",
+      title: "Mitigate Raw Material Price Volatility & Supply Lead Times",
+      detail: "Diversify vendor contracts and optimize safety stock thresholds.",
+      category: "Supply Chain",
+      recommended: true,
+    },
+    {
+      id: "mfg_scrap",
+      title: "Reduce Quality Rejections & Production Scrap Below 1.5%",
+      detail: "Implement automated stage-gate QA audits across assembly lines.",
+      category: "Quality",
+    },
+    {
+      id: "mfg_dealers",
+      title: "Expand Dealer/Distributor Network & Improve Turnaround",
+      detail: "Accelerate distributor dispatch cycles and track regional dealer quotas.",
+      category: "Distribution",
+    },
+  ],
+  finance: [
+    {
+      id: "fin_aum",
+      title: "Accelerate High-Net-Worth Client Acquisition & AUM",
+      detail: "Streamline wealth advisory pipeline and client portfolio proposals.",
+      category: "Growth",
+      recommended: true,
+    },
+    {
+      id: "fin_compliance",
+      title: "Automate Regulatory Audits & Compliance Documentation",
+      detail: "Maintain continuous audit trails and KYC compliance checks.",
+      category: "Compliance",
+      recommended: true,
+    },
+    {
+      id: "fin_fees",
+      title: "Protect Advisory Fee Realisation & Transparency",
+      detail: "Automate management fee billing and portfolio performance attribution.",
+      category: "Operations",
+    },
+  ],
+  other: [
+    {
+      id: "other_runway",
+      title: "Extend Working Capital Runway & Optimize Cash Flow",
+      detail: "Audit operational burn and forecast forward liquidity reserves.",
+      category: "Financial",
+      recommended: true,
+    },
+    {
+      id: "other_sales",
+      title: "Systematize Sales Pipeline & Reduce Founder Closing Burden",
+      detail: "Enable team to qualify, quote, and close deals independently.",
+      category: "Operations",
+      recommended: true,
+    },
+    {
+      id: "other_vendor",
+      title: "Eliminate Vendor Cost Creep & Protect Gross Margins",
+      detail: "Audit monthly supplier invoices and re-negotiate high-spend contracts.",
+      category: "Profitability",
+    },
+    {
+      id: "other_retention",
+      title: "Elevate Client Retention & Repeat Business",
+      detail: "Implement structured post-delivery check-ins and satisfaction telemetry.",
+      category: "Retention",
+    },
+  ],
+};
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -527,44 +814,28 @@ export default function OnboardingPage() {
     }
   };
 
-  const needsOptions = [
-    {
-      id: "extend_runway",
-      title: "Extend Cash Runway & Control Burn",
-      detail: "Audit discretionary vendor opex, model bridge scenarios, and prolong runway.",
-      category: "Financial",
-    },
-    {
-      id: "fix_concentration",
-      title: "Eliminate Client Concentration Risk",
-      detail: "De-risk primary account representing >25% of company revenues.",
-      category: "Risk",
-    },
-    {
-      id: "founder_bottleneck",
-      title: "Remove Founder Bottleneck in Sales & Ops",
-      detail: "Codify founder closing playbook so team can execute and close enterprise deals independently.",
-      category: "Operations",
-    },
-    {
-      id: "reduce_cac_payback",
-      title: "Shorten CAC Payback & Scale Acquisition",
-      detail: "Lower customer acquisition costs and eliminate saturation in primary channels.",
-      category: "Growth",
-    },
-    {
-      id: "reprice_products",
-      title: "Reprice Products & Model Margin Elasticity",
-      detail: "Test price increases with Monte Carlo sensitivity before notifying accounts.",
-      category: "Pricing",
-    },
-    {
-      id: "board_intelligence",
-      title: "Instrument Board-Ready Reporting & KPIs",
-      detail: "Weekly executive briefings, automated telemetry, and gap solution playbooks.",
-      category: "Strategy",
-    },
+  const [customNeedInput, setCustomNeedInput] = useState("");
+  const [customNeedsList, setCustomNeedsList] = useState<{ id: string; title: string; detail: string; category: string; recommended?: boolean }[]>([]);
+
+  // Dynamically resolve industry priorities
+  const currentNeedsOptions = [
+    ...(INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other),
+    ...customNeedsList,
   ];
+
+  const handleAddCustomNeed = () => {
+    if (!customNeedInput.trim()) return;
+    const newId = `custom_need_${Date.now()}`;
+    const newNeed = {
+      id: newId,
+      title: customNeedInput.trim(),
+      detail: "Custom operational bottleneck specified by leadership.",
+      category: "Custom Directive",
+    };
+    setCustomNeedsList(prev => [...prev, newNeed]);
+    setSelectedNeeds(prev => [...prev, newId]);
+    setCustomNeedInput("");
+  };
 
   const toggleNeed = (id: string) => {
     setSelectedNeeds(prev =>
@@ -1394,7 +1665,6 @@ export default function OnboardingPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {TOOLS_OPTIONS.map(tool => {
                     const isSelected = tool.id === "none" ? noIntegrations : selectedTools.includes(tool.id);
-                    const Icon = tool.icon;
 
                     return (
                       <div
@@ -1406,13 +1676,7 @@ export default function OnboardingPage() {
                             : "bg-surface-2/40 border-line hover:border-line-strong"
                         }`}
                       >
-                        <div
-                          className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 shadow-sm transition-colors ${
-                            isSelected ? "bg-brass text-white border-brass" : "bg-surface border-line text-text-muted"
-                          }`}
-                        >
-                          <Icon className="w-4 h-4" />
-                        </div>
+                        <ToolLogo toolId={tool.id} size={36} className="mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1">
                             <span className="text-xs font-bold text-text">{tool.name}</span>
@@ -1475,12 +1739,9 @@ export default function OnboardingPage() {
                       <label className="text-[11px] font-semibold text-text block">
                         Founder / Primary WhatsApp Number
                       </label>
-                      <input
-                        type="tel"
+                      <PhoneCountryInput
                         value={whatsappNumber}
-                        onChange={e => setWhatsappNumber(e.target.value)}
-                        placeholder="e.g. +91 98765 43210"
-                        className="w-full px-3 py-2 rounded-lg bg-surface border border-line text-xs text-text font-mono placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
+                        onChange={setWhatsappNumber}
                       />
                     </div>
                   )}
@@ -1497,7 +1758,15 @@ export default function OnboardingPage() {
                   <button
                     id="btn-continue-step-tools"
                     type="button"
-                    onClick={() => setStep(3)}
+                    onClick={() => {
+                      setStep(3);
+                      if (selectedNeeds.length === 0) {
+                        const recs = (INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other)
+                          .filter(o => o.recommended)
+                          .map(o => o.id);
+                        setSelectedNeeds(recs);
+                      }
+                    }}
                     className="px-5 py-2.5 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer"
                   >
                     <span>Continue to Priorities & Bottlenecks</span>
@@ -1511,16 +1780,19 @@ export default function OnboardingPage() {
             {step === 3 && (
               <div className="space-y-5">
                 <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[10px] font-bold uppercase tracking-wider mb-2">
+                    Dynamic Strategic Calibration
+                  </div>
                   <h1 className="text-lg sm:text-xl font-bold text-text tracking-tight font-sans">
                     What are your biggest priorities & bottlenecks?
                   </h1>
                   <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                    Select everything you want Nuralix to solve. We will seed actionable gap playbooks, autonomous agents, and tasks for each item.
+                    Tailored for your established <strong className="text-text font-bold">{businessTypes.find(b => b.id === businessType)?.title || "business"}</strong>. Recommended items are pre-selected to seed your gap register, AI executives, and execution queue.
                   </p>
                 </div>
 
                 <div className="space-y-2.5">
-                  {needsOptions.map(need => {
+                  {currentNeedsOptions.map(need => {
                     const isChecked = selectedNeeds.includes(need.id);
                     return (
                       <div
@@ -1540,11 +1812,18 @@ export default function OnboardingPage() {
                           {isChecked && <CheckCircle2 className="w-3.5 h-3.5" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-wrap items-center justify-between gap-1.5">
                             <span className="text-xs font-bold text-text">{need.title}</span>
-                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface border border-line text-brass font-semibold uppercase">
-                              {need.category}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              {need.recommended && (
+                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold uppercase font-mono tracking-wide">
+                                  Recommended
+                                </span>
+                              )}
+                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface border border-line text-brass font-semibold uppercase">
+                                {need.category}
+                              </span>
+                            </div>
                           </div>
                           <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
                             {need.detail}
@@ -1553,6 +1832,36 @@ export default function OnboardingPage() {
                       </div>
                     );
                   })}
+                </div>
+
+                {/* Custom Bottleneck / Priority Write-in Option */}
+                <div className="p-3.5 rounded-xl border border-line bg-surface-2/30 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-text">Add Custom Priority or Bottleneck</span>
+                    <span className="text-[10px] text-text-muted">Type and press Enter or click + Add</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customNeedInput}
+                      onChange={e => setCustomNeedInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddCustomNeed();
+                        }
+                      }}
+                      placeholder="e.g. Reduce customer onboarding drop-off rate, negotiate supplier credit terms..."
+                      className="flex-1 px-3 py-2 rounded-lg bg-surface border border-line text-xs text-text focus:outline-none focus:ring-1 focus:ring-brass"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomNeed}
+                      className="px-3.5 py-2 rounded-lg bg-brass text-white text-xs font-bold hover:brightness-110 btn-tactile cursor-pointer shrink-0"
+                    >
+                      + Add
+                    </button>
+                  </div>
                 </div>
 
                 <div className="pt-4 border-t border-line flex items-center justify-between">

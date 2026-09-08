@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db, DEFAULT_BUSINESS_ID } from "@/lib/db";
+import { generateDynamicCheckInQuestions } from "@/lib/checkin/generateQuestions";
 
 // Helper to get today's date in YYYY-MM-DD
 function getTodayDateString(): string {
@@ -16,18 +17,8 @@ export async function GET() {
       .prepare("SELECT * FROM daily_checkins WHERE business_id = ? AND date = ?")
       .get(DEFAULT_BUSINESS_ID, today) as any;
 
-    // Get business connection state to know which questions are skipped
-    const business = db.prepare("SELECT connected_tools FROM businesses WHERE id = ?").get(DEFAULT_BUSINESS_ID) as any;
-    const connectedTools: string[] = business?.connected_tools ? JSON.parse(business.connected_tools) : [];
-
-    // Also get active integrations
-    const integrations = db
-      .prepare("SELECT tool_key, status FROM integrations WHERE business_id = ? AND status = 'connected'")
-      .all(DEFAULT_BUSINESS_ID) as any[];
-    const activeTools = new Set([...connectedTools, ...integrations.map(i => i.tool_key)]);
-
-    const skipRevenue = activeTools.has("stripe") || activeTools.has("zoho_books");
-    const skipTech = activeTools.has("help_desk");
+    // Dynamically generate context-aware questions based on recent problems, past check-ins, tasks, and industry
+    const { questions, contextSummary } = generateDynamicCheckInQuestions(DEFAULT_BUSINESS_ID);
 
     // Get recent check-ins
     const recentCheckins = db
@@ -49,9 +40,11 @@ export async function GET() {
           }
         : null,
       questionRules: {
-        skipRevenue,
-        skipTech,
+        skipRevenue: contextSummary.skipRevenue,
+        skipTech: contextSummary.skipTech,
       },
+      questions,
+      contextSummary,
       recentCheckins: recentCheckins.map(c => ({
         id: c.id,
         date: c.date,
