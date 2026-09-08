@@ -111,7 +111,7 @@ function NeuralField ({ count, maxLines, connectDist }) {
 
   const pointUniforms = useMemo(() => ({
     uTime: { value: 0 }, uMorph: { value: 1 }, uSize: { value: 1 }, uDrift: { value: 0.55 },
-    uEnergy: { value: 0 }, uPR: { value: Math.min(window.devicePixelRatio || 1, 2) },
+    uEnergy: { value: 0 }, uPR: { value: Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 1.5) },
     uColA: { value: new THREE.Color('#00D9FF') }, uColB: { value: new THREE.Color('#6C5CE7') },
     uOpacity: { value: 1 }, uFogN: { value: 60 }, uFogF: { value: 210 }
   }), []);
@@ -260,7 +260,7 @@ function Rig () {
 /* ------------------------------------------------------------- the scene */
 export default function Experience ({ quality = 'high' }) {
   const low = quality === 'low';
-  const dpr = low ? [1, 1.5] : [1, 2];
+  const dpr = low ? [1, 1.25] : [1, 1.5];
 
   return (
     <Canvas
@@ -268,7 +268,7 @@ export default function Experience ({ quality = 'high' }) {
       flat
       linear
       dpr={dpr}
-      gl={{ antialias: !low, powerPreference: 'high-performance', stencil: false, alpha: false }}
+      gl={{ antialias: !low, powerPreference: 'high-performance', stencil: false, alpha: false, depth: true }}
       camera={{ fov: 46, near: 0.5, far: 1400, position: [0, 0, 70] }}
       style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}
       onCreated={({ gl }) => gl.setClearColor(0x03040a, 1)}
@@ -276,15 +276,15 @@ export default function Experience ({ quality = 'high' }) {
       <Suspense fallback={null}>
         <Backdrop />
         <NeuralField
-          count={low ? 1500 : 3400}
-          maxLines={low ? 1900 : 5200}
-          connectDist={low ? 8.4 : 7.2}
+          count={low ? 1400 : 2600}
+          maxLines={low ? 1800 : 3800}
+          connectDist={low ? 8.4 : 7.5}
         />
         <Core />
         <Rig />
         {!low && (
           <EffectComposer disableNormalPass multisampling={0}>
-            <Bloom intensity={0.52} luminanceThreshold={0.28} luminanceSmoothing={0.2} mipmapBlur radius={0.55} />
+            <Bloom intensity={0.5} luminanceThreshold={0.28} luminanceSmoothing={0.2} mipmapBlur radius={0.55} />
           </EffectComposer>
         )}
       </Suspense>

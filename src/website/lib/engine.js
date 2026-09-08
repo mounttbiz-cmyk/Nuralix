@@ -82,11 +82,22 @@ export function snapStory () {
 }
 
 let tick = 0;
+let prevBgA = '', prevBgB = '', prevAcc = '', prevAcc2 = '';
+
 export function syncCSSVars (force = false) {
-  if (!force && ++tick % 3 !== 0) return;
+  if (!force && ++tick % 4 !== 0) return;
+  const bgA = '#' + current.bot.getHexString();
+  const bgB = '#' + current.top.getHexString();
+  const acc = '#' + current.accent.getHexString();
+  const acc2 = '#' + current.accent2.getHexString();
+
+  if (!force && bgA === prevBgA && bgB === prevBgB && acc === prevAcc && acc2 === prevAcc2) {
+    return;
+  }
+
   const r = document.documentElement.style;
-  r.setProperty('--bg-a', '#' + current.bot.getHexString());
-  r.setProperty('--bg-b', '#' + current.top.getHexString());
-  r.setProperty('--accent', '#' + current.accent.getHexString());
-  r.setProperty('--accent-2', '#' + current.accent2.getHexString());
+  if (force || bgA !== prevBgA) { r.setProperty('--bg-a', bgA); prevBgA = bgA; }
+  if (force || bgB !== prevBgB) { r.setProperty('--bg-b', bgB); prevBgB = bgB; }
+  if (force || acc !== prevAcc) { r.setProperty('--accent', acc); prevAcc = acc; }
+  if (force || acc2 !== prevAcc2) { r.setProperty('--accent-2', acc2); prevAcc2 = acc2; }
 }

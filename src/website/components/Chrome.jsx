@@ -34,32 +34,67 @@ export function Cursor () {
     if (IS_TOUCH()) return;
     let mx = innerWidth / 2, my = innerHeight / 2;
     const p = [{ x: mx, y: my }, { x: mx, y: my }, { x: mx, y: my }];
-    const move = e => { mx = e.clientX; my = e.clientY; };
-    addEventListener('pointermove', move, { passive: true });
+    let running = false;
+    let raf = 0;
 
-    let raf;
+    const els = [ring.current, dot.current, glow.current];
+    const ease = [0.16, 0.55, 0.07];
+
     const loop = () => {
-      raf = requestAnimationFrame(loop);
-      const els = [ring.current, dot.current, glow.current];
-      const ease = [0.16, 0.55, 0.07];
-      els.forEach((el, i) => {
-        if (!el) return;
-        p[i].x += (mx - p[i].x) * ease[i];
-        p[i].y += (my - p[i].y) * ease[i];
-        el.style.transform = `translate3d(${p[i].x}px,${p[i].y}px,0)`;
-      });
+      let maxDist = 0;
+      for (let i = 0; i < 3; i++) {
+        const el = els[i];
+        if (!el) continue;
+        const dx = mx - p[i].x;
+        const dy = my - p[i].y;
+        p[i].x += dx * ease[i];
+        p[i].y += dy * ease[i];
+        el.style.transform = `translate3d(${p[i].x.toFixed(1)}px,${p[i].y.toFixed(1)}px,0)`;
+        const dist = Math.abs(dx) + Math.abs(dy);
+        if (dist > maxDist) maxDist = dist;
+      }
+      if (maxDist > 0.15) {
+        raf = requestAnimationFrame(loop);
+      } else {
+        running = false;
+      }
     };
-    raf = requestAnimationFrame(loop);
 
-    const on = () => document.body.classList.add('is-hover');
-    const off = () => document.body.classList.remove('is-hover');
-    const targets = [...document.querySelectorAll('a, button, .card, input')];
-    targets.forEach(el => { el.addEventListener('pointerenter', on); el.addEventListener('pointerleave', off); });
+    const wake = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(loop);
+      }
+    };
+
+    const move = e => {
+      mx = e.clientX;
+      my = e.clientY;
+      wake();
+    };
+
+    addEventListener('pointermove', move, { passive: true });
+    wake();
+
+    const onOver = e => {
+      if (e.target && e.target.closest && e.target.closest('a, button, .card, input')) {
+        document.body.classList.add('is-hover');
+      }
+    };
+    const onOut = e => {
+      if (!e.relatedTarget || (e.relatedTarget.closest && !e.relatedTarget.closest('a, button, .card, input'))) {
+        document.body.classList.remove('is-hover');
+      }
+    };
+
+    document.addEventListener('pointerover', onOver, { passive: true });
+    document.addEventListener('pointerout', onOut, { passive: true });
 
     return () => {
       cancelAnimationFrame(raf);
       removeEventListener('pointermove', move);
-      targets.forEach(el => { el.removeEventListener('pointerenter', on); el.removeEventListener('pointerleave', off); });
+      document.removeEventListener('pointerover', onOver);
+      document.removeEventListener('pointerout', onOut);
     };
   }, []);
 

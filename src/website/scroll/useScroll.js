@@ -10,10 +10,29 @@ import { readScroll, snapStory, stepStory, syncCSSVars, pointer } from '../lib/e
 
 const PREFERS_REDUCED = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+const secMetrics = new Map();
+
+function measureSections () {
+  if (typeof window === 'undefined') return;
+  const scrollY = window.scrollY || window.pageYOffset || 0;
+  document.querySelectorAll('section').forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    secMetrics.set(sec, {
+      top: rect.top + scrollY,
+      height: sec.offsetHeight
+    });
+  });
+}
+
 function sectionProgress (sec) {
   if (!sec) return 0;
-  const r = sec.getBoundingClientRect();
-  return clamp(-r.top / Math.max(1, sec.offsetHeight - window.innerHeight), 0, 1);
+  const m = secMetrics.get(sec);
+  const scrollY = window.scrollY || window.pageYOffset || 0;
+  if (!m) {
+    const r = sec.getBoundingClientRect();
+    return clamp(-r.top / Math.max(1, sec.offsetHeight - window.innerHeight), 0, 1);
+  }
+  return clamp((scrollY - m.top) / Math.max(1, m.height - window.innerHeight), 0, 1);
 }
 
 export function useSmoothScroll ({ webgl }) {
@@ -28,11 +47,16 @@ export function useSmoothScroll ({ webgl }) {
     const visionSec = document.querySelector('#vision');
     const bar = document.querySelector('.prog__bar');
     const nav = document.querySelector('.nav');
+    let isStuck = false;
 
     function choreograph () {
       const p = readScroll();
-      if (bar) bar.style.width = (p * 100).toFixed(2) + '%';
-      if (nav) nav.classList.toggle('stuck', window.scrollY > 40);
+      if (bar) bar.style.transform = `scaleX(${p.toFixed(4)})`;
+      const shouldBeStuck = window.scrollY > 40;
+      if (nav && isStuck !== shouldBeStuck) {
+        isStuck = shouldBeStuck;
+        nav.classList.toggle('stuck', isStuck);
+      }
       if (reduced) return;
 
       for (const f of fadeEls) {
@@ -54,7 +78,6 @@ export function useSmoothScroll ({ webgl }) {
           }
           w.style.opacity = a.toFixed(3);
           w.style.transform = `translate3d(0,${y.toFixed(1)}px,0) scale(${sc.toFixed(3)})`;
-          w.style.filter = a > 0.02 ? `blur(${((1 - a) * 9).toFixed(1)}px)` : 'blur(9px)';
         });
       }
     }
@@ -79,6 +102,7 @@ export function useSmoothScroll ({ webgl }) {
     };
     raf = requestAnimationFrame(loop);
 
+    measureSections();
     snapStory();
     choreograph();
     syncCSSVars(true);
@@ -86,18 +110,18 @@ export function useSmoothScroll ({ webgl }) {
     let rt;
     const onResize = () => {
       clearTimeout(rt);
-      rt = setTimeout(() => { measureBeats(); choreograph(); }, 180);
+      rt = setTimeout(() => { measureSections(); measureBeats(); choreograph(); }, 180);
     };
     const onPointer = e => {
       pointer.tx = (e.clientX / window.innerWidth - 0.5) * 2;
       pointer.ty = (e.clientY / window.innerHeight - 0.5) * 2;
     };
-    const onLoad = () => setTimeout(() => { measureBeats(); choreograph(); }, 200);
+    const onLoad = () => setTimeout(() => { measureSections(); measureBeats(); choreograph(); }, 200);
 
     window.addEventListener('resize', onResize, { passive: true });
     window.addEventListener('pointermove', onPointer, { passive: true });
     window.addEventListener('load', onLoad);
-    const settle = setTimeout(() => { measureBeats(); choreograph(); }, 900);
+    const settle = setTimeout(() => { measureSections(); measureBeats(); choreograph(); }, 900);
 
     return () => {
       cancelAnimationFrame(raf);
