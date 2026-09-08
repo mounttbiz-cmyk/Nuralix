@@ -123,7 +123,7 @@ export function KpiGridWidget() {
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+              <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-sans">
                 Core Performance Indicators
               </h2>
               <p className="text-[11px] text-text-muted">
@@ -132,7 +132,7 @@ export function KpiGridWidget() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted border border-white/[0.08] font-mono">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted border border-line font-mono">
               Live Stream
             </span>
           </div>
@@ -143,7 +143,7 @@ export function KpiGridWidget() {
           {kpis.map(kpi => (
             <div
               key={kpi.id}
-              className="p-4 rounded-xl bg-surface-2/50 border border-white/[0.07] hover:border-white/15 flex flex-col justify-between space-y-3 transition-all duration-200 group relative overflow-hidden"
+              className="p-4 rounded-xl bg-surface-2/50 border border-line hover:border-line-strong flex flex-col justify-between space-y-3 transition-all duration-200 group relative overflow-hidden"
             >
               {/* Top ambient color glow */}
               <div
@@ -153,7 +153,7 @@ export function KpiGridWidget() {
 
               <div className="flex items-start justify-between relative z-10">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-surface/80 border border-white/[0.08]">
+                  <div className="p-1.5 rounded-lg bg-surface/80 border border-line">
                     {kpi.icon}
                   </div>
                   <span className="text-xs text-text-muted font-medium truncate max-w-[130px]">
@@ -165,7 +165,7 @@ export function KpiGridWidget() {
 
               {/* Value and SVG Sparkline with Gradient Fill */}
               <div className="flex items-end justify-between pt-1 relative z-10">
-                <div className="text-2xl sm:text-3xl font-extrabold num-tabular text-white tracking-tight font-mono">
+                <div className="text-2xl sm:text-3xl font-extrabold num-tabular text-slate-900 dark:text-white tracking-tight font-mono">
                   {kpi.value}
                 </div>
 

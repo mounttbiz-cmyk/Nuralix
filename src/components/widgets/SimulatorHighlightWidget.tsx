@@ -34,10 +34,10 @@ export function SimulatorHighlightWidget() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+                <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-sans">
                   Decision Simulator: Sales AE Expansion
                 </h2>
-                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-300 font-mono font-semibold">
+                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 font-mono font-semibold">
                   Monte Carlo (1,000 runs)
                 </span>
               </div>
@@ -123,32 +123,32 @@ export function SimulatorHighlightWidget() {
           <div className="grid grid-cols-3 gap-2 text-center">
             <div className="p-3 rounded-xl border border-rust/30 bg-rust/10 space-y-1">
               <span className="text-[10px] uppercase font-bold text-rust block font-mono">P10 Bear</span>
-              <span className="text-sm sm:text-base font-black num-tabular text-white font-mono block">-₹2.84L</span>
+              <span className="text-sm sm:text-base font-black num-tabular text-slate-900 dark:text-white font-mono block">-₹2.84L</span>
               <span className="text-[10px] text-text-muted block">Breakeven: Mo 10</span>
             </div>
 
             <div className="p-3 rounded-xl border border-cyan-400/50 bg-cyan-500/15 ring-1 ring-cyan-500/30 space-y-1">
-              <span className="text-[10px] uppercase font-bold text-cyan-400 block font-mono">P50 Expected</span>
-              <span className="text-sm sm:text-base font-black num-tabular text-white font-mono block">+₹4.20L</span>
-              <span className="text-[10px] text-cyan-300 block">Breakeven: Mo 7</span>
+              <span className="text-[10px] uppercase font-bold text-cyan-600 dark:text-cyan-400 block font-mono">P50 Expected</span>
+              <span className="text-sm sm:text-base font-black num-tabular text-slate-900 dark:text-white font-mono block">+₹4.20L</span>
+              <span className="text-[10px] text-cyan-700 dark:text-cyan-300 block">Breakeven: Mo 7</span>
             </div>
 
             <div className="p-3 rounded-xl border border-jade/30 bg-jade/10 space-y-1">
               <span className="text-[10px] uppercase font-bold text-jade block font-mono">P90 Bull</span>
-              <span className="text-sm sm:text-base font-black num-tabular text-white font-mono block">+₹8.92L</span>
+              <span className="text-sm sm:text-base font-black num-tabular text-slate-900 dark:text-white font-mono block">+₹8.92L</span>
               <span className="text-[10px] text-text-muted block">Breakeven: Mo 5</span>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="pt-3 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div className="pt-3 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
           <span className="text-text-muted">
-            In <strong className="text-white">842 of 1,000 runs</strong>, cash reserve never breached your ₹15L safety floor.
+            In <strong className="text-slate-900 dark:text-white font-bold">842 of 1,000 runs</strong>, cash reserve never breached your ₹15L safety floor.
           </span>
           <Link
             href="/simulator"
-            className="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-semibold btn-tactile cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 font-semibold btn-tactile cursor-pointer"
           >
             <span>Launch Full Scenario Sandbox</span>
             <ArrowRight className="w-3.5 h-3.5" />

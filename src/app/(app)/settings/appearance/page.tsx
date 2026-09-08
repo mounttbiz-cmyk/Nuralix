@@ -1,20 +1,34 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 import { useTheme } from "@/lib/theme/ThemeProvider";
-import { Sun, Moon, Monitor, Eye, Palette, Check, Globe, ArrowUpRight } from "lucide-react";
+import { Sun, Moon, Monitor, Eye, Palette, Check, Globe, ArrowUpRight, Layers } from "lucide-react";
 
 export default function AppearancePage() {
   const { theme, resolvedTheme } = useTheme();
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-lg font-bold text-text">Appearance & Display Settings</h1>
-        <p className="text-xs text-text-muted mt-0.5">
-          Configure interface theme, density, tabular typography, and system synchronization.
-        </p>
+      <div className="space-y-3 pb-4 border-b border-line">
+        <h1 className="text-lg font-bold text-text">Platform Settings</h1>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/settings/appearance"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brass text-white shadow-xs flex items-center gap-1.5"
+          >
+            <Palette className="w-3.5 h-3.5" />
+            <span>Appearance & Theme</span>
+          </Link>
+          <Link
+            href="/settings/tools"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface border border-line flex items-center gap-1.5"
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Connected Business Tools</span>
+          </Link>
+        </div>
       </div>
 
       {/* Theme selection card */}

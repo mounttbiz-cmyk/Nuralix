@@ -52,13 +52,13 @@ export function TasksPreviewWidget() {
     <ContainerTile span={2} id="widget_priority_tasks">
       <div className="flex flex-col h-full justify-between space-y-4">
         <div>
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-jade/15 border border-jade/30 flex items-center justify-center text-jade">
                 <CheckSquare className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+                <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-sans">
                   Autonomous Execution Queue
                 </h2>
                 <span className="text-[10px] text-text-muted">
@@ -66,7 +66,7 @@ export function TasksPreviewWidget() {
                 </span>
               </div>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-semibold font-mono border border-cyan-500/30">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 font-semibold font-mono border border-cyan-500/30">
               {tasks.filter(t => !t.completed).length} Pending
             </span>
           </div>
@@ -78,19 +78,19 @@ export function TasksPreviewWidget() {
                 onClick={() => toggleTask(task.id)}
                 className={`p-3 rounded-xl border flex items-start gap-3 cursor-pointer transition-all ${
                   task.completed
-                    ? "bg-surface-2/20 border-white/[0.04] opacity-60"
-                    : "bg-surface-2/40 border-white/[0.06] hover:border-white/15 hover:bg-surface-2/70"
+                    ? "bg-surface-2/20 border-line/40 opacity-60"
+                    : "bg-surface-2/40 border-line hover:border-line-strong hover:bg-surface-2/70"
                 }`}
               >
                 <button
                   type="button"
-                  className="mt-0.5 shrink-0 text-text-muted group-hover:text-cyan-400 transition-colors"
+                  className="mt-0.5 shrink-0 text-text-muted group-hover:text-cyan-500 transition-colors"
                   aria-label={task.completed ? "Mark incomplete" : "Mark completed"}
                 >
                   {task.completed ? (
                     <CheckCircle2 className="w-4 h-4 text-jade" />
                   ) : (
-                    <Circle className="w-4 h-4 text-text-muted hover:text-cyan-400" />
+                    <Circle className="w-4 h-4 text-text-muted hover:text-cyan-500" />
                   )}
                 </button>
                 <div className="flex-1 min-w-0">
@@ -102,12 +102,12 @@ export function TasksPreviewWidget() {
                     {task.title}
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-[10px] text-text-muted mt-1.5 font-mono">
-                    <span className="px-1.5 py-0.2 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/25 font-sans font-medium">
+                    <span className="px-1.5 py-0.2 rounded bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25 font-sans font-medium">
                       {task.owner}
                     </span>
-                    <span className="text-white/20">·</span>
-                    <span className="text-amber-400 font-medium font-sans">{task.due}</span>
-                    <span className="text-white/20">·</span>
+                    <span className="text-line-strong">·</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-medium font-sans">{task.due}</span>
+                    <span className="text-line-strong">·</span>
                     <span className="truncate text-text-muted/80">{task.source}</span>
                   </div>
                 </div>

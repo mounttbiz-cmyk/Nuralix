@@ -46,7 +46,7 @@ export function DesktopRail({
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-[#080C16]/95 backdrop-blur-2xl border-r border-white/[0.07] select-none z-30">
+    <aside className="hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-[#080C16]/95 backdrop-blur-2xl border-r border-white/[0.07] select-none z-30">
       {/* Brand Header */}
       <div className="p-4 border-b border-white/[0.07]">
         <Link href="/dashboard" className="flex items-center gap-3 group">

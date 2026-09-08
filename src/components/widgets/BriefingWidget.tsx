@@ -59,9 +59,9 @@ export function BriefingWidget({
                 <Sparkles className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans flex items-center gap-1.5">
+                <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-sans flex items-center gap-1.5">
                   <span>Executive AI Briefing</span>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-300 font-mono font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 font-mono font-semibold">
                     Autonomous
                   </span>
                 </h2>
@@ -70,26 +70,26 @@ export function BriefingWidget({
                 </span>
               </div>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted font-mono border border-white/[0.08]">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted font-mono border border-line">
               Live Feed
             </span>
           </div>
 
           {/* Structured Intelligence Cards */}
           <div className="py-3 space-y-2.5">
-            <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] hover:border-white/12 transition-colors space-y-1">
+            <div className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-line-strong transition-colors space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs">📈</span>
-                <span className="text-[11px] font-bold text-cyan-400 uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider font-mono">
                   Revenue & Growth Trajectory
                 </span>
               </div>
               <p className="text-xs text-text-muted leading-relaxed pl-5">
-                Monthly operating revenue for <strong className="text-white">{companyName}</strong> is stable at <strong className="text-white">₹{monthlyRev.toLocaleString("en-IN")}</strong> with healthy top-quartile gross margins for {industryLabel}.
+                Monthly operating revenue for <strong className="text-slate-900 dark:text-white font-bold">{companyName}</strong> is stable at <strong className="text-slate-900 dark:text-white font-bold">₹{monthlyRev.toLocaleString("en-IN")}</strong> with healthy top-quartile gross margins for {industryLabel}.
               </p>
             </div>
 
-            <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] hover:border-white/12 transition-colors space-y-1">
+            <div className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-line-strong transition-colors space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs">🛡️</span>
                 <span className="text-[11px] font-bold text-jade uppercase tracking-wider font-mono">
@@ -97,18 +97,18 @@ export function BriefingWidget({
                 </span>
               </div>
               <p className="text-xs text-text-muted leading-relaxed pl-5">
-                Net burn at <strong className="text-white">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-white">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-jade">{runwayMonths} month</strong> runway runway buffer.
+                Net burn at <strong className="text-slate-900 dark:text-white font-bold">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-slate-900 dark:text-white font-bold">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-jade font-bold">{runwayMonths} month</strong> runway runway buffer.
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs">⚡</span>
-                <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">
                   Priority Directive for {founderName}
                 </span>
               </div>
-              <p className="text-xs text-slate-200 leading-relaxed pl-5 font-medium">
+              <p className="text-xs text-text leading-relaxed pl-5 font-medium">
                 Dilute top-client concentration below 25% by advancing secondary deal pipelines within the next 60 days.
               </p>
             </div>

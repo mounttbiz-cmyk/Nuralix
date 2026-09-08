@@ -65,7 +65,7 @@ export function AppShell({
       <TabletRail navItems={navItems} />
 
       {/* Main Column */}
-      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
+      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0 md:ml-16 lg:ml-64">
         {/* Mobile Header (xs/sm) */}
         <MobileHeader companyName={companyName} onOpenChat={() => setChatOpen(true)} />
 

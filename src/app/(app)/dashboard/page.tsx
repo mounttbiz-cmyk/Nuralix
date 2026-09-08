@@ -18,12 +18,47 @@ import {
   X
 } from "lucide-react";
 import { Suspense } from "react";
+import { DailyCheckInModal } from "@/components/checkin/DailyCheckInModal";
+import { Clock, Send, Radio } from "lucide-react";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
   const [selectedIndustry, setSelectedIndustry] = useState<TenantContext["industry"]>("saas");
   const [selectedModel, setSelectedModel] = useState<TenantContext["businessModel"]>("subscription");
   const [companyName, setCompanyName] = useState("Apex Analytics");
+
+  // Daily Check-In State
+  const [checkinData, setCheckinData] = useState<{
+    isCompletedToday: boolean;
+    todayCheckin: any;
+    questionRules: { skipRevenue: boolean; skipTech: boolean };
+  }>({
+    isCompletedToday: false,
+    todayCheckin: null,
+    questionRules: { skipRevenue: false, skipTech: false },
+  });
+  const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
+
+  // Fetch Check-In Status
+  const refreshCheckinStatus = async () => {
+    try {
+      const res = await fetch("/api/checkin");
+      const data = await res.json();
+      if (data.success) {
+        setCheckinData({
+          isCompletedToday: Boolean(data.isCompletedToday),
+          todayCheckin: data.todayCheckin,
+          questionRules: data.questionRules || { skipRevenue: false, skipTech: false },
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch checkin status", err);
+    }
+  };
+
+  useEffect(() => {
+    refreshCheckinStatus();
+  }, []);
 
   // Read saved business profile if available
   useEffect(() => {
@@ -116,27 +151,77 @@ function DashboardContent() {
         </div>
       )}
 
+      {/* Daily Executive Check-in Banner / Status */}
+      <div className="p-4 sm:p-5 rounded-2xl border border-line bg-surface shadow-theme flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div
+            className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 ${
+              checkinData.isCompletedToday
+                ? "bg-jade/10 border-jade/30 text-jade"
+                : "bg-amber-500/10 border-amber-500/30 text-amber-500"
+            }`}
+          >
+            {checkinData.isCompletedToday ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-text">
+                {checkinData.isCompletedToday
+                  ? "Today's Executive Check-In Completed"
+                  : "Daily Executive Pulse Check Pending"}
+              </span>
+              <span
+                className={`text-[9px] px-2 py-0.2 rounded-full font-bold uppercase border ${
+                  checkinData.isCompletedToday
+                    ? "bg-jade/10 border-jade/30 text-jade"
+                    : "bg-amber-500/10 border-amber-500/30 text-amber-500"
+                }`}
+              >
+                {checkinData.isCompletedToday ? `● Synced (${checkinData.todayCheckin?.source || "web"})` : "⚡ 60s Required"}
+              </span>
+            </div>
+            <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
+              {checkinData.isCompletedToday
+                ? "Executive agents (Astra, Marcus, Elena) are calibrated with today's operational telemetry."
+                : "Continuous data collection mode is active. Give your AI executive team today's quick 60-second update."}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsCheckInModalOpen(true)}
+          className={`px-4 py-2 rounded-xl text-xs font-bold btn-tactile inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer ${
+            checkinData.isCompletedToday
+              ? "bg-surface-2 border border-line text-text hover:border-line-strong"
+              : "bg-brass text-white shadow-md hover:brightness-110"
+          }`}
+        >
+          <span>{checkinData.isCompletedToday ? "Review / Update Check-In" : "Complete 60s Check-In →"}</span>
+        </button>
+      </div>
+
       {/* Top Header & Executive Command Center */}
       <div className="glass-card hairline-accent p-5 sm:p-6 space-y-4">
         {/* Live Status Beacon & Timeframe Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
-          <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-surface-2/70 border border-white/[0.08] text-[11px]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-line">
+          <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-surface-2/70 border border-line text-[11px]">
             <span className="beacon-dot" />
             <span className="font-semibold text-text">Autonomous Intelligence Engine</span>
-            <span className="text-white/20">|</span>
-            <span className="text-cyan-400 font-medium">Telemetry Synced Live</span>
-            <span className="text-white/20">|</span>
+            <span className="text-line-strong">|</span>
+            <span className="text-cyan-600 dark:text-cyan-400 font-medium">Telemetry Synced Live</span>
+            <span className="text-line-strong">|</span>
             <span className="font-mono text-[10px] text-text-muted">v{baseConfig.version} Registry</span>
           </div>
 
-          <div className="flex items-center gap-1.5 p-0.5 bg-surface-2/60 rounded-xl border border-white/[0.06] text-xs">
+          <div className="flex items-center gap-1.5 p-0.5 bg-surface-2/60 rounded-xl border border-line text-xs">
             {["Live Today", "7D Trend", "Month to Date", "Q3 Live"].map((tf, i) => (
               <button
                 key={tf}
                 type="button"
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
                   i === 0
-                    ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-xs"
+                    ? "bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30 shadow-xs"
                     : "text-text-muted hover:text-text"
                 }`}
               >
@@ -150,10 +235,10 @@ function DashboardContent() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight font-sans">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight font-sans">
                 {companyName}
               </h1>
-              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-cyan-300 border border-cyan-500/30 font-semibold font-mono tracking-normal">
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 font-semibold font-mono tracking-normal">
                 {selectedIndustry.toUpperCase()} · Growth Plan
               </span>
             </div>
@@ -165,7 +250,7 @@ function DashboardContent() {
           {/* Action Controls: Profile Selector + Customize Dashboard Button */}
           <div className="flex items-center gap-2.5 flex-wrap">
             {/* Profile Switcher */}
-            <div className="flex items-center gap-1 p-1 bg-surface-2/70 rounded-xl border border-white/[0.08]">
+            <div className="flex items-center gap-1 p-1 bg-surface-2/70 rounded-xl border border-line">
               {[
                 { ind: "saas", mod: "subscription", label: "B2B SaaS" },
                 { ind: "d2c", mod: "one-time", label: "D2C Brand" },
@@ -182,8 +267,8 @@ function DashboardContent() {
                     }}
                     className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all btn-tactile ${
                       isActive
-                        ? "bg-cyan-500/20 text-cyan-300 shadow-sm border border-cyan-500/30 font-semibold"
-                        : "text-text-muted hover:text-text hover:bg-white/[0.04]"
+                        ? "bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 shadow-sm border border-cyan-500/30 font-semibold"
+                        : "text-text-muted hover:text-text hover:bg-surface"
                     }`}
                   >
                     {profile.label}
@@ -199,10 +284,10 @@ function DashboardContent() {
               className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-2 transition-all btn-tactile ${
                 isEditingLayout
                   ? "bg-gradient-to-r from-cyan-500 to-indigo-600 text-white border-cyan-400 shadow-lg shadow-cyan-500/25 font-bold"
-                  : "bg-surface-2/80 border-white/[0.08] text-text hover:bg-surface-2 hover:border-white/15"
+                  : "bg-surface-2/80 border-line text-text hover:bg-surface-2 hover:border-line-strong"
               }`}
             >
-              <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+              <Sliders className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400" />
               <span>{isEditingLayout ? "Exit Layout Editor" : "Customize Layout"}</span>
             </button>
           </div>
@@ -210,42 +295,42 @@ function DashboardContent() {
 
         {/* Quick-Glance Executive KPI Ribbon */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
-          <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-surface-2/40 border border-line flex items-center justify-between">
             <div>
               <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Overall Health</span>
-              <span className="text-base font-extrabold text-white font-mono">82 / 100</span>
+              <span className="text-base font-extrabold text-slate-900 dark:text-white font-mono">82 / 100</span>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-jade/15 text-jade font-semibold font-mono border border-jade/30">
               Optimal
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-surface-2/40 border border-line flex items-center justify-between">
             <div>
               <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Liquid Runway</span>
-              <span className="text-base font-extrabold text-cyan-400 font-mono">8.0 mo</span>
+              <span className="text-base font-extrabold text-cyan-600 dark:text-cyan-400 font-mono">8.0 mo</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-semibold font-mono border border-cyan-500/30">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 font-semibold font-mono border border-cyan-500/30">
               Safe Zone
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-surface-2/40 border border-line flex items-center justify-between">
             <div>
               <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Execution Queue</span>
-              <span className="text-base font-extrabold text-white font-mono">3 Active</span>
+              <span className="text-base font-extrabold text-slate-900 dark:text-white font-mono">3 Active</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-300 font-semibold font-mono border border-violet-500/30">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-700 dark:text-violet-300 font-semibold font-mono border border-violet-500/30">
               On Schedule
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-surface-2/40 border border-white/[0.06] flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-surface-2/40 border border-line flex items-center justify-between">
             <div>
               <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block">Bottleneck Gaps</span>
-              <span className="text-base font-extrabold text-amber-400 font-mono">3 Flagged</span>
+              <span className="text-base font-extrabold text-amber-600 dark:text-amber-400 font-mono">3 Flagged</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 font-semibold font-mono border border-amber-500/30">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold font-mono border border-amber-500/30">
               Action Ready
             </span>
           </div>
@@ -347,6 +432,18 @@ function DashboardContent() {
             <RenderWidget key={widget.id} widget={widget} />
           ))}
       </div>
+
+      {/* Daily Check-In Modal */}
+      <DailyCheckInModal
+        isOpen={isCheckInModalOpen}
+        onClose={() => setIsCheckInModalOpen(false)}
+        onCompleted={() => {
+          refreshCheckinStatus();
+          setToast("Daily Executive Check-In recorded! Telemetry synchronized.");
+          setTimeout(() => setToast(null), 4000);
+        }}
+        questionRules={checkinData.questionRules}
+      />
     </div>
   );
 }

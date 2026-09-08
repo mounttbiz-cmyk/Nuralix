@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ContainerTile } from "../ui/ContainerTile";
 import { ProvenanceBadge } from "../ui/Badge";
-import { ShieldCheck, ChevronRight, TrendingUp } from "lucide-react";
+import { ShieldCheck, ChevronRight, TrendingUp, Activity } from "lucide-react";
 
 interface HealthScoreProps {
   score?: number;
@@ -69,46 +69,47 @@ export function HealthScoreWidget({
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
+  const strokeColor = score >= 80 ? "#10B981" : score >= 70 ? "#06B6D4" : "#F59E0B";
 
   return (
     <ContainerTile span={2} id="widget_health_score">
       <div className="space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-          <div className="flex items-center gap-2">
-            <span className="beacon-dot" />
-            <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
-              Business Health Score
-            </h2>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <Activity className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-sans">
+                Corporate Health Score
+              </h2>
+              <p className="text-[11px] text-text-muted">
+                Deterministic telemetry synthesized across 5 operational vectors
+              </p>
+            </div>
           </div>
           <ProvenanceBadge type="from_data" />
         </div>
 
-        {/* Main Gauge & Metrics */}
-        <div className="flex flex-col @sm:flex-row items-center gap-6 py-2">
-          {/* Circular SVG Gauge with Glowing Gradient Arc */}
+        {/* Circular Gauge + Hero Score */}
+        <div className="flex flex-col @sm:flex-row items-center gap-6 py-4">
           <div className="relative flex items-center justify-center shrink-0">
-            <svg className="w-32 h-32 transform -rotate-90 drop-shadow-md">
-              <defs>
-                <linearGradient id="health-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#10B981" />
-                  <stop offset="60%" stopColor="#00D9FF" />
-                  <stop offset="100%" stopColor="#6366F1" />
-                </linearGradient>
-              </defs>
+            <svg className="w-28 h-28 transform -rotate-90">
               <circle
-                cx="64"
-                cy="64"
+                cx="56"
+                cy="56"
                 r={radius}
-                className="stroke-surface-2"
-                strokeWidth="8"
+                stroke="currentColor"
+                strokeWidth="7"
                 fill="transparent"
+                className="text-surface-2"
               />
               <circle
-                cx="64"
-                cy="64"
+                cx="56"
+                cy="56"
                 r={radius}
-                stroke="url(#health-grad)"
-                strokeWidth="8"
+                stroke={strokeColor}
+                strokeWidth="7"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
@@ -117,16 +118,15 @@ export function HealthScoreWidget({
               />
             </svg>
             <div className="absolute flex flex-col items-center justify-center">
-              <span className="text-3xl sm:text-4xl font-black num-tabular text-white font-mono leading-none tracking-tight">
+              <span className="text-3xl sm:text-4xl font-black num-tabular text-slate-900 dark:text-white font-mono leading-none tracking-tight">
                 {score}
               </span>
-              <span className="text-[10px] text-cyan-400 font-semibold font-mono mt-1 uppercase tracking-wider">
+              <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-semibold font-mono mt-1 uppercase tracking-wider">
                 Optimal
               </span>
             </div>
           </div>
 
-          {/* Context & Delta */}
           <div className="flex-1 space-y-2 text-center @sm:text-left">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-jade/15 text-jade border border-jade/30 font-mono">
               <TrendingUp className="w-3.5 h-3.5" />
@@ -139,7 +139,7 @@ export function HealthScoreWidget({
         </div>
 
         {/* Component Breakdown with Progress Bars */}
-        <div className="space-y-2 pt-3 border-t border-white/[0.08]">
+        <div className="space-y-2 pt-3 border-t border-line">
           <div className="flex items-center justify-between text-[10px] font-bold uppercase text-text-muted/80 px-1 tracking-widest font-mono">
             <span>Category Performance</span>
             <span>Weight</span>
@@ -156,17 +156,16 @@ export function HealthScoreWidget({
                   className={`p-2.5 rounded-xl border text-left transition-all btn-tactile ${
                     isSelected
                       ? "border-cyan-400/50 bg-cyan-500/15 shadow-sm ring-1 ring-cyan-500/30"
-                      : "border-white/[0.07] bg-surface-2/60 hover:bg-surface-2 hover:border-white/15"
+                      : "border-line bg-surface-2/60 hover:bg-surface-2 hover:border-line-strong"
                   }`}
                 >
                   <div className="flex items-center justify-between text-[11px] text-text-muted">
                     <span className="truncate font-medium">{comp.name}</span>
                     <span className="font-mono text-[9px] text-text-muted/70">{comp.weight}</span>
                   </div>
-                  <div className="text-sm sm:text-base font-black num-tabular text-white font-mono mt-1">
+                  <div className="text-sm sm:text-base font-black num-tabular text-slate-900 dark:text-white font-mono mt-1">
                     {comp.score}
                   </div>
-                  {/* Miniature progress bar */}
                   <div className="w-full h-1 bg-surface rounded-full overflow-hidden mt-1.5">
                     <div
                       className={`h-full rounded-full ${

@@ -24,7 +24,14 @@ import {
   Landmark,
   Globe,
   RefreshCw,
-  Check
+  Check,
+  CreditCard,
+  MessageSquare,
+  Calendar,
+  LifeBuoy,
+  Phone,
+  Radio,
+  FileSpreadsheet
 } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 
@@ -42,8 +49,336 @@ const parseINR = (val: string): string => {
   return val.replace(/[^\d]/g, "");
 };
 
+// Industry specific dynamic question schema
+interface DynamicQuestion {
+  id: string;
+  question: string;
+  hint: string;
+  options: string[];
+}
+
+const INDUSTRY_DYNAMIC_QUESTIONS: Record<string, DynamicQuestion[]> = {
+  saas: [
+    {
+      id: "pricing_model",
+      question: "What is your primary software packaging & pricing model?",
+      hint: "Helps Astra calibrate recurring MRR predictability and expansion revenue models.",
+      options: [
+        "Per-Seat / User License (Monthly/Annual)",
+        "Usage-Based / Consumption Metering",
+        "Flat-Rate Tiered Subscriptions",
+        "High-ACV Enterprise Custom Contracts",
+      ],
+    },
+    {
+      id: "sales_motion",
+      question: "How do your enterprise customers primarily buy?",
+      hint: "Used to calibrate pipeline velocity and rep quota benchmarks.",
+      options: [
+        "Product-Led Growth (Self-serve checkout)",
+        "Inbound Demo Requests & Inside Sales",
+        "Outbound Account-Based Enterprise Sales",
+        "Partner Ecosystem & Reseller Channel",
+      ],
+    },
+    {
+      id: "annual_churn",
+      question: "What is your estimated annual net revenue churn rate?",
+      hint: "Informs CFO Marcus's LTV-to-CAC payback formulas.",
+      options: [
+        "Negative Churn (High Net Expansion >110%)",
+        "Under 5% Annual Logo Churn",
+        "5% – 12% Annual Churn",
+        "Over 12% / Early stage baseline",
+      ],
+    },
+  ],
+  real_estate: [
+    {
+      id: "portfolio_scope",
+      question: "What is the primary asset mix in your portfolio?",
+      hint: "Calibrates capital depreciation, rental yield spreads, and vacancy reserves.",
+      options: [
+        "Commercial Grade-A Office Leasing",
+        "Residential Multi-Family Developments",
+        "Industrial Logistics & Warehousing Assets",
+        "Land Parcels & Mixed-Use Masterplans",
+      ],
+    },
+    {
+      id: "revenue_engine",
+      question: "What drives the majority of your cash collections?",
+      hint: "Shapes forward liquidity horizons and debt-service coverage ratio.",
+      options: [
+        "Predictable Monthly Long-Term Leases",
+        "Deal Brokerage & Syndication Fees",
+        "Property Asset Management Retainers",
+        "Project Construction Milestone Advances",
+      ],
+    },
+    {
+      id: "average_occupancy",
+      question: "What is your portfolio's current average occupancy rate?",
+      hint: "Sets risk alarms for asset yield compression.",
+      options: [
+        "Over 92% (Near Full Capacity)",
+        "80% – 92% (Healthy Commercial Baseline)",
+        "65% – 80% (Leasing Push Underway)",
+        "Under 65% / Turnaround Phase",
+      ],
+    },
+  ],
+  d2c: [
+    {
+      id: "fulfillment_model",
+      question: "How do you store and dispatch inventory to buyers?",
+      hint: "Used by Operations AI to track stockout exposure and shipping margins.",
+      options: [
+        "In-House Dedicated Central Warehouse",
+        "Distributed 3PL Network (Shiprocket/Delhivery)",
+        "Marketplace Direct (Amazon FBA / Flipkart)",
+        "On-Demand Contract Manufacturing Dispatch",
+      ],
+    },
+    {
+      id: "sku_count",
+      question: "How many active SKUs (stock keeping units) do you manage?",
+      hint: "Determines working capital cycle and inventory holding costs.",
+      options: [
+        "Focused Hero Catalog (1 – 15 SKUs)",
+        "Expanding Lineup (16 – 75 SKUs)",
+        "Broad Multi-Category (75 – 300 SKUs)",
+        "High-Volume Enterprise (300+ SKUs)",
+      ],
+    },
+    {
+      id: "primary_channel",
+      question: "Where does your brand acquire the highest order volume?",
+      hint: "Informs CMO Elena's blended ROAS and repeat purchase modeling.",
+      options: [
+        "Direct Brand Website (Shopify/Custom)",
+        "Amazon & Flipkart Marketplaces",
+        "Quick-Commerce (Blinkit, Zepto, Instamart)",
+        "Omnichannel / Offline Retail Stores",
+      ],
+    },
+  ],
+  agency: [
+    {
+      id: "billing_structure",
+      question: "What is your agency's standard client agreement structure?",
+      hint: "Directly calculates utilization rates, revenue realization, and margin buffers.",
+      options: [
+        "Monthly Rolling Strategic Retainers",
+        "Fixed-Price SOW Milestones with Delivery Gates",
+        "Blended Hourly / Time & Materials",
+        "Performance Incentive / Revenue-Share Model",
+      ],
+    },
+    {
+      id: "client_concentration",
+      question: "How many core accounts represent >60% of your revenue?",
+      hint: "Flags single-client concentration vulnerabilities in the Gap Register.",
+      options: [
+        "1 – 2 Whale Accounts (High Concentration)",
+        "3 – 6 Anchor Accounts (Balanced Core)",
+        "7 – 15 Diversified Active Accounts",
+        "Highly Distributed (No client >10%)",
+      ],
+    },
+    {
+      id: "team_utilization",
+      question: "What is your target billable biller utilization?",
+      hint: "Used to model hiring triggers before taking on new enterprise mandates.",
+      options: [
+        "Over 85% (High Billable Load)",
+        "70% – 85% (Optimal Creative & Exec Balance)",
+        "50% – 70% (Capacity Available for Scaling)",
+        "Under 50% / Repositioning offerings",
+      ],
+    },
+  ],
+  it: [
+    {
+      id: "service_delivery",
+      question: "What is the primary scope of your IT delivery?",
+      hint: "Calibrates engineering margins, bench costs, and cloud infrastructure pass-throughs.",
+      options: [
+        "Custom Enterprise Software & Web Development",
+        "Cloud Infrastructure & Managed DevOps (AWS/Azure)",
+        "Staff Augmentation & Dedicated Pods",
+        "Cybersecurity, Compliance & Audits",
+      ],
+    },
+    {
+      id: "contract_duration",
+      question: "What is the typical tenure of your client engagements?",
+      hint: "Projects forward cash runway and pipeline replenishment requirements.",
+      options: [
+        "Multi-Year Enterprise Managed Services (2-3+ yrs)",
+        "Annual Service Level Agreements (12 months)",
+        "6-Month Development Sprints",
+        "Ad-hoc Short Engagements (1-3 months)",
+      ],
+    },
+    {
+      id: "bench_rate",
+      question: "What percentage of billable engineers are on bench/unallocated?",
+      hint: "Informs CFO Marcus's gross margin protection rules.",
+      options: [
+        "Zero Bench / Immediate Backfill Needed",
+        "Healthy Buffer (< 8% on Bench)",
+        "8% – 18% Bench Reserve",
+        "Over 18% / Optimization Needed",
+      ],
+    },
+  ],
+  healthcare: [
+    {
+      id: "practice_model",
+      question: "What is the primary structure of your healthcare operations?",
+      hint: "Calibrates equipment amortisation, doctor payout ratios, and bed turnover.",
+      options: [
+        "Multi-Specialty Hospital or Surgery Center",
+        "Outpatient Specialty Clinic Chain",
+        "Diagnostic Labs & Pathology Centers",
+        "Dental & Cosmetic Wellness Center",
+      ],
+    },
+    {
+      id: "patient_volume",
+      question: "What is your average daily patient footfall?",
+      hint: "Determines revenue per practitioner and clinical throughput efficiency.",
+      options: [
+        "Over 250 Patients / Day (High Volume)",
+        "100 – 250 Patients / Day",
+        "30 – 100 Patients / Day",
+        "Boutique / High-Touch (< 30 Patients/Day)",
+      ],
+    },
+  ],
+  manufacturing: [
+    {
+      id: "production_model",
+      question: "What is your core manufacturing & delivery cycle?",
+      hint: "Shapes factory capacity models, downtime reserves, and scrap rate metrics.",
+      options: [
+        "Continuous Make-to-Stock (MTS) High-Volume Runs",
+        "Custom Engineered Make-to-Order (MTO)",
+        "OEM White-Label for Enterprise Brands",
+        "Batch Assembly & Specialized Fabrication",
+      ],
+    },
+    {
+      id: "raw_lead_time",
+      question: "What is your critical raw material procurement lead time?",
+      hint: "Used to model safety stock and working capital lockup.",
+      options: [
+        "Short Domestic Supply (< 10 Days)",
+        "2 – 4 Weeks Procurement Cycle",
+        "1 – 3 Months (Import / Custom Component Dependent)",
+        "Over 3 Months (Global Supply Chain Buffer Required)",
+      ],
+    },
+  ],
+  finance: [
+    {
+      id: "fin_scope",
+      question: "What is the primary financial vehicle or advisory focus?",
+      hint: "Configures fiduciary compliance, AUM schedules, and advisory realization.",
+      options: [
+        "Wealth Management & Multi-Family Office",
+        "NBFC / Private Credit & Secured Lending",
+        "Corporate Advisory, M&A & Capital Syndication",
+        "Tax, Audit & Statutory Assurance Services",
+      ],
+    },
+    {
+      id: "fee_mechanism",
+      question: "What is your primary revenue generation mechanism?",
+      hint: "Determines quarterly fee collection schedules and liquidity models.",
+      options: [
+        "Asset-Based AUM % Retainer Fee",
+        "Transaction Success Fees & Syndicate Spread",
+        "Fixed Advisory Retainers & Retainer Mandates",
+        "Net Interest Margin (NIM) on Loan Portfolios",
+      ],
+    },
+  ],
+  other: [
+    {
+      id: "operating_model",
+      question: "What is the primary operational rhythm of your business?",
+      hint: "Astra synthesizes custom agent behaviors from your operating model.",
+      options: [
+        "B2B Professional Contracts & Deliverables",
+        "High-Frequency Consumer Transactions",
+        "Recurring Memberships / Subscriptions",
+        "Asset Utilization & Field Operations",
+      ],
+    },
+    {
+      id: "core_bottleneck",
+      question: "Where is the largest operational drag currently located?",
+      hint: "Directly primes your initial Gap Register priorities.",
+      options: [
+        "Founder Being the Single Point of Contact & Sale",
+        "Unpredictable Working Capital & Delayed Collections",
+        "Sales Pipeline Inconsistency & Conversion Drops",
+        "Talent Quality, Handover & Mid-Management Friction",
+      ],
+    },
+  ],
+};
+
+const TOOLS_OPTIONS = [
+  {
+    id: "stripe",
+    name: "Stripe",
+    category: "Payments & Revenue",
+    description: "Automatic sync of invoices, ARR/MRR subscriptions, refunds, and daily cash inflow.",
+    icon: CreditCard,
+  },
+  {
+    id: "slack",
+    name: "Slack",
+    category: "Team Communication",
+    description: "Executive channel alerts, solvency warnings, and bidirectional AI assistant bot.",
+    icon: MessageSquare,
+  },
+  {
+    id: "zoho_books",
+    name: "Zoho Books / QuickBooks",
+    category: "Accounting & Ledgers",
+    description: "P&L synchronization, vendor expenses, GST reconciliation, and burn tracking.",
+    icon: FileSpreadsheet,
+  },
+  {
+    id: "google_calendar",
+    name: "Google Calendar",
+    category: "Meetings & Workload",
+    description: "Meeting load telemetry, client discovery calls, and executive time-burn diagnostics.",
+    icon: Calendar,
+  },
+  {
+    id: "help_desk",
+    name: "Help Desk (Zendesk / Freshdesk)",
+    category: "Support & Customer Health",
+    description: "Escalated ticket volume, SLA response times, and customer churn indicators.",
+    icon: LifeBuoy,
+  },
+  {
+    id: "none",
+    name: "None of the above / I don't use any of these",
+    category: "Manual Data Collection Mode",
+    description: "Zero integrations required. We will collect your daily pulse via a 60-second in-app or WhatsApp check-in.",
+    icon: Radio,
+  },
+];
+
 export default function OnboardingPage() {
   const router = useRouter();
+  // Steps: 1 (Industry), 2 (Scale & Numbers), 2.5 (Website Extraction), 2.7 (Dynamic Business Intake), 2.9 (Connect Tools), 3 (Priorities)
   const [step, setStep] = useState<number>(1);
   const [isAssembling, setIsAssembling] = useState(false);
   const [assemblyProgress, setAssemblyProgress] = useState(0);
@@ -80,6 +415,16 @@ export default function OnboardingPage() {
     metricsNote: "",
     verifiedDomain: "",
   });
+
+  // Dynamic Business Intake State
+  const [dynamicAnswers, setDynamicAnswers] = useState<Record<string, string>>({});
+  const [customOtherAnswers, setCustomOtherAnswers] = useState<Record<string, string>>({});
+
+  // Tool Intake State
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const [noIntegrations, setNoIntegrations] = useState<boolean>(false);
+  const [whatsappOptIn, setWhatsappOptIn] = useState<boolean>(true);
+  const [whatsappNumber, setWhatsappNumber] = useState<string>("");
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -227,6 +572,24 @@ export default function OnboardingPage() {
     );
   };
 
+  // Tool Selection Handler: Multi-select, with "none" mutually exclusive
+  const toggleTool = (toolId: string) => {
+    if (toolId === "none") {
+      setNoIntegrations(prev => !prev);
+      setSelectedTools([]);
+      return;
+    }
+
+    setNoIntegrations(false);
+    setSelectedTools(prev => {
+      if (prev.includes(toolId)) {
+        return prev.filter(t => t !== toolId);
+      } else {
+        return [...prev, toolId];
+      }
+    });
+  };
+
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
     if (businessType === "other" && !customBusinessType.trim()) {
@@ -305,27 +668,28 @@ export default function OnboardingPage() {
       if (website.trim() && autoExtractWebsite) {
         startWebsiteExtraction();
       } else {
-        setStep(3);
+        setStep(2.7); // Jump straight to Dynamic Business Intake
       }
     }
   };
 
-  const handleCompleteSetup = () => {
+  const handleCompleteSetup = async () => {
     setIsAssembling(true);
-    const resolvedIndustryLabel = businessType === "other" && customBusinessType.trim()
-      ? customBusinessType.trim()
-      : businessTypes.find(b => b.id === businessType)?.title || businessType;
+    const resolvedIndustryLabel =
+      businessType === "other" && customBusinessType.trim()
+        ? customBusinessType.trim()
+        : businessTypes.find(b => b.id === businessType)?.title || businessType;
 
     const statuses = [
       `Persisting company profile for ${companyName}…`,
       `Calibrating Indian benchmarks (INR ₹) for established ${resolvedIndustryLabel.toUpperCase()} business…`,
       `Configuring Astra (CEO) and Marcus (CFO) executive agents for ${founderName}…`,
-      "Running deterministic Layer 1 gap analysis…",
-      "Synthesizing your opening executive briefing…",
+      "Synthesizing your connected tool sync adapters and daily check-in protocols…",
+      "Running deterministic Layer 1 gap analysis & synthesizing your executive briefing…",
     ];
 
     let current = 0;
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       current += 1;
       if (current < statuses.length) {
         setStatusMessage(statuses[current]);
@@ -334,7 +698,17 @@ export default function OnboardingPage() {
         clearInterval(interval);
         setAssemblyProgress(100);
 
-        // Save completed profile
+        // Compile dynamic answers merging options & custom "other" inputs
+        const finalizedDynamicAnswers: Record<string, string> = {};
+        for (const [k, v] of Object.entries(dynamicAnswers)) {
+          if (v === "__other__") {
+            finalizedDynamicAnswers[k] = customOtherAnswers[k] || "Custom Specification";
+          } else {
+            finalizedDynamicAnswers[k] = v;
+          }
+        }
+
+        // Save completed profile locally
         const profile = {
           name: companyName.trim() || "My Company",
           founderName: founderName.trim() || "Founder",
@@ -351,12 +725,45 @@ export default function OnboardingPage() {
           burn: Number(monthlyBurn) || 150000,
           cash: Number(cashOnHand) || 1200000,
           needs: selectedNeeds.length > 0 ? selectedNeeds : ["extend_runway"],
+          connectedTools: noIntegrations ? [] : selectedTools,
+          noIntegrations,
+          whatsappOptIn,
+          whatsappNumber: whatsappNumber.trim(),
+          dynamicAnswers: finalizedDynamicAnswers,
           extractedWebsiteData: website.trim() ? extractedData : null,
           completedAt: new Date().toISOString(),
         };
         localStorage.setItem("nuralix_business_profile", JSON.stringify(profile));
 
-        // Guarantee user session is active so AuthGuard always admits user to dashboard
+        // Persist to persistent SQLite database via API
+        try {
+          await fetch("/api/business/intake", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: profile.name,
+              industry: profile.industryKey,
+              industryLabel: profile.industryLabel,
+              customIndustry: profile.customBusinessType,
+              founderName: profile.founderName,
+              website: profile.website,
+              teamSize: profile.teamSize,
+              annualRevenue: profile.annualRevenue,
+              monthlyRevenue: profile.revenue,
+              monthlyBurn: profile.burn,
+              cashOnHand: profile.cash,
+              connectedTools: profile.connectedTools,
+              noIntegrations: profile.noIntegrations,
+              whatsappOptIn: profile.whatsappOptIn,
+              whatsappNumber: profile.whatsappNumber,
+              dynamicAnswers: profile.dynamicAnswers,
+            }),
+          });
+        } catch (e) {
+          console.error("Failed to persist intake to SQLite API:", e);
+        }
+
+        // Guarantee user session is active
         try {
           const existingSession = localStorage.getItem("nuralix_user_session");
           if (!existingSession) {
@@ -378,8 +785,10 @@ export default function OnboardingPage() {
           router.push("/subscription");
         }, 800);
       }
-    }, 700);
+    }, 650);
   };
+
+  const currentQuestions = INDUSTRY_DYNAMIC_QUESTIONS[businessType] || INDUSTRY_DYNAMIC_QUESTIONS.other;
 
   return (
     <div className="min-h-screen bg-bg text-text flex flex-col justify-between p-4 sm:p-6 lg:p-8">
@@ -405,14 +814,12 @@ export default function OnboardingPage() {
 
         <div className="flex items-center gap-3">
           <span className="text-xs font-semibold text-text-muted">
-            {step === 2.5 ? (
-              <span className="text-brass flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-brass" />
-                <span>Extra Step: Website Intelligence</span>
-              </span>
-            ) : (
-              <span>Step {step} of 3</span>
-            )}
+            {step === 1 && "Step 1 of 5 · Industry"}
+            {step === 2 && "Step 2 of 5 · Financials"}
+            {step === 2.5 && "Step 2.5 · AI Extraction"}
+            {step === 2.7 && "Step 3 of 5 · Operations"}
+            {step === 2.9 && "Step 4 of 5 · Connected Tools"}
+            {step === 3 && "Step 5 of 5 · Priorities"}
           </span>
           <div className="w-32">
             <ThemeSwitch compact />
@@ -528,7 +935,6 @@ export default function OnboardingPage() {
                   </p>
                 </div>
 
-                {/* Validation summary banner if errors exist */}
                 {Object.keys(errors).length > 0 && (
                   <div className="p-3 rounded-lg bg-rust/10 border border-rust/30 flex items-start gap-2.5 text-xs text-rust">
                     <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -614,7 +1020,7 @@ export default function OnboardingPage() {
                     )}
                   </div>
 
-                  {/* Company Annual Income / Revenue (INR ₹) */}
+                  {/* Annual Revenue (INR ₹) */}
                   <div>
                     <label className="font-semibold text-text mb-1 flex items-center">
                       <span>Company Annual Income / Revenue (₹)</span>
@@ -720,7 +1126,7 @@ export default function OnboardingPage() {
                     onClick={handleStep2Next}
                     className="px-5 py-2.5 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer"
                   >
-                    <span>{website.trim() && autoExtractWebsite ? "Continue to Website Extraction" : "Continue to What You Need"}</span>
+                    <span>{website.trim() && autoExtractWebsite ? "Continue to Website Extraction" : "Continue to Operational Details"}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -761,7 +1167,6 @@ export default function OnboardingPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {/* Live Extraction Success Banner */}
                     <div className="p-3.5 rounded-xl bg-jade/10 border border-jade/30 flex items-center justify-between text-xs text-jade">
                       <div className="flex items-center gap-2 font-semibold">
                         <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />
@@ -777,7 +1182,6 @@ export default function OnboardingPage() {
                       </button>
                     </div>
 
-                    {/* Extracted Positioning */}
                     <div className="space-y-1.5 text-xs">
                       <label className="font-semibold text-text flex items-center justify-between">
                         <span>Extracted Value Proposition & Positioning</span>
@@ -791,7 +1195,6 @@ export default function OnboardingPage() {
                       />
                     </div>
 
-                    {/* Extracted Offerings */}
                     <div className="space-y-1.5 text-xs">
                       <label className="font-semibold text-text flex items-center justify-between">
                         <span>Extracted Core Offerings & Services</span>
@@ -805,7 +1208,6 @@ export default function OnboardingPage() {
                       />
                     </div>
 
-                    {/* Extracted Target ICP */}
                     <div className="space-y-1.5 text-xs">
                       <label className="font-semibold text-text flex items-center justify-between">
                         <span>Identified Target Customer Persona (ICP)</span>
@@ -819,27 +1221,25 @@ export default function OnboardingPage() {
                       />
                     </div>
 
-                    {/* Commercial / Indian INR Alignment Notes */}
                     <div className="p-3 rounded-lg bg-surface-2 border border-line text-[11px] text-text-muted flex items-start gap-2.5">
                       <Building2 className="w-4 h-4 text-brass shrink-0 mt-0.5" />
                       <span>{extractedData.metricsNote}</span>
                     </div>
 
-                    {/* Navigation Buttons */}
                     <div className="pt-3 border-t border-line flex items-center justify-between">
                       <button
                         type="button"
                         onClick={() => setStep(2)}
                         className="px-4 py-2 text-xs font-semibold text-text-muted hover:text-text cursor-pointer"
                       >
-                        Back to Scale & Numbers
+                        Back to Financials
                       </button>
                       <button
                         type="button"
-                        onClick={() => setStep(3)}
+                        onClick={() => setStep(2.7)}
                         className="px-5 py-2.5 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer"
                       >
-                        <span>Confirm & Continue to Priorities</span>
+                        <span>Confirm & Continue to Operational Details</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -848,7 +1248,266 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* Step 3: What do you need right now? */}
+            {/* Step 2.7: Dynamic Business Intake Questions (Tailored by Industry) */}
+            {step === 2.7 && (
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[10px] font-bold uppercase tracking-wider mb-2">
+                      Tailored Industry Telemetry
+                    </div>
+                    <h1 className="text-lg sm:text-xl font-bold text-text tracking-tight font-sans">
+                      Operational Anatomy & Mechanics
+                    </h1>
+                    <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                      Calibrated specifically for your <span className="font-semibold text-text">{businessTypes.find(b => b.id === businessType)?.title || "business"}</span> model. Answer or customize these questions, or skip to continue anytime.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setStep(2.9)}
+                    className="self-start sm:self-auto text-xs text-text-muted hover:text-brass underline decoration-dotted font-semibold cursor-pointer px-2 py-1"
+                  >
+                    Skip this section →
+                  </button>
+                </div>
+
+                {/* Dynamic Questions List */}
+                <div className="space-y-5 pt-1">
+                  {currentQuestions.map((q, qIndex) => {
+                    const selectedVal = dynamicAnswers[q.id] || "";
+                    const isOther = selectedVal === "__other__";
+
+                    return (
+                      <div key={q.id} className="p-4 rounded-xl border border-line bg-surface-2/40 space-y-3">
+                        <div>
+                          <span className="text-[10px] font-bold text-brass uppercase tracking-wider block">
+                            Question {qIndex + 1} of {currentQuestions.length}
+                          </span>
+                          <h2 className="text-xs sm:text-sm font-bold text-text mt-0.5">{q.question}</h2>
+                          <p className="text-[11px] text-text-muted mt-0.5">{q.hint}</p>
+                        </div>
+
+                        {/* Options Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {q.options.map(opt => {
+                            const isOptSelected = selectedVal === opt;
+                            return (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => {
+                                  setDynamicAnswers(prev => ({
+                                    ...prev,
+                                    [q.id]: isOptSelected ? "" : opt,
+                                  }));
+                                }}
+                                className={`p-2.5 rounded-lg border text-left text-xs transition-all cursor-pointer flex items-center justify-between btn-tactile ${
+                                  isOptSelected
+                                    ? "bg-brass-soft border-brass text-text font-bold shadow-xs"
+                                    : "bg-surface border-line text-text-muted hover:text-text hover:border-line-strong"
+                                }`}
+                              >
+                                <span>{opt}</span>
+                                {isOptSelected && <Check className="w-3.5 h-3.5 text-brass shrink-0" />}
+                              </button>
+                            );
+                          })}
+
+                          {/* "Other (manual input)" option */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDynamicAnswers(prev => ({
+                                ...prev,
+                                [q.id]: isOther ? "" : "__other__",
+                              }));
+                            }}
+                            className={`p-2.5 rounded-lg border text-left text-xs transition-all cursor-pointer flex items-center justify-between btn-tactile ${
+                              isOther
+                                ? "bg-brass-soft border-brass text-text font-bold shadow-xs"
+                                : "bg-surface border-line text-text-muted hover:text-text hover:border-line-strong"
+                            }`}
+                          >
+                            <span>Other (write manually)</span>
+                            {isOther && <Check className="w-3.5 h-3.5 text-brass shrink-0" />}
+                          </button>
+                        </div>
+
+                        {/* Manual write-in box if "Other" is selected */}
+                        {isOther && (
+                          <div className="pt-2">
+                            <input
+                              type="text"
+                              value={customOtherAnswers[q.id] || ""}
+                              onChange={e => {
+                                const val = e.target.value;
+                                setCustomOtherAnswers(prev => ({ ...prev, [q.id]: val }));
+                              }}
+                              placeholder="Type your specific answer here..."
+                              className="w-full px-3 py-2 rounded-lg bg-surface border border-brass text-xs text-text focus:outline-none focus:ring-1 focus:ring-brass"
+                              autoFocus
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="pt-3 border-t border-line flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setStep(website.trim() && autoExtractWebsite ? 2.5 : 2)}
+                    className="px-4 py-2 text-xs font-semibold text-text-muted hover:text-text cursor-pointer"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep(2.9)}
+                    className="px-5 py-2.5 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>Continue to Business Tools</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2.9: Connect Your Business Tools */}
+            {step === 2.9 && (
+              <div className="space-y-5">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brass-soft text-brass text-[10px] font-bold uppercase tracking-wider mb-2">
+                    Integration & Collection Mode
+                  </div>
+                  <h1 className="text-lg sm:text-xl font-bold text-text tracking-tight font-sans">
+                    Connect your business tools
+                  </h1>
+                  <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                    Select the platforms and systems your company already uses. You can select multiple tools, or choose none to use automated daily check-ins.
+                  </p>
+                </div>
+
+                {/* Multi-Select Tools Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {TOOLS_OPTIONS.map(tool => {
+                    const isSelected = tool.id === "none" ? noIntegrations : selectedTools.includes(tool.id);
+                    const Icon = tool.icon;
+
+                    return (
+                      <div
+                        key={tool.id}
+                        onClick={() => toggleTool(tool.id)}
+                        className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start gap-3.5 btn-tactile ${
+                          isSelected
+                            ? "bg-surface-2 border-brass ring-1 ring-brass/40 shadow-sm"
+                            : "bg-surface-2/40 border-line hover:border-line-strong"
+                        }`}
+                      >
+                        <div
+                          className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 shadow-sm transition-colors ${
+                            isSelected ? "bg-brass text-white border-brass" : "bg-surface border-line text-text-muted"
+                          }`}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-xs font-bold text-text">{tool.name}</span>
+                            <div
+                              className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                                isSelected ? "bg-brass border-brass text-white" : "border-line-strong bg-surface"
+                              }`}
+                            >
+                              {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-mono text-brass block mt-0.5">{tool.category}</span>
+                          <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
+                            {tool.description}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Visible Explanation Under the Grid */}
+                <div className="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-text space-y-1">
+                  <div className="font-bold text-cyan-400 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>How Nuralix Collects Your Daily Data</span>
+                  </div>
+                  <p className="text-[11px] text-text-muted leading-relaxed">
+                    Selected tools sync your data automatically. For anything not connected, we&apos;ll ask you for a quick daily update instead — no manual dashboard work required.
+                  </p>
+                </div>
+
+                {/* WhatsApp Check-In Bot Opt-In Field */}
+                <div className="p-4 rounded-xl border border-line bg-surface-2/60 space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-jade/10 border border-jade/30 flex items-center justify-center text-jade shrink-0 mt-0.5">
+                        <Phone className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h2 className="text-xs font-bold text-text">WhatsApp Daily Executive Check-In Bot</h2>
+                        <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
+                          Receive a 60-second morning message. Reply with 1 line or a voice note and Nuralix updates your dashboard and executive briefings automatically.
+                        </p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                      <input
+                        type="checkbox"
+                        checked={whatsappOptIn}
+                        onChange={e => setWhatsappOptIn(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-surface rounded-full border border-line peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-text-muted peer-checked:after:bg-white after:border-line after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-jade" />
+                    </label>
+                  </div>
+
+                  {whatsappOptIn && (
+                    <div className="pt-2 border-t border-line/60 animate-fade-in space-y-1.5">
+                      <label className="text-[11px] font-semibold text-text block">
+                        Founder / Primary WhatsApp Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={whatsappNumber}
+                        onChange={e => setWhatsappNumber(e.target.value)}
+                        placeholder="e.g. +91 98765 43210"
+                        className="w-full px-3 py-2 rounded-lg bg-surface border border-line text-xs text-text font-mono placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-3 border-t border-line flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setStep(2.7)}
+                    className="px-4 py-2 text-xs font-semibold text-text-muted hover:text-text cursor-pointer"
+                  >
+                    Back
+                  </button>
+                  <button
+                    id="btn-continue-step-tools"
+                    type="button"
+                    onClick={() => setStep(3)}
+                    className="px-5 py-2.5 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>Continue to Priorities & Bottlenecks</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: What do you need right now? (Priorities & Bottlenecks) */}
             {step === 3 && (
               <div className="space-y-5">
                 <div>
@@ -856,7 +1515,7 @@ export default function OnboardingPage() {
                     What are your biggest priorities & bottlenecks?
                   </h1>
                   <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                    Select everything you want Nuralix to solve. We will seed actionable gap playbooks and tasks for each item.
+                    Select everything you want Nuralix to solve. We will seed actionable gap playbooks, autonomous agents, and tasks for each item.
                   </p>
                 </div>
 
@@ -899,10 +1558,10 @@ export default function OnboardingPage() {
                 <div className="pt-4 border-t border-line flex items-center justify-between">
                   <button
                     type="button"
-                    onClick={() => setStep(website.trim() && autoExtractWebsite ? 2.5 : 2)}
+                    onClick={() => setStep(2.9)}
                     className="px-4 py-2 text-xs font-semibold text-text-muted hover:text-text cursor-pointer"
                   >
-                    Back
+                    Back to Business Tools
                   </button>
                   <button
                     id="btn-assemble-os"
@@ -918,7 +1577,7 @@ export default function OnboardingPage() {
             )}
           </div>
         ) : (
-          /* Live AI Assembly Sequence (§4.2 signature sequence) */
+          /* Live AI Assembly Sequence */
           <div className="p-8 sm:p-12 rounded-2xl border border-line bg-surface shadow-2xl text-center space-y-6 max-w-lg mx-auto">
             <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line flex items-center justify-center mx-auto p-2.5 shadow-md">
               <Image

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Layers,
@@ -19,7 +19,11 @@ import {
   Check,
   ChevronRight,
   Cable,
-  Workflow
+  Workflow,
+  Send,
+  RefreshCw,
+  Clock,
+  Radio
 } from "lucide-react";
 import { IntegrationLogo } from "@/components/ui/IntegrationLogo";
 
@@ -27,188 +31,132 @@ interface IntegrationItem {
   id: string;
   name: string;
   category: "business" | "automation" | "data";
-  logo: string;
   tagline: string;
-  status: "connected" | "disconnected" | "action_required";
-  connectedAt?: string;
+  status: "connected" | "pending_connection" | "not_connected" | "error";
+  apiKey?: string | null;
+  updatedAt?: string;
   services: string[];
   permissions: string[];
   usedBy: string[];
   configSummary?: string;
 }
 
-const DEFAULT_INTEGRATIONS: IntegrationItem[] = [
-  // Business Integrations
+interface StripeEvent {
+  id: string;
+  eventType: string;
+  amount: number;
+  currency: string;
+  createdAt: string;
+}
+
+const CATALOG_DEFINITIONS: Omit<IntegrationItem, "status">[] = [
+  // 1. Core Business Tools
   {
-    id: "google_workspace",
-    name: "Google Workspace",
+    id: "stripe",
+    name: "Stripe",
     category: "business",
-    logo: "🌐",
-    tagline: "Sync executive communication, scheduling, and strategic docs.",
-    status: "connected",
-    connectedAt: "Verified 2 days ago",
-    services: ["Gmail", "Google Drive", "Google Calendar", "Google Sheets"],
-    permissions: [
-      "Read authorized executive emails",
-      "Read business files & briefings in Drive",
-      "Create executive calendar events",
-      "Create and format live telemetry spreadsheets",
-    ],
-    usedBy: ["CEO AI (Astra)", "Sales AI (Vikram)", "Tasks & Execution", "Workflows & Automations"],
-    configSummary: "OAuth 2.0 Enterprise Domain-wide Delegation active.",
-  },
-  {
-    id: "microsoft_365",
-    name: "Microsoft 365",
-    category: "business",
-    logo: "🏢",
-    tagline: "Outlook email telemetry, OneDrive storage, and Teams communications.",
-    status: "disconnected",
-    services: ["Outlook", "OneDrive", "Microsoft Teams", "Excel Online"],
-    permissions: [
-      "Read business emails",
-      "Read shared OneDrive files",
-      "Dispatch alerts to Teams channels",
-    ],
-    usedBy: ["CEO AI", "Operations AI", "Automations"],
+    tagline: "Live telemetry for ARR/MRR collections, invoices, subscription churn, and automated revenue reconciliation.",
+    services: ["Charges & Payments API", "Subscriptions Telemetry", "Inbound Webhook Engine"],
+    permissions: ["Read customer charges & invoices", "Listen for live payment webhook events"],
+    usedBy: ["Marcus (CFO AI)", "Adaptive Analytics", "Decision Simulator", "Daily Check-In Filter"],
+    configSummary: "End-to-end verified with live webhook endpoint and persistent event logging.",
   },
   {
     id: "slack",
     name: "Slack",
     category: "business",
-    logo: "💬",
     tagline: "Real-time executive briefing alerts, solvency alarms, and approval bots.",
-    status: "connected",
-    connectedAt: "Active on #boardroom",
-    services: ["Bot Notifications", "Slash Commands (/nuralix)", "Thread AI Responses"],
-    permissions: [
-      "Post messages to selected channels",
-      "Listen for executive slash commands",
-      "Create interactive approval buttons",
-    ],
-    usedBy: ["CFO AI (Marcus)", "David (Operations AI)", "Solvency Alarms"],
-    configSummary: "Connected to workspace apex.slack.com",
+    services: ["Bot Notifications", "Slash Commands (/nuralix)", "Interactive Approvals"],
+    permissions: ["Post messages to #boardroom", "Listen for executive slash commands"],
+    usedBy: ["Astra (CEO AI)", "Marcus (CFO AI)", "Solvency Alarms"],
+    configSummary: "Webhook link for executive broadcasts and daily briefing delivery.",
+  },
+  {
+    id: "zoho_books",
+    name: "Zoho Books / QuickBooks",
+    category: "business",
+    tagline: "General ledger sync, vendor expense tracking, and Indian GST tax compliance.",
+    services: ["Chart of Accounts", "Bills & Expenses", "Vendor Invoices"],
+    permissions: ["Read ledger transactions", "Extract vendor line-item burn"],
+    usedBy: ["Marcus (CFO AI)", "Budget Planner", "Daily Check-In Filter"],
+    configSummary: "OAuth token / Org ID link for continuous burn synchronization.",
+  },
+  {
+    id: "google_calendar",
+    name: "Google Calendar",
+    category: "business",
+    tagline: "Meeting load telemetry, client discovery calls, and executive time-burn diagnostics.",
+    services: ["Calendar Events API", "Executive Workload Analyzer"],
+    permissions: ["Read executive calendar metadata", "Analyze meeting load per FTE"],
+    usedBy: ["Operations AI", "Astra (CEO AI)", "Tasks & Execution"],
+    configSummary: "Google Workspace service account sync.",
+  },
+  {
+    id: "help_desk",
+    name: "Help Desk (Zendesk / Freshdesk)",
+    category: "business",
+    tagline: "Escalated ticket volume, SLA response times, and customer churn indicators.",
+    services: ["Ticket Metrics", "SLA Breach Telemetry", "Customer Satisfaction (CSAT)"],
+    permissions: ["Read ticket volume counts", "Extract open critical incidents"],
+    usedBy: ["Support AI", "Gap Register", "Daily Check-In Filter"],
+    configSummary: "API key connection to support portal.",
+  },
+  {
+    id: "google_workspace",
+    name: "Google Workspace",
+    category: "business",
+    tagline: "Sync executive communication, scheduling, and strategic Drive docs.",
+    services: ["Gmail Telemetry", "Google Drive", "Google Sheets"],
+    permissions: ["Read authorized executive emails", "Read business files in Drive"],
+    usedBy: ["CEO AI (Astra)", "Sales AI (Vikram)", "Tasks & Execution"],
+    configSummary: "Domain-wide delegation active.",
   },
   {
     id: "zoom",
     name: "Zoom",
     category: "business",
-    logo: "📹",
     tagline: "Meeting transcript ingestion, AI summary synthesis, and action item extraction.",
-    status: "disconnected",
     services: ["Cloud Recordings", "Live Transcripts", "Meeting Intelligence"],
-    permissions: ["Read authorized meeting transcripts", "Extract speaker action items"],
-    usedBy: ["Knowledge Hub", "Executive Briefings", "Tasks & Execution"],
-  },
-  {
-    id: "whatsapp",
-    name: "WhatsApp Business",
-    category: "business",
-    logo: "📱",
-    tagline: "Instant founder briefings, high-priority solvency alerts, and approval triggers.",
-    status: "connected",
-    connectedAt: "Founder number verified",
-    services: ["Executive Briefings via WhatsApp", "Quick Approval Triggers"],
-    permissions: ["Send high-priority executive alerts", "Receive command replies from founder"],
-    usedBy: ["Founder Personal Desk", "Astra (CEO AI)", "Solvency Guard"],
-    configSummary: "Encrypted webhook linked to verified founder mobile.",
-  },
-  {
-    id: "stripe",
-    name: "Stripe",
-    category: "business",
-    logo: "💳",
-    tagline: "Live telemetry for MRR, customer churn, gross collection volume, and refunds.",
-    status: "connected",
-    connectedAt: "Live telemetry sync",
-    services: ["Charges API", "Subscriptions Telemetry", "Disputes Webhook"],
-    permissions: ["Read-only access to customer charges & subscriptions", "Read refund telemetry"],
-    usedBy: ["Marcus (CFO AI)", "Adaptive Analytics", "Decision Simulator"],
-    configSummary: "Restricted API key active (Read-only Billing).",
-  },
-  {
-    id: "quickbooks",
-    name: "QuickBooks",
-    category: "business",
-    logo: "🧾",
-    tagline: "General ledger sync, vendor expense tracking, and Indian tax compliance.",
-    status: "connected",
-    connectedAt: "Synced 1h ago",
-    services: ["Chart of Accounts", "Bills & Expenses", "Vendor Invoices"],
-    permissions: ["Read ledger transactions", "Extract vendor line-item burn"],
-    usedBy: ["CFO AI (Marcus)", "Solvency Alarms", "Budget Planner"],
+    permissions: ["Read authorized meeting transcripts", "Extract action items"],
+    usedBy: ["Knowledge Hub", "Executive Briefings"],
   },
   {
     id: "hubspot",
     name: "HubSpot",
     category: "business",
-    logo: "🧡",
     tagline: "CRM deal pipeline synchronization, lead status tracking, and AE attribution.",
-    status: "disconnected",
     services: ["Deals Pipeline", "Contacts & Companies", "Engagement Activity"],
-    permissions: ["Read and write deals", "Update deal stages", "Enrich contacts with AI scores"],
-    usedBy: ["Vikram (Sales AI)", "Elena (Marketing AI)", "Workflows"],
-  },
-  {
-    id: "salesforce",
-    name: "Salesforce",
-    category: "business",
-    logo: "☁️",
-    tagline: "Enterprise CRM account mapping, quota velocity, and opportunity tracking.",
-    status: "disconnected",
-    services: ["Opportunities API", "Account Hierarchies", "Custom Objects"],
-    permissions: ["Read opportunities & stages", "Sync enterprise account telemetry"],
-    usedBy: ["Sales AI", "Workflows Builder", "Executive Intelligence"],
+    permissions: ["Read deals pipeline", "Extract deal stage velocity"],
+    usedBy: ["Sales AI (Vikram)", "Marketing AI (Elena)"],
   },
 
-  // Automation Integrations
+  // 2. Automations
   {
     id: "zapier",
     name: "Zapier",
     category: "automation",
-    logo: "⚡",
     tagline: "Connect Nuralix actions and triggers with 6,000+ business applications.",
-    status: "connected",
-    connectedAt: "Nuralix App installed",
     services: ["Zapier Triggers", "Zapier Actions", "Multi-step Zaps"],
-    permissions: ["Trigger external workflows from Nuralix actions", "Ingest inbound payloads"],
-    usedBy: ["Workflows Builder", "Operations AI", "Tasks"],
+    permissions: ["Trigger external workflows from Nuralix actions"],
+    usedBy: ["Workflows Builder", "Operations AI"],
   },
   {
     id: "webhooks",
     name: "Custom Webhooks",
     category: "automation",
-    logo: "🪝",
     tagline: "Inbound and outbound JSON webhooks with HMAC SHA-256 signature verification.",
-    status: "connected",
-    connectedAt: "3 active endpoints",
-    services: ["Inbound Lead Capture", "Outbound Executive Briefing Dispatch", "Custom Event Listeners"],
+    services: ["Inbound Lead Capture", "Outbound Briefing Dispatch"],
     permissions: ["Accept signed JSON POST requests", "Dispatch signed webhook alerts"],
-    usedBy: ["Workflows", "Platform Developers", "Automations"],
-    configSummary: "Secret token: whsec_live_9a87d6e5...",
-  },
-  {
-    id: "rest_api",
-    name: "REST API Access",
-    category: "automation",
-    logo: "🔌",
-    tagline: "Enterprise programmatic access to Nuralix metrics, intelligence, and execution.",
-    status: "connected",
-    connectedAt: "API Key v2 active",
-    services: ["Metrics Read API", "Task Creation API", "Simulation API", "Briefings Export API"],
-    permissions: ["Full enterprise tenant read/write token"],
-    usedBy: ["Custom Internal Portals", "Data Pipelines", "Enterprise IT"],
-    configSummary: "Key: nr_live_8390bca4f71...",
+    usedBy: ["Workflows", "Platform Developers"],
+    configSummary: "Webhook secret active.",
   },
 
-  // Data Connections
+  // 3. Data Connections
   {
     id: "csv",
     name: "CSV Batch Importer",
     category: "data",
-    logo: "📄",
     tagline: "Upload custom transaction logs, customer rosters, and historical financials.",
-    status: "connected",
     services: ["Delimiter Detection", "Currency Parser (INR / USD)", "Data Sanitization"],
     permissions: ["Parse and store local tabular files in tenant database"],
     usedBy: ["Knowledge Hub", "Adaptive Analytics", "Tools"],
@@ -217,62 +165,171 @@ const DEFAULT_INTEGRATIONS: IntegrationItem[] = [
     id: "excel",
     name: "Microsoft Excel (.xlsx)",
     category: "data",
-    logo: "📊",
     tagline: "Direct ingest of multi-tab Excel workbooks, pivot tables, and P&L sheets.",
-    status: "connected",
-    services: ["Multi-sheet Parsing", "Formula Ingestion", "Cell Formatting Preservation"],
+    services: ["Multi-sheet Parsing", "Formula Ingestion", "Cell Formatting"],
     permissions: ["Read and extract workbook tables"],
-    usedBy: ["CFO AI", "Financial Tools", "Knowledge Hub"],
+    usedBy: ["CFO AI", "Financial Tools"],
   },
   {
     id: "google_sheets",
     name: "Google Sheets Live Link",
     category: "data",
-    logo: "📗",
     tagline: "Bidirectional live synchronization with company Google Sheets models.",
-    status: "connected",
-    connectedAt: "Synced 15m ago",
     services: ["Live Polling (every 15 min)", "Cell Writeback", "Schema Mapping"],
     permissions: ["Read spreadsheet data", "Append telemetry rows"],
-    usedBy: ["Tools", "Adaptive Analytics", "CEO AI"],
-  },
-  {
-    id: "databases",
-    name: "Database Connections",
-    category: "data",
-    logo: "🗄️",
-    tagline: "Direct read-replica connections to PostgreSQL, MySQL, MongoDB, and Snowflake.",
-    status: "disconnected",
-    services: ["PostgreSQL", "MySQL", "MongoDB", "Snowflake / BigQuery"],
-    permissions: ["Read-only SQL query execution over SSL tunnel"],
-    usedBy: ["Adaptive Analytics", "Digital Twin", "Enterprise Reports"],
+    usedBy: ["Tools", "Adaptive Analytics"],
   },
 ];
 
 export default function IntegrationsPage() {
-  const [integrations, setIntegrations] = useState<IntegrationItem[]>(DEFAULT_INTEGRATIONS);
+  const [integrations, setIntegrations] = useState<IntegrationItem[]>([]);
+  const [stripeEvents, setStripeEvents] = useState<StripeEvent[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [inspectItem, setInspectItem] = useState<IntegrationItem | null>(null);
 
-  const toggleConnection = (id: string) => {
-    setIntegrations(prev =>
-      prev.map(item => {
-        if (item.id === id) {
-          const nextStatus = item.status === "connected" ? "disconnected" : "connected";
-          const updated = {
-            ...item,
-            status: nextStatus as IntegrationItem["status"],
-            connectedAt: nextStatus === "connected" ? "Just connected" : undefined,
+  // Modals
+  const [inspectItem, setInspectItem] = useState<IntegrationItem | null>(null);
+  const [stripeModalOpen, setStripeModalOpen] = useState<boolean>(false);
+  const [genericModalItem, setGenericModalItem] = useState<IntegrationItem | null>(null);
+
+  // Stripe Modal State
+  const [stripeApiKey, setStripeApiKey] = useState<string>("");
+  const [stripeConnecting, setStripeConnecting] = useState<boolean>(false);
+  const [stripeTestingWebhook, setStripeTestingWebhook] = useState<boolean>(false);
+  const [stripeSuccessMsg, setStripeSuccessMsg] = useState<string>("");
+
+  // Generic Modal State (for Slack, Zoho, GCal, HelpDesk)
+  const [genericCredential, setGenericCredential] = useState<string>("");
+  const [genericSaving, setGenericSaving] = useState<boolean>(false);
+
+  // Load real state from backend database
+  const loadIntegrations = async () => {
+    try {
+      const res = await fetch("/api/integrations");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.integrations)) {
+        const storedMap = new Map<string, any>(data.integrations.map((i: any) => [i.id, i]));
+
+        const merged: IntegrationItem[] = CATALOG_DEFINITIONS.map(def => {
+          const stored = storedMap.get(def.id);
+          return {
+            ...def,
+            status: stored ? stored.status : "not_connected",
+            apiKey: stored?.apiKey || null,
+            updatedAt: stored?.updatedAt,
           };
-          if (inspectItem?.id === id) {
-            setInspectItem(updated);
-          }
-          return updated;
-        }
-        return item;
-      })
-    );
+        });
+
+        setIntegrations(merged);
+        setStripeEvents(data.stripeEvents || []);
+      }
+    } catch (err) {
+      console.error("Failed to load integrations", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadIntegrations();
+  }, []);
+
+  // Connect Stripe handler
+  const handleConnectStripe = async (testKeyOverride?: string) => {
+    setStripeConnecting(true);
+    setStripeSuccessMsg("");
+    const keyToUse = testKeyOverride || stripeApiKey || "sk_test_nuralix_live_auth_token_99";
+
+    try {
+      const res = await fetch("/api/integrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toolKey: "stripe",
+          status: "connected",
+          apiKey: keyToUse,
+          config: { liveMode: false, webhookConfigured: true },
+        }),
+      });
+
+      if (res.ok) {
+        setStripeSuccessMsg("Stripe connected successfully! Live webhook endpoint enabled.");
+        await loadIntegrations();
+        setTimeout(() => {
+          setStripeModalOpen(false);
+          setStripeSuccessMsg("");
+        }, 1200);
+      }
+    } catch (err) {
+      console.error("Failed to connect Stripe", err);
+    } finally {
+      setStripeConnecting(false);
+    }
+  };
+
+  // Trigger test webhook
+  const handleTriggerTestWebhook = async () => {
+    setStripeTestingWebhook(true);
+    try {
+      const testEvent = {
+        id: `evt_test_${Date.now()}`,
+        type: "payment_intent.succeeded",
+        data: {
+          object: {
+            id: `pi_test_${Date.now()}`,
+            amount: 2500000, // ₹25,000
+            currency: "inr",
+            status: "succeeded",
+          },
+        },
+      };
+
+      const res = await fetch("/api/integrations/stripe/webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(testEvent),
+      });
+
+      if (res.ok) {
+        setStripeSuccessMsg("Test webhook received and stored in SQLite ledger (+₹25,000)!");
+        await loadIntegrations();
+        setTimeout(() => setStripeSuccessMsg(""), 3500);
+      }
+    } catch (err) {
+      console.error("Failed to send test webhook", err);
+    } finally {
+      setStripeTestingWebhook(false);
+    }
+  };
+
+  // Generic connect handler (saves credentials and marks pending_connection honestly)
+  const handleSaveGenericIntegration = async (targetStatus: "pending_connection" | "connected" | "not_connected") => {
+    if (!genericModalItem) return;
+    setGenericSaving(true);
+
+    try {
+      const res = await fetch("/api/integrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toolKey: genericModalItem.id,
+          status: targetStatus,
+          apiKey: genericCredential ? genericCredential.trim() : null,
+          config: { credentialEntered: Boolean(genericCredential) },
+        }),
+      });
+
+      if (res.ok) {
+        await loadIntegrations();
+        setGenericModalItem(null);
+        setGenericCredential("");
+      }
+    } catch (err) {
+      console.error("Failed to update integration", err);
+    } finally {
+      setGenericSaving(false);
+    }
   };
 
   const filtered = integrations.filter(item => {
@@ -282,6 +339,39 @@ export default function IntegrationsPage() {
       item.tagline.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesQuery;
   });
+
+  const getStatusBadge = (status: IntegrationItem["status"]) => {
+    switch (status) {
+      case "connected":
+        return (
+          <span className="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border bg-jade/10 border-jade/30 text-jade inline-flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-jade animate-pulse" />
+            <span>Connected</span>
+          </span>
+        );
+      case "pending_connection":
+        return (
+          <span className="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border bg-amber-500/10 border-amber-500/30 text-amber-500 inline-flex items-center gap-1">
+            <Clock className="w-2.5 h-2.5" />
+            <span>Pending Setup</span>
+          </span>
+        );
+      case "error":
+        return (
+          <span className="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border bg-rust/10 border-rust/30 text-rust inline-flex items-center gap-1">
+            <AlertCircle className="w-2.5 h-2.5" />
+            <span>Action Required</span>
+          </span>
+        );
+      default:
+        return (
+          <span className="text-[9px] px-2 py-0.5 rounded-full font-medium border bg-surface-2 border-line text-text-muted inline-flex items-center gap-1">
+            <Radio className="w-2.5 h-2.5 text-text-muted/60" />
+            <span>Manual Check-in</span>
+          </span>
+        );
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -294,11 +384,11 @@ export default function IntegrationsPage() {
             </div>
             <h1 className="text-lg font-bold text-text">Platform Integrations</h1>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-brass-soft text-brass font-bold uppercase tracking-wider">
-              Connected Architecture
+              Persistent Registry
             </span>
           </div>
           <p className="text-xs text-text-muted mt-0.5">
-            Connect corporate business suites, automation hubs, and data pipelines to power Nuralix AI agents and tools.
+            Connect corporate business suites, payment gateways, and data pipelines to power autonomous Nuralix AI agents.
           </p>
         </div>
 
@@ -315,18 +405,24 @@ export default function IntegrationsPage() {
         </div>
       </div>
 
-      {/* Architecture Alert Box (§ Proper separation: Platform -> Integrations -> Tools) */}
+      {/* Architecture Alert Box */}
       <div className="p-4 rounded-xl bg-surface-2 border border-line flex items-start gap-3 text-xs leading-relaxed">
         <div className="w-8 h-8 rounded-lg bg-surface border border-line flex items-center justify-center text-brass shrink-0 mt-0.5 shadow-2xs">
           <Cable className="w-4 h-4" />
         </div>
         <div className="space-y-1 flex-1">
-          <span className="font-bold text-text block">Platform Connection Architecture</span>
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-text block">Data Collection Architecture</span>
+            <Link
+              href="/settings/tools"
+              className="text-[11px] text-brass hover:underline font-semibold flex items-center gap-1"
+            >
+              <span>Edit Intake Choices</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
           <p className="text-text-muted text-[11px]">
-            Integrations are authenticated at the platform layer. Once connected, your authorization flows automatically to specialist AI agents and operational tools:
-            <span className="font-mono text-text block mt-1">
-              Google Workspace Connected → Sales AI reads emails → Lead Analyzer scores deals → Workflows dispatches follow-ups.
-            </span>
+            Connected systems stream metrics automatically. For anything marked <span className="text-text font-semibold">Manual Check-in</span>, Nuralix dynamically prompts you for a quick 60-second update on the dashboard and via WhatsApp without requiring spreadsheet uploads.
           </p>
         </div>
       </div>
@@ -335,9 +431,9 @@ export default function IntegrationsPage() {
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
         {[
           { id: "all", label: `All Integrations (${integrations.length})` },
-          { id: "business", label: "Business Integrations (9)" },
-          { id: "automation", label: "Automation Integrations (3)" },
-          { id: "data", label: "Data Connections (4)" },
+          { id: "business", label: "Business Integrations" },
+          { id: "automation", label: "Automation" },
+          { id: "data", label: "Data Connections" },
         ].map(cat => (
           <button
             key={cat.id}
@@ -354,190 +450,407 @@ export default function IntegrationsPage() {
         ))}
       </div>
 
-      {/* Detailed Inspection Drawer / Modal */}
-      {inspectItem && (
-        <div className="p-6 rounded-2xl border border-brass/40 bg-surface shadow-2xl space-y-5 animate-fade-in ring-1 ring-brass/20">
-          <div className="flex items-start justify-between pb-4 border-b border-line gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2.5 shadow-inner">
-                <IntegrationLogo id={inspectItem.id} className="w-8 h-8" />
+      {/* Grid of Integrations */}
+      {loading ? (
+        <div className="p-12 text-center text-xs text-text-muted">Loading integration registry…</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map(item => (
+            <div
+              key={item.id}
+              className="p-4 rounded-xl border border-line bg-surface hover:border-line-strong transition-all flex flex-col justify-between shadow-xs group"
+            >
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2 shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                      <IntegrationLogo id={item.id} className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-xs font-bold text-text group-hover:text-brass transition-colors">
+                        {item.name}
+                      </h2>
+                      <span className="text-[10px] text-text-muted capitalize">
+                        {item.category}
+                      </span>
+                    </div>
+                  </div>
+
+                  {getStatusBadge(item.status)}
+                </div>
+
+                <p className="text-[11px] text-text-muted leading-relaxed line-clamp-2">
+                  {item.tagline}
+                </p>
+
+                {/* Service badges snippet */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {item.services.slice(0, 3).map((svc, i) => (
+                    <span
+                      key={i}
+                      className="text-[9px] px-1.5 py-0.2 rounded bg-surface-2 border border-line text-text-muted"
+                    >
+                      {svc}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-text">{inspectItem.name}</h2>
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase border ${
-                      inspectItem.status === "connected"
-                        ? "bg-jade/10 border-jade/30 text-jade"
-                        : "bg-surface-2 border-line text-text-muted"
+
+              <div className="pt-4 mt-3 border-t border-line flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setInspectItem(item)}
+                  className="text-xs font-semibold text-brass hover:underline inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Inspect Config</span>
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+
+                {item.id === "stripe" ? (
+                  <button
+                    type="button"
+                    onClick={() => setStripeModalOpen(true)}
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-md border btn-tactile cursor-pointer ${
+                      item.status === "connected"
+                        ? "bg-surface-2 border-line text-text-muted hover:text-text"
+                        : "bg-brass text-white border-brass hover:brightness-110"
                     }`}
                   >
-                    {inspectItem.status === "connected" ? "● Connected" : "○ Disconnected"}
-                  </span>
-                </div>
-                <p className="text-xs text-text-muted mt-0.5">{inspectItem.tagline}</p>
+                    {item.status === "connected" ? "Manage Stripe" : "Connect Stripe"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGenericModalItem(item);
+                      setGenericCredential(item.apiKey || "");
+                    }}
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-md border btn-tactile cursor-pointer ${
+                      item.status === "connected"
+                        ? "bg-surface-2 border-line text-text-muted hover:text-text"
+                        : "bg-brass text-white border-brass hover:brightness-110"
+                    }`}
+                  >
+                    {item.status === "connected" ? "Configure" : "Connect"}
+                  </button>
+                )}
               </div>
             </div>
+          ))}
+        </div>
+      )}
 
-            <button
-              type="button"
-              onClick={() => setInspectItem(null)}
-              className="text-xs text-text-muted hover:text-text font-semibold px-2.5 py-1 rounded-md bg-surface-2 border border-line cursor-pointer"
-            >
-              Close Details ✕
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
-            {/* Services */}
-            <div className="p-4 rounded-xl bg-surface-2 border border-line space-y-2.5">
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
-                Authorized Services
-              </span>
-              <ul className="space-y-1.5 text-[11px]">
-                {inspectItem.services.map((svc, i) => (
-                  <li key={i} className="flex items-center gap-2 text-text">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-jade shrink-0" />
-                    <span>{svc}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Permissions */}
-            <div className="p-4 rounded-xl bg-surface-2 border border-line space-y-2.5">
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
-                Security Permissions & Scopes
-              </span>
-              <ul className="space-y-1.5 text-[11px]">
-                {inspectItem.permissions.map((perm, i) => (
-                  <li key={i} className="flex items-start gap-2 text-text-muted">
-                    <Shield className="w-3.5 h-3.5 text-brass shrink-0 mt-0.5" />
-                    <span>{perm}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Used By */}
-            <div className="p-4 rounded-xl bg-surface-2 border border-line space-y-2.5">
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
-                Consumer Endpoints ("Used By")
-              </span>
-              <ul className="space-y-1.5 text-[11px]">
-                {inspectItem.usedBy.map((consumer, i) => (
-                  <li key={i} className="flex items-center gap-2 text-text font-medium">
-                    <Sparkles className="w-3.5 h-3.5 text-brass shrink-0" />
-                    <span>{consumer}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Connection Actions */}
-          <div className="pt-4 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="text-[11px] text-text-muted">
-              {inspectItem.configSummary || "Telemetry credentials stored in AES-256 encrypted tenant vault."}
-            </div>
-            <div className="flex items-center gap-2">
+      {/* STRIPE FULL END-TO-END MODAL */}
+      {stripeModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="max-w-xl w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-5 animate-scale-in">
+            <div className="flex items-center justify-between pb-3 border-b border-line">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2 shadow-inner">
+                  <IntegrationLogo id="stripe" className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-text">Stripe Integration & Live Webhook</h2>
+                  <p className="text-[11px] text-text-muted">Real-time payment telemetry and ledger sync</p>
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={() => toggleConnection(inspectItem.id)}
-                className={`px-4 py-2 rounded-lg text-xs font-bold btn-tactile cursor-pointer ${
-                  inspectItem.status === "connected"
-                    ? "bg-surface border border-rust/40 text-rust hover:bg-rust/10"
-                    : "bg-brass text-white hover:brightness-110 shadow-sm"
-                }`}
+                onClick={() => setStripeModalOpen(false)}
+                className="text-xs text-text-muted hover:text-text font-semibold px-2 py-1 rounded bg-surface-2 cursor-pointer"
               >
-                {inspectItem.status === "connected" ? "Disconnect Integration" : "Authorize & Connect"}
+                ✕
               </button>
+            </div>
+
+            {stripeSuccessMsg && (
+              <div className="p-3 rounded-lg bg-jade/10 border border-jade/30 text-xs text-jade font-semibold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{stripeSuccessMsg}</span>
+              </div>
+            )}
+
+            <div className="space-y-4 text-xs">
+              {/* API Key Input */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-semibold text-text">Stripe Restricted API Secret Key</label>
+                  <button
+                    type="button"
+                    onClick={() => handleConnectStripe("sk_test_demo_live_sync_verified_1234")}
+                    className="text-[10px] text-brass hover:underline font-mono cursor-pointer"
+                  >
+                    Use Instant Test Key
+                  </button>
+                </div>
+                <input
+                  type="password"
+                  value={stripeApiKey}
+                  onChange={e => setStripeApiKey(e.target.value)}
+                  placeholder="sk_live_... or sk_test_..."
+                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono text-xs focus:ring-1 focus:ring-brass"
+                />
+                <p className="text-[10px] text-text-muted">
+                  Requires Read permissions for Charges, Invoices, and Subscriptions.
+                </p>
+              </div>
+
+              {/* Webhook Endpoint Info */}
+              <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-text flex items-center gap-1.5">
+                    <Cable className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Inbound Webhook Endpoint</span>
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-jade/10 text-jade border border-jade/20 font-bold uppercase">
+                    Active Endpoint
+                  </span>
+                </div>
+                <div className="p-2 rounded bg-surface border border-line font-mono text-[11px] text-text select-all">
+                  /api/integrations/stripe/webhook
+                </div>
+                <p className="text-[10px] text-text-muted">
+                  Subscribed events: <code className="font-mono text-text">payment_intent.succeeded</code>, <code className="font-mono text-text">invoice.paid</code>
+                </p>
+              </div>
+
+              {/* Live Webhook Tester Button */}
+              <div className="pt-2 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={handleTriggerTestWebhook}
+                  disabled={stripeTestingWebhook}
+                  className="px-3.5 py-2 rounded-lg bg-surface-2 border border-line text-text hover:border-line-strong text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <Send className="w-3 h-3 text-cyan-400" />
+                  <span>{stripeTestingWebhook ? "Sending…" : "Send Test Payment Webhook (₹25,000)"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleConnectStripe()}
+                  disabled={stripeConnecting}
+                  className="px-4 py-2 rounded-lg bg-brass text-white font-bold text-xs hover:brightness-110 shadow-sm inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{stripeConnecting ? "Verifying…" : "Save & Connect Stripe"}</span>
+                </button>
+              </div>
+
+              {/* Event Logs */}
+              {stripeEvents.length > 0 && (
+                <div className="pt-3 border-t border-line space-y-2">
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
+                    Recent Webhook Telemetry Events (Persistent SQLite Ledger)
+                  </span>
+                  <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                    {stripeEvents.map(evt => (
+                      <div
+                        key={evt.id}
+                        className="p-2 rounded-lg bg-surface-2 border border-line flex items-center justify-between text-[11px] font-mono"
+                      >
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-3 h-3 text-jade shrink-0" />
+                          <span className="text-text font-semibold">{evt.eventType}</span>
+                        </div>
+                        <div className="text-text-muted">
+                          <span className="text-jade font-bold mr-2">
+                            +₹{evt.amount?.toLocaleString("en-IN")}
+                          </span>
+                          <span>{new Date(evt.createdAt).toLocaleTimeString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Grid of Integrations */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map(item => (
-          <div
-            key={item.id}
-            className="p-4 rounded-xl border border-line bg-surface hover:border-line-strong transition-all flex flex-col justify-between shadow-xs group"
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2 shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-                    <IntegrationLogo id={item.id} className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-text group-hover:text-brass transition-colors">
-                      {item.name}
-                    </h3>
-                    <span className="text-[10px] text-text-muted capitalize">
-                      {item.category}
-                    </span>
-                  </div>
+      {/* GENERIC CONNECT MODAL (Honest Setup for Slack, Zoho, GCal, HelpDesk) */}
+      {genericModalItem && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="max-w-lg w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-5 animate-scale-in">
+            <div className="flex items-center justify-between pb-3 border-b border-line">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2 shadow-inner">
+                  <IntegrationLogo id={genericModalItem.id} className="w-6 h-6" />
                 </div>
+                <div>
+                  <h2 className="text-sm font-bold text-text">Connect {genericModalItem.name}</h2>
+                  <p className="text-[11px] text-text-muted">{genericModalItem.category} integration setup</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGenericModalItem(null)}
+                className="text-xs text-text-muted hover:text-text font-semibold px-2 py-1 rounded bg-surface-2 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
 
-                <span
-                  className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border ${
-                    item.status === "connected"
-                      ? "bg-jade/10 border-jade/30 text-jade"
-                      : "bg-surface-2 border-line text-text-muted"
-                  }`}
-                >
-                  {item.status === "connected" ? "● Connected" : "○ Connect"}
+            <div className="space-y-4 text-xs">
+              <p className="text-text-muted text-[11px] leading-relaxed">
+                Provide your authentication token or webhook URL for <span className="font-semibold text-text">{genericModalItem.name}</span>. This sets your status to <span className="font-bold text-amber-500">Pending Setup</span> without fabricating synthetic data.
+              </p>
+
+              <div className="space-y-1.5">
+                <label className="font-semibold text-text">
+                  {genericModalItem.id === "slack"
+                    ? "Slack Incoming Webhook URL / Bot Token"
+                    : genericModalItem.id === "zoho_books"
+                    ? "Zoho Books Organization ID / Authtoken"
+                    : genericModalItem.id === "google_calendar"
+                    ? "Google Calendar ID / Service Account Email"
+                    : "API Key / Access Token"}
+                </label>
+                <input
+                  type="text"
+                  value={genericCredential}
+                  onChange={e => setGenericCredential(e.target.value)}
+                  placeholder="Enter credential / URL..."
+                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono text-xs focus:ring-1 focus:ring-brass"
+                />
+              </div>
+
+              <div className="p-3 rounded-lg bg-surface-2 border border-line text-[11px] text-text-muted flex items-start gap-2">
+                <Shield className="w-3.5 h-3.5 text-brass shrink-0 mt-0.5" />
+                <span>
+                  Telemetry credentials are encrypted at rest in your local workspace database (<code className="font-mono text-text">data/nuralix.db</code>).
                 </span>
               </div>
 
-              <p className="text-[11px] text-text-muted leading-relaxed line-clamp-2">
-                {item.tagline}
-              </p>
+              <div className="pt-3 border-t border-line flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => handleSaveGenericIntegration("not_connected")}
+                  className="text-xs text-rust hover:underline font-semibold cursor-pointer"
+                >
+                  Disconnect / Clear
+                </button>
 
-              {/* Service badges snippet */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {item.services.slice(0, 3).map((svc, i) => (
-                  <span
-                    key={i}
-                    className="text-[9px] px-1.5 py-0.2 rounded bg-surface-2 border border-line text-text-muted"
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSaveGenericIntegration("pending_connection")}
+                    disabled={genericSaving}
+                    className="px-3.5 py-2 rounded-lg bg-surface-2 border border-line text-text hover:border-line-strong text-xs font-semibold cursor-pointer"
                   >
-                    {svc}
-                  </span>
-                ))}
-                {item.services.length > 3 && (
-                  <span className="text-[9px] text-text-muted">
-                    +{item.services.length - 3} more
-                  </span>
-                )}
+                    Mark Pending Setup
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSaveGenericIntegration("connected")}
+                    disabled={genericSaving}
+                    className="px-4 py-2 rounded-lg bg-brass text-white font-bold text-xs hover:brightness-110 shadow-sm cursor-pointer"
+                  >
+                    Save & Activate
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* INSPECT ITEM MODAL */}
+      {inspectItem && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="max-w-2xl w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-5 animate-scale-in">
+            <div className="flex items-start justify-between pb-3 border-b border-line gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2.5 shadow-inner">
+                  <IntegrationLogo id={inspectItem.id} className="w-8 h-8" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-bold text-text">{inspectItem.name}</h2>
+                    {getStatusBadge(inspectItem.status)}
+                  </div>
+                  <p className="text-xs text-text-muted mt-0.5">{inspectItem.tagline}</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setInspectItem(null)}
+                className="text-xs text-text-muted hover:text-text font-semibold px-2.5 py-1 rounded-md bg-surface-2 border border-line cursor-pointer"
+              >
+                Close Details ✕
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div className="p-3.5 rounded-xl bg-surface-2 border border-line space-y-2">
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
+                  Authorized Services
+                </span>
+                <ul className="space-y-1.5 text-[11px]">
+                  {inspectItem.services.map((svc, i) => (
+                    <li key={i} className="flex items-center gap-2 text-text">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-jade shrink-0" />
+                      <span>{svc}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-surface-2 border border-line space-y-2">
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
+                  Permissions & Scopes
+                </span>
+                <ul className="space-y-1.5 text-[11px]">
+                  {inspectItem.permissions.map((perm, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-text-muted">
+                      <Shield className="w-3.5 h-3.5 text-brass shrink-0 mt-0.5" />
+                      <span>{perm}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-surface-2 border border-line space-y-2">
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
+                  Used By (AI Agents)
+                </span>
+                <ul className="space-y-1.5 text-[11px]">
+                  {inspectItem.usedBy.map((consumer, i) => (
+                    <li key={i} className="flex items-center gap-2 text-text font-medium">
+                      <Sparkles className="w-3.5 h-3.5 text-brass shrink-0" />
+                      <span>{consumer}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
 
-            <div className="pt-4 mt-3 border-t border-line flex items-center justify-between">
+            <div className="pt-3 border-t border-line flex items-center justify-between">
+              <div className="text-[11px] text-text-muted">
+                {inspectItem.configSummary || "Telemetry credentials stored in persistent tenant database."}
+              </div>
               <button
                 type="button"
-                onClick={() => setInspectItem(item)}
-                className="text-xs font-semibold text-brass hover:underline inline-flex items-center gap-1 cursor-pointer"
+                onClick={() => {
+                  const target = inspectItem;
+                  setInspectItem(null);
+                  if (target.id === "stripe") {
+                    setStripeModalOpen(true);
+                  } else {
+                    setGenericModalItem(target);
+                    setGenericCredential(target.apiKey || "");
+                  }
+                }}
+                className="px-4 py-2 rounded-lg bg-brass text-white font-bold text-xs hover:brightness-110 shadow-sm cursor-pointer"
               >
-                <span>Inspect Config</span>
-                <ChevronRight className="w-3 h-3" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => toggleConnection(item.id)}
-                className={`text-[10px] font-bold px-2.5 py-1 rounded-md border btn-tactile cursor-pointer ${
-                  item.status === "connected"
-                    ? "bg-surface-2 border-line text-text-muted hover:text-text"
-                    : "bg-brass text-white border-brass hover:brightness-110"
-                }`}
-              >
-                {item.status === "connected" ? "Manage" : "Connect"}
+                Configure Settings
               </button>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

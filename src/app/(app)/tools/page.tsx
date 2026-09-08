@@ -25,6 +25,20 @@ import {
 } from "lucide-react";
 import { Suspense } from "react";
 
+// Format numbers using Indian comma numbering (e.g. 12,00,000 / 3,00,000)
+const formatINR = (val: string | number): string => {
+  if (val === "" || val === null || val === undefined) return "";
+  const clean = String(val).replace(/[^\d]/g, "");
+  if (!clean) return "";
+  const num = Number(clean);
+  if (isNaN(num)) return "";
+  return num.toLocaleString("en-IN");
+};
+
+const parseINR = (val: string): string => {
+  return val.replace(/[^\d]/g, "");
+};
+
 interface BusinessTool {
   id: string;
   name: string;
@@ -401,27 +415,33 @@ function ToolsContent() {
                 <div>
                   <label className="font-semibold text-text block mb-1">Monthly Gross Revenue (₹)</label>
                   <input
-                    type="number"
-                    value={calcRevenue}
-                    onChange={e => setCalcRevenue(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={calcRevenue ? formatINR(calcRevenue) : ""}
+                    onChange={e => setCalcRevenue(Number(parseINR(e.target.value)) || 0)}
+                    placeholder="e.g. 12,00,000"
                     className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
                   />
                 </div>
                 <div>
                   <label className="font-semibold text-text block mb-1">Cost of Goods Sold / Delivery (COGS) (₹)</label>
                   <input
-                    type="number"
-                    value={calcCogs}
-                    onChange={e => setCalcCogs(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={calcCogs ? formatINR(calcCogs) : ""}
+                    onChange={e => setCalcCogs(Number(parseINR(e.target.value)) || 0)}
+                    placeholder="e.g. 3,00,000"
                     className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
                   />
                 </div>
                 <div>
                   <label className="font-semibold text-text block mb-1">Operating Overheads & Payroll (OpEx) (₹)</label>
                   <input
-                    type="number"
-                    value={calcOpex}
-                    onChange={e => setCalcOpex(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={calcOpex ? formatINR(calcOpex) : ""}
+                    onChange={e => setCalcOpex(Number(parseINR(e.target.value)) || 0)}
+                    placeholder="e.g. 4,50,000"
                     className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
                   />
                 </div>
@@ -466,27 +486,33 @@ function ToolsContent() {
                 <div>
                   <label className="font-semibold text-text block mb-1">Total Monthly Fixed Overheads (₹)</label>
                   <input
-                    type="number"
-                    value={fixedCosts}
-                    onChange={e => setFixedCosts(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={fixedCosts ? formatINR(fixedCosts) : ""}
+                    onChange={e => setFixedCosts(Number(parseINR(e.target.value)) || 0)}
+                    placeholder="e.g. 2,50,000"
                     className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
                   />
                 </div>
                 <div>
                   <label className="font-semibold text-text block mb-1">Average Selling Price Per Contract (₹)</label>
                   <input
-                    type="number"
-                    value={pricePerUnit}
-                    onChange={e => setPricePerUnit(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={pricePerUnit ? formatINR(pricePerUnit) : ""}
+                    onChange={e => setPricePerUnit(Number(parseINR(e.target.value)) || 0)}
+                    placeholder="e.g. 25,000"
                     className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
                   />
                 </div>
                 <div>
                   <label className="font-semibold text-text block mb-1">Direct Variable Cost Per Contract (₹)</label>
                   <input
-                    type="number"
-                    value={variableCostPerUnit}
-                    onChange={e => setVariableCostPerUnit(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={variableCostPerUnit ? formatINR(variableCostPerUnit) : ""}
+                    onChange={e => setVariableCostPerUnit(Number(parseINR(e.target.value)) || 0)}
+                    placeholder="e.g. 5,000"
                     className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
                   />
                 </div>
@@ -531,9 +557,11 @@ function ToolsContent() {
                 <div>
                   <label className="font-semibold text-text block mb-1">Total Monthly Sales & Marketing Outlay (₹)</label>
                   <input
-                    type="number"
-                    value={marketingSpend}
-                    onChange={e => setMarketingSpend(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={marketingSpend ? formatINR(marketingSpend) : ""}
+                    onChange={e => setMarketingSpend(Number(parseINR(e.target.value)) || 0)}
+                    placeholder="e.g. 2,00,000"
                     className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
                   />
                 </div>
@@ -549,9 +577,11 @@ function ToolsContent() {
                 <div>
                   <label className="font-semibold text-text block mb-1">Annual Revenue Per Customer (ACV) (₹)</label>
                   <input
-                    type="number"
-                    value={avgRevenuePerAccount}
-                    onChange={e => setAvgRevenuePerAccount(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={avgRevenuePerAccount ? formatINR(avgRevenuePerAccount) : ""}
+                    onChange={e => setAvgRevenuePerAccount(Number(parseINR(e.target.value)) || 0)}
+                    placeholder="e.g. 60,000"
                     className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
                   />
                 </div>
