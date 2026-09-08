@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "firebase:login": "npx firebase login",
+    "firebase:deploy": "npx firebase deploy"
   },
   "dependencies": {
     "@react-three/fiber": "^8.18.0",
