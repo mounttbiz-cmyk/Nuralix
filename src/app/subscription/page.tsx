@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Check, Shield, ArrowRight, Sparkles, CheckCircle2, X, Building2, Zap } from "lucide-react";
+import { Check, ArrowRight, Sparkles, CheckCircle2, X, Building2, Zap } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 
 interface PlanTier {
@@ -300,17 +300,6 @@ export default function SubscriptionPage() {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Enterprise Security Banner */}
-        <div className="p-4 rounded-xl border border-line bg-surface text-center flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-text-muted">
-          <div className="flex items-center gap-2 mx-auto sm:mx-0">
-            <Shield className="w-4 h-4 text-brass shrink-0" />
-            <span>Bank-grade 256-bit encryption. Multi-tenant privacy guarantees for enterprise ledgers.</span>
-          </div>
-          <Link href="/dashboard" className="text-brass font-bold hover:underline shrink-0">
-            Skip directly to Dashboard →
-          </Link>
         </div>
       </div>
 
