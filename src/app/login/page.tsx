@@ -123,7 +123,7 @@ export default function LoginPage() {
         } else if (code === "auth/user-not-found") {
           setError("No account found with this email. Click 'Create Account' above to register.");
         } else if (code === "auth/email-already-in-use") {
-          setError("This email is already registered. Please switch to 'Sign In'.");
+          setError("This account already exists! An account with this email is already registered. Please switch to Sign In.");
         } else if (code === "auth/popup-closed-by-user") {
           setError("Google Sign-In popup was closed before completing.");
         } else if (code === "auth/popup-blocked") {
@@ -223,6 +223,34 @@ export default function LoginPage() {
                     <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                     <div className="flex-1 leading-relaxed">{error}</div>
                   </div>
+                  {error.includes("already exists") && (
+                    <div className="pl-6 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthMode("signin");
+                          setError(null);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brass text-white font-bold text-xs shadow hover:brightness-110 btn-tactile transition-all"
+                      >
+                        <span>Go to Sign In →</span>
+                      </button>
+                    </div>
+                  )}
+                  {error.includes("No account found") && (
+                    <div className="pl-6 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthMode("register");
+                          setError(null);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brass text-white font-bold text-xs shadow hover:brightness-110 btn-tactile transition-all"
+                      >
+                        <span>Create Account →</span>
+                      </button>
+                    </div>
+                  )}
                   {error.includes("Authorized domains") && (
                     <div className="pl-6 pt-1">
                       <a
