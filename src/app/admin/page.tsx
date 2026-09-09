@@ -463,14 +463,15 @@ export default function AdminPage() {
   };
 
   const handleToggleTool = async (t: any) => {
+    const isCurrentlyEnabled = t.enabled !== false;
     const updatedList = tools.map((item) =>
-      item.id === t.id ? { ...item, enabled: !item.enabled } : item
+      item.id === t.id ? { ...item, enabled: !isCurrentlyEnabled } : item
     );
     setTools(updatedList);
     await saveSection(
       "tools",
       updatedList,
-      `Toggled tool "${t.name}" (${!t.enabled ? "enabled" : "disabled"})`
+      `Toggled tool "${t.name}" (${isCurrentlyEnabled ? "disabled" : "enabled"})`
     );
   };
 
@@ -2138,29 +2139,43 @@ export default function AdminPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-semibold text-text">Badge</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Valuation, Risk"
-                    value={toolForm.badge}
-                    onChange={(e) => setToolForm({ ...toolForm, badge: e.target.value })}
-                    className="w-full px-2.5 py-2 rounded-xl bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="font-semibold text-text">Badge</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Valuation, Risk"
+                  value={toolForm.badge}
+                  onChange={(e) => setToolForm({ ...toolForm, badge: e.target.value })}
+                  className="w-full px-2.5 py-2 rounded-xl bg-surface-2 border border-line text-text font-mono"
+                />
+              </div>
 
-                <div className="space-y-1 flex flex-col justify-end">
-                  <label className="inline-flex items-center gap-2 cursor-pointer pb-2">
-                    <input
-                      type="checkbox"
-                      checked={toolForm.hasInteractiveCalculator}
-                      onChange={(e) => setToolForm({ ...toolForm, hasInteractiveCalculator: e.target.checked })}
-                      className="rounded border-line text-cyan-600 focus:ring-0"
-                    />
-                    <span className="text-xs text-text">Has Pop-up Calculator</span>
-                  </label>
-                </div>
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <label className="inline-flex items-center gap-2 cursor-pointer p-2.5 rounded-xl bg-surface-2/60 border border-line hover:border-cyan-500/50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={toolForm.enabled}
+                    onChange={(e) => setToolForm({ ...toolForm, enabled: e.target.checked })}
+                    className="rounded border-line text-cyan-600 focus:ring-0"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-text">Tool Active</span>
+                    <span className="text-[10px] text-text-muted">Visible on /tools</span>
+                  </div>
+                </label>
+
+                <label className="inline-flex items-center gap-2 cursor-pointer p-2.5 rounded-xl bg-surface-2/60 border border-line hover:border-cyan-500/50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={toolForm.hasInteractiveCalculator}
+                    onChange={(e) => setToolForm({ ...toolForm, hasInteractiveCalculator: e.target.checked })}
+                    className="rounded border-line text-cyan-600 focus:ring-0"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-text">Has Calculator</span>
+                    <span className="text-[10px] text-text-muted">Interactive Pop-up</span>
+                  </div>
+                </label>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
