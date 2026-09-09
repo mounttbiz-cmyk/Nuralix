@@ -9,8 +9,29 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
+// Clear read-only attributes on Windows if set by OneDrive or OS
+if (process.platform === "win32") {
+  try {
+    const { execSync } = require("child_process");
+    execSync(`attrib -r "${dataDir}" /d`, { stdio: "ignore" });
+    execSync(`attrib -r "${path.join(dataDir, "*.*")}"`, { stdio: "ignore" });
+  } catch {}
+}
+
 const dbPath = path.join(dataDir, "nuralix.db");
 const db = new DatabaseSync(dbPath);
+
+// Enable WAL mode & resilient pragmas so SQLite handles Windows/OneDrive concurrent locks
+try {
+  db.exec(`
+    PRAGMA busy_timeout = 10000;
+    PRAGMA journal_mode = WAL;
+    PRAGMA synchronous = NORMAL;
+    PRAGMA temp_store = MEMORY;
+  `);
+} catch (e) {
+  console.warn("Could not set SQLite pragmas:", e);
+}
 
 // Initialize schema
 db.exec(`
@@ -559,11 +580,19 @@ export const DEFAULT_TOOLS_CATALOG = [
   },
 ];
 
+const memoryConfigCache = new Map<string, any>();
+
 export function getPlatformConfig<T>(key: string, fallback: T): T {
+  // First check in-memory cache
+  if (memoryConfigCache.has(key)) {
+    return memoryConfigCache.get(key) as T;
+  }
   try {
     const row = db.prepare("SELECT config_value FROM platform_config WHERE config_key = ?").get(key) as { config_value: string } | undefined;
     if (row && row.config_value) {
-      return JSON.parse(row.config_value) as T;
+      const parsed = JSON.parse(row.config_value) as T;
+      memoryConfigCache.set(key, parsed);
+      return parsed;
     }
   } catch (err) {
     console.error(`Error reading config for key ${key}:`, err);
@@ -572,14 +601,39 @@ export function getPlatformConfig<T>(key: string, fallback: T): T {
 }
 
 export function setPlatformConfig<T>(key: string, value: T): void {
+  // Always update in-memory cache immediately so runtime never lags or errors
+  memoryConfigCache.set(key, value);
+
   const now = new Date().toISOString();
-  db.prepare(`
-    INSERT INTO platform_config (config_key, config_value, updated_at)
-    VALUES (?, ?, ?)
-    ON CONFLICT(config_key) DO UPDATE SET
-      config_value = excluded.config_value,
-      updated_at = excluded.updated_at
-  `).run(key, JSON.stringify(value), now);
+  
+  // Try writing to SQLite with retry and permission healing
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      db.prepare(`
+        INSERT INTO platform_config (config_key, config_value, updated_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(config_key) DO UPDATE SET
+          config_value = excluded.config_value,
+          updated_at = excluded.updated_at
+      `).run(key, JSON.stringify(value), now);
+      return;
+    } catch (err: any) {
+      console.warn(`Attempt ${attempt} to write config ${key} to SQLite failed:`, err.message);
+      
+      // On Windows / OneDrive, clear read-only attribute if it got reapplied
+      if (process.platform === "win32") {
+        try {
+          const { execSync } = require("child_process");
+          execSync(`attrib -r "${dataDir}" /d`, { stdio: "ignore" });
+          execSync(`attrib -r "${dbPath}"`, { stdio: "ignore" });
+        } catch {}
+      }
+
+      if (attempt === 3) {
+        console.error(`Persisting ${key} to SQLite failed after 3 attempts (${err.message}). Value safely retained in memory.`);
+      }
+    }
+  }
 }
 
 // Initialize seed platform configs if not present
