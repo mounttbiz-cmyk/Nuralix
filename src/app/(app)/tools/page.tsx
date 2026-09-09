@@ -24,6 +24,7 @@ import {
   Activity
 } from "lucide-react";
 import { Suspense } from "react";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 // Format numbers using Indian comma numbering (e.g. 12,00,000 / 3,00,000)
 const formatINR = (val: string | number): string => {
@@ -277,6 +278,9 @@ function ToolsContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
+
+  // Close active tool calculator on Escape
+  useEscapeKey(() => setActiveToolId(null), Boolean(activeToolId));
 
   // Read URL query parameter if launched from an AI Agent
   useEffect(() => {

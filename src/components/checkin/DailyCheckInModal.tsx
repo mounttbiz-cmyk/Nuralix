@@ -15,6 +15,7 @@ import {
   Info
 } from "lucide-react";
 import { CheckInQuestion } from "@/lib/checkin/generateQuestions";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface DailyCheckInModalProps {
   isOpen: boolean;
@@ -62,6 +63,9 @@ export function DailyCheckInModal({
       }
     }
   }, [isOpen, propQuestions]);
+
+  // Close modal when Escape key is pressed
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
 

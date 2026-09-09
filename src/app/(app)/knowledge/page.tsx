@@ -17,6 +17,7 @@ import {
   Download,
   FolderOpen
 } from "lucide-react";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface KnowledgeDoc {
   id: string;
@@ -36,6 +37,12 @@ export default function KnowledgeHubPage() {
   const [activeDoc, setActiveDoc] = useState<KnowledgeDoc | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [companyName, setCompanyName] = useState("Apex Technologies");
+
+  // Close modals when Escape key is pressed
+  useEscapeKey(() => {
+    if (isAddModalOpen) setIsAddModalOpen(false);
+    if (activeDoc) setActiveDoc(null);
+  }, Boolean(isAddModalOpen || activeDoc));
 
   // New Doc Form
   const [newTitle, setNewTitle] = useState("");

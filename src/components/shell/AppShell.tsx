@@ -10,6 +10,7 @@ import { CommandPalette } from "@/components/search/CommandPalette";
 import { NavItem } from "@/config/schemas/nav";
 import { MessageSquare } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -29,6 +30,12 @@ export function AppShell({
   const [searchOpen, setSearchOpen] = useState(false);
   const [companyName, setCompanyName] = useState(initialCompanyName);
   const [industry, setIndustry] = useState(initialIndustry);
+
+  // Close search or chat overlay when Escape key is pressed
+  useEscapeKey(() => {
+    if (searchOpen) setSearchOpen(false);
+    if (chatOpen) setChatOpen(false);
+  }, Boolean(searchOpen || chatOpen));
 
   // Global keyboard shortcut for ⌘K / Ctrl+K
   React.useEffect(() => {

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check, ArrowRight, Sparkles, CheckCircle2, X, Building2, Zap } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface PlanTier {
   id: string;
@@ -27,6 +28,9 @@ export default function SubscriptionPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlanForModal, setSelectedPlanForModal] = useState<PlanTier | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+
+  // Close Plan modal on Escape
+  useEscapeKey(() => setSelectedPlanForModal(null), Boolean(selectedPlanForModal));
 
   useEffect(() => {
     try {

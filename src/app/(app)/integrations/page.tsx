@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { IntegrationLogo } from "@/components/ui/IntegrationLogo";
 import { isFirebaseConfigured, firebaseConfig } from "@/lib/firebase/config";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface IntegrationItem {
   id: string;
@@ -213,6 +214,13 @@ export default function IntegrationsPage() {
   // Generic Modal State (for Slack, Zoho, GCal, HelpDesk)
   const [genericCredential, setGenericCredential] = useState<string>("");
   const [genericSaving, setGenericSaving] = useState<boolean>(false);
+
+  // Close any active modal when Escape key is pressed
+  useEscapeKey(() => {
+    if (stripeModalOpen) setStripeModalOpen(false);
+    if (genericModalItem) setGenericModalItem(null);
+    if (inspectItem) setInspectItem(null);
+  }, Boolean(stripeModalOpen || genericModalItem || inspectItem));
 
   // Load real state from backend database
   const loadIntegrations = async () => {

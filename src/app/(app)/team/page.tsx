@@ -16,6 +16,7 @@ import {
   FileText,
   AlertTriangle
 } from "lucide-react";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface TeamMember {
   id: string;
@@ -24,7 +25,7 @@ interface TeamMember {
   role: "Owner" | "Executive" | "Manager" | "Operator";
   department: string;
   twoFactor: boolean;
-  status: "active" | "invited";
+  status: "active" | "invited" | "suspended";
   lastActive: string;
 }
 
@@ -53,21 +54,41 @@ const DEFAULT_MEMBERS: TeamMember[] = [
     id: "mem_3",
     name: "Priya Nair",
     email: "priya@apextechnologies.in",
-    role: "Executive",
-    department: "Finance & Accounting",
-    twoFactor: true,
+    role: "Manager",
+    department: "Operations & Delivery",
+    twoFactor: false,
     status: "active",
-    lastActive: "2h ago",
+    lastActive: "1h ago",
   },
   {
     id: "mem_4",
-    name: "Rohan Varma",
-    email: "rohan@apextechnologies.in",
-    role: "Manager",
-    department: "Sales Operations",
-    twoFactor: false,
+    name: "Karan Verma",
+    email: "karan@apextechnologies.in",
+    role: "Operator",
+    department: "Finance & Accounting",
+    twoFactor: true,
     status: "active",
-    lastActive: "Yesterday",
+    lastActive: "3h ago",
+  },
+  {
+    id: "mem_5",
+    name: "Astra (CEO Copilot)",
+    email: "astra.ai@nuralix.internal",
+    role: "Executive",
+    department: "Autonomous Strategy",
+    twoFactor: true,
+    status: "active",
+    lastActive: "Real-time engine",
+  },
+  {
+    id: "mem_6",
+    name: "Marcus (CFO Copilot)",
+    email: "marcus.ai@nuralix.internal",
+    role: "Executive",
+    department: "Autonomous Finance",
+    twoFactor: true,
+    status: "active",
+    lastActive: "Real-time engine",
   },
 ];
 
@@ -86,6 +107,9 @@ export default function TeamPage() {
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<TeamMember["role"]>("Manager");
+
+  // Close invite modal on Escape
+  useEscapeKey(() => setIsInviteOpen(false), isInviteOpen);
 
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();

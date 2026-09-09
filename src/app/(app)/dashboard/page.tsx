@@ -21,6 +21,7 @@ import {
 import { Suspense } from "react";
 import { DailyCheckInModal } from "@/components/checkin/DailyCheckInModal";
 import { Clock, Send, Radio } from "lucide-react";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -42,6 +43,9 @@ function DashboardContent() {
     questions: [],
   });
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
+
+  // Close daily check-in modal on Escape
+  useEscapeKey(() => setIsCheckInModalOpen(false), isCheckInModalOpen);
 
   // Fetch Check-In Status
   const refreshCheckinStatus = async () => {

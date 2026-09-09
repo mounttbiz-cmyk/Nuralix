@@ -15,6 +15,7 @@ import {
   ArrowRight,
   RotateCw
 } from "lucide-react";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface TaskItem {
   id: string;
@@ -23,14 +24,38 @@ interface TaskItem {
   gap?: string;
   priority: "low" | "medium" | "high" | "critical";
   status: "todo" | "in_progress" | "done";
+  category?: string;
   createdAt?: string;
 }
 
 const DEFAULT_INITIAL_TASKS: TaskItem[] = [
-  { id: "1", title: "Audit discretionary SaaS tool spend for ₹12,000/mo savings", status: "todo", owner: "Marcus (CFO)", priority: "high", gap: "Cash Runway" },
-  { id: "2", title: "Draft enterprise SLA & multi-year contract for top account", status: "in_progress", owner: "Astra (CEO)", priority: "critical", gap: "Client Concentration" },
-  { id: "3", title: "Launch secondary customer acquisition sprint on LinkedIn", status: "todo", owner: "Elena (CMO)", priority: "medium", gap: "Channel Concentration" },
-  { id: "4", title: "Document sales script & handover discovery calls", status: "done", owner: "Founder", priority: "high", gap: "Founder Dependency" },
+  {
+    id: "task_1",
+    title: "Conduct secondary client outreach calls to reduce top concentration",
+    owner: "Founder",
+    gap: "Client Concentration",
+    priority: "critical",
+    status: "in_progress",
+    category: "Revenue Ops",
+  },
+  {
+    id: "task_2",
+    title: "Implement gross-margin floor checklist for delivery team",
+    owner: "Operations Lead",
+    gap: "Margin Volatility",
+    priority: "high",
+    status: "todo",
+    category: "Unit Economics",
+  },
+  {
+    id: "task_3",
+    title: "Establish daily executive pulse check-in review workflow",
+    owner: "Founder",
+    gap: "Founder Dependency",
+    priority: "medium",
+    status: "done",
+    category: "Governance",
+  },
 ];
 
 export default function TasksPage() {
@@ -45,6 +70,9 @@ export default function TasksPage() {
   const [newPriority, setNewPriority] = useState<TaskItem["priority"]>("high");
   const [newStatus, setNewStatus] = useState<TaskItem["status"]>("todo");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Close Add Task modal when Escape key is pressed
+  useEscapeKey(() => setIsAddModalOpen(false), isAddModalOpen);
 
   // Load from persistent SQLite backend
   const fetchTasks = async () => {

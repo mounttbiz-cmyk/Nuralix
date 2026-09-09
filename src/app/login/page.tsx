@@ -8,6 +8,7 @@ import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 import { useAuth } from "@/lib/firebase/authContext";
 import { isFirebaseConfigured, firebaseConfig } from "@/lib/firebase/config";
 import { saveUserProfileToFirestore } from "@/lib/firebase/firestore";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +16,9 @@ export default function LoginPage() {
   const [authMode, setAuthMode] = useState<"register" | "signin">("register");
   const [isSuperadminMode, setIsSuperadminMode] = useState(false);
   const [showFirebaseModal, setShowFirebaseModal] = useState(false);
+
+  // Close Firebase modal on Escape
+  useEscapeKey(() => setShowFirebaseModal(false), showFirebaseModal);
   const [copiedEnv, setCopiedEnv] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");

@@ -17,6 +17,7 @@ import {
   ArrowRight,
   X
 } from "lucide-react";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface AutomationItem {
   id: string;
@@ -43,6 +44,9 @@ export default function AutomationsPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [companyName, setCompanyName] = useState("Apex Technologies");
+
+  // Close Create modal when Escape key is pressed
+  useEscapeKey(() => setIsCreateModalOpen(false), isCreateModalOpen);
 
   // New automation state
   const [newName, setNewName] = useState("");

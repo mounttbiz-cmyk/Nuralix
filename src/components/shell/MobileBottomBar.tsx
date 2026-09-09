@@ -7,6 +7,7 @@ import { NavItem } from "@/config/schemas/nav";
 import { DynamicIcon } from "./DynamicIcon";
 import { Menu, X, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/lib/theme/ThemeProvider";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface MobileBottomBarProps {
   navItems: NavItem[];
@@ -16,6 +17,9 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
   const { theme, setTheme, resolvedTheme } = useTheme();
+
+  // Close drawer on Escape
+  useEscapeKey(() => setMoreOpen(false), moreOpen);
 
   // Primary 4 tabs + 5th is "More"
   const primaryTabs: { id: string; label: string; href: string; icon: string }[] = [

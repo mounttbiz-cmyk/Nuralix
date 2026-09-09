@@ -66,7 +66,7 @@ export function ChatDock({
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
 
-  // Keyboard shortcut: ⌘J or Ctrl+J to toggle dock
+  // Keyboard shortcuts: Escape to close when open, ⌘J or Ctrl+J to toggle dock
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && (e.key === "j" || e.key === "J")) {
@@ -74,6 +74,9 @@ export function ChatDock({
         if (isOpen) {
           onClose();
         }
+      } else if (e.key === "Escape" && isOpen) {
+        e.preventDefault();
+        onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
