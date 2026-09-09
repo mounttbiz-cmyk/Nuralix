@@ -21,7 +21,8 @@ import {
   ExternalLink,
   ChevronRight,
   ShieldCheck,
-  Activity
+  Activity,
+  X
 } from "lucide-react";
 import { Suspense } from "react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
@@ -390,270 +391,333 @@ function ToolsContent() {
         ))}
       </div>
 
-      {/* Interactive Tool Modal / Drawer if a tool is active */}
+      {/* Interactive Tool Pop-Up Modal */}
       {activeTool && (
-        <div className="p-5 rounded-2xl border border-brass/40 bg-surface shadow-xl space-y-4 animate-fade-in ring-1 ring-brass/20">
-          <div className="flex items-center justify-between pb-3 border-b border-line">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-brass/10 border border-brass/30 flex items-center justify-center text-brass">
-                <Calculator className="w-4 h-4" />
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setActiveToolId(null)}
+        >
+          <div
+            className="max-w-2xl w-full bg-white dark:bg-[#0C1222] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl dark:shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[90vh] animate-scale-in"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Pop-Up Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between bg-slate-50/80 dark:bg-white/[0.02] shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                  <Calculator className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
+                      {activeTool.name}
+                    </h2>
+                    {activeTool.badge && (
+                      <span className="text-[9px] px-2 py-0.5 rounded-md font-mono font-semibold uppercase bg-slate-100 dark:bg-white/[0.08] border border-slate-200 dark:border-white/10 text-cyan-700 dark:text-cyan-400 shrink-0">
+                        {activeTool.badge}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                    {activeTool.description}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-sm font-bold text-text">{activeTool.name}</h2>
-                <p className="text-[11px] text-text-muted">{activeTool.description}</p>
-              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveToolId(null)}
+                className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer shrink-0 ml-2"
+                title="Close calculator (Esc)"
+              >
+                <span className="hidden sm:inline">Close</span>
+                <kbd className="hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded bg-white dark:bg-white/[0.08] border border-slate-200 dark:border-white/10 font-mono text-slate-500 dark:text-slate-400">
+                  ESC
+                </kbd>
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setActiveToolId(null)}
-              className="text-xs text-text-muted hover:text-text font-semibold px-2.5 py-1 rounded-md bg-surface-2 border border-line cursor-pointer"
-            >
-              Close Calculator ✕
-            </button>
+
+            {/* Scrollable Pop-Up Body */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-5 bg-white dark:bg-[#0C1222]">
+              {/* Calculator Body Based on Tool ID */}
+              {activeTool.id === "profit" && (
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                  <div className="md:col-span-6 space-y-3 text-xs">
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                        Monthly Gross Revenue (₹)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={calcRevenue ? formatINR(calcRevenue) : ""}
+                        onChange={e => setCalcRevenue(Number(parseINR(e.target.value)) || 0)}
+                        placeholder="e.g. 12,00,000"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                        Cost of Goods Sold / Delivery (COGS) (₹)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={calcCogs ? formatINR(calcCogs) : ""}
+                        onChange={e => setCalcCogs(Number(parseINR(e.target.value)) || 0)}
+                        placeholder="e.g. 3,00,000"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                        Operating Overheads & Payroll (OpEx) (₹)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={calcOpex ? formatINR(calcOpex) : ""}
+                        onChange={e => setCalcOpex(Number(parseINR(e.target.value)) || 0)}
+                        placeholder="e.g. 4,50,000"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-6 p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
+                        Calculated Profitability Engine
+                      </span>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 rounded-lg bg-white dark:bg-[#131B2C] border border-slate-200 dark:border-white/10 shadow-xs">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">Gross Margin</div>
+                          <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                            {grossMargin}%
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                            ₹{grossProfit.toLocaleString("en-IN")}
+                          </div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-white dark:bg-[#131B2C] border border-slate-200 dark:border-white/10 shadow-xs">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">Net Operating Margin</div>
+                          <div className={`text-base font-extrabold font-mono ${netProfit >= 0 ? "text-cyan-600 dark:text-cyan-400" : "text-rose-600 dark:text-rose-400"}`}>
+                            {netMargin}%
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                            ₹{netProfit.toLocaleString("en-IN")}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-200 dark:border-white/10">
+                      <Link
+                        href={`/chat?message=${encodeURIComponent(`Marcus, review our Profit Calculator results: Gross margin is ${grossMargin}%, Net margin is ${netMargin}%. How do we expand EBITDA?`)}`}
+                        className="w-full block py-2.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white font-bold text-xs text-center btn-tactile transition-colors shadow-xs"
+                      >
+                        Consult Marcus (CFO AI) on Margins →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTool.id === "breakeven" && (
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                  <div className="md:col-span-6 space-y-3 text-xs">
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                        Total Monthly Fixed Overheads (₹)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={fixedCosts ? formatINR(fixedCosts) : ""}
+                        onChange={e => setFixedCosts(Number(parseINR(e.target.value)) || 0)}
+                        placeholder="e.g. 2,50,000"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                        Average Selling Price Per Contract (₹)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={pricePerUnit ? formatINR(pricePerUnit) : ""}
+                        onChange={e => setPricePerUnit(Number(parseINR(e.target.value)) || 0)}
+                        placeholder="e.g. 25,000"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                        Direct Variable Cost Per Contract (₹)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={variableCostPerUnit ? formatINR(variableCostPerUnit) : ""}
+                        onChange={e => setVariableCostPerUnit(Number(parseINR(e.target.value)) || 0)}
+                        placeholder="e.g. 5,000"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-6 p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
+                        Break-Even Solvency Requirement
+                      </span>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 rounded-lg bg-white dark:bg-[#131B2C] border border-slate-200 dark:border-white/10 shadow-xs">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">Target Deals / Units</div>
+                          <div className="text-base font-extrabold text-cyan-600 dark:text-cyan-400 font-mono">
+                            {breakevenUnits} contracts
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">per month</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-white dark:bg-[#131B2C] border border-slate-200 dark:border-white/10 shadow-xs">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">Required Revenue</div>
+                          <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                            ₹{breakevenRevenue.toLocaleString("en-IN")}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">at break-even</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-200 dark:border-white/10">
+                      <Link
+                        href={`/chat?message=${encodeURIComponent(`Marcus, our break-even target is ₹${breakevenRevenue.toLocaleString("en-IN")} across ${breakevenUnits} contracts/mo. What's our quickest path to achieving this?`)}`}
+                        className="w-full block py-2.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white font-bold text-xs text-center btn-tactile transition-colors shadow-xs"
+                      >
+                        Analyze with CFO AI →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(activeTool.id === "cac" || activeTool.id === "ltv") && (
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                  <div className="md:col-span-6 space-y-3 text-xs">
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                        Total Monthly Sales & Marketing Outlay (₹)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={marketingSpend ? formatINR(marketingSpend) : ""}
+                        onChange={e => setMarketingSpend(Number(parseINR(e.target.value)) || 0)}
+                        placeholder="e.g. 2,00,000"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                        New Customers Signed This Month
+                      </label>
+                      <input
+                        type="number"
+                        value={acquiredCustomers}
+                        onChange={e => setAcquiredCustomers(Number(e.target.value))}
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                        Annual Revenue Per Customer (ACV) (₹)
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={avgRevenuePerAccount ? formatINR(avgRevenuePerAccount) : ""}
+                        onChange={e => setAvgRevenuePerAccount(Number(parseINR(e.target.value)) || 0)}
+                        placeholder="e.g. 60,000"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-6 p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
+                        Unit Acquisition & Lifetime Value
+                      </span>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="p-2.5 rounded-lg bg-white dark:bg-[#131B2C] border border-slate-200 dark:border-white/10 shadow-xs">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">Blended CAC</div>
+                          <div className="text-xs sm:text-sm font-extrabold text-rose-600 dark:text-rose-400 font-mono">
+                            ₹{calculatedCAC.toLocaleString("en-IN")}
+                          </div>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-white dark:bg-[#131B2C] border border-slate-200 dark:border-white/10 shadow-xs">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">Customer LTV</div>
+                          <div className="text-xs sm:text-sm font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                            ₹{calculatedLTV.toLocaleString("en-IN")}
+                          </div>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-white dark:bg-[#131B2C] border border-slate-200 dark:border-white/10 shadow-xs">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">LTV / CAC</div>
+                          <div className="text-xs sm:text-sm font-extrabold text-cyan-600 dark:text-cyan-400 font-mono">
+                            {ltvToCacRatio}x
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-200 dark:border-white/10">
+                      <Link
+                        href={`/chat?message=${encodeURIComponent(`Elena, evaluate our LTV to CAC ratio of ${ltvToCacRatio}x (CAC: ₹${calculatedCAC.toLocaleString("en-IN")}, LTV: ₹${calculatedLTV.toLocaleString("en-IN")}). How should we optimize our demand funnel?`)}`}
+                        className="w-full block py-2.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white font-bold text-xs text-center btn-tactile transition-colors shadow-xs"
+                      >
+                        Consult Elena (Marketing AI) on CAC →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Generic default view for other calculators */}
+              {!["profit", "breakeven", "cac", "ltv"].includes(activeTool.id) && (
+                <div className="p-6 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mx-auto">
+                    <Activity className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                      {activeTool.name} Telemetry Sandbox
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                      Configured with active ledger parameters for {activeTool.name}. You can calibrate assumptions or execute a full simulation in AI Workspace.
+                    </p>
+                  </div>
+                  <div className="pt-3 flex items-center justify-center gap-3">
+                    <Link
+                      href={`/chat?message=${encodeURIComponent(`Open ${activeTool.name} analysis with relevant operational telemetry.`)}`}
+                      className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white font-bold text-xs btn-tactile inline-flex items-center gap-2 shadow-xs transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span>Launch in AI Workspace</span>
+                    </Link>
+                    <Link
+                      href="/simulator"
+                      className="px-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:border-slate-300 text-slate-800 dark:text-white font-bold text-xs btn-tactile inline-flex items-center gap-2 transition-colors shadow-xs"
+                    >
+                      <span>Decision Simulator</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-
-          {/* Calculator Body Based on Tool ID */}
-          {activeTool.id === "profit" && (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 pt-2">
-              <div className="md:col-span-6 space-y-3 text-xs">
-                <div>
-                  <label className="font-semibold text-text block mb-1">Monthly Gross Revenue (₹)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={calcRevenue ? formatINR(calcRevenue) : ""}
-                    onChange={e => setCalcRevenue(Number(parseINR(e.target.value)) || 0)}
-                    placeholder="e.g. 12,00,000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold text-text block mb-1">Cost of Goods Sold / Delivery (COGS) (₹)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={calcCogs ? formatINR(calcCogs) : ""}
-                    onChange={e => setCalcCogs(Number(parseINR(e.target.value)) || 0)}
-                    placeholder="e.g. 3,00,000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold text-text block mb-1">Operating Overheads & Payroll (OpEx) (₹)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={calcOpex ? formatINR(calcOpex) : ""}
-                    onChange={e => setCalcOpex(Number(parseINR(e.target.value)) || 0)}
-                    placeholder="e.g. 4,50,000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-6 p-4 rounded-xl bg-surface-2 border border-line flex flex-col justify-between space-y-3">
-                <div className="space-y-3">
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
-                    Calculated Profitability Engine
-                  </span>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-surface border border-line">
-                      <div className="text-[10px] text-text-muted">Gross Margin</div>
-                      <div className="text-base font-extrabold text-jade font-mono">{grossMargin}%</div>
-                      <div className="text-[10px] text-text-muted font-mono">₹{grossProfit.toLocaleString("en-IN")}</div>
-                    </div>
-                    <div className="p-3 rounded-lg bg-surface border border-line">
-                      <div className="text-[10px] text-text-muted">Net Operating Margin</div>
-                      <div className={`text-base font-extrabold font-mono ${netProfit >= 0 ? "text-brass" : "text-rust"}`}>
-                        {netMargin}%
-                      </div>
-                      <div className="text-[10px] text-text-muted font-mono">₹{netProfit.toLocaleString("en-IN")}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 pt-3 border-t border-line">
-                  <Link
-                    href={`/chat?message=${encodeURIComponent(`Marcus, review our Profit Calculator results: Gross margin is ${grossMargin}%, Net margin is ${netMargin}%. How do we expand EBITDA?`)}`}
-                    className="flex-1 py-2 px-3 rounded-lg bg-brass text-white font-bold text-[11px] text-center btn-tactile hover:brightness-110"
-                  >
-                    Consult Marcus (CFO AI) on Margins →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTool.id === "breakeven" && (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 pt-2">
-              <div className="md:col-span-6 space-y-3 text-xs">
-                <div>
-                  <label className="font-semibold text-text block mb-1">Total Monthly Fixed Overheads (₹)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={fixedCosts ? formatINR(fixedCosts) : ""}
-                    onChange={e => setFixedCosts(Number(parseINR(e.target.value)) || 0)}
-                    placeholder="e.g. 2,50,000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold text-text block mb-1">Average Selling Price Per Contract (₹)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={pricePerUnit ? formatINR(pricePerUnit) : ""}
-                    onChange={e => setPricePerUnit(Number(parseINR(e.target.value)) || 0)}
-                    placeholder="e.g. 25,000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold text-text block mb-1">Direct Variable Cost Per Contract (₹)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={variableCostPerUnit ? formatINR(variableCostPerUnit) : ""}
-                    onChange={e => setVariableCostPerUnit(Number(parseINR(e.target.value)) || 0)}
-                    placeholder="e.g. 5,000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-6 p-4 rounded-xl bg-surface-2 border border-line flex flex-col justify-between space-y-3">
-                <div className="space-y-3">
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
-                    Break-Even Solvency Requirement
-                  </span>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-surface border border-line">
-                      <div className="text-[10px] text-text-muted">Target Deals / Units</div>
-                      <div className="text-base font-extrabold text-brass font-mono">{breakevenUnits} contracts</div>
-                      <div className="text-[10px] text-text-muted">per month</div>
-                    </div>
-                    <div className="p-3 rounded-lg bg-surface border border-line">
-                      <div className="text-[10px] text-text-muted">Required Revenue</div>
-                      <div className="text-base font-extrabold text-jade font-mono">
-                        ₹{breakevenRevenue.toLocaleString("en-IN")}
-                      </div>
-                      <div className="text-[10px] text-text-muted">at break-even</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-line">
-                  <Link
-                    href={`/chat?message=${encodeURIComponent(`Marcus, our break-even target is ₹${breakevenRevenue.toLocaleString("en-IN")} across ${breakevenUnits} contracts/mo. What's our quickest path to achieving this?`)}`}
-                    className="w-full block py-2 px-3 rounded-lg bg-brass text-white font-bold text-[11px] text-center btn-tactile hover:brightness-110"
-                  >
-                    Analyze with CFO AI →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {(activeTool.id === "cac" || activeTool.id === "ltv") && (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 pt-2">
-              <div className="md:col-span-6 space-y-3 text-xs">
-                <div>
-                  <label className="font-semibold text-text block mb-1">Total Monthly Sales & Marketing Outlay (₹)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={marketingSpend ? formatINR(marketingSpend) : ""}
-                    onChange={e => setMarketingSpend(Number(parseINR(e.target.value)) || 0)}
-                    placeholder="e.g. 2,00,000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold text-text block mb-1">New Customers Signed This Month</label>
-                  <input
-                    type="number"
-                    value={acquiredCustomers}
-                    onChange={e => setAcquiredCustomers(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold text-text block mb-1">Annual Revenue Per Customer (ACV) (₹)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={avgRevenuePerAccount ? formatINR(avgRevenuePerAccount) : ""}
-                    onChange={e => setAvgRevenuePerAccount(Number(parseINR(e.target.value)) || 0)}
-                    placeholder="e.g. 60,000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-6 p-4 rounded-xl bg-surface-2 border border-line flex flex-col justify-between space-y-3">
-                <div className="space-y-3">
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
-                    Unit Acquisition & Lifetime Value
-                  </span>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="p-2.5 rounded-lg bg-surface border border-line">
-                      <div className="text-[10px] text-text-muted">Blended CAC</div>
-                      <div className="text-sm font-extrabold text-rust font-mono">₹{calculatedCAC.toLocaleString("en-IN")}</div>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-surface border border-line">
-                      <div className="text-[10px] text-text-muted">Customer LTV</div>
-                      <div className="text-sm font-extrabold text-jade font-mono">₹{calculatedLTV.toLocaleString("en-IN")}</div>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-surface border border-line">
-                      <div className="text-[10px] text-text-muted">LTV / CAC</div>
-                      <div className="text-sm font-extrabold text-brass font-mono">{ltvToCacRatio}x</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-line">
-                  <Link
-                    href={`/chat?message=${encodeURIComponent(`Elena, evaluate our LTV to CAC ratio of ${ltvToCacRatio}x (CAC: ₹${calculatedCAC.toLocaleString("en-IN")}, LTV: ₹${calculatedLTV.toLocaleString("en-IN")}). How should we optimize our demand funnel?`)}`}
-                    className="w-full block py-2 px-3 rounded-lg bg-brass text-white font-bold text-[11px] text-center btn-tactile hover:brightness-110"
-                  >
-                    Consult Elena (Marketing AI) on CAC →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Generic default view for other calculators */}
-          {!["profit", "breakeven", "cac", "ltv"].includes(activeTool.id) && (
-            <div className="p-6 rounded-xl bg-surface-2 border border-line text-center space-y-3">
-              <div className="w-10 h-10 rounded-full bg-brass/10 border border-brass/30 flex items-center justify-center text-brass mx-auto">
-                <Activity className="w-5 h-5" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-xs font-bold text-text">{activeTool.name} Telemetry Sandbox</h3>
-                <p className="text-[11px] text-text-muted max-w-md mx-auto">
-                  Configured with active ledger parameters for {activeTool.name}. You can calibrate assumptions or execute a full simulation in AI Workspace.
-                </p>
-              </div>
-              <div className="pt-2 flex items-center justify-center gap-3">
-                <Link
-                  href={`/chat?message=${encodeURIComponent(`Open ${activeTool.name} analysis with relevant operational telemetry.`)}`}
-                  className="px-4 py-2 rounded-lg bg-brass text-white font-bold text-xs btn-tactile hover:brightness-110 inline-flex items-center gap-1.5"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Launch in AI Workspace</span>
-                </Link>
-                <Link
-                  href="/simulator"
-                  className="px-4 py-2 rounded-lg bg-surface border border-line hover:border-line-strong text-text font-bold text-xs btn-tactile inline-flex items-center gap-1.5"
-                >
-                  <span>Decision Simulator</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
