@@ -49,6 +49,45 @@ export function AppShell({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const [items, setItems] = useState<NavItem[]>(navItems);
+  const [features, setFeatures] = useState<{
+    enableAiCopilot: boolean;
+    enableDailyCheckin: boolean;
+    enableCommandPalette: boolean;
+    enableWhatsApp: boolean;
+    enableToolsCatalog: boolean;
+  }>({
+    enableAiCopilot: true,
+    enableDailyCheckin: true,
+    enableCommandPalette: true,
+    enableWhatsApp: true,
+    enableToolsCatalog: true,
+  });
+
+  // Sync navItems prop if changes
+  React.useEffect(() => {
+    if (navItems && navItems.length > 0) {
+      setItems(navItems);
+    }
+  }, [navItems]);
+
+  // Fetch dynamic navigation and feature toggles from backend
+  React.useEffect(() => {
+    fetch("/api/public/config")
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          if (Array.isArray(d.nav) && d.nav.length > 0) {
+            setItems(d.nav.filter((n: NavItem) => n.enabled !== false));
+          }
+          if (d.features) {
+            setFeatures(d.features);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   React.useEffect(() => {
     try {
       const savedProfileStr = localStorage.getItem("nuralix_business_profile");
@@ -83,16 +122,16 @@ export function AppShell({
 
       {/* Desktop Left Rail (lg+) */}
       <DesktopRail
-        navItems={navItems}
+        navItems={items}
         companyName={companyName}
         industry={industry}
-        onOpenSearch={() => setSearchOpen(true)}
+        onOpenSearch={() => features.enableCommandPalette && setSearchOpen(true)}
       />
 
       {/* Tablet Icon Rail (md) */}
       <TabletRail
-        navItems={navItems}
-        onOpenSearch={() => setSearchOpen(true)}
+        navItems={items}
+        onOpenSearch={() => features.enableCommandPalette && setSearchOpen(true)}
       />
 
       {/* Main Column */}
@@ -101,7 +140,7 @@ export function AppShell({
         <MobileHeader
           companyName={companyName}
           onOpenChat={() => setChatOpen(true)}
-          onOpenSearch={() => setSearchOpen(true)}
+          onOpenSearch={() => features.enableCommandPalette && setSearchOpen(true)}
         />
 
         {/* Page Content Container with Container Queries support */}
@@ -110,8 +149,8 @@ export function AppShell({
         </main>
       </div>
 
-      {/* Floating AI Executive Launcher Button (Desktop & Tablet) - hidden on /chat */}
-      {pathname !== "/chat" && (
+      {/* Floating AI Executive Launcher Button (Desktop & Tablet) - hidden on /chat or if disabled */}
+      {features.enableAiCopilot && pathname !== "/chat" && (
         <button
           type="button"
           onClick={() => setChatOpen(true)}
@@ -128,10 +167,12 @@ export function AppShell({
       )}
 
       {/* Universal Command Palette / Spotlight Search Modal */}
-      <CommandPalette
-        isOpen={searchOpen}
-        onClose={() => setSearchOpen(false)}
-      />
+      {features.enableCommandPalette && (
+        <CommandPalette
+          isOpen={searchOpen}
+          onClose={() => setSearchOpen(false)}
+        />
+      )}
 
       {/* Slide-over Chat Dock */}
       <ChatDock
@@ -142,7 +183,7 @@ export function AppShell({
       />
 
       {/* Mobile Bottom Tab Bar (xs/sm) */}
-      <MobileBottomBar navItems={navItems} />
+      <MobileBottomBar navItems={items} />
     </div>
   );
 }

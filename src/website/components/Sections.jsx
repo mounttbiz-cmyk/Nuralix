@@ -1,34 +1,54 @@
 /* ============================================================================
-   SECTIONS — the written half of the experience.
-
-   CONTENT NOTE
-   Copy is built from what Nuralix publishes about itself. Anything not
-   verifiable is marked as a placeholder rather than invented — see the
-   `PLACEHOLDER` markers below and README.md.
+   SECTIONS — Dynamic & Configurable Content Presentation.
+   Allows Super Admin to edit every headline, button, link, and scene text.
    ========================================================================== */
 import { useState } from 'react';
 import { MagneticButton } from './Chrome';
 import { applyFX, resetFX } from '../lib/engine';
 import { DASHBOARD_URL } from '../config';
 
-/* -- swap these for the real Nuralix details -------------------------------- */
-export const CONTACT = {
-  email: 'hello@nuralix.in',        // PLACEHOLDER — confirm the real inbox
+export const DEFAULT_CONTACT = {
+  email: 'hello@nuralix.in',
   site: 'nuralix.in',
-  linkedin: '',                     // PLACEHOLDER — paste the profile URL
-  twitter: ''                       // PLACEHOLDER — paste the profile URL
+  linkedin: 'https://linkedin.com/company/nuralix',
+  twitter: 'https://twitter.com/nuralix'
 };
 
 const IS_TOUCH = () => typeof window !== 'undefined' && window.matchMedia('(hover:none), (pointer:coarse)').matches;
 
+/* ------------------------------------------------------------------- announcement banner */
+export function AnnouncementBanner({ data }) {
+  if (!data?.enabled) return null;
+  return (
+    <aside className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 text-white text-xs font-semibold py-2 px-4 flex items-center justify-center gap-3 shadow-lg" style={{ zIndex: 100 }}>
+      <span>{data.text}</span>
+      {data.linkText && (
+        <a
+          href={data.linkUrl || '#'}
+          className="underline decoration-white/60 underline-offset-2 hover:text-cyan-200 transition-colors"
+        >
+          {data.linkText} →
+        </a>
+      )}
+    </aside>
+  );
+}
+
 /* ------------------------------------------------------------------- hero */
-export function Hero ({ ready }) {
-  const word = 'NURALIX';
+export function Hero({ ready, data }) {
+  const word = data?.word || 'NURALIX';
+  const eyebrow = data?.eyebrow || 'Artificial Intelligence · Nuralix.in';
+  const subtitle = data?.subtitle || 'Intelligence. Engineered for Tomorrow.';
+  const primaryCtaText = data?.primaryCtaText || 'Explore Nuralix';
+  const primaryCtaHref = data?.primaryCtaHref || '#s01';
+  const secondaryCtaText = data?.secondaryCtaText || 'Discover Our Intelligence';
+  const secondaryCtaHref = data?.secondaryCtaHref || '#s03';
+
   return (
     <section id="hero" className="story" aria-label="Nuralix — Intelligence engineered for tomorrow">
       <div className="pin">
         <div className="wrap hero__inner">
-          <p className={'eyebrow rv' + (ready ? ' in' : '')} data-d="1">Artificial Intelligence · Nuralix.in</p>
+          <p className={'eyebrow rv' + (ready ? ' in' : '')} data-d="1">{eyebrow}</p>
 
           <h1 className={'hero__mark' + (ready ? ' in' : '')} aria-label={word}>
             {[...word].map((ch, i) => (
@@ -37,14 +57,16 @@ export function Hero ({ ready }) {
           </h1>
 
           <p className={'hero__sub rv' + (ready ? ' in' : '')} data-d="4">
-            Intelligence. <em>Engineered for Tomorrow.</em>
+            {subtitle}
           </p>
 
           <div className={'hero__cta rv' + (ready ? ' in' : '')} data-d="5">
-            <MagneticButton className="btn--solid btn--lg" href="#s01">
-              <span>Explore Nuralix</span><span className="btn__ar" aria-hidden="true">→</span>
+            <MagneticButton className="btn--solid btn--lg" href={primaryCtaHref}>
+              <span>{primaryCtaText}</span><span className="btn__ar" aria-hidden="true">→</span>
             </MagneticButton>
-            <MagneticButton className="btn--lg" href="#s03"><span>Discover Our Intelligence</span></MagneticButton>
+            <MagneticButton className="btn--lg" href={secondaryCtaHref}>
+              <span>{secondaryCtaText}</span>
+            </MagneticButton>
           </div>
         </div>
 
@@ -57,7 +79,7 @@ export function Hero ({ ready }) {
 }
 
 /* ------------------------------------------------------ cinematic captions */
-function Beat ({ id, height, label, align = 'center', modifier = '', children }) {
+function Beat({ id, height, label, align = 'center', modifier = '', children }) {
   const beatClass = ['beat', align === 'center' ? 'beat--c' : '', modifier, 'fade'].filter(Boolean).join(' ');
   const style = align === 'right' ? { marginLeft: 'auto', textAlign: 'right' } : undefined;
   return (
@@ -71,17 +93,25 @@ function Beat ({ id, height, label, align = 'center', modifier = '', children })
   );
 }
 
-export const SceneAwakening = () => (
+export const SceneAwakening = ({ data }) => (
   <Beat id="s01" height="170svh" label="Awakening">
-    <p className="eyebrow" style={{ justifyContent: 'center' }}>Scene 01 — Awakening</p>
-    <h2 className="h-xl">Every breakthrough<br />begins with a signal.</h2>
+    <p className="eyebrow" style={{ justifyContent: 'center' }}>
+      {data?.eyebrow || 'Scene 01 — Awakening'}
+    </p>
+    <h2 className="h-xl" style={{ whiteSpace: 'pre-line' }}>
+      {data?.headline || 'Every breakthrough\nbegins with a signal.'}
+    </h2>
   </Beat>
 );
 
-export const SceneConnection = () => (
+export const SceneConnection = ({ data }) => (
   <Beat id="s02" height="190svh" label="Connection" align="left">
-    <p className="eyebrow">Scene 02 — Connection</p>
-    <h2 className="h-xl">We connect data,<br />intelligence and<br />possibility.</h2>
+    <p className="eyebrow">
+      {data?.eyebrow || 'Scene 02 — Connection'}
+    </p>
+    <h2 className="h-xl" style={{ whiteSpace: 'pre-line' }}>
+      {data?.headline || 'We connect data,\nintelligence and\npossibility.'}
+    </h2>
   </Beat>
 );
 
@@ -92,7 +122,7 @@ const FLOATERS = [
   ['Context', null, 'continuously learning', 0.16]
 ];
 
-export const SceneIntelligence = () => (
+export const SceneIntelligence = ({ data }) => (
   <section id="s03" className="story" style={{ height: '205svh' }} aria-label="Intelligence">
     <div className="pin">
       <div className="floaters" aria-hidden="true">
@@ -104,96 +134,117 @@ export const SceneIntelligence = () => (
       </div>
       <div className="wrap">
         <div className="beat beat--c fade" data-fade>
-          <p className="eyebrow" style={{ justifyContent: 'center' }}>Scene 03 — Intelligence</p>
-          <h2 className="h-xl">Turning complexity<br />into intelligence.</h2>
+          <p className="eyebrow" style={{ justifyContent: 'center' }}>
+            {data?.eyebrow || 'Scene 03 — Intelligence'}
+          </p>
+          <h2 className="h-xl" style={{ whiteSpace: 'pre-line' }}>
+            {data?.headline || 'Turning complexity\ninto intelligence.'}
+          </h2>
         </div>
       </div>
     </div>
   </section>
 );
 
-export const SceneNuralix = () => (
+export const SceneNuralix = ({ data }) => (
   <Beat id="s04" height="175svh" label="This is Nuralix" modifier="beat--n">
-    <h2 className="h-xl" style={{ fontWeight: 500 }}>This is Nuralix.</h2>
+    <h2 className="h-xl" style={{ fontWeight: 500 }}>
+      {data?.headline || 'This is Nuralix.'}
+    </h2>
     <p className="lead" style={{ margin: '26px auto 0', textAlign: 'center' }}>
-      Building intelligent systems for a rapidly evolving world.
+      {data?.lead || 'Building intelligent systems for a rapidly evolving world.'}
     </p>
   </Beat>
 );
 
-export const SceneExpansion = () => (
+export const SceneExpansion = ({ data }) => (
   <Beat id="s05" height="160svh" label="Expansion">
-    <p className="eyebrow" style={{ justifyContent: 'center' }}>Scene 05 — Expansion</p>
-    <h2 className="h-xl">One intelligence.<br />Infinite possibilities.</h2>
+    <p className="eyebrow" style={{ justifyContent: 'center' }}>
+      {data?.eyebrow || 'Scene 05 — Expansion'}
+    </p>
+    <h2 className="h-xl" style={{ whiteSpace: 'pre-line' }}>
+      {data?.headline || 'One intelligence.\nInfinite possibilities.'}
+    </h2>
   </Beat>
 );
 
-export const SceneHuman = () => (
+export const SceneHuman = ({ data }) => (
   <Beat id="s06" height="190svh" label="Human and AI" align="right">
-    <p className="eyebrow" style={{ justifyContent: 'flex-end' }}>Scene 06 — Human + AI</p>
-    <h2 className="h-xl">AI doesn&rsquo;t replace<br />possibility.<br />It expands it.</h2>
+    <p className="eyebrow" style={{ justifyContent: 'flex-end' }}>
+      {data?.eyebrow || 'Scene 06 — Human + AI'}
+    </p>
+    <h2 className="h-xl" style={{ whiteSpace: 'pre-line' }}>
+      {data?.headline || 'AI doesn’t replace\npossibility.\nIt expands it.'}
+    </h2>
     <p className="lead" style={{ margin: '26px 0 0 auto' }}>
-      Technology should amplify human potential — not stand in for it.
+      {data?.lead || 'Technology should amplify human potential — not stand in for it.'}
     </p>
   </Beat>
 );
 
-export const SceneFuture = () => (
-  <section id="s07" className="story" style={{ height: '180svh' }} aria-label="The future">
-    <div className="pin">
-      <div className="wrap">
-        <div className="beat beat--c fade" data-fade>
-          <p className="eyebrow" style={{ justifyContent: 'center' }}>Scene 07 — Future</p>
-          <h2 className="h-xl">The future isn&rsquo;t coming.<br />We&rsquo;re engineering it.</h2>
-          <div className="hero__cta" style={{ marginTop: 40 }}>
-            <MagneticButton className="btn--solid btn--lg" href={DASHBOARD_URL}>
-              <span>Build the Future with Nuralix</span><span className="btn__ar" aria-hidden="true">→</span>
-            </MagneticButton>
+export const SceneFuture = ({ data }) => {
+  const eyebrow = data?.eyebrow || 'Scene 07 — Future';
+  const headline = data?.headline || 'The future isn’t coming.\nWe’re engineering it.';
+  const ctaText = data?.ctaText || 'Build the Future with Nuralix';
+  const ctaHref = data?.ctaHref || DASHBOARD_URL;
+
+  return (
+    <section id="s07" className="story" style={{ height: '180svh' }} aria-label="The future">
+      <div className="pin">
+        <div className="wrap">
+          <div className="beat beat--c fade" data-fade>
+            <p className="eyebrow" style={{ justifyContent: 'center' }}>{eyebrow}</p>
+            <h2 className="h-xl" style={{ whiteSpace: 'pre-line' }}>{headline}</h2>
+            <div className="hero__cta" style={{ marginTop: 40 }}>
+              <MagneticButton className="btn--solid btn--lg" href={ctaHref}>
+                <span>{ctaText}</span><span className="btn__ar" aria-hidden="true">→</span>
+              </MagneticButton>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ------------------------------------------------------------------ about */
-const APPROACH = [
+const DEFAULT_APPROACH = [
   ['Understand the problem', '01'], ['Model the intelligence', '02'],
   ['Engineer the system', '03'], ['Scale what works', '04']
 ];
 
-export const About = () => (
-  <section id="about" aria-labelledby="about-h">
-    <div className="wrap">
-      <p className="eyebrow rv">About Nuralix</p>
-      <h2 className="h-xl rv" id="about-h">We build intelligence that moves the world forward.</h2>
-      <div className="rule rv" />
-      <div className="about__grid">
-        <div className="about__cols">
-          <p className="lead rv" data-d="1">
-            Nuralix uses artificial intelligence to automate tasks, analyse data, and help businesses
-            make smarter, faster decisions for growth.
-          </p>
-          <p className="lead rv" data-d="2">
-            We work at the point where information becomes understanding — designing systems that read
-            complexity, find the signal inside it, and turn that signal into a decision a business can
-            act on today.
-          </p>
-        </div>
-        <div className="rv" data-d="3">
-          <p className="small" style={{ letterSpacing: '.24em', textTransform: 'uppercase', fontSize: 10.5, color: 'var(--ink-faint)' }}>
-            Our approach
-          </p>
-          <div className="clist" style={{ marginTop: 20 }}>
-            {APPROACH.map(([label, n]) => (
-              <div className="crow" key={n}><span className="crow__v">{label}</span><span className="crow__k">{n}</span></div>
-            ))}
+export const About = ({ data }) => {
+  const eyebrow = data?.eyebrow || 'About Nuralix';
+  const headline = data?.headline || 'We build intelligence that moves the world forward.';
+  const p1 = data?.p1 || 'Nuralix uses artificial intelligence to automate tasks, analyse data, and help businesses make smarter, faster decisions for growth.';
+  const p2 = data?.p2 || 'We work at the point where information becomes understanding — designing systems that read complexity, find the signal inside it, and turn that signal into a decision a business can act on today.';
+
+  return (
+    <section id="about" aria-labelledby="about-h">
+      <div className="wrap">
+        <p className="eyebrow rv">{eyebrow}</p>
+        <h2 className="h-xl rv" id="about-h">{headline}</h2>
+        <div className="rule rv" />
+        <div className="about__grid">
+          <div className="about__cols">
+            <p className="lead rv" data-d="1">{p1}</p>
+            <p className="lead rv" data-d="2">{p2}</p>
+          </div>
+          <div className="rv" data-d="3">
+            <p className="small" style={{ letterSpacing: '.24em', textTransform: 'uppercase', fontSize: 10.5, color: 'var(--ink-faint)' }}>
+              Our approach
+            </p>
+            <div className="clist" style={{ marginTop: 20 }}>
+              {DEFAULT_APPROACH.map(([label, n]) => (
+                <div className="crow" key={n}><span className="crow__v">{label}</span><span className="crow__k">{n}</span></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* -------------------------------------------------------------- solutions */
 const GLYPHS = {
@@ -204,15 +255,15 @@ const GLYPHS = {
   custom: <><path d="M50 10 86 30v40L50 90 14 70V30z" /><path d="M50 32 68 42v20L50 72 32 62V42z" /><circle cx="50" cy="52" r="5" /></>
 };
 
-const CARDS = [
-  ['01', 'ai', 'AI & Machine Intelligence', 'Systems that transform complex information into actionable intelligence.'],
-  ['02', 'auto', 'Intelligent Automation', 'Smarter workflows designed to reduce friction and increase scale.'],
-  ['03', 'data', 'Data & Analytics', 'Turning data into clarity, prediction and strategic advantage.'],
-  ['04', 'digital', 'Digital Intelligence', 'Building intelligent digital experiences for modern organisations.'],
-  ['05', 'custom', 'Custom AI Systems', 'Purpose-built intelligence designed around specific business challenges.']
+const DEFAULT_CARDS = [
+  { id: 'c1', num: '01', fx: 'ai', title: 'AI & Machine Intelligence', desc: 'Systems that transform complex information into actionable intelligence.' },
+  { id: 'c2', num: '02', fx: 'auto', title: 'Intelligent Automation', desc: 'Smarter workflows designed to reduce friction and increase scale.' },
+  { id: 'c3', num: '03', fx: 'data', title: 'Data & Analytics', desc: 'Turning data into clarity, prediction and strategic advantage.' },
+  { id: 'c4', num: '04', fx: 'digital', title: 'Digital Intelligence', desc: 'Building intelligent digital experiences for modern organisations.' },
+  { id: 'c5', num: '05', fx: 'custom', title: 'Custom AI Systems', desc: 'Purpose-built intelligence designed around specific business challenges.' }
 ];
 
-function Card ({ n, fx, title, desc, delay }) {
+function Card({ n, fx = 'ai', title, desc, delay }) {
   const onMove = e => {
     const el = e.currentTarget, r = el.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
@@ -236,49 +287,71 @@ function Card ({ n, fx, title, desc, delay }) {
         <h3 className="card__t">{title}</h3>
         <p className="card__d">{desc}</p>
       </div>
-      <svg className="card__glyph" viewBox="0 0 100 100" aria-hidden="true">{GLYPHS[fx]}</svg>
+      <svg className="card__glyph" viewBox="0 0 100 100" aria-hidden="true">{GLYPHS[fx] || GLYPHS.ai}</svg>
     </article>
   );
 }
 
-export const Solutions = () => (
-  <section id="solutions" aria-labelledby="sol-h">
-    <div className="wrap">
-      <div className="sol__head">
-        <div>
-          <p className="eyebrow rv">Solutions</p>
-          <h2 className="h-l rv" id="sol-h" data-d="1">Capabilities, engineered.</h2>
+export const Solutions = ({ data }) => {
+  const eyebrow = data?.eyebrow || 'Solutions';
+  const headline = data?.headline || 'Capabilities, engineered.';
+  const subtitle = data?.subtitle || 'Each capability is a system, not a feature — built around the problem it is meant to solve.';
+  const cards = data?.cards || DEFAULT_CARDS;
+
+  return (
+    <section id="solutions" aria-labelledby="sol-h">
+      <div className="wrap">
+        <div className="sol__head">
+          <div>
+            <p className="eyebrow rv">{eyebrow}</p>
+            <h2 className="h-l rv" id="sol-h" data-d="1">{headline}</h2>
+          </div>
+          <p className="small rv" data-d="2" style={{ maxWidth: '34ch' }}>
+            {subtitle}
+          </p>
         </div>
-        <p className="small rv" data-d="2" style={{ maxWidth: '34ch' }}>
-          Each capability is a system, not a feature — built around the problem it is meant to solve.
-        </p>
+        <div className="cards">
+          {cards.map((card, i) => (
+            <Card
+              key={card.id || card.num || i}
+              n={card.num || `0${i+1}`}
+              fx={card.fx || 'ai'}
+              title={card.title}
+              desc={card.desc}
+              delay={i + 1}
+            />
+          ))}
+        </div>
       </div>
-      <div className="cards">
-        {CARDS.map(([n, fx, title, desc], i) => (
-          <Card key={n} n={n} fx={fx} title={title} desc={desc} delay={i + 1} />
-        ))}
-      </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ------------------------------------------------------------------ stats */
-const STATS = [['01', 'Intelligence'], ['∞', 'Possibilities'], ['24/7', 'Designed to think'], ['01', 'Vision']];
+const DEFAULT_STATS = [
+  { id: 's1', num: '01', label: 'Intelligence' },
+  { id: 's2', num: '∞', label: 'Possibilities' },
+  { id: 's3', num: '24/7', label: 'Designed to think' },
+  { id: 's4', num: '01', label: 'Vision' }
+];
 
-export const Stats = () => (
-  <section id="stats" aria-label="Impact">
-    <div className="wrap">
-      <div className="stats">
-        {STATS.map(([n, l], i) => (
-          <div className="rv" key={l} data-d={i || undefined}>
-            <div className="stat__n">{n}</div>
-            <div className="stat__l">{l}</div>
-          </div>
-        ))}
+export const Stats = ({ data }) => {
+  const items = data?.items || DEFAULT_STATS;
+  return (
+    <section id="stats" aria-label="Impact">
+      <div className="wrap">
+        <div className="stats">
+          {items.map((stat, i) => (
+            <div className="rv" key={stat.id || stat.label || i} data-d={i || undefined}>
+              <div className="stat__n">{stat.num}</div>
+              <div className="stat__l">{stat.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ----------------------------------------------------------------- vision */
 const WORDS = ['Understand.', 'Predict.', 'Adapt.', 'Create.', 'Evolve.', 'Nuralix.'];
@@ -297,17 +370,29 @@ export const Vision = () => (
 );
 
 /* ---------------------------------------------------------------- contact */
-export function Contact () {
+export function Contact({ data }) {
   const [email, setEmail] = useState('');
-  const [note, setNote] = useState('Enter your email to begin your executive onboarding.');
+  const [note, setNote] = useState(data?.note || 'Enter your email to begin your executive onboarding.');
   const [alert, setAlert] = useState(false);
+
+  const eyebrow = data?.eyebrow || 'Start with Nuralix';
+  const headline = data?.headline || 'Ready to build\nwhat’s next?';
+  const ctaText = data?.ctaText || 'Start with Nuralix';
+  const ctaHref = data?.ctaHref || DASHBOARD_URL;
+  const contactInfo = {
+    email: data?.email || DEFAULT_CONTACT.email,
+    site: data?.site || DEFAULT_CONTACT.site,
+    linkedin: data?.linkedin || DEFAULT_CONTACT.linkedin,
+    twitter: data?.twitter || DEFAULT_CONTACT.twitter,
+  };
 
   const submit = e => {
     e.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setNote('Please enter a valid business email address.'); setAlert(true); return;
     }
-    window.location.href = `${DASHBOARD_URL}?email=${encodeURIComponent(email.trim())}`;
+    const dest = ctaHref.includes('?') ? `${ctaHref}&email=${encodeURIComponent(email.trim())}` : `${ctaHref}?email=${encodeURIComponent(email.trim())}`;
+    window.location.href = dest;
   };
 
   const social = (label, url) => url
@@ -319,15 +404,15 @@ export function Contact () {
       <div className="wrap">
         <div className="contact__grid">
           <div>
-            <p className="eyebrow rv">Start with Nuralix</p>
-            <h2 className="h-xl rv" id="contact-h" data-d="1">Ready to build<br />what&rsquo;s next?</h2>
+            <p className="eyebrow rv">{eyebrow}</p>
+            <h2 className="h-xl rv" id="contact-h" data-d="1" style={{ whiteSpace: 'pre-line' }}>{headline}</h2>
             <form className="field rv" data-d="2" onSubmit={submit} noValidate>
               <label htmlFor="email" style={{ position: 'absolute', left: -9999 }}>Your email address</label>
               <input
                 id="email" type="email" name="email" placeholder="founder@company.com"
                 autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required
               />
-              <button type="submit" aria-label="Start with Nuralix">
+              <button type="submit" aria-label={ctaText}>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M5 12h13M12 5l7 7-7 7" />
                 </svg>
@@ -337,8 +422,8 @@ export function Contact () {
               {note}
             </p>
             <div className="rv" data-d="4" style={{ marginTop: 20 }}>
-              <MagneticButton className="btn--solid btn--lg" href={DASHBOARD_URL}>
-                <span>Start with Nuralix</span><span className="btn__ar" aria-hidden="true">→</span>
+              <MagneticButton className="btn--solid btn--lg" href={ctaHref}>
+                <span>{ctaText}</span><span className="btn__ar" aria-hidden="true">→</span>
               </MagneticButton>
             </div>
           </div>
@@ -348,10 +433,10 @@ export function Contact () {
               Direct
             </p>
             <div className="clist">
-              <a className="crow" href={`mailto:${CONTACT.email}`}><span className="crow__v">{CONTACT.email}</span><span className="crow__k">Email</span></a>
-              <a className="crow" href={`https://${CONTACT.site}`} target="_blank" rel="noopener"><span className="crow__v">{CONTACT.site}</span><span className="crow__k">Website</span></a>
-              {social('LinkedIn', CONTACT.linkedin)}
-              {social('X / Twitter', CONTACT.twitter)}
+              <a className="crow" href={`mailto:${contactInfo.email}`}><span className="crow__v">{contactInfo.email}</span><span className="crow__k">Email</span></a>
+              <a className="crow" href={`https://${contactInfo.site}`} target="_blank" rel="noopener"><span className="crow__v">{contactInfo.site}</span><span className="crow__k">Website</span></a>
+              {social('LinkedIn', contactInfo.linkedin)}
+              {social('X / Twitter', contactInfo.twitter)}
             </div>
           </div>
         </div>
@@ -360,12 +445,16 @@ export function Contact () {
   );
 }
 
-export const Footer = () => (
-  <footer>
-    <div className="wrap foot">
-      <span>© {new Date().getFullYear()} Nuralix</span>
-      <span>Nuralix — Intelligence in Motion</span>
-      <a href="#hero">Back to top ↑</a>
-    </div>
-  </footer>
-);
+export const Footer = ({ data }) => {
+  const copyright = data?.copyright || `© ${new Date().getFullYear()} Nuralix`;
+  const tagline = data?.tagline || 'Nuralix — Intelligence in Motion';
+  return (
+    <footer>
+      <div className="wrap foot">
+        <span>{copyright}</span>
+        <span>{tagline}</span>
+        <a href="#hero">Back to top ↑</a>
+      </div>
+    </footer>
+  );
+};

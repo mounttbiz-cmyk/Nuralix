@@ -276,6 +276,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
 
 function ToolsContent() {
   const searchParams = useSearchParams();
+  const [toolsList, setToolsList] = useState<BusinessTool[]>(TOOLS_CATALOG);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
@@ -283,15 +284,27 @@ function ToolsContent() {
   // Close active tool calculator on Escape
   useEscapeKey(() => setActiveToolId(null), Boolean(activeToolId));
 
+  // Fetch dynamic tools catalog
+  useEffect(() => {
+    fetch("/api/public/config")
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.tools) && d.tools.length > 0) {
+          setToolsList(d.tools.filter((t: any) => t.enabled !== false));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Read URL query parameter if launched from an AI Agent
   useEffect(() => {
     const toolParam = searchParams.get("tool");
     if (toolParam) {
       setActiveToolId(toolParam);
-      const tool = TOOLS_CATALOG.find(t => t.id === toolParam);
+      const tool = toolsList.find(t => t.id === toolParam);
       if (tool) setSelectedCategory(tool.category);
     }
-  }, [searchParams]);
+  }, [searchParams, toolsList]);
 
   // Interactive Calculator State (Profit & Margin)
   const [calcRevenue, setCalcRevenue] = useState(1200000);
@@ -309,7 +322,7 @@ function ToolsContent() {
   const [avgRevenuePerAccount, setAvgRevenuePerAccount] = useState(60000);
   const [avgRetentionMonths, setAvgRetentionMonths] = useState(18);
 
-  const filteredTools = TOOLS_CATALOG.filter(tool => {
+  const filteredTools = toolsList.filter(tool => {
     const matchesCategory = selectedCategory === "all" || tool.category === selectedCategory;
     const matchesSearch =
       tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

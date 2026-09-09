@@ -65,8 +65,20 @@ function DashboardContent() {
     }
   };
 
+  const [featureFlags, setFeatureFlags] = useState({
+    enableDailyCheckin: true,
+  });
+
   useEffect(() => {
     refreshCheckinStatus();
+    fetch("/api/public/config")
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.features) {
+          setFeatureFlags(d.features);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Read saved business profile if available
@@ -161,54 +173,56 @@ function DashboardContent() {
       )}
 
       {/* Daily Executive Check-in Banner / Status */}
-      <div className="p-4 sm:p-5 rounded-2xl border border-line bg-surface shadow-theme flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-start gap-3.5">
-          <div
-            className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 ${
+      {featureFlags.enableDailyCheckin !== false && (
+        <div className="p-4 sm:p-5 rounded-2xl border border-line bg-surface shadow-theme flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div
+              className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 ${
+                checkinData.isCompletedToday
+                  ? "bg-jade/10 border-jade/30 text-jade"
+                  : "bg-amber-500/10 border-amber-500/30 text-amber-500"
+              }`}
+            >
+              {checkinData.isCompletedToday ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-text">
+                  {checkinData.isCompletedToday
+                    ? "Today's Executive Check-In Completed"
+                    : "Daily Executive Pulse Check Pending"}
+                </span>
+                <span
+                  className={`text-[9px] px-2 py-0.2 rounded-full font-bold uppercase border ${
+                    checkinData.isCompletedToday
+                      ? "bg-jade/10 border-jade/30 text-jade"
+                      : "bg-amber-500/10 border-amber-500/30 text-amber-500"
+                  }`}
+                >
+                  {checkinData.isCompletedToday ? `● Synced (${checkinData.todayCheckin?.source || "web"})` : "⚡ 60s Required"}
+                </span>
+              </div>
+              <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
+                {checkinData.isCompletedToday
+                  ? "Executive agents (Astra, Marcus, Elena) are calibrated with today's operational telemetry."
+                  : "Continuous data collection mode is active. Give your AI executive team today's quick 60-second update."}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsCheckInModalOpen(true)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold btn-tactile inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer ${
               checkinData.isCompletedToday
-                ? "bg-jade/10 border-jade/30 text-jade"
-                : "bg-amber-500/10 border-amber-500/30 text-amber-500"
+                ? "bg-surface-2 border border-line text-text hover:border-line-strong"
+                : "bg-brass text-white shadow-md hover:brightness-110"
             }`}
           >
-            {checkinData.isCompletedToday ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-text">
-                {checkinData.isCompletedToday
-                  ? "Today's Executive Check-In Completed"
-                  : "Daily Executive Pulse Check Pending"}
-              </span>
-              <span
-                className={`text-[9px] px-2 py-0.2 rounded-full font-bold uppercase border ${
-                  checkinData.isCompletedToday
-                    ? "bg-jade/10 border-jade/30 text-jade"
-                    : "bg-amber-500/10 border-amber-500/30 text-amber-500"
-                }`}
-              >
-                {checkinData.isCompletedToday ? `● Synced (${checkinData.todayCheckin?.source || "web"})` : "⚡ 60s Required"}
-              </span>
-            </div>
-            <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
-              {checkinData.isCompletedToday
-                ? "Executive agents (Astra, Marcus, Elena) are calibrated with today's operational telemetry."
-                : "Continuous data collection mode is active. Give your AI executive team today's quick 60-second update."}
-            </p>
-          </div>
+            <span>{checkinData.isCompletedToday ? "Review / Update Check-In" : "Complete 60s Check-In →"}</span>
+          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={() => setIsCheckInModalOpen(true)}
-          className={`px-4 py-2 rounded-xl text-xs font-bold btn-tactile inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer ${
-            checkinData.isCompletedToday
-              ? "bg-surface-2 border border-line text-text hover:border-line-strong"
-              : "bg-brass text-white shadow-md hover:brightness-110"
-          }`}
-        >
-          <span>{checkinData.isCompletedToday ? "Review / Update Check-In" : "Complete 60s Check-In →"}</span>
-        </button>
-      </div>
+      )}
 
       {/* Top Header & Executive Command Center */}
       <div className="glass-card hairline-accent p-5 sm:p-6 space-y-4">

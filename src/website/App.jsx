@@ -2,12 +2,15 @@
 
 /* ============================================================================
    NURALIX — INTELLIGENCE IN MOTION
+   Dynamic Website connected to Super Admin Control Plane
    ========================================================================== */
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import './styles.css';
 import { useSmoothScroll, useAnchors, useReveals } from './scroll/useScroll';
 import { Preloader, Cursor, Nav, Progress, Atmosphere } from './components/Chrome';
+import { useWebsiteConfig } from './hooks/useWebsiteConfig';
 import {
+  AnnouncementBanner,
   Hero, SceneAwakening, SceneConnection, SceneIntelligence, SceneNuralix,
   About, SceneExpansion, Solutions, Stats, SceneHuman, Vision, SceneFuture,
   Contact, Footer
@@ -31,6 +34,7 @@ export default function App () {
   const [env] = useState(detect);
   const [ready, setReady] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { config } = useWebsiteConfig();
 
   const lenis = useSmoothScroll({ webgl: env.webgl });
   useAnchors(lenis, useCallback(() => setMenuOpen(false), []));
@@ -51,8 +55,11 @@ export default function App () {
     if (menuOpen) lenis.current?.stop(); else lenis.current?.start();
   }, [menuOpen, lenis]);
 
+  const sec = config.sections || {};
+
   return (
     <>
+      <AnnouncementBanner data={config.announcement} />
       <Atmosphere />
       {env.webgl && (
         <Suspense fallback={null}>
@@ -70,20 +77,20 @@ export default function App () {
       <Nav menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
       <main>
-        <Hero ready={ready} />
-        <SceneAwakening />
-        <SceneConnection />
-        <SceneIntelligence />
-        <SceneNuralix />
-        <About />
-        <SceneExpansion />
-        <Solutions />
-        <Stats />
-        <SceneHuman />
-        <Vision />
-        <SceneFuture />
-        <Contact />
-        <Footer />
+        {sec.hero?.enabled !== false && <Hero ready={ready} data={config.hero} />}
+        {sec.sceneAwakening?.enabled !== false && <SceneAwakening data={config.scenes?.s01} />}
+        {sec.sceneConnection?.enabled !== false && <SceneConnection data={config.scenes?.s02} />}
+        {sec.sceneIntelligence?.enabled !== false && <SceneIntelligence data={config.scenes?.s03} />}
+        {sec.sceneNuralix?.enabled !== false && <SceneNuralix data={config.scenes?.s04} />}
+        {sec.about?.enabled !== false && <About data={config.about} />}
+        {sec.sceneExpansion?.enabled !== false && <SceneExpansion data={config.scenes?.s05} />}
+        {sec.solutions?.enabled !== false && <Solutions data={config.solutions} />}
+        {sec.stats?.enabled !== false && <Stats data={config.stats} />}
+        {sec.sceneHuman?.enabled !== false && <SceneHuman data={config.scenes?.s06} />}
+        {sec.vision?.enabled !== false && <Vision />}
+        {sec.sceneFuture?.enabled !== false && <SceneFuture data={config.scenes?.s07} />}
+        {sec.contact?.enabled !== false && <Contact data={config.contact} />}
+        {sec.footer?.enabled !== false && <Footer data={config.footer} />}
       </main>
     </>
   );
