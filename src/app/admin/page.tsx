@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Globe,
   Compass,
@@ -26,11 +27,15 @@ import {
   MessageSquare,
   Search,
   DollarSign,
-  ChevronRight
+  ChevronRight,
+  Menu,
+  ArrowLeft,
+  LogOut
 } from "lucide-react";
 import { NavItem } from "@/config/schemas/nav";
 import { WidgetDef } from "@/config/schemas/widget";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<
@@ -39,6 +44,7 @@ export default function AdminPage() {
   const [subWebTab, setSubWebTab] = useState<
     "sections" | "hero" | "scenes" | "about_solutions" | "contact"
   >("sections");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -486,97 +492,378 @@ export default function AdminPage() {
     );
   }
 
+  const breadcrumb = (() => {
+    switch (activeTab) {
+      case "website":
+        return {
+          group: "Marketing & CMS",
+          current:
+            subWebTab === "sections"
+              ? "Section Visibility & Toggles"
+              : subWebTab === "hero"
+              ? "Hero Copy & Primary Buttons"
+              : subWebTab === "scenes"
+              ? "Story Scenes (01 - 07)"
+              : subWebTab === "about_solutions"
+              ? "About & Solutions Cards"
+              : "Contact Info & Channels",
+        };
+      case "navigation":
+        return { group: "Executive Dashboard", current: "Navigation Buttons" };
+      case "features":
+        return { group: "Executive Dashboard", current: "Platform Feature Toggles" };
+      case "widgets":
+        return { group: "Executive Dashboard", current: "Dashboard Widgets" };
+      case "tools":
+        return { group: "Specialist Engines", current: "Tools Catalog & Calculators" };
+      case "audit":
+        return { group: "Governance & Security", current: "Audit Ledger & Version History" };
+      default:
+        return { group: "Control Plane", current: "Overview" };
+    }
+  })();
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem("nuralix_admin_session");
+    window.location.href = "/login";
+  };
+
   return (
-    <div className="space-y-6 pb-20">
+    <div className="min-h-screen bg-bg text-text flex flex-col lg:flex-row">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-surface border border-jade shadow-2xl text-xs font-semibold text-jade flex items-center gap-2 animate-bounce">
-          <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />
+        <div className="fixed bottom-6 right-6 z-[1000] px-4 py-3 rounded-xl bg-slate-900/95 dark:bg-black/95 text-white border border-line shadow-2xl flex items-center gap-2.5 text-xs font-semibold animate-fade-in backdrop-blur-md">
+          {toastMessage.toLowerCase().includes("error") || toastMessage.toLowerCase().includes("failed") ? (
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          )}
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Control Plane Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl border border-line bg-surface shadow-theme">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-lg sm:text-xl font-extrabold text-text tracking-tight font-sans">
-              Superadmin Control Plane (§15)
-            </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-brass/15 text-brass font-bold font-mono border border-brass/30">
-              v{version} Published
+      {/* Mobile Drawer Backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* PERSISTENT MODERN LEFT SIDEBAR                                            */}
+      {/* ========================================================================= */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-surface border-r border-line flex flex-col justify-between transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 shrink-0 ${
+          isMobileMenuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+        }`}
+      >
+        {/* Sidebar Brand & Status Header */}
+        <div className="p-4 border-b border-line flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center p-1 shadow-xs">
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  width={22}
+                  height={22}
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <h1 className="text-xs font-extrabold text-text uppercase tracking-wider">
+                  Nuralix Superadmin
+                </h1>
+                <span className="text-[10px] text-text-muted font-mono block -mt-0.5">
+                  Control Plane §15
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg hover:bg-surface-2 text-text-muted hover:text-text cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-500 font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>SQLite Live • v{version}</span>
+            </div>
+            <span className="text-[9px] px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider bg-amber-500/15 text-amber-500 border border-amber-500/30">
+              DEV_ACCESS
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl leading-relaxed">
-            Directly configure website copy, CTA buttons, section visibility, dashboard navigation links, feature flags, widgets, and specialist tools. All changes persist in SQLite.
-          </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface-2 border border-line text-text hover:text-cyan-500 hover:border-cyan-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <Globe className="w-3.5 h-3.5" />
-            <span>View Website</span>
-            <ExternalLink className="w-3 h-3 opacity-60" />
-          </a>
+        {/* Sidebar Categorized Navigation */}
+        <div className="p-3 flex-1 overflow-y-auto space-y-5 text-xs">
+          {/* GROUP 1: MARKETING & CMS */}
+          <div className="space-y-1">
+            <div className="px-2.5 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-wider font-mono">
+              Marketing & CMS
+            </div>
+            {[
+              { id: "website_sections", tab: "website", sub: "sections", label: "Section Visibility", icon: Eye, badge: "14" },
+              { id: "website_hero", tab: "website", sub: "hero", label: "Hero Copy & CTAs", icon: Globe },
+              { id: "website_scenes", tab: "website", sub: "scenes", label: "Story Scenes (01-07)", icon: Sparkles, badge: "7" },
+              { id: "website_about", tab: "website", sub: "about_solutions", label: "About & Solutions", icon: Layers },
+              { id: "website_contact", tab: "website", sub: "contact", label: "Contact & Channels", icon: MessageSquare },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.tab && subWebTab === item.sub;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(item.tab as any);
+                    setSubWebTab(item.sub as any);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
+                    isActive
+                      ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
+                      : "text-text-muted hover:text-text hover:bg-surface-2"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-surface-2 border border-line font-mono text-text-muted">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
-          <a
-            href="/dashboard"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface-2 border border-line text-text hover:text-cyan-500 hover:border-cyan-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span>View Dashboard</span>
-            <ExternalLink className="w-3 h-3 opacity-60" />
-          </a>
+          {/* GROUP 2: EXECUTIVE DASHBOARD */}
+          <div className="space-y-1">
+            <div className="px-2.5 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-wider font-mono">
+              Executive Dashboard
+            </div>
+            {[
+              { id: "navigation", tab: "navigation", label: "Navigation Buttons", icon: Compass, badge: `${navItems.length}` },
+              { id: "widgets", tab: "widgets", label: "Dashboard Widgets", icon: Layers, badge: `${widgets.length}` },
+              { id: "features", tab: "features", label: "Feature Toggles", icon: Sliders, badge: `${featuresConfig ? Object.values(featuresConfig).filter(Boolean).length : 0}` },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.tab;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(item.tab as any);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
+                    isActive
+                      ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
+                      : "text-text-muted hover:text-text hover:bg-surface-2"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-surface-2 border border-line font-mono text-text-muted">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
-          <button
-            type="button"
-            onClick={handleFactoryReset}
-            disabled={saving}
-            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 border border-rose-500/30 flex items-center gap-1.5 transition-all cursor-pointer"
-            title="Reset all settings to default"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Factory Reset</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Tab Navigation Bar */}
-      <div className="flex items-center gap-1.5 p-1 bg-surface rounded-xl border border-line overflow-x-auto text-xs font-semibold">
-        {[
-          { id: "website", label: "Website Content & CTAs", icon: Globe },
-          { id: "navigation", label: "Dashboard Navigation", icon: Compass },
-          { id: "features", label: "Platform Feature Toggles", icon: Sliders },
-          { id: "widgets", label: "Dashboard Widgets", icon: Layers },
-          { id: "tools", label: "Specialist Tools Catalog", icon: Wrench },
-          { id: "audit", label: `Audit Log (${auditLogs.length})`, icon: History },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
+          {/* GROUP 3: SPECIALIST ENGINES */}
+          <div className="space-y-1">
+            <div className="px-2.5 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-wider font-mono">
+              Specialist Engines
+            </div>
             <button
-              key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
-                isActive
-                  ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 shadow-xs"
+              onClick={() => {
+                setActiveTab("tools");
+                setIsMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
+                activeTab === "tools"
+                  ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
                   : "text-text-muted hover:text-text hover:bg-surface-2"
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{tab.label}</span>
+              <div className="flex items-center gap-2.5">
+                <Wrench className="w-4 h-4" />
+                <span>Tools & Calculators</span>
+              </div>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-mono font-bold">
+                {tools.length}
+              </span>
             </button>
-          );
-        })}
-      </div>
+          </div>
+
+          {/* GROUP 4: GOVERNANCE & SECURITY */}
+          <div className="space-y-1">
+            <div className="px-2.5 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-wider font-mono">
+              Governance & Security
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("audit");
+                setIsMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
+                activeTab === "audit"
+                  ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
+                  : "text-text-muted hover:text-text hover:bg-surface-2"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <History className="w-4 h-4" />
+                <span>Audit Ledger</span>
+              </div>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-surface-2 border border-line font-mono text-text-muted">
+                {auditLogs.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleFactoryReset}
+              disabled={saving}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors font-semibold cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Factory Reset</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Sidebar Footer */}
+        <div className="p-3.5 border-t border-line space-y-2.5 bg-surface-2/40">
+          <div className="grid grid-cols-2 gap-2">
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-xl text-[11px] font-semibold bg-surface border border-line hover:border-cyan-500/40 text-text hover:text-cyan-500 flex items-center justify-center gap-1.5 transition-all shadow-xs"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Website ↗</span>
+            </a>
+            <a
+              href="/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-xl text-[11px] font-semibold bg-surface border border-line hover:border-cyan-500/40 text-text hover:text-cyan-500 flex items-center justify-center gap-1.5 transition-all shadow-xs"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>App ↗</span>
+            </a>
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <div className="w-28">
+              <ThemeSwitch compact />
+            </div>
+            <button
+              type="button"
+              onClick={handleAdminLogout}
+              className="text-xs text-text-muted hover:text-rose-500 p-1.5 rounded-lg border border-line hover:bg-rose-500/10 transition-colors flex items-center gap-1.5 font-semibold cursor-pointer"
+              title="Sign Out"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* ========================================================================= */}
+      {/* MAIN WORKSPACE CANVAS                                                     */}
+      {/* ========================================================================= */}
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
+        {/* Sticky Workspace Top Bar */}
+        <header className="sticky top-0 z-30 h-16 bg-surface/90 backdrop-blur-md border-b border-line px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-xl bg-surface-2 border border-line text-text-muted hover:text-text cursor-pointer"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+
+            {/* Breadcrumb Navigation */}
+            <div className="flex items-center gap-2 text-xs font-semibold min-w-0">
+              <span className="text-text-muted hidden sm:inline">{breadcrumb.group}</span>
+              <span className="text-text-muted hidden sm:inline">/</span>
+              <span className="text-text font-bold truncate">{breadcrumb.current}</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-brass/15 text-brass font-bold font-mono border border-brass/30 shrink-0 ml-1">
+                v{version} Published
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="hidden md:flex items-center gap-1.5 text-xs text-text-muted hover:text-text px-3 py-1.5 rounded-xl border border-line hover:bg-surface-2 transition-colors font-semibold"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Exit to App</span>
+            </Link>
+
+            {/* Contextual Quick Actions */}
+            {activeTab === "navigation" && (
+              <button
+                type="button"
+                onClick={() => handleOpenNavModal()}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Nav Button</span>
+              </button>
+            )}
+
+            {activeTab === "widgets" && (
+              <button
+                type="button"
+                onClick={() => handleOpenWidgetModal()}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Widget</span>
+              </button>
+            )}
+
+            {activeTab === "tools" && (
+              <button
+                type="button"
+                onClick={() => handleOpenToolModal()}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Tool</span>
+              </button>
+            )}
+          </div>
+        </header>
+
+        {/* Main Workspace Body */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full">
 
       {/* ============================================================= */}
       {/* TAB 1: WEBSITE CONTENT & CTAs                                 */}
@@ -1840,6 +2127,8 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+        </main>
+      </div>
 
       {/* ============================================================= */}
       {/* MODAL: ADD / EDIT NAVIGATION BUTTON                           */}

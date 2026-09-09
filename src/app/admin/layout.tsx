@@ -48,56 +48,8 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-bg text-text">
-      {/* Top Admin Bar */}
-      <header className="sticky top-0 z-20 bg-surface border-b border-line px-4 sm:px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text btn-tactile"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Dashboard</span>
-          </Link>
-          <div className="h-4 w-px bg-line" />
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-surface-2 flex items-center justify-center p-0.5 border border-line">
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={18}
-                height={18}
-                className="object-contain"
-              />
-            </div>
-            <span className="text-xs font-bold text-text uppercase tracking-wider font-sans">
-              Superadmin Control Plane (§15)
-            </span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber/15 text-amber font-mono font-bold">
-              DEVELOPER_ACCESS
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="w-36">
-            <ThemeSwitch compact />
-          </div>
-          <button
-            type="button"
-            onClick={handleAdminLogout}
-            title="Exit Superadmin Session"
-            className="text-xs text-text-muted hover:text-rust p-1.5 rounded-lg border border-line hover:bg-surface-2 transition-colors flex items-center gap-1 font-semibold"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </button>
-        </div>
-      </header>
-
-      <main className="relative z-30 p-4 sm:p-6 lg:p-8 max-w-[1560px] mx-auto">
-        {children}
-      </main>
+    <div className="min-h-screen bg-bg text-text antialiased">
+      {children}
     </div>
   );
 }
