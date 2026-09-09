@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { NavItem } from "@/config/schemas/nav";
 import { WidgetDef } from "@/config/schemas/widget";
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<
@@ -116,6 +117,26 @@ export default function AdminPage() {
     hasInteractiveCalculator: false,
     enabled: true,
   });
+
+  // Close any open modal on Escape key
+  const isAnyModalOpen = Boolean(isNavModalOpen || isWidgetModalOpen || isToolModalOpen);
+  useEscapeKey(() => {
+    setIsNavModalOpen(false);
+    setIsWidgetModalOpen(false);
+    setIsToolModalOpen(false);
+  }, isAnyModalOpen);
+
+  // Prevent background scrolling while modal is open
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isAnyModalOpen]);
 
   const notify = (msg: string) => {
     setToastMessage(msg);
@@ -1823,7 +1844,7 @@ export default function AdminPage() {
       {/* MODAL: ADD / EDIT NAVIGATION BUTTON                           */}
       {/* ============================================================= */}
       {isNavModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-text">
@@ -1950,7 +1971,7 @@ export default function AdminPage() {
       {/* MODAL: ADD / EDIT DASHBOARD WIDGET                            */}
       {/* ============================================================= */}
       {isWidgetModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-text">
@@ -2047,7 +2068,7 @@ export default function AdminPage() {
       {/* MODAL: ADD / EDIT SPECIALIST TOOL                             */}
       {/* ============================================================= */}
       {isToolModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-text">

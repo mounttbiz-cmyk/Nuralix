@@ -82,6 +82,16 @@ class PlatformConfigStore {
     return this.draftTheme;
   }
 
+  setNav(items: NavItem[]) {
+    this.nav = [...items];
+    return this.nav;
+  }
+
+  setWidgets(widgets: WidgetDef[]) {
+    this.widgets = [...widgets];
+    return this.widgets;
+  }
+
   updateWidget(widget: unknown) {
     const validated = WidgetDefSchema.parse(widget);
     const idx = this.widgets.findIndex(w => w.id === validated.id);

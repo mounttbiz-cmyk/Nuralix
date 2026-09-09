@@ -73,7 +73,7 @@ export function AppShell({
 
   // Fetch dynamic navigation and feature toggles from backend
   React.useEffect(() => {
-    fetch("/api/public/config")
+    fetch("/api/public/config", { cache: "no-store" })
       .then(r => r.json())
       .then(d => {
         if (d.success) {

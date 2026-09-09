@@ -71,11 +71,16 @@ function DashboardContent() {
 
   useEffect(() => {
     refreshCheckinStatus();
-    fetch("/api/public/config")
+    fetch("/api/public/config", { cache: "no-store" })
       .then(r => r.json())
       .then(d => {
-        if (d.success && d.features) {
-          setFeatureFlags(d.features);
+        if (d.success) {
+          if (d.features) {
+            setFeatureFlags(d.features);
+          }
+          if (Array.isArray(d.widgets) && d.widgets.length > 0) {
+            setActiveWidgets(d.widgets.filter((w: any) => w.enabled !== false));
+          }
         }
       })
       .catch(() => {});

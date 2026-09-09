@@ -50,7 +50,7 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-bg text-text">
       {/* Top Admin Bar */}
-      <header className="sticky top-0 z-40 bg-surface border-b border-line px-4 sm:px-6 h-14 flex items-center justify-between">
+      <header className="sticky top-0 z-20 bg-surface border-b border-line px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
@@ -95,7 +95,7 @@ export default function AdminLayout({
         </div>
       </header>
 
-      <main className="p-4 sm:p-6 lg:p-8 max-w-[1560px] mx-auto">
+      <main className="relative z-30 p-4 sm:p-6 lg:p-8 max-w-[1560px] mx-auto">
         {children}
       </main>
     </div>

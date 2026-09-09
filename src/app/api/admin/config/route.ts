@@ -94,12 +94,12 @@ export async function POST(request: Request) {
       setPlatformConfig("dashboard_nav", payload);
       // Synchronize in-memory store
       if (Array.isArray(payload)) {
-        payload.forEach((item) => platformConfigStore.updateNavItem(item));
+        platformConfigStore.setNav(payload);
       }
     } else if (section === "widgets" && payload) {
       setPlatformConfig("dashboard_widgets", payload);
       if (Array.isArray(payload)) {
-        payload.forEach((item) => platformConfigStore.updateWidget(item));
+        platformConfigStore.setWidgets(payload);
       }
     } else if (section === "tools" && payload) {
       setPlatformConfig("tools_catalog", payload);

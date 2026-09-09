@@ -286,7 +286,7 @@ function ToolsContent() {
 
   // Fetch dynamic tools catalog
   useEffect(() => {
-    fetch("/api/public/config")
+    fetch("/api/public/config", { cache: "no-store" })
       .then(r => r.json())
       .then(d => {
         if (d.success && Array.isArray(d.tools) && d.tools.length > 0) {
