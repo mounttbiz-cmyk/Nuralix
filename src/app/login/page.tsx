@@ -31,7 +31,7 @@ export default function LoginPage() {
   React.useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("signin") === "true") {
+      if (params.get("signin") === "true" || params.get("login") === "true") {
         setAuthMode("signin");
       } else if (params.get("signup") === "true") {
         setAuthMode("register");
@@ -122,12 +122,10 @@ export default function LoginPage() {
           setError(
             `Domain authorization required in Firebase. In Firebase Console → Authentication → Settings → Authorized domains, click "Add domain" and enter "${recommendedDomain}" (this authorizes all your Vercel deployments permanently). Alternatively, sign in with Email & Password below.`
           );
-        } else if (code === "auth/invalid-credential" || code === "auth/wrong-password") {
-          setError("Incorrect password or invalid email credential.");
-        } else if (code === "auth/user-not-found") {
-          setError("No account found with this email. Click 'Create Account' above to register.");
+        } else if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
+          setError("No account found with this email, or incorrect password. If you are a new user, please click 'Create Account' above to register.");
         } else if (code === "auth/email-already-in-use") {
-          setError("This account already exists! An account with this email is already registered. Please switch to Sign In.");
+          setError("This account already exists! An account with this email is already registered. Please switch to Log In.");
         } else if (code === "auth/popup-closed-by-user") {
           setError("Google Sign-In popup was closed before completing.");
         } else if (code === "auth/popup-blocked") {
@@ -237,11 +235,11 @@ export default function LoginPage() {
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brass text-white font-bold text-xs shadow hover:brightness-110 btn-tactile transition-all"
                       >
-                        <span>Go to Sign In →</span>
+                        <span>Go to Log In →</span>
                       </button>
                     </div>
                   )}
-                  {error.includes("No account found") && (
+                  {(error.includes("No account found") || error.includes("invalid email")) && (
                     <div className="pl-6 pt-1">
                       <button
                         type="button"
@@ -299,13 +297,13 @@ export default function LoginPage() {
                       : "text-text-muted hover:text-text"
                   }`}
                 >
-                  Sign In
+                  Log In
                 </button>
               </div>
 
               <div className="space-y-1.5 text-center sm:text-left">
                 <h1 className="text-xl font-bold text-text tracking-tight font-sans">
-                  {authMode === "register" ? "Register Your Business" : "Sign in to your Business OS"}
+                  {authMode === "register" ? "Register Your Business" : "Log in to your Business OS"}
                 </h1>
                 <p className="text-xs text-text-muted leading-relaxed">
                   {authMode === "register"
@@ -341,7 +339,7 @@ export default function LoginPage() {
                     d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                   />
                 </svg>
-                <span>{authMode === "register" ? "Sign up with Google" : "Continue with Google"}</span>
+                <span>{authMode === "register" ? "Sign up with Google" : "Log in with Google"}</span>
               </button>
 
               <div className="flex items-center gap-3">
@@ -408,10 +406,10 @@ export default function LoginPage() {
                   {loading
                     ? authMode === "register"
                       ? "Creating Account…"
-                      : "Signing in…"
+                      : "Logging in…"
                     : authMode === "register"
                     ? "Create Account & Continue →"
-                    : "Sign In to Business OS →"}
+                    : "Log In to Business OS →"}
                 </button>
               </form>
             </>
@@ -466,7 +464,7 @@ export default function LoginPage() {
                   onClick={() => setIsSuperadminMode(false)}
                   className="w-full py-2 text-xs font-semibold text-text-muted hover:text-text text-center"
                 >
-                  Return to Business Login
+                  Return to Business Log In
                 </button>
               </div>
             </form>
