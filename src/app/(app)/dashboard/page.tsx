@@ -69,6 +69,8 @@ function DashboardContent() {
     enableDailyCheckin: true,
   });
 
+  const hasLoadedBackendWidgetsRef = React.useRef(false);
+
   useEffect(() => {
     refreshCheckinStatus();
     fetch("/api/public/config", { cache: "no-store" })
@@ -79,12 +81,27 @@ function DashboardContent() {
             setFeatureFlags(d.features);
           }
           if (Array.isArray(d.widgets) && d.widgets.length > 0) {
-            setActiveWidgets(d.widgets.filter((w: any) => w.enabled !== false));
+            hasLoadedBackendWidgetsRef.current = true;
+            const disabledIds = new Set(
+              d.widgets.filter((w: any) => w.enabled === false).map((w: any) => w.id)
+            );
+            const savedLayout = localStorage.getItem(`nuralix_layout_${selectedIndustry}`);
+            if (savedLayout) {
+              try {
+                const parsed = JSON.parse(savedLayout);
+                // Keep customized order but remove widgets disabled by superadmin
+                setActiveWidgets(parsed.filter((w: any) => !disabledIds.has(w.id)));
+              } catch {
+                setActiveWidgets(d.widgets.filter((w: any) => w.enabled !== false));
+              }
+            } else {
+              setActiveWidgets(d.widgets.filter((w: any) => w.enabled !== false));
+            }
           }
         }
       })
       .catch(() => {});
-  }, []);
+  }, [selectedIndustry]);
 
   // Read saved business profile if available
   useEffect(() => {
@@ -119,8 +136,9 @@ function DashboardContent() {
   const [activeWidgets, setActiveWidgets] = useState<WidgetDef[]>(baseConfig.widgets);
   const [toast, setToast] = useState<string | null>(null);
 
-  // Load custom layout overrides from storage
+  // Load custom layout overrides from storage ONLY if customized and no backend widgets loaded yet
   useEffect(() => {
+    if (hasLoadedBackendWidgetsRef.current) return;
     try {
       const savedLayout = localStorage.getItem(`nuralix_layout_${selectedIndustry}`);
       if (savedLayout) {

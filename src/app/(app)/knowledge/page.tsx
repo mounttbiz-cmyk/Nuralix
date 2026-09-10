@@ -18,6 +18,7 @@ import {
   FolderOpen
 } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { PortalModal } from "@/components/ui/PortalModal";
 
 interface KnowledgeDoc {
   id: string;
@@ -311,9 +312,9 @@ export default function KnowledgeHubPage() {
       )}
 
       {/* View Document Drawer / Modal */}
-      {activeDoc && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="max-w-2xl w-full bg-surface border border-line rounded-2xl shadow-2xl p-6 space-y-5 max-h-[85vh] flex flex-col justify-between">
+      <PortalModal isOpen={Boolean(activeDoc)} onClose={() => setActiveDoc(null)}>
+        {activeDoc && (
+          <div className="max-w-2xl w-full bg-surface border border-line rounded-2xl shadow-2xl p-6 space-y-5 max-h-[85vh] flex flex-col justify-between animate-scale-in">
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-3 pb-3 border-b border-line">
                 <div>
@@ -360,100 +361,87 @@ export default function KnowledgeHubPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </PortalModal>
 
       {/* Add Document Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <form
-            onSubmit={handleAddDoc}
-            className="max-w-lg w-full bg-surface border border-line rounded-2xl shadow-2xl p-6 space-y-4"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-line">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-brass" />
-                <h2 className="text-sm font-bold text-text">Add Company Knowledge Item</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(false)}
-                className="p-1 rounded-lg border border-line bg-surface-2 text-text-muted hover:text-text"
-              >
-                <X className="w-4 h-4" />
-              </button>
+      <PortalModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)}>
+        <form
+          onSubmit={handleAddDoc}
+          className="max-w-lg w-full bg-surface border border-line rounded-2xl shadow-2xl p-6 space-y-4 animate-scale-in"
+        >
+          <div className="flex items-center justify-between pb-3 border-b border-line">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-brass" />
+              <h2 className="text-sm font-bold text-text">Add Company Knowledge Item</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="p-1 rounded-lg border border-line bg-surface-2 text-text-muted hover:text-text"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="space-y-3 text-xs">
+            <div>
+              <label className="font-semibold text-text block mb-1">Document Title *</label>
+              <input
+                type="text"
+                required
+                value={newTitle}
+                onChange={e => setNewTitle(e.target.value)}
+                placeholder="e.g. Q4 Growth Mandate & Hiring Thresholds"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
+              />
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="font-semibold text-text block mb-1">Document Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={newTitle}
-                  onChange={e => setNewTitle(e.target.value)}
-                  placeholder="e.g. Q4 Growth Mandate & Hiring Thresholds"
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold text-text block mb-1">Knowledge Category</label>
-                <select
-                  value={newCategory}
-                  onChange={e => setNewCategory(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
-                >
-                  <option value="operations">Operations & Delivery</option>
-                  <option value="finance">Finance & Accounting</option>
-                  <option value="sales">Sales & Growth</option>
-                  <option value="technology">Technology & Infrastructure</option>
-                  <option value="governance">Governance & Legal</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="font-semibold text-text block mb-1">Summary / Abstract *</label>
-                <input
-                  type="text"
-                  required
-                  value={newDescription}
-                  onChange={e => setNewDescription(e.target.value)}
-                  placeholder="Brief synopsis of what this protocol controls"
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold text-text block mb-1">Document Content / Markdown</label>
-                <textarea
-                  rows={5}
-                  value={newContent}
-                  onChange={e => setNewContent(e.target.value)}
-                  placeholder="Paste or write document text, policy guidelines, and SOP steps…"
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass font-mono text-[11px]"
-                />
-              </div>
+            <div>
+              <label className="font-semibold text-text block mb-1">Operational Category</label>
+              <select
+                value={newCategory}
+                onChange={e => setNewCategory(e.target.value as any)}
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
+              >
+                <option value="operations">Operations & Workflows</option>
+                <option value="finance">Finance & Unit Economics</option>
+                <option value="sales">Sales & GTM Frameworks</option>
+                <option value="governance">Corporate Governance & Compliance</option>
+                <option value="technology">Technology & Engineering</option>
+              </select>
             </div>
 
-            <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(false)}
-                className="px-4 py-2 rounded-lg border border-line text-xs font-semibold text-text-muted hover:text-text"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-5 py-2 rounded-lg bg-brass text-white text-xs font-bold shadow-md hover:brightness-110 btn-tactile cursor-pointer"
-              >
-                Index & Save Item
-              </button>
+            <div>
+              <label className="font-semibold text-text block mb-1">Full Document Text / Mandate *</label>
+              <textarea
+                required
+                rows={6}
+                value={newContent}
+                onChange={e => setNewContent(e.target.value)}
+                placeholder="Paste guidelines, decision frameworks, pricing rules, or operating procedures..."
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass font-mono text-[11px]"
+              />
             </div>
-          </form>
-        </div>
-      )}
+          </div>
+
+          <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="px-4 py-2 rounded-lg border border-line text-xs font-semibold text-text-muted hover:text-text"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-lg bg-brass text-white text-xs font-bold shadow-md hover:brightness-110 btn-tactile cursor-pointer"
+            >
+              Index & Save Item
+            </button>
+          </div>
+        </form>
+      </PortalModal>
     </div>
   );
 }

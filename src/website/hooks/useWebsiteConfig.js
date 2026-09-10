@@ -108,6 +108,31 @@ export const DEFAULT_WEBSITE_STATE = {
   },
 };
 
+function deepMerge(fallback, override) {
+  if (!override || typeof override !== 'object' || Array.isArray(override)) {
+    return override !== undefined ? override : fallback;
+  }
+  if (!fallback || typeof fallback !== 'object' || Array.isArray(fallback)) {
+    return override;
+  }
+  const result = { ...fallback };
+  for (const key of Object.keys(override)) {
+    if (
+      override[key] !== null &&
+      typeof override[key] === 'object' &&
+      !Array.isArray(override[key]) &&
+      key in result &&
+      typeof result[key] === 'object' &&
+      !Array.isArray(result[key])
+    ) {
+      result[key] = deepMerge(result[key], override[key]);
+    } else if (override[key] !== undefined) {
+      result[key] = override[key];
+    }
+  }
+  return result;
+}
+
 export function useWebsiteConfig() {
   const [config, setConfig] = useState(DEFAULT_WEBSITE_STATE);
   const [loading, setLoading] = useState(true);
@@ -119,7 +144,7 @@ export function useWebsiteConfig() {
         const res = await fetch('/api/public/config', { cache: 'no-store' });
         const json = await res.json();
         if (mounted && json.success && json.website) {
-          setConfig(json.website);
+          setConfig(deepMerge(DEFAULT_WEBSITE_STATE, json.website));
         }
       } catch (err) {
         console.warn('Could not fetch remote website config, using defaults', err);

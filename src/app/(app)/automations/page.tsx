@@ -18,6 +18,7 @@ import {
   X
 } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { PortalModal } from "@/components/ui/PortalModal";
 
 interface AutomationItem {
   id: string;
@@ -405,96 +406,92 @@ export default function AutomationsPage() {
       </div>
 
       {/* New Automation Modal */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <form
-            onSubmit={handleCreateAutomation}
-            className="max-w-lg w-full bg-surface border border-line rounded-2xl shadow-2xl p-6 space-y-4"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-line">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-brass" />
-                <h2 className="text-sm font-bold text-text">Create Automation Protocol</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCreateModalOpen(false)}
-                className="p-1 rounded-lg border border-line bg-surface-2 text-text-muted hover:text-text"
-              >
-                <X className="w-4 h-4" />
-              </button>
+      <PortalModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
+        <form
+          onSubmit={handleCreateAutomation}
+          className="max-w-lg w-full bg-surface border border-line rounded-2xl shadow-2xl p-6 space-y-4 animate-scale-in"
+        >
+          <div className="flex items-center justify-between pb-3 border-b border-line">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-brass" />
+              <h2 className="text-sm font-bold text-text">Create Automation Protocol</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(false)}
+              className="p-1 rounded-lg border border-line bg-surface-2 text-text-muted hover:text-text"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="space-y-3 text-xs">
+            <div>
+              <label className="font-semibold text-text block mb-1">Protocol Name *</label>
+              <input
+                type="text"
+                required
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                placeholder="e.g. Stripe Webhook Reconciliation"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
+              />
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="font-semibold text-text block mb-1">Protocol Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={newName}
-                  onChange={e => setNewName(e.target.value)}
-                  placeholder="e.g. Discretionary SaaS Renewal Blocker"
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold text-text block mb-1">Protocol Category</label>
-                <select
-                  value={newCategory}
-                  onChange={e => setNewCategory(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
-                >
-                  <option value="finance">Financial Solvency & Burn</option>
-                  <option value="risk">Client & Revenue Concentration</option>
-                  <option value="operations">Operational Workload & Bottlenecks</option>
-                  <option value="communications">Executive Briefings & Alerts</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="font-semibold text-text block mb-1">Trigger Condition *</label>
-                <input
-                  type="text"
-                  required
-                  value={newTrigger}
-                  onChange={e => setNewTrigger(e.target.value)}
-                  placeholder="e.g. When software renewal invoice exceeds ₹25,000/mo"
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold text-text block mb-1">Autonomous Action *</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={newAction}
-                  onChange={e => setNewAction(e.target.value)}
-                  placeholder="e.g. Require approval from CFO and verify team seat utilization first."
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass text-xs"
-                />
-              </div>
+            <div>
+              <label className="font-semibold text-text block mb-1">Operational Category</label>
+              <select
+                value={newCategory}
+                onChange={e => setNewCategory(e.target.value as any)}
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
+              >
+                <option value="finance">Finance & Treasury</option>
+                <option value="risk">Risk & Defensibility</option>
+                <option value="operations">Operations & Talent</option>
+                <option value="communications">Communications & Stakeholders</option>
+              </select>
             </div>
 
-            <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setIsCreateModalOpen(false)}
-                className="px-4 py-2 rounded-lg border border-line text-xs font-semibold text-text-muted hover:text-text"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-5 py-2 rounded-lg bg-brass text-white text-xs font-bold shadow-md hover:brightness-110 btn-tactile cursor-pointer"
-              >
-                Deploy Protocol
-              </button>
+            <div>
+              <label className="font-semibold text-text block mb-1">Trigger Event</label>
+              <input
+                type="text"
+                value={newTrigger}
+                onChange={e => setNewTrigger(e.target.value)}
+                placeholder="e.g. Daily at 08:00 AM IST or When runway drops below 6 months"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
+              />
             </div>
-          </form>
-        </div>
-      )}
+
+            <div>
+              <label className="font-semibold text-text block mb-1">Automated Action Execution</label>
+              <input
+                type="text"
+                value={newAction}
+                onChange={e => setNewAction(e.target.value)}
+                placeholder="e.g. Notify CFO AI & alert founder on high-priority gap"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:ring-1 focus:ring-brass"
+              />
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(false)}
+              className="px-4 py-2 rounded-lg border border-line text-xs font-semibold text-text-muted hover:text-text"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-lg bg-brass text-white text-xs font-bold shadow-md hover:brightness-110 btn-tactile cursor-pointer"
+            >
+              Deploy Protocol
+            </button>
+          </div>
+        </form>
+      </PortalModal>
     </div>
   );
 }

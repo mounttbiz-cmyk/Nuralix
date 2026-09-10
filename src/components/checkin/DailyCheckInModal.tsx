@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { CheckInQuestion } from "@/lib/checkin/generateQuestions";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { createPortal } from "react-dom";
 
 interface DailyCheckInModalProps {
   isOpen: boolean;
@@ -40,6 +41,22 @@ export function DailyCheckInModal({
   const [dynamicQuestions, setDynamicQuestions] = useState<CheckInQuestion[]>(propQuestions || []);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [skipRevenueBanner, setSkipRevenueBanner] = useState(Boolean(questionRules?.skipRevenue));
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
 
   // If questions were not passed in props, fetch them from the API on open
   useEffect(() => {
@@ -157,9 +174,18 @@ export function DailyCheckInModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="max-w-xl w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-5 animate-scale-in max-h-[90vh] overflow-y-auto">
+  if (!isOpen) return null;
+
+  const modalContent = (
+    <div
+      className="fixed inset-0 m-0 z-[9999] bg-slate-950/75 dark:bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+      style={{ top: 0, left: 0, right: 0, bottom: 0, margin: 0 }}
+      onClick={onClose}
+    >
+      <div
+        className="max-w-xl w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-5 animate-scale-in max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-line">
           <div className="flex items-center gap-2.5">
@@ -296,4 +322,8 @@ export function DailyCheckInModal({
       </div>
     </div>
   );
+
+  if (!mounted || typeof document === "undefined") return null;
+
+  return createPortal(modalContent, document.body);
 }

@@ -582,17 +582,48 @@ export const DEFAULT_TOOLS_CATALOG = [
 
 const memoryConfigCache = new Map<string, any>();
 
+export function deepMerge<T>(fallback: T, override: any): T {
+  if (!override || typeof override !== "object" || Array.isArray(override)) {
+    return (override !== undefined ? override : fallback) as T;
+  }
+  if (!fallback || typeof fallback !== "object" || Array.isArray(fallback)) {
+    return override as T;
+  }
+  const result: any = { ...fallback };
+  for (const key of Object.keys(override)) {
+    if (
+      override[key] !== null &&
+      typeof override[key] === "object" &&
+      !Array.isArray(override[key]) &&
+      key in result &&
+      typeof result[key] === "object" &&
+      !Array.isArray(result[key])
+    ) {
+      result[key] = deepMerge(result[key], override[key]);
+    } else if (override[key] !== undefined) {
+      result[key] = override[key];
+    }
+  }
+  return result as T;
+}
+
 export function getPlatformConfig<T>(key: string, fallback: T): T {
   // First check in-memory cache
   if (memoryConfigCache.has(key)) {
-    return memoryConfigCache.get(key) as T;
+    const cached = memoryConfigCache.get(key);
+    return typeof fallback === "object" && fallback !== null && !Array.isArray(fallback)
+      ? deepMerge(fallback, cached)
+      : (cached as T);
   }
   try {
     const row = db.prepare("SELECT config_value FROM platform_config WHERE config_key = ?").get(key) as { config_value: string } | undefined;
     if (row && row.config_value) {
-      const parsed = JSON.parse(row.config_value) as T;
-      memoryConfigCache.set(key, parsed);
-      return parsed;
+      const parsed = JSON.parse(row.config_value);
+      const merged = typeof fallback === "object" && fallback !== null && !Array.isArray(fallback)
+        ? deepMerge(fallback, parsed)
+        : (parsed as T);
+      memoryConfigCache.set(key, merged);
+      return merged;
     }
   } catch (err) {
     console.error(`Error reading config for key ${key}:`, err);
@@ -636,9 +667,20 @@ export function setPlatformConfig<T>(key: string, value: T): void {
   }
 }
 
-// Initialize seed platform configs if not present
-if (!db.prepare("SELECT config_key FROM platform_config WHERE config_key = ?").get("website_config")) {
+// Initialize seed platform configs if not present or heal if partial
+const existingWebsiteRow = db.prepare("SELECT config_value FROM platform_config WHERE config_key = ?").get("website_config") as { config_value: string } | undefined;
+if (!existingWebsiteRow) {
   setPlatformConfig("website_config", DEFAULT_WEBSITE_CONFIG);
+} else {
+  try {
+    const parsedWeb = JSON.parse(existingWebsiteRow.config_value);
+    if (!parsedWeb.hero || !parsedWeb.scenes || !parsedWeb.sections?.about) {
+      const healed = deepMerge(DEFAULT_WEBSITE_CONFIG, parsedWeb);
+      setPlatformConfig("website_config", healed);
+    }
+  } catch {
+    setPlatformConfig("website_config", DEFAULT_WEBSITE_CONFIG);
+  }
 }
 
 if (!db.prepare("SELECT config_key FROM platform_config WHERE config_key = ?").get("dashboard_features")) {

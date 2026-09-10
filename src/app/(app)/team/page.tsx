@@ -17,6 +17,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { PortalModal } from "@/components/ui/PortalModal";
 
 interface TeamMember {
   id: string;
@@ -411,74 +412,73 @@ export default function TeamPage() {
       )}
 
       {/* Invite Member Modal */}
-      {isInviteOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md p-6 rounded-2xl border border-line bg-surface shadow-2xl space-y-4 animate-scale-up">
-            <div className="flex items-center justify-between pb-3 border-b border-line">
-              <h3 className="text-sm font-bold text-text">Invite Colleague to Nuralix</h3>
+      <PortalModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)}>
+        <div className="w-full max-w-md p-6 rounded-2xl border border-line bg-surface shadow-2xl space-y-4 animate-scale-in">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
+            <h3 className="text-sm font-bold text-text">Invite Colleague to Nuralix</h3>
+            <button
+              type="button"
+              onClick={() => setIsInviteOpen(false)}
+              className="text-xs text-text-muted hover:text-text cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleInvite} className="space-y-3 text-xs">
+            <div>
+              <label className="font-semibold text-text block mb-1">Full Name</label>
+              <input
+                type="text"
+                value={inviteName}
+                onChange={e => setInviteName(e.target.value)}
+                placeholder="e.g. Rahul Mehta"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
+              />
+            </div>
+            <div>
+              <label className="font-semibold text-text block mb-1">Work Email</label>
+              <input
+                type="email"
+                required
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
+                placeholder="e.g. rahul@company.in"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
+              />
+            </div>
+            <div>
+              <label className="font-semibold text-text block mb-1">Role & Authority</label>
+              <select
+                value={inviteRole}
+                onChange={e => setInviteRole(e.target.value as any)}
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
+              >
+                <option value="Operator">Operator (Read & Execute assigned actions)</option>
+                <option value="Manager">Manager (Team oversight & tool execution)</option>
+                <option value="Executive">Executive (Full AI Copilot & decision authority)</option>
+                <option value="Owner">Owner (Enterprise root billing & permissions)</option>
+              </select>
+            </div>
+
+            <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setIsInviteOpen(false)}
-                className="text-xs text-text-muted hover:text-text cursor-pointer"
+                className="px-3 py-1.5 rounded-lg border border-line text-text-muted hover:text-text cursor-pointer"
               >
-                ✕
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-1.5 rounded-lg bg-brass text-white font-bold btn-tactile hover:brightness-110 cursor-pointer"
+              >
+                Send Invitation
               </button>
             </div>
-
-            <form onSubmit={handleInvite} className="space-y-3 text-xs">
-              <div>
-                <label className="font-semibold text-text block mb-1">Full Name</label>
-                <input
-                  type="text"
-                  value={inviteName}
-                  onChange={e => setInviteName(e.target.value)}
-                  placeholder="e.g. Rahul Mehta"
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
-                />
-              </div>
-              <div>
-                <label className="font-semibold text-text block mb-1">Work Email</label>
-                <input
-                  type="email"
-                  required
-                  value={inviteEmail}
-                  onChange={e => setInviteEmail(e.target.value)}
-                  placeholder="e.g. rahul@company.in"
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
-                />
-              </div>
-              <div>
-                <label className="font-semibold text-text block mb-1">Assigned Role</label>
-                <select
-                  value={inviteRole}
-                  onChange={e => setInviteRole(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
-                >
-                  <option value="Executive">Executive (High-level decisions, AI suite)</option>
-                  <option value="Manager">Manager (Team pipelines, workflows)</option>
-                  <option value="Operator">Operator (Execution tasks, reports)</option>
-                </select>
-              </div>
-
-              <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsInviteOpen(false)}
-                  className="px-3 py-1.5 rounded-lg border border-line text-text-muted hover:text-text cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 rounded-lg bg-brass text-white font-bold btn-tactile hover:brightness-110 cursor-pointer"
-                >
-                  Send Invitation
-                </button>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
-      )}
+      </PortalModal>
     </div>
   );
 }

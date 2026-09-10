@@ -25,6 +25,7 @@ import {
   X
 } from "lucide-react";
 import { Suspense } from "react";
+import { createPortal } from "react-dom";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 // Format numbers using Indian comma numbering (e.g. 12,00,000 / 3,00,000)
@@ -280,6 +281,22 @@ function ToolsContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is active to prevent scroll leakage
+  useEffect(() => {
+    if (activeToolId) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [activeToolId]);
 
   // Close active tool calculator on Escape
   useEscapeKey(() => setActiveToolId(null), Boolean(activeToolId));
@@ -429,9 +446,10 @@ function ToolsContent() {
       </div>
 
       {/* Interactive Tool Pop-Up Modal */}
-      {activeTool && (
+      {mounted && activeTool && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          className="fixed inset-0 m-0 z-[9999] bg-slate-950/75 dark:bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+          style={{ top: 0, left: 0, right: 0, bottom: 0, margin: 0 }}
           onClick={() => setActiveToolId(null)}
         >
           <div
@@ -965,7 +983,8 @@ function ToolsContent() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Tools Grid */}

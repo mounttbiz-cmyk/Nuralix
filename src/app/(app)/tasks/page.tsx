@@ -16,6 +16,7 @@ import {
   RotateCw
 } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { PortalModal } from "@/components/ui/PortalModal";
 
 interface TaskItem {
   id: string;
@@ -313,116 +314,114 @@ export default function TasksPage() {
       </div>
 
       {/* ADD CUSTOM TASK MODAL */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="max-w-md w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-4 animate-scale-in">
-            <div className="flex items-center justify-between pb-3 border-b border-line">
-              <div className="flex items-center gap-2">
-                <CheckSquare className="w-4 h-4 text-brass" />
-                <h2 className="text-sm font-bold text-text">Add Custom Execution Task</h2>
+      <PortalModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)}>
+        <div className="max-w-md w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-4 animate-scale-in">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
+            <div className="flex items-center gap-2">
+              <CheckSquare className="w-4 h-4 text-brass" />
+              <h2 className="text-sm font-bold text-text">Add Custom Execution Task</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="text-xs text-text-muted hover:text-text px-2 py-1 rounded bg-surface-2 cursor-pointer font-semibold"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateTask} className="space-y-3.5 text-xs">
+            <div>
+              <label className="font-semibold text-text block mb-1">Task Title / Action Item</label>
+              <input
+                type="text"
+                value={newTitle}
+                onChange={e => setNewTitle(e.target.value)}
+                placeholder="e.g. Audit discretionary software subscriptions..."
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
+                autoFocus
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="font-semibold text-text block mb-1">Owner / Assignee</label>
+                <select
+                  value={newOwner}
+                  onChange={e => setNewOwner(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
+                >
+                  <option value="Marcus (CFO AI)">Marcus (CFO AI)</option>
+                  <option value="Astra (CEO AI)">Astra (CEO AI)</option>
+                  <option value="Devon (CTO AI)">Devon (CTO AI)</option>
+                  <option value="Valeria (CMO AI)">Valeria (CMO AI)</option>
+                  <option value="Internal Operations">Internal Operations</option>
+                  <option value="Founder / CEO">Founder / CEO</option>
+                </select>
               </div>
+
+              <div>
+                <label className="font-semibold text-text block mb-1">Priority Level</label>
+                <select
+                  value={newPriority}
+                  onChange={e => setNewPriority(e.target.value as any)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
+                >
+                  <option value="critical">Critical</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="font-semibold text-text block mb-1">Initial Status</label>
+                <select
+                  value={newStatus}
+                  onChange={e => setNewStatus(e.target.value as any)}
+                  className="w-full px-2.5 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass font-medium"
+                >
+                  <option value="todo">To Do</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="done">Completed</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-semibold text-text block mb-1">Strategic Gap / Category</label>
+                <input
+                  type="text"
+                  value={newGap}
+                  onChange={e => setNewGap(e.target.value)}
+                  placeholder="e.g. Cash Runway"
+                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
+                />
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="text-xs text-text-muted hover:text-text px-2 py-1 rounded bg-surface-2 cursor-pointer font-semibold"
+                className="px-3.5 py-2 rounded-lg text-text-muted hover:text-text text-xs font-semibold cursor-pointer"
               >
-                ✕
+                Cancel
+              </button>
+              <button
+                type="submit"
+                onClick={() => handleCreateTask()}
+                disabled={isSubmitting || !newTitle.trim()}
+                className="px-4 py-2 rounded-lg bg-brass text-white font-bold text-xs hover:brightness-110 shadow-sm cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? "Creating…" : "Add Task to Queue"}
               </button>
             </div>
-
-            <form onSubmit={handleCreateTask} className="space-y-3.5 text-xs">
-              <div>
-                <label className="font-semibold text-text block mb-1">Task Title / Action Item</label>
-                <input
-                  type="text"
-                  value={newTitle}
-                  onChange={e => setNewTitle(e.target.value)}
-                  placeholder="e.g. Audit discretionary software subscriptions..."
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
-                  autoFocus
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-semibold text-text block mb-1">Owner / Assignee</label>
-                  <select
-                    value={newOwner}
-                    onChange={e => setNewOwner(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
-                  >
-                    <option value="Founder">Founder</option>
-                    <option value="Astra (CEO)">Astra (CEO AI)</option>
-                    <option value="Marcus (CFO)">Marcus (CFO AI)</option>
-                    <option value="Elena (CMO)">Elena (CMO AI)</option>
-                    <option value="Vikram (Sales AI)">Vikram (Sales AI)</option>
-                    <option value="Operations AI">Operations AI</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="font-semibold text-text block mb-1">Initial Status</label>
-                  <select
-                    value={newStatus}
-                    onChange={e => setNewStatus(e.target.value as any)}
-                    className="w-full px-2.5 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass font-medium"
-                  >
-                    <option value="todo">To Do</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="done">Completed</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-semibold text-text block mb-1">Priority</label>
-                  <select
-                    value={newPriority}
-                    onChange={e => setNewPriority(e.target.value as any)}
-                    className="w-full px-2.5 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
-                  >
-                    <option value="critical">Critical</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="font-semibold text-text block mb-1">Strategic Gap / Category</label>
-                  <input
-                    type="text"
-                    value={newGap}
-                    onChange={e => setNewGap(e.target.value)}
-                    placeholder="e.g. Cash Runway"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-3.5 py-2 rounded-lg text-text-muted hover:text-text text-xs font-semibold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  onClick={() => handleCreateTask()}
-                  disabled={isSubmitting || !newTitle.trim()}
-                  className="px-4 py-2 rounded-lg bg-brass text-white font-bold text-xs hover:brightness-110 shadow-sm cursor-pointer disabled:opacity-50"
-                >
-                  {isSubmitting ? "Creating…" : "Add Task to Queue"}
-                </button>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
-      )}
+      </PortalModal>
     </div>
   );
 }

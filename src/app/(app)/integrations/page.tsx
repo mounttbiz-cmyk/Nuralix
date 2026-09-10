@@ -28,6 +28,7 @@ import {
 import { IntegrationLogo } from "@/components/ui/IntegrationLogo";
 import { isFirebaseConfigured, firebaseConfig } from "@/lib/firebase/config";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { PortalModal } from "@/components/ui/PortalModal";
 
 interface IntegrationItem {
   id: string;
@@ -571,137 +572,135 @@ export default function IntegrationsPage() {
       )}
 
       {/* STRIPE FULL END-TO-END MODAL */}
-      {stripeModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="max-w-xl w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-5 animate-scale-in">
-            <div className="flex items-center justify-between pb-3 border-b border-line">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2 shadow-inner">
-                  <IntegrationLogo id="stripe" className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-bold text-text">Stripe Integration & Live Webhook</h2>
-                  <p className="text-[11px] text-text-muted">Real-time payment telemetry and ledger sync</p>
-                </div>
+      <PortalModal isOpen={stripeModalOpen} onClose={() => setStripeModalOpen(false)}>
+        <div className="max-w-xl w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-5 animate-scale-in">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line flex items-center justify-center p-2 shadow-inner">
+                <IntegrationLogo id="stripe" className="w-6 h-6" />
               </div>
+              <div>
+                <h2 className="text-sm font-bold text-text">Stripe Integration & Live Webhook</h2>
+                <p className="text-[11px] text-text-muted">Real-time payment telemetry and ledger sync</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setStripeModalOpen(false)}
+              className="text-xs text-text-muted hover:text-text font-semibold px-2 py-1 rounded bg-surface-2 cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          {stripeSuccessMsg && (
+            <div className="p-3 rounded-lg bg-jade/10 border border-jade/30 text-xs text-jade font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{stripeSuccessMsg}</span>
+            </div>
+          )}
+
+          <div className="space-y-4 text-xs">
+            {/* API Key Input */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="font-semibold text-text">Stripe Restricted API Secret Key</label>
+                <button
+                  type="button"
+                  onClick={() => handleConnectStripe("sk_test_demo_live_sync_verified_1234")}
+                  className="text-[10px] text-brass hover:underline font-mono cursor-pointer"
+                >
+                  Use Instant Test Key
+                </button>
+              </div>
+              <input
+                type="password"
+                value={stripeApiKey}
+                onChange={e => setStripeApiKey(e.target.value)}
+                placeholder="sk_live_... or sk_test_..."
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono text-xs focus:ring-1 focus:ring-brass"
+              />
+              <p className="text-[10px] text-text-muted">
+                Requires Read permissions for Charges, Invoices, and Subscriptions.
+              </p>
+            </div>
+
+            {/* Webhook Endpoint Info */}
+            <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-text flex items-center gap-1.5">
+                  <Cable className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Inbound Webhook Endpoint</span>
+                </span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-jade/10 text-jade border border-jade/20 font-bold uppercase">
+                  Active Endpoint
+                </span>
+              </div>
+              <div className="p-2 rounded bg-surface border border-line font-mono text-[11px] text-text select-all">
+                /api/integrations/stripe/webhook
+              </div>
+              <p className="text-[10px] text-text-muted">
+                Subscribed events: <code className="font-mono text-text">payment_intent.succeeded</code>, <code className="font-mono text-text">invoice.paid</code>
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-2 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setStripeModalOpen(false)}
-                className="text-xs text-text-muted hover:text-text font-semibold px-2 py-1 rounded bg-surface-2 cursor-pointer"
+                onClick={handleTriggerTestWebhook}
+                disabled={stripeTestingWebhook}
+                className="px-3.5 py-2 rounded-lg bg-surface-2 border border-line text-text hover:border-line-strong text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                ✕
+                <Send className="w-3 h-3 text-cyan-400" />
+                <span>{stripeTestingWebhook ? "Sending…" : "Send Test Payment Webhook (₹25,000)"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleConnectStripe()}
+                disabled={stripeConnecting}
+                className="px-4 py-2 rounded-lg bg-brass text-white font-bold text-xs hover:brightness-110 shadow-sm inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>{stripeConnecting ? "Verifying…" : "Save & Connect Stripe"}</span>
               </button>
             </div>
 
-            {stripeSuccessMsg && (
-              <div className="p-3 rounded-lg bg-jade/10 border border-jade/30 text-xs text-jade font-semibold flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>{stripeSuccessMsg}</span>
+            {/* Event Logs */}
+            {stripeEvents.length > 0 && (
+              <div className="pt-3 border-t border-line space-y-2">
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
+                  Recent Webhook Telemetry Events (Persistent SQLite Ledger)
+                </span>
+                <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                  {stripeEvents.map(evt => (
+                    <div
+                      key={evt.id}
+                      className="p-2 rounded-lg bg-surface-2 border border-line flex items-center justify-between text-[11px] font-mono"
+                    >
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3 h-3 text-jade shrink-0" />
+                        <span className="text-text font-semibold">{evt.eventType}</span>
+                      </div>
+                      <div className="text-text-muted">
+                        <span className="text-jade font-bold mr-2">
+                          +₹{evt.amount?.toLocaleString("en-IN")}
+                        </span>
+                        <span>{new Date(evt.createdAt).toLocaleTimeString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-
-            <div className="space-y-4 text-xs">
-              {/* API Key Input */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="font-semibold text-text">Stripe Restricted API Secret Key</label>
-                  <button
-                    type="button"
-                    onClick={() => handleConnectStripe("sk_test_demo_live_sync_verified_1234")}
-                    className="text-[10px] text-brass hover:underline font-mono cursor-pointer"
-                  >
-                    Use Instant Test Key
-                  </button>
-                </div>
-                <input
-                  type="password"
-                  value={stripeApiKey}
-                  onChange={e => setStripeApiKey(e.target.value)}
-                  placeholder="sk_live_... or sk_test_..."
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text font-mono text-xs focus:ring-1 focus:ring-brass"
-                />
-                <p className="text-[10px] text-text-muted">
-                  Requires Read permissions for Charges, Invoices, and Subscriptions.
-                </p>
-              </div>
-
-              {/* Webhook Endpoint Info */}
-              <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-text flex items-center gap-1.5">
-                    <Cable className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Inbound Webhook Endpoint</span>
-                  </span>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-jade/10 text-jade border border-jade/20 font-bold uppercase">
-                    Active Endpoint
-                  </span>
-                </div>
-                <div className="p-2 rounded bg-surface border border-line font-mono text-[11px] text-text select-all">
-                  /api/integrations/stripe/webhook
-                </div>
-                <p className="text-[10px] text-text-muted">
-                  Subscribed events: <code className="font-mono text-text">payment_intent.succeeded</code>, <code className="font-mono text-text">invoice.paid</code>
-                </p>
-              </div>
-
-              {/* Live Webhook Tester Button */}
-              <div className="pt-2 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={handleTriggerTestWebhook}
-                  disabled={stripeTestingWebhook}
-                  className="px-3.5 py-2 rounded-lg bg-surface-2 border border-line text-text hover:border-line-strong text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  <Send className="w-3 h-3 text-cyan-400" />
-                  <span>{stripeTestingWebhook ? "Sending…" : "Send Test Payment Webhook (₹25,000)"}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleConnectStripe()}
-                  disabled={stripeConnecting}
-                  className="px-4 py-2 rounded-lg bg-brass text-white font-bold text-xs hover:brightness-110 shadow-sm inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  <span>{stripeConnecting ? "Verifying…" : "Save & Connect Stripe"}</span>
-                </button>
-              </div>
-
-              {/* Event Logs */}
-              {stripeEvents.length > 0 && (
-                <div className="pt-3 border-t border-line space-y-2">
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
-                    Recent Webhook Telemetry Events (Persistent SQLite Ledger)
-                  </span>
-                  <div className="space-y-1.5 max-h-36 overflow-y-auto">
-                    {stripeEvents.map(evt => (
-                      <div
-                        key={evt.id}
-                        className="p-2 rounded-lg bg-surface-2 border border-line flex items-center justify-between text-[11px] font-mono"
-                      >
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="w-3 h-3 text-jade shrink-0" />
-                          <span className="text-text font-semibold">{evt.eventType}</span>
-                        </div>
-                        <div className="text-text-muted">
-                          <span className="text-jade font-bold mr-2">
-                            +₹{evt.amount?.toLocaleString("en-IN")}
-                          </span>
-                          <span>{new Date(evt.createdAt).toLocaleTimeString()}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
-      )}
+      </PortalModal>
 
       {/* GENERIC CONNECT MODAL (Honest Setup for Slack, Zoho, GCal, HelpDesk) */}
-      {genericModalItem && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <PortalModal isOpen={Boolean(genericModalItem)} onClose={() => setGenericModalItem(null)}>
+        {genericModalItem && (
           <div className="max-w-lg w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-5 animate-scale-in">
             <div className="flex items-center justify-between pb-3 border-b border-line">
               <div className="flex items-center gap-3">
@@ -783,12 +782,12 @@ export default function IntegrationsPage() {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </PortalModal>
 
       {/* INSPECT ITEM MODAL */}
-      {inspectItem && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <PortalModal isOpen={Boolean(inspectItem)} onClose={() => setInspectItem(null)}>
+        {inspectItem && (
           <div className="max-w-2xl w-full p-6 rounded-2xl bg-surface border border-line shadow-2xl space-y-5 animate-scale-in">
             <div className="flex items-start justify-between pb-3 border-b border-line gap-4">
               <div className="flex items-center gap-3">
@@ -848,8 +847,8 @@ export default function IntegrationsPage() {
                 </span>
                 <ul className="space-y-1.5 text-[11px]">
                   {inspectItem.usedBy.map((consumer, i) => (
-                    <li key={i} className="flex items-center gap-2 text-text font-medium">
-                      <Sparkles className="w-3.5 h-3.5 text-brass shrink-0" />
+                    <li key={i} className="flex items-center gap-1.5 text-text">
+                      <Sparkles className="w-3 h-3 text-cyan-400 shrink-0" />
                       <span>{consumer}</span>
                     </li>
                   ))}
@@ -879,8 +878,8 @@ export default function IntegrationsPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </PortalModal>
     </div>
   );
 }
