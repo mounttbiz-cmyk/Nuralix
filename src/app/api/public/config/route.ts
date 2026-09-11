@@ -16,7 +16,21 @@ export async function GET() {
     const features = getPlatformConfig("dashboard_features", DEFAULT_DASHBOARD_FEATURES);
     const nav = getPlatformConfig("dashboard_nav", defaultNavItems);
     const tools = getPlatformConfig("tools_catalog", DEFAULT_TOOLS_CATALOG);
-    const widgets = getPlatformConfig("dashboard_widgets", defaultWidgets);
+    let widgets = getPlatformConfig("dashboard_widgets", defaultWidgets);
+    
+    // Ensure any newly added default widgets (like DataUploadWidget) are merged if missing from DB
+    const existingIds = new Set(widgets.map((w: any) => w.id));
+    let hasNewWidgets = false;
+    for (const dw of defaultWidgets) {
+      if (!existingIds.has(dw.id)) {
+        widgets.push(dw);
+        hasNewWidgets = true;
+      }
+    }
+    // Re-sort if we added new ones
+    if (hasNewWidgets) {
+      widgets.sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0));
+    }
 
     return NextResponse.json({
       success: true,

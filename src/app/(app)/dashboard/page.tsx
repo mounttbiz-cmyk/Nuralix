@@ -486,13 +486,21 @@ function DashboardContent() {
         </div>
       )}
 
-      {/* Dynamic 4-column Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {activeWidgets
-          .filter(w => w.enabled)
-          .map(widget => (
-            <RenderWidget key={widget.id} widget={widget} />
-          ))}
+      {/* Dynamic Dashboard Grid (Masonry-style dense packing) */}
+      <div className="pt-4 mt-2">
+        <div className="flex items-center gap-2 mb-4 px-1">
+          <Layers className="w-4 h-4 text-cyan-500" />
+          <h2 className="text-xs font-bold text-text uppercase tracking-wider font-sans">
+            Executive Operations & Active Tooling
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 auto-rows-max grid-flow-row-dense">
+          {activeWidgets
+            .filter(w => w.enabled)
+            .map(widget => (
+              <RenderWidget key={widget.id} widget={widget} />
+            ))}
+        </div>
       </div>
 
       {/* Daily Check-In Modal */}

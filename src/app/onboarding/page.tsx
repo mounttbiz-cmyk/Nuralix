@@ -949,7 +949,7 @@ export default function OnboardingPage() {
     }
   };
 
-  const startWebsiteExtraction = () => {
+  const startWebsiteExtraction = async () => {
     setStep(2.5);
     setIsExtractingWebsite(true);
     setExtractionProgress(15);
@@ -960,33 +960,52 @@ export default function OnboardingPage() {
         ? customBusinessType.trim()
         : businessTypes.find(b => b.id === businessType)?.title || "Business";
 
-    const stages = [
-      `Validating SSL handshake & security headers for ${cleanDomain}…`,
-      `Crawling homepage, services, and sitemap navigation…`,
-      `Extracting market positioning and core value proposition…`,
-      `Detecting target ICP buyer personas and commercial workflows…`,
-      `Synthesizing extracted telemetry into Nuralix Business OS…`,
-    ];
+    setExtractionStage(`Connecting to ${cleanDomain} and extracting metadata…`);
 
-    let current = 0;
-    const timer = setInterval(() => {
-      current++;
-      if (current < stages.length) {
-        setExtractionStage(stages[current]);
-        setExtractionProgress(Math.round(((current + 1) / (stages.length + 1)) * 100));
+    try {
+      const response = await fetch('/api/extract-website', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: website.trim() })
+      });
+
+      const result = await response.json();
+      
+      setExtractionProgress(100);
+      setIsExtractingWebsite(false);
+
+      if (result.success) {
+        const { title, description, verifiedDomain } = result.data;
+        setExtractedData({
+          verifiedDomain: verifiedDomain || cleanDomain,
+          positioning: `${companyName || "Your Company"} positioning: ${title}.`,
+          offerings: `Metadata: ${description.slice(0, 150)}${description.length > 150 ? '...' : ''}`,
+          icp: `Targeting based on ${resolvedIndustryLabel.toLowerCase()} market trends.`,
+          metricsNote: `Live extraction successful. Indian INR (₹) commercial model aligned.`,
+        });
       } else {
-        clearInterval(timer);
-        setExtractionProgress(100);
-        setIsExtractingWebsite(false);
+        // Fallback on error
         setExtractedData({
           verifiedDomain: cleanDomain,
-          positioning: `${companyName || "Your Company"} is an established ${resolvedIndustryLabel.toLowerCase()} operation delivering reliable, high-performance capabilities.`,
-          offerings: `Custom ${resolvedIndustryLabel} solutions, SLA-backed performance architectures, operational telemetry, automated client pipelines.`,
-          icp: `Mid-market to enterprise leaders, commercial directors, procurement specialists, and growth-focused founders.`,
-          metricsNote: `Indian INR (₹) commercial model aligned · High client retention indicators · Active digital footprint verified.`,
+          positioning: `${companyName || "Your Company"} is an established ${resolvedIndustryLabel.toLowerCase()} operation.`,
+          offerings: `Custom ${resolvedIndustryLabel} solutions and operational telemetry.`,
+          icp: `Mid-market to enterprise leaders in the ${resolvedIndustryLabel.toLowerCase()} sector.`,
+          metricsNote: `Basic extraction fallback used. Indian INR (₹) commercial model aligned.`,
         });
       }
-    }, 550);
+    } catch (e) {
+      console.error(e);
+      setExtractionProgress(100);
+      setIsExtractingWebsite(false);
+      // Fallback
+      setExtractedData({
+        verifiedDomain: cleanDomain,
+        positioning: `${companyName || "Your Company"} is an established ${resolvedIndustryLabel.toLowerCase()} operation.`,
+        offerings: `Custom ${resolvedIndustryLabel} solutions.`,
+        icp: `Enterprise leaders.`,
+        metricsNote: `Extraction failed. Using defaults.`,
+      });
+    }
   };
 
   const handleStep2Next = () => {

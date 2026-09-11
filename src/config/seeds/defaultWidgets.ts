@@ -61,4 +61,14 @@ export const defaultWidgets: WidgetDef[] = [
     requires: {},
     enabled: true,
   },
+  {
+    id: "widget_data_upload",
+    title: "Data Upload Option",
+    component: "DataUploadWidget",
+    priority: 70,
+    defaultSpan: 2,
+    minContainerWidth: 320,
+    requires: {},
+    enabled: true,
+  },
 ];

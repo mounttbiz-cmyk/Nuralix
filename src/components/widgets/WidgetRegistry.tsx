@@ -5,6 +5,7 @@ import { KpiGridWidget } from "./KpiGridWidget";
 import { GapsPreviewWidget } from "./GapsPreviewWidget";
 import { TasksPreviewWidget } from "./TasksPreviewWidget";
 import { SimulatorHighlightWidget } from "./SimulatorHighlightWidget";
+import { DataUploadWidget } from "./DataUploadWidget";
 import { WidgetDef } from "@/config/schemas/widget";
 
 const COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
@@ -14,6 +15,7 @@ const COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
   GapsPreviewWidget,
   TasksPreviewWidget,
   SimulatorHighlightWidget,
+  DataUploadWidget,
 };
 
 export function RenderWidget({ widget }: { widget: WidgetDef }) {
