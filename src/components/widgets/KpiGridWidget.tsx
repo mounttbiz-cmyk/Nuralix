@@ -6,6 +6,8 @@ import { ProvenanceBadge } from "../ui/Badge";
 import { TrendingUp, TrendingDown, HelpCircle, MessageSquare, DollarSign, Clock, Users, Percent, Sparkles } from "lucide-react";
 import Link from "next/link";
 
+import { useBusinessDataSync } from "@/lib/upload/events";
+
 interface KpiItem {
   id: string;
   label: string;
@@ -29,24 +31,52 @@ export function KpiGridWidget() {
   const [burn, setBurn] = useState(150000);
   const [cash, setCash] = useState(1200000);
   const [teamSize, setTeamSize] = useState(15);
+  const [grossMarginVal, setGrossMarginVal] = useState(82.4);
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [sparklinePoints, setSparklinePoints] = useState<string | null>(null);
+
+  const applyProfile = (p: any) => {
+    if (!p) return;
+    if (p.industryLabel) setIndustryLabel(p.industryLabel);
+    else if (p.industry) setIndustryLabel(p.industry);
+    if (p.revenue !== undefined) setMonthlyRev(Number(p.revenue));
+    else if (p.monthlyRevenue !== undefined) setMonthlyRev(Number(p.monthlyRevenue));
+    if (p.annualRevenue !== undefined) setAnnualRev(Number(p.annualRevenue));
+    if (p.burn !== undefined) setBurn(Number(p.burn));
+    else if (p.monthlyBurn !== undefined) setBurn(Number(p.monthlyBurn));
+    if (p.cash !== undefined) setCash(Number(p.cash));
+    else if (p.cashOnHand !== undefined) setCash(Number(p.cashOnHand));
+    if (p.teamSize !== undefined) setTeamSize(Number(p.teamSize));
+    if (p.grossMargin !== undefined) setGrossMarginVal(Number(p.grossMargin));
+    if (p.isUploadedData) setIsUploaded(true);
+
+    if (Array.isArray(p.trend) && p.trend.length > 1) {
+      const min = Math.min(...p.trend);
+      const max = Math.max(...p.trend);
+      const range = max - min || 1;
+      const pts = p.trend.map((val: number, i: number) => {
+        const x = Math.round((i / (p.trend.length - 1)) * 75);
+        const y = Math.round(22 - ((val - min) / range) * 18);
+        return `${x},${y}`;
+      }).join(" ");
+      setSparklinePoints(pts);
+    }
+  };
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("nuralix_business_profile");
       if (saved) {
-        const p = JSON.parse(saved);
-        if (p.industryLabel) setIndustryLabel(p.industryLabel);
-        else if (p.industry) setIndustryLabel(p.industry);
-        if (p.revenue) setMonthlyRev(Number(p.revenue));
-        if (p.annualRevenue) setAnnualRev(Number(p.annualRevenue));
-        if (p.burn) setBurn(Number(p.burn));
-        if (p.cash) setCash(Number(p.cash));
-        if (p.teamSize) setTeamSize(Number(p.teamSize));
+        applyProfile(JSON.parse(saved));
       }
     } catch (e) {
       // ignore
     }
   }, []);
+
+  useBusinessDataSync(metrics => {
+    applyProfile(metrics);
+  });
 
   const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : "18+";
   const revPerHead = Math.round(annualRev / (teamSize || 1));
@@ -63,8 +93,8 @@ export function KpiGridWidget() {
       color: "#00D9FF",
       gradientId: "grad-mrr",
       icon: <DollarSign className="w-4 h-4 text-cyan-400" />,
-      points: "0,20 15,16 30,17 45,9 60,7 75,3",
-      areaPoints: "0,20 15,16 30,17 45,9 60,7 75,3 75,25 0,25",
+      points: sparklinePoints || "0,20 15,16 30,17 45,9 60,7 75,3",
+      areaPoints: sparklinePoints ? `${sparklinePoints} 75,25 0,25` : "0,20 15,16 30,17 45,9 60,7 75,3 75,25 0,25",
       provenance: "from_data",
     },
     {
@@ -100,7 +130,7 @@ export function KpiGridWidget() {
     {
       id: "gross_margin",
       label: "Gross Margin Efficiency",
-      value: "82.4%",
+      value: `${grossMarginVal}%`,
       delta: "+2.3%",
       direction: "up",
       sentiment: "positive",
@@ -110,7 +140,7 @@ export function KpiGridWidget() {
       icon: <Percent className="w-4 h-4 text-emerald-400" />,
       points: "0,17 15,14 30,15 45,11 60,7 75,3",
       areaPoints: "0,17 15,14 30,15 45,11 60,7 75,3 75,25 0,25",
-      provenance: "benchmark",
+      provenance: isUploaded ? "from_data" : "benchmark",
     },
   ];
 
@@ -132,9 +162,15 @@ export function KpiGridWidget() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted border border-line font-mono">
-              Live Stream
-            </span>
+            {isUploaded ? (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30 font-mono font-bold">
+                ● Uploaded Data Synced
+              </span>
+            ) : (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted border border-line font-mono">
+                Live Stream
+              </span>
+            )}
           </div>
         </div>
 

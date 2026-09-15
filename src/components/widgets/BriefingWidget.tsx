@@ -5,6 +5,8 @@ import { ContainerTile } from "../ui/ContainerTile";
 import { Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+import { useBusinessDataSync } from "@/lib/upload/events";
+
 interface BriefingWidgetProps {
   companyName?: string;
   ceoName?: string;
@@ -20,24 +22,37 @@ export function BriefingWidget({
   const [monthlyRev, setMonthlyRev] = useState(500000);
   const [burn, setBurn] = useState(150000);
   const [cash, setCash] = useState(1200000);
+  const [isUploaded, setIsUploaded] = useState(false);
+
+  const applyProfile = (p: any) => {
+    if (!p) return;
+    if (p.name) setCompanyName(p.name);
+    if (p.founderName) setFounderName(p.founderName);
+    if (p.industryLabel) setIndustryLabel(p.industryLabel);
+    else if (p.industry) setIndustryLabel(p.industry);
+    if (p.revenue !== undefined) setMonthlyRev(Number(p.revenue));
+    else if (p.monthlyRevenue !== undefined) setMonthlyRev(Number(p.monthlyRevenue));
+    if (p.burn !== undefined) setBurn(Number(p.burn));
+    else if (p.monthlyBurn !== undefined) setBurn(Number(p.monthlyBurn));
+    if (p.cash !== undefined) setCash(Number(p.cash));
+    else if (p.cashOnHand !== undefined) setCash(Number(p.cashOnHand));
+    if (p.isUploadedData) setIsUploaded(true);
+  };
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("nuralix_business_profile");
       if (saved) {
-        const p = JSON.parse(saved);
-        if (p.name) setCompanyName(p.name);
-        if (p.founderName) setFounderName(p.founderName);
-        if (p.industryLabel) setIndustryLabel(p.industryLabel);
-        else if (p.industry) setIndustryLabel(p.industry);
-        if (p.revenue) setMonthlyRev(Number(p.revenue));
-        if (p.burn) setBurn(Number(p.burn));
-        if (p.cash) setCash(Number(p.cash));
+        applyProfile(JSON.parse(saved));
       }
     } catch (e) {
       // ignore
     }
   }, []);
+
+  useBusinessDataSync(metrics => {
+    applyProfile(metrics);
+  });
 
   const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : "18+";
 

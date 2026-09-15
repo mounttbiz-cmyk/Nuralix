@@ -107,6 +107,17 @@ db.exec(`
     config_value TEXT NOT NULL,
     updated_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS business_data_uploads (
+    id TEXT PRIMARY KEY,
+    business_id TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    metrics_summary TEXT NOT NULL,
+    raw_data TEXT,
+    active INTEGER DEFAULT 1,
+    created_at TEXT NOT NULL
+  );
 `);
 
 // Default business ID for single-tenant local workspace

@@ -16,10 +16,13 @@ import {
   Sparkles,
   Save,
   CheckCircle2,
-  X
+  X,
+  UploadCloud,
 } from "lucide-react";
 import { Suspense } from "react";
 import { DailyCheckInModal } from "@/components/checkin/DailyCheckInModal";
+import { UploadDataModal } from "@/components/upload/UploadDataModal";
+import { useBusinessDataSync } from "@/lib/upload/events";
 import { Clock, Send, Radio } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
@@ -29,6 +32,9 @@ function DashboardContent() {
   const [selectedModel, setSelectedModel] = useState<TenantContext["businessModel"]>("subscription");
   const [companyName, setCompanyName] = useState("Apex Analytics");
   const [selectedTimeframe, setSelectedTimeframe] = useState("Live Today");
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [liquidRunwayMo, setLiquidRunwayMo] = useState("8.0");
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   // Daily Check-In State
   const [checkinData, setCheckinData] = useState<{
@@ -89,8 +95,9 @@ function DashboardContent() {
             if (savedLayout) {
               try {
                 const parsed = JSON.parse(savedLayout);
-                // Keep customized order but remove widgets disabled by superadmin
-                setActiveWidgets(parsed.filter((w: any) => !disabledIds.has(w.id)));
+                const existingIds = new Set(parsed.map((w: any) => w.id));
+                const missingDefaults = d.widgets.filter((w: any) => !existingIds.has(w.id) && !disabledIds.has(w.id));
+                setActiveWidgets([...parsed.filter((w: any) => !disabledIds.has(w.id)), ...missingDefaults]);
               } catch {
                 setActiveWidgets(d.widgets.filter((w: any) => w.enabled !== false));
               }
@@ -103,19 +110,37 @@ function DashboardContent() {
       .catch(() => {});
   }, [selectedIndustry]);
 
+  const applyProfileData = (saved: any) => {
+    if (!saved) return;
+    if (saved.industry) setSelectedIndustry(saved.industry);
+    if (saved.name) setCompanyName(saved.name);
+    if (saved.isUploadedData && saved.sourceFileName) {
+      setUploadedFileName(saved.sourceFileName);
+    } else {
+      setUploadedFileName(null);
+    }
+    const cash = Number(saved.cash || saved.cashOnHand || 1200000);
+    const burn = Number(saved.burn || saved.monthlyBurn || saved.monthlyNetBurn || 150000);
+    if (burn > 0) {
+      setLiquidRunwayMo((cash / burn).toFixed(1));
+    }
+  };
+
   // Read saved business profile if available
   useEffect(() => {
     try {
       const savedProfileStr = localStorage.getItem("nuralix_business_profile");
       if (savedProfileStr) {
-        const saved = JSON.parse(savedProfileStr);
-        if (saved.industry) setSelectedIndustry(saved.industry);
-        if (saved.name) setCompanyName(saved.name);
+        applyProfileData(JSON.parse(savedProfileStr));
       }
     } catch (e) {
       // ignore
     }
   }, []);
+
+  useBusinessDataSync(metrics => {
+    applyProfileData(metrics);
+  });
 
   // Base dynamic config from registry
   const baseConfig = resolveTenantConfig({
@@ -255,7 +280,15 @@ function DashboardContent() {
             <span className="beacon-dot" />
             <span className="font-semibold text-text">Autonomous Intelligence Engine</span>
             <span className="text-line-strong">|</span>
-            <span className="text-cyan-600 dark:text-cyan-400 font-medium">Telemetry Synced Live</span>
+            {uploadedFileName ? (
+              <>
+                <span className="text-jade font-semibold">● Custom Telemetry Synced</span>
+                <span className="text-line-strong">|</span>
+                <span className="text-text font-mono text-[10px]">{uploadedFileName}</span>
+              </>
+            ) : (
+              <span className="text-cyan-600 dark:text-cyan-400 font-medium">Telemetry Synced Live</span>
+            )}
             <span className="text-line-strong">|</span>
             <span className="font-mono text-[10px] text-text-muted">v{baseConfig.version} Registry</span>
           </div>
@@ -291,14 +324,33 @@ function DashboardContent() {
               <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 font-semibold font-mono tracking-normal">
                 {selectedIndustry.toUpperCase()} · Growth Plan
               </span>
+              {uploadedFileName && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-jade/15 text-jade border border-jade/30 font-mono font-bold inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-jade" />
+                  Uploaded Data Active
+                </span>
+              )}
             </div>
             <p className="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl">
               Real-time enterprise dashboard synthesized by Nuralix AI. Cross-correlating cash reserves, unit economics, and operational playbooks.
             </p>
           </div>
 
-          {/* Action Controls: Profile Selector + Customize Dashboard Button */}
+          {/* Action Controls: Upload Business Data + Profile Selector + Customize Layout */}
           <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Upload Business Data Button */}
+            <button
+              type="button"
+              onClick={() => setIsUploadModalOpen(true)}
+              className="px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-gradient-to-r from-cyan-500/15 via-indigo-500/15 to-violet-500/15 border-cyan-500/40 text-cyan-600 dark:text-cyan-300 hover:brightness-110 shadow-xs"
+            >
+              <UploadCloud className="w-3.5 h-3.5 text-cyan-500" />
+              <span>Upload Business Data</span>
+              {uploadedFileName && (
+                <span className="w-2 h-2 rounded-full bg-jade animate-pulse" title="Custom dataset active" />
+              )}
+            </button>
+
             {/* Profile Switcher */}
             <div className="flex items-center gap-1 p-1 bg-surface-2/70 rounded-xl border border-line">
               {[
@@ -364,10 +416,10 @@ function DashboardContent() {
           >
             <div>
               <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Liquid Runway</span>
-              <span className="text-base font-extrabold text-cyan-600 dark:text-cyan-400 font-mono">8.0 mo</span>
+              <span className="text-base font-extrabold text-cyan-600 dark:text-cyan-400 font-mono">{liquidRunwayMo} mo</span>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 font-semibold font-mono border border-cyan-500/30">
-              Safe Zone
+              {Number(liquidRunwayMo) >= 6 ? "Safe Zone" : "Caution"}
             </span>
           </Link>
 
@@ -514,6 +566,15 @@ function DashboardContent() {
         }}
         questionRules={checkinData.questionRules}
         questions={checkinData.questions}
+      />
+
+      {/* Business Data Upload Modal */}
+      <UploadDataModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onSuccess={(metrics) => {
+          notify(`Business Data applied: ${metrics.name || companyName}! Telemetry synchronized.`);
+        }}
       />
     </div>
   );
