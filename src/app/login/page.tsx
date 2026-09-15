@@ -277,11 +277,10 @@ export default function LoginPage() {
                     setAuthMode("register");
                     setError(null);
                   }}
-                  className={`flex-1 py-1.5 text-xs rounded-lg font-bold transition-all ${
-                    authMode === "register"
+                  className={`flex-1 py-1.5 text-xs rounded-lg font-bold transition-all ${authMode === "register"
                       ? "bg-surface text-text shadow-sm border border-line"
                       : "text-text-muted hover:text-text"
-                  }`}
+                    }`}
                 >
                   Create Account
                 </button>
@@ -291,11 +290,10 @@ export default function LoginPage() {
                     setAuthMode("signin");
                     setError(null);
                   }}
-                  className={`flex-1 py-1.5 text-xs rounded-lg font-bold transition-all ${
-                    authMode === "signin"
+                  className={`flex-1 py-1.5 text-xs rounded-lg font-bold transition-all ${authMode === "signin"
                       ? "bg-surface text-text shadow-sm border border-line"
                       : "text-text-muted hover:text-text"
-                  }`}
+                    }`}
                 >
                   Log In
                 </button>
@@ -408,8 +406,8 @@ export default function LoginPage() {
                       ? "Creating Account…"
                       : "Logging in…"
                     : authMode === "register"
-                    ? "Create Account & Continue →"
-                    : "Log In to Business OS →"}
+                      ? "Create Account & Continue →"
+                      : "Log In to Business OS →"}
                 </button>
               </form>
             </>

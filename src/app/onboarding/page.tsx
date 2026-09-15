@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -51,7 +51,7 @@ const parseINR = (val: string): string => {
   return val.replace(/[^\d]/g, "");
 };
 
-// Industry specific dynamic question schema
+// Industry & Business-specific dynamic question schema
 interface DynamicQuestion {
   id: string;
   question: string;
@@ -59,279 +59,379 @@ interface DynamicQuestion {
   options: string[];
 }
 
-const INDUSTRY_DYNAMIC_QUESTIONS: Record<string, DynamicQuestion[]> = {
-  saas: [
-    {
-      id: "pricing_model",
-      question: "What is your primary software packaging & pricing model?",
-      hint: "Helps Astra calibrate recurring MRR predictability and expansion revenue models.",
-      options: [
-        "Per-Seat / User License (Monthly/Annual)",
-        "Usage-Based / Consumption Metering",
-        "Flat-Rate Tiered Subscriptions",
-        "High-ACV Enterprise Custom Contracts",
-      ],
-    },
-    {
-      id: "sales_motion",
-      question: "How do your enterprise customers primarily buy?",
-      hint: "Used to calibrate pipeline velocity and rep quota benchmarks.",
-      options: [
-        "Product-Led Growth (Self-serve checkout)",
-        "Inbound Demo Requests & Inside Sales",
-        "Outbound Account-Based Enterprise Sales",
-        "Partner Ecosystem & Reseller Channel",
-      ],
-    },
-    {
-      id: "annual_churn",
-      question: "What is your estimated annual net revenue churn rate?",
-      hint: "Informs CFO Marcus's LTV-to-CAC payback formulas.",
-      options: [
-        "Negative Churn (High Net Expansion >110%)",
-        "Under 5% Annual Logo Churn",
-        "5% – 12% Annual Churn",
-        "Over 12% / Early stage baseline",
-      ],
-    },
-  ],
-  real_estate: [
-    {
-      id: "portfolio_scope",
-      question: "What is the primary asset mix in your portfolio?",
-      hint: "Calibrates capital depreciation, rental yield spreads, and vacancy reserves.",
-      options: [
-        "Commercial Grade-A Office Leasing",
-        "Residential Multi-Family Developments",
-        "Industrial Logistics & Warehousing Assets",
-        "Land Parcels & Mixed-Use Masterplans",
-      ],
-    },
-    {
-      id: "revenue_engine",
-      question: "What drives the majority of your cash collections?",
-      hint: "Shapes forward liquidity horizons and debt-service coverage ratio.",
-      options: [
-        "Predictable Monthly Long-Term Leases",
-        "Deal Brokerage & Syndication Fees",
-        "Property Asset Management Retainers",
-        "Project Construction Milestone Advances",
-      ],
-    },
-    {
-      id: "average_occupancy",
-      question: "What is your portfolio's current average occupancy rate?",
-      hint: "Sets risk alarms for asset yield compression.",
-      options: [
-        "Over 92% (Near Full Capacity)",
-        "80% – 92% (Healthy Commercial Baseline)",
-        "65% – 80% (Leasing Push Underway)",
-        "Under 65% / Turnaround Phase",
-      ],
-    },
-  ],
-  d2c: [
-    {
-      id: "fulfillment_model",
-      question: "How do you store and dispatch inventory to buyers?",
-      hint: "Used by Operations AI to track stockout exposure and shipping margins.",
-      options: [
-        "In-House Dedicated Central Warehouse",
-        "Distributed 3PL Network (Shiprocket/Delhivery)",
-        "Marketplace Direct (Amazon FBA / Flipkart)",
-        "On-Demand Contract Manufacturing Dispatch",
-      ],
-    },
-    {
-      id: "sku_count",
-      question: "How many active SKUs (stock keeping units) do you manage?",
-      hint: "Determines working capital cycle and inventory holding costs.",
-      options: [
-        "Focused Hero Catalog (1 – 15 SKUs)",
-        "Expanding Lineup (16 – 75 SKUs)",
-        "Broad Multi-Category (75 – 300 SKUs)",
-        "High-Volume Enterprise (300+ SKUs)",
-      ],
-    },
-    {
-      id: "primary_channel",
-      question: "Where does your brand acquire the highest order volume?",
-      hint: "Informs CMO Elena's blended ROAS and repeat purchase modeling.",
-      options: [
-        "Direct Brand Website (Shopify/Custom)",
-        "Amazon & Flipkart Marketplaces",
-        "Quick-Commerce (Blinkit, Zepto, Instamart)",
-        "Omnichannel / Offline Retail Stores",
-      ],
-    },
-  ],
-  agency: [
-    {
-      id: "billing_structure",
-      question: "What is your agency's standard client agreement structure?",
-      hint: "Directly calculates utilization rates, revenue realization, and margin buffers.",
-      options: [
-        "Monthly Rolling Strategic Retainers",
-        "Fixed-Price SOW Milestones with Delivery Gates",
-        "Blended Hourly / Time & Materials",
-        "Performance Incentive / Revenue-Share Model",
-      ],
-    },
-    {
-      id: "client_concentration",
-      question: "How many core accounts represent >60% of your revenue?",
-      hint: "Flags single-client concentration vulnerabilities in the Gap Register.",
-      options: [
-        "1 – 2 Whale Accounts (High Concentration)",
-        "3 – 6 Anchor Accounts (Balanced Core)",
-        "7 – 15 Diversified Active Accounts",
-        "Highly Distributed (No client >10%)",
-      ],
-    },
-    {
-      id: "team_utilization",
-      question: "What is your target billable biller utilization?",
-      hint: "Used to model hiring triggers before taking on new enterprise mandates.",
-      options: [
-        "Over 85% (High Billable Load)",
-        "70% – 85% (Optimal Creative & Exec Balance)",
-        "50% – 70% (Capacity Available for Scaling)",
-        "Under 50% / Repositioning offerings",
-      ],
-    },
-  ],
-  it: [
-    {
-      id: "service_delivery",
-      question: "What is the primary scope of your IT delivery?",
-      hint: "Calibrates engineering margins, bench costs, and cloud infrastructure pass-throughs.",
-      options: [
-        "Custom Enterprise Software & Web Development",
-        "Cloud Infrastructure & Managed DevOps (AWS/Azure)",
-        "Staff Augmentation & Dedicated Pods",
-        "Cybersecurity, Compliance & Audits",
-      ],
-    },
-    {
-      id: "contract_duration",
-      question: "What is the typical tenure of your client engagements?",
-      hint: "Projects forward cash runway and pipeline replenishment requirements.",
-      options: [
-        "Multi-Year Enterprise Managed Services (2-3+ yrs)",
-        "Annual Service Level Agreements (12 months)",
-        "6-Month Development Sprints",
-        "Ad-hoc Short Engagements (1-3 months)",
-      ],
-    },
-    {
-      id: "bench_rate",
-      question: "What percentage of billable engineers are on bench/unallocated?",
-      hint: "Informs CFO Marcus's gross margin protection rules.",
-      options: [
-        "Zero Bench / Immediate Backfill Needed",
-        "Healthy Buffer (< 8% on Bench)",
-        "8% – 18% Bench Reserve",
-        "Over 18% / Optimization Needed",
-      ],
-    },
-  ],
-  healthcare: [
-    {
-      id: "practice_model",
-      question: "What is the primary structure of your healthcare operations?",
-      hint: "Calibrates equipment amortisation, doctor payout ratios, and bed turnover.",
-      options: [
-        "Multi-Specialty Hospital or Surgery Center",
-        "Outpatient Specialty Clinic Chain",
-        "Diagnostic Labs & Pathology Centers",
-        "Dental & Cosmetic Wellness Center",
-      ],
-    },
-    {
-      id: "patient_volume",
-      question: "What is your average daily patient footfall?",
-      hint: "Determines revenue per practitioner and clinical throughput efficiency.",
-      options: [
-        "Over 250 Patients / Day (High Volume)",
-        "100 – 250 Patients / Day",
-        "30 – 100 Patients / Day",
-        "Boutique / High-Touch (< 30 Patients/Day)",
-      ],
-    },
-  ],
-  manufacturing: [
-    {
-      id: "production_model",
-      question: "What is your core manufacturing & delivery cycle?",
-      hint: "Shapes factory capacity models, downtime reserves, and scrap rate metrics.",
-      options: [
-        "Continuous Make-to-Stock (MTS) High-Volume Runs",
-        "Custom Engineered Make-to-Order (MTO)",
-        "OEM White-Label for Enterprise Brands",
-        "Batch Assembly & Specialized Fabrication",
-      ],
-    },
-    {
-      id: "raw_lead_time",
-      question: "What is your critical raw material procurement lead time?",
-      hint: "Used to model safety stock and working capital lockup.",
-      options: [
-        "Short Domestic Supply (< 10 Days)",
-        "2 – 4 Weeks Procurement Cycle",
-        "1 – 3 Months (Import / Custom Component Dependent)",
-        "Over 3 Months (Global Supply Chain Buffer Required)",
-      ],
-    },
-  ],
-  finance: [
-    {
-      id: "fin_scope",
-      question: "What is the primary financial vehicle or advisory focus?",
-      hint: "Configures fiduciary compliance, AUM schedules, and advisory realization.",
-      options: [
-        "Wealth Management & Multi-Family Office",
-        "NBFC / Private Credit & Secured Lending",
-        "Corporate Advisory, M&A & Capital Syndication",
-        "Tax, Audit & Statutory Assurance Services",
-      ],
-    },
-    {
-      id: "fee_mechanism",
-      question: "What is your primary revenue generation mechanism?",
-      hint: "Determines quarterly fee collection schedules and liquidity models.",
-      options: [
-        "Asset-Based AUM % Retainer Fee",
-        "Transaction Success Fees & Syndicate Spread",
-        "Fixed Advisory Retainers & Retainer Mandates",
-        "Net Interest Margin (NIM) on Loan Portfolios",
-      ],
-    },
-  ],
-  other: [
-    {
-      id: "operating_model",
-      question: "What is the primary operational rhythm of your business?",
-      hint: "Astra synthesizes custom agent behaviors from your operating model.",
-      options: [
-        "B2B Professional Contracts & Deliverables",
-        "High-Frequency Consumer Transactions",
-        "Recurring Memberships / Subscriptions",
-        "Asset Utilization & Field Operations",
-      ],
-    },
-    {
-      id: "core_bottleneck",
-      question: "Where is the largest operational drag currently located?",
-      hint: "Directly primes your initial Gap Register priorities.",
-      options: [
-        "Founder Being the Single Point of Contact & Sale",
-        "Unpredictable Working Capital & Delayed Collections",
-        "Sales Pipeline Inconsistency & Conversion Drops",
-        "Talent Quality, Handover & Mid-Management Friction",
-      ],
-    },
-  ],
-};
+interface DynamicQuestionParams {
+  businessType: string;
+  customBusinessType?: string;
+  companyName?: string;
+  founderName?: string;
+  teamSize?: string | number;
+  annualRevenue?: string | number;
+  monthlyRevenue?: string | number;
+  monthlyBurn?: string | number;
+  cashOnHand?: string | number;
+  website?: string;
+  extractedData?: {
+    positioning?: string;
+    offerings?: string;
+    icp?: string;
+    metricsNote?: string;
+    verifiedDomain?: string;
+  };
+}
+
+function getDynamicQuestions(params: DynamicQuestionParams): DynamicQuestion[] {
+  const cName = params.companyName?.trim() || "Your Company";
+  const fName = params.founderName?.trim() || "Founder";
+  const teamNum = Number(params.teamSize) || 10;
+  const teamLabel = `${teamNum} team member${teamNum === 1 ? "" : "s"}`;
+  const annRevNum = Number(params.annualRevenue) || 6000000;
+  const monthlyRevNum = Number(params.monthlyRevenue) || Math.round(annRevNum / 12);
+  const revLabel = `₹${monthlyRevNum.toLocaleString("en-IN")}/mo`;
+  const burnNum = Number(params.monthlyBurn) || 150000;
+  const cashNum = Number(params.cashOnHand) || 1200000;
+  const runwayMonths = burnNum > 0 ? (cashNum / burnNum).toFixed(1) : "18+";
+  const bType = params.businessType || "it";
+
+  switch (bType) {
+    case "it":
+      return [
+        {
+          id: "it_service_delivery",
+          question: `What is the primary scope of ${cName}'s technology delivery?`,
+          hint: `Calibrates engineering gross margins, bench idle cost, and cloud pass-throughs for ${cName}'s ${teamLabel}.`,
+          options: [
+            `Custom Enterprise Software & Web Platforms (${cName} Core)`,
+            `Cloud Infrastructure, Managed DevOps & Site Reliability (AWS/Azure)`,
+            teamNum > 20
+              ? `Dedicated Engineering Squads & Staff Augmentation (${teamLabel})`
+              : `Agile Boutique Development Pods (${fName}-Led)`,
+            `Cybersecurity, System Audits & Compliance Engineering`,
+          ],
+        },
+        {
+          id: "it_contract_duration",
+          question: `What is the typical tenure of client engagements for ${cName}?`,
+          hint: `Projects forward cash runway (${runwayMonths} mo verified) and pipeline velocity needed to sustain ${revLabel}.`,
+          options: [
+            `Multi-Year Enterprise Managed Services (2 – 3+ yrs contracts)`,
+            `Annual Service Level Agreements & Retainers (12 months)`,
+            `6-Month Project Sprints with Milestone Gates`,
+            `Ad-Hoc Short Engagements & Proof-of-Concepts (1 – 3 months)`,
+          ],
+        },
+        {
+          id: "it_bench_rate",
+          question: `What percentage of billable engineers or developers at ${cName} are unallocated on bench?`,
+          hint: `Informs CFO Marcus's gross margin protection rules and recruitment triggers across your ${teamLabel}.`,
+          options: [
+            `Near-Zero Bench / Immediate Hiring Backfill Needed for Pipeline`,
+            `Optimal Buffer (< 8% of ${teamLabel} on Bench)`,
+            `8% – 18% Bench Reserve Available for Immediate Onboarding`,
+            `Over 18% Bench / Operational Utilization Optimization Needed`,
+          ],
+        },
+      ];
+
+    case "saas":
+      return [
+        {
+          id: "saas_pricing_model",
+          question: `What is ${cName}'s primary software packaging & pricing model?`,
+          hint: `Helps Astra calibrate recurring MRR predictability and expansion revenue models for ${cName}.`,
+          options: [
+            `Per-Seat / User License Subscriptions (Monthly & Annual)`,
+            `Usage-Based / Consumption-Metered Billing`,
+            `Tiered Flat-Rate Subscriptions (Starter, Growth, Enterprise)`,
+            `High-ACV Custom Enterprise Contracts with Multi-Year Commitments`,
+          ],
+        },
+        {
+          id: "saas_sales_motion",
+          question: `How do enterprise customers primarily discover and buy from ${cName}?`,
+          hint: `Calibrates sales velocity and rep quota benchmarks across your ${teamLabel}.`,
+          options: [
+            `Product-Led Growth (Self-Serve Trial to Paid Conversion)`,
+            `Inbound Inquiries, Demo Requests & Inside Sales Reps`,
+            `Outbound Account-Based Enterprise Sales (${fName} / Direct Closing)`,
+            `Partner Ecosystem, App Marketplaces & Reseller Network`,
+          ],
+        },
+        {
+          id: "saas_annual_churn",
+          question: `What is ${cName}'s estimated annual net revenue churn rate?`,
+          hint: `Informs CFO Marcus's LTV-to-CAC payback formulas calibrated against ${revLabel} run-rate.`,
+          options: [
+            `Net Expansion > 110% (Negative Churn / High Account Expansion)`,
+            `Under 5% Annual Logo Churn (Top-Tier SaaS Benchmark)`,
+            `5% – 12% Annual Churn (Healthy Industry Standard)`,
+            `Over 12% Churn / Churn Defense Playbook Active`,
+          ],
+        },
+      ];
+
+    case "d2c":
+      return [
+        {
+          id: "d2c_fulfillment_model",
+          question: `How does ${cName} store, fulfill, and dispatch inventory to buyers?`,
+          hint: `Used by Operations AI to track stockout exposure and shipping margins across ${teamLabel}.`,
+          options: [
+            `In-House Dedicated Central Warehouse (${teamLabel} Operations)`,
+            `Distributed 3PL Network (Shiprocket, Delhivery, Bluedart)`,
+            `Marketplace Fulfillment (Amazon FBA, Flipkart Assured)`,
+            `On-Demand Contract Manufacturing Direct Dispatch`,
+          ],
+        },
+        {
+          id: "d2c_sku_count",
+          question: `How many active product SKUs does ${cName} actively manage?`,
+          hint: `Determines working capital lockup and inventory holding costs for your ${revLabel} volume.`,
+          options: [
+            `Focused Hero Catalog (1 – 15 Core SKUs)`,
+            `Expanding Lineup (16 – 75 SKUs)`,
+            `Broad Multi-Category Lineup (75 – 250 SKUs)`,
+            `High-Volume Enterprise Catalog (250+ SKUs)`,
+          ],
+        },
+        {
+          id: "d2c_primary_channel",
+          question: `Where does ${cName} acquire the highest order volume and revenue?`,
+          hint: `Informs CMO Elena's blended ROAS and repeat purchase modeling.`,
+          options: [
+            `Direct Brand Website (Shopify, Custom D2C Storefront)`,
+            `Marketplaces (Amazon, Flipkart, Myntra)`,
+            `Quick-Commerce Platforms (Blinkit, Zepto, Instamart)`,
+            `Omnichannel & Offline Retail Stores`,
+          ],
+        },
+      ];
+
+    case "agency":
+      return [
+        {
+          id: "agency_billing_structure",
+          question: `What is ${cName}'s standard client agreement structure?`,
+          hint: `Directly calculates utilization rates, revenue realization, and margin buffers for ${teamLabel}.`,
+          options: [
+            `Monthly Rolling Strategic Retainers (Recurring MRR)`,
+            `Fixed-Price SOW Milestones with Delivery Gates`,
+            `Blended Hourly / Time & Materials Billing`,
+            `Performance-Linked / Revenue-Share Model`,
+          ],
+        },
+        {
+          id: "agency_client_concentration",
+          question: `How many core client accounts represent >60% of ${cName}'s revenue?`,
+          hint: `Flags account concentration vulnerabilities against ${revLabel} monthly operations.`,
+          options: [
+            `1 – 2 Whale Accounts (High Concentration Vulnerability)`,
+            `3 – 6 Anchor Accounts (Balanced Core Baseline)`,
+            `7 – 15 Diversified Retainer Accounts`,
+            `Highly Distributed (No single client represents >10% of revenue)`,
+          ],
+        },
+        {
+          id: "agency_team_utilization",
+          question: `What is the target billable utilization rate across ${cName}'s ${teamLabel}?`,
+          hint: `Used to model capacity triggers before ${fName} takes on new client mandates.`,
+          options: [
+            `Over 85% (High Billable Load / Near Capacity)`,
+            `70% – 85% (Optimal Creative & Execution Balance)`,
+            `50% – 70% (Capacity Available for Immediate Scaling)`,
+            `Under 50% / Service Repositioning Underway`,
+          ],
+        },
+      ];
+
+    case "real_estate":
+      return [
+        {
+          id: "re_portfolio_scope",
+          question: `What is the primary asset mix in ${cName}'s portfolio?`,
+          hint: `Calibrates capital depreciation, rental yield spreads, and asset valuation models.`,
+          options: [
+            `Commercial Grade-A Office & Tech Park Leasing`,
+            `Residential Multi-Family Developments & Communities`,
+            `Industrial Logistics, Warehousing & Cold Storage`,
+            `Land Parcels & Mixed-Use Masterplans`,
+          ],
+        },
+        {
+          id: "re_revenue_engine",
+          question: `What drives the primary cash collection rhythm for ${cName}?`,
+          hint: `Shapes forward liquidity horizons and debt-service coverage against ${revLabel}.`,
+          options: [
+            `Predictable Monthly Long-Term Commercial Leases`,
+            `Brokerage, Transaction & Syndication Commissions`,
+            `Property Asset Management & Maintenance Retainers`,
+            `Project Construction Milestone Drawdowns`,
+          ],
+        },
+        {
+          id: "re_average_occupancy",
+          question: `What is the current average occupancy or leasing rate across ${cName}'s portfolio?`,
+          hint: `Sets yield compression alarms across your ${teamLabel} asset management.`,
+          options: [
+            `Over 92% (Near Full Capacity / Prime Occupancy)`,
+            `80% – 92% (Healthy Operational Baseline)`,
+            `65% – 80% (Active Tenant Leasing Drive Underway)`,
+            `Under 65% / Renovation & Repositioning Phase`,
+          ],
+        },
+      ];
+
+    case "healthcare":
+      return [
+        {
+          id: "hc_practice_model",
+          question: `What is the primary operational structure of ${cName}?`,
+          hint: `Calibrates equipment amortization, practitioner payout ratios, and patient throughput.`,
+          options: [
+            `Multi-Specialty Hospital or Day-Surgery Center`,
+            `Outpatient Specialty Clinic Chain / Diagnostic Network`,
+            `Digital Tele-Health & Remote Patient Monitoring`,
+            `Dental, Aesthetic & Preventive Wellness Center`,
+          ],
+        },
+        {
+          id: "hc_acquisition",
+          question: `How does ${cName} primarily acquire and schedule patient consultations?`,
+          hint: `Informs patient lifetime value and clinic expansion thresholds for ${teamLabel}.`,
+          options: [
+            `Direct Walk-Ins & Community Practitioner Referrals`,
+            `Digital Marketing, Website & Online Tele-Consult Portals`,
+            `Corporate Health Checkups & Insurer Empanelments`,
+            `Recurring Chronic Care / Patient Subscription Memberships`,
+          ],
+        },
+        {
+          id: "hc_turnaround",
+          question: `What is the typical appointment or diagnostic turnaround time at ${cName}?`,
+          hint: `Identifies clinical throughput bottlenecks and staff scheduling efficiency for ${teamLabel}.`,
+          options: [
+            `Same-Day Walk-In Consultations & Rapid Diagnostics`,
+            `Scheduled Within 24 – 48 Hours`,
+            `Advance Multi-Week Procedure Scheduling`,
+            `Custom Multi-Stage Treatment Protocol Care Plans`,
+          ],
+        },
+      ];
+
+    case "manufacturing":
+      return [
+        {
+          id: "mfg_production_model",
+          question: `What is ${cName}'s primary manufacturing and production model?`,
+          hint: `Calibrates plant capacity utilization, machine maintenance, and raw material cycles.`,
+          options: [
+            `In-House Dedicated Manufacturing Facility (${teamLabel})`,
+            `Contract / OEM Third-Party Manufacturing Partners`,
+            `Custom Make-to-Order (MTO) Engineering Fabrication`,
+            `High-Volume Continuous Batch Processing`,
+          ],
+        },
+        {
+          id: "mfg_lead_time",
+          question: `What is the average lead time from customer purchase order to dispatch at ${cName}?`,
+          hint: `Informs working capital cycles and inventory holding buffers for ${revLabel} volume.`,
+          options: [
+            `Under 48 Hours (Ready Stock / Fast-Moving Goods)`,
+            `1 – 3 Weeks (Standard Production Batch Cycle)`,
+            `1 – 3 Months (Custom Engineered / High-Value Equipment)`,
+            `Project-Based Multi-Month Staged Deliveries`,
+          ],
+        },
+        {
+          id: "mfg_distribution",
+          question: `How does ${cName} primarily distribute products to end buyers?`,
+          hint: `Maps channel partner margins, dealer incentives, and receivables aging.`,
+          options: [
+            `Direct Enterprise B2B Supply Contracts`,
+            `Authorized Dealer & Distributor Network Across India`,
+            `OEM Tier-1/Tier-2 Supplier to Industrial Brands`,
+            `D2C & Direct Commercial Procurement Channels`,
+          ],
+        },
+      ];
+
+    case "finance":
+      return [
+        {
+          id: "fin_revenue_mech",
+          question: `What is ${cName}'s primary revenue generation mechanism?`,
+          hint: `Determines fee collection schedules and liquidity models for ${cName}.`,
+          options: [
+            `Asset-Based AUM % Retainer Fee`,
+            `Transaction Success Fees & Syndicate Placement Spreads`,
+            `Fixed Advisory Retainers & Corporate Mandates`,
+            `Net Interest Margin (NIM) on Loan & Credit Portfolios`,
+          ],
+        },
+        {
+          id: "fin_client_segment",
+          question: `What is the primary client segment serviced by ${cName}?`,
+          hint: `Calibrates regulatory compliance, KYC depth, and onboarding friction.`,
+          options: [
+            `High Net Worth Individuals (HNIs) & Family Offices`,
+            `Mid-Market Corporations & Growing Enterprises`,
+            `Retail Investors & Direct Retail Borrowers`,
+            `Institutional Funds & Sovereign Portfolios`,
+          ],
+        },
+        {
+          id: "fin_compliance",
+          question: `What is the governance and regulatory compliance reporting framework at ${cName}?`,
+          hint: `Monitors audit readiness and risk management protocols for your ${teamLabel}.`,
+          options: [
+            `SEBI / RBI Licensed & Regulated Entity`,
+            `Standard Corporate Advisory / Non-Custodial Intermediary`,
+            `AMFI Registered Distributor / Advisory Firm`,
+            `Fintech / Tech Platform Partnered with Regulated NBFC/Bank`,
+          ],
+        },
+      ];
+
+    default: {
+      // Custom Industry / Others
+      const customLabel = params.customBusinessType?.trim() || "Custom Business";
+      return [
+        {
+          id: "custom_operating_model",
+          question: `What is the core revenue engine and delivery model for ${cName} in ${customLabel}?`,
+          hint: `Calibrates operating rhythm, pricing structure, and margin buffers for ${cName}'s ${teamLabel}.`,
+          options: [
+            `B2B Long-Term Contracts & Managed Deliverables in ${customLabel}`,
+            `Direct High-Volume Transactions & Fulfillment`,
+            `Recurring Retainers & Membership Subscriptions`,
+            `Specialized Project Execution & Advisory Mandates`,
+          ],
+        },
+        {
+          id: "custom_sales_cycle",
+          question: `What is the typical sales cycle and client contract tenure for ${cName}?`,
+          hint: `Projects forward cash runway (${runwayMonths} mo) and pipeline replenishment needed to sustain ${revLabel}.`,
+          options: [
+            `Multi-Year Strategic Engagements (2 – 3+ yrs)`,
+            `Annual Contracts with Scheduled Milestones (12 months)`,
+            `3 – 6 Month Project Deployments`,
+            `Short-Cycle / Rapid Transactions (< 30 days)`,
+          ],
+        },
+        {
+          id: "custom_core_bottleneck",
+          question: `Where is the largest operational constraint or bottleneck across ${cName}'s ${teamLabel} today?`,
+          hint: `Directly primes Astra and Marcus's initial Gap Register and task delegation for ${fName}.`,
+          options: [
+            `Founder (${fName}) Being the Single Point of Contact & Sale`,
+            `Working Capital Lockup & Delayed Customer Collections`,
+            `Sales Pipeline Inconsistency & Conversion Deceleration`,
+            `Talent Quality, Project Handover & Mid-Management Friction`,
+          ],
+        },
+      ];
+    }
+  }
+}
 
 const TOOLS_OPTIONS = [
   {
@@ -1133,7 +1233,33 @@ export default function OnboardingPage() {
     }, 650);
   };
 
-  const currentQuestions = INDUSTRY_DYNAMIC_QUESTIONS[businessType] || INDUSTRY_DYNAMIC_QUESTIONS.other;
+  const currentQuestions = useMemo(() => {
+    return getDynamicQuestions({
+      businessType,
+      customBusinessType,
+      companyName,
+      founderName,
+      teamSize,
+      annualRevenue,
+      monthlyRevenue,
+      monthlyBurn,
+      cashOnHand,
+      website,
+      extractedData,
+    });
+  }, [
+    businessType,
+    customBusinessType,
+    companyName,
+    founderName,
+    teamSize,
+    annualRevenue,
+    monthlyRevenue,
+    monthlyBurn,
+    cashOnHand,
+    website,
+    extractedData,
+  ]);
 
   return (
     <div className="min-h-screen bg-bg text-text flex flex-col justify-between p-4 sm:p-6 lg:p-8">
@@ -1600,13 +1726,13 @@ export default function OnboardingPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[10px] font-bold uppercase tracking-wider mb-2">
-                      Tailored Industry Telemetry
+                      Tailored Business Telemetry · {companyName.trim() || "Your Business"}
                     </div>
                     <h1 className="text-lg sm:text-xl font-bold text-text tracking-tight font-sans">
                       Operational Anatomy & Mechanics
                     </h1>
                     <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                      Calibrated specifically for your <span className="font-semibold text-text">{businessTypes.find(b => b.id === businessType)?.title || "business"}</span> model. Answer or customize these questions, or skip to continue anytime.
+                      Calibrated specifically for <span className="font-semibold text-text">{companyName.trim() || "your company"}</span> ({businessType === "other" && customBusinessType.trim() ? customBusinessType.trim() : businessTypes.find(b => b.id === businessType)?.title || "business"}{teamSize ? ` · ${teamSize} team members` : ""}{annualRevenue ? ` · ₹${Number(annualRevenue).toLocaleString("en-IN")}/yr` : ""}). Answer or customize these questions, or skip to continue anytime.
                     </p>
                   </div>
                   <button
