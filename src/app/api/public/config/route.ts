@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   getPlatformConfig,
+  setPlatformConfig,
   DEFAULT_WEBSITE_CONFIG,
   DEFAULT_DASHBOARD_FEATURES,
   DEFAULT_TOOLS_CATALOG,
@@ -15,8 +16,21 @@ export async function GET() {
     const website = getPlatformConfig("website_config", DEFAULT_WEBSITE_CONFIG);
     const features = getPlatformConfig("dashboard_features", DEFAULT_DASHBOARD_FEATURES);
     const nav = getPlatformConfig("dashboard_nav", defaultNavItems);
-    const tools = getPlatformConfig("tools_catalog", DEFAULT_TOOLS_CATALOG);
+    let tools = getPlatformConfig("tools_catalog", DEFAULT_TOOLS_CATALOG);
     let widgets = getPlatformConfig("dashboard_widgets", defaultWidgets);
+
+    // Ensure any newly added default tools are merged if missing from DB
+    const existingToolIds = new Set(tools.map((t: any) => t.id));
+    let hasNewTools = false;
+    for (const dt of DEFAULT_TOOLS_CATALOG) {
+      if (!existingToolIds.has(dt.id)) {
+        tools.push(dt);
+        hasNewTools = true;
+      }
+    }
+    if (hasNewTools) {
+      setPlatformConfig("tools_catalog", tools);
+    }
     
     // Ensure any newly added default widgets (like DataUploadWidget) are merged if missing from DB
     const existingIds = new Set(widgets.map((w: any) => w.id));
