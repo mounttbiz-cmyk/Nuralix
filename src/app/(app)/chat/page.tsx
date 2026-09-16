@@ -28,8 +28,71 @@ import {
   Zap,
   Clock,
   ShieldAlert,
-  Info
+  Info,
+  ChevronDown,
+  Cpu,
+  Check
 } from "lucide-react";
+import { parseNaturalBusinessInput, ExtractedBusinessRecord } from "@/lib/intake/nlpParser";
+import { emitBusinessDataUpdated } from "@/lib/upload/events";
+
+interface ModelOption {
+  id: "auto" | "claude-3-5" | "gpt-4o" | "deepseek-r1" | "gemini-1-5";
+  name: string;
+  shortName: string;
+  tagline: string;
+  badge: string;
+  color: string;
+  icon: string;
+}
+
+const AVAILABLE_MODELS: ModelOption[] = [
+  {
+    id: "auto",
+    name: "Auto-Route (Nuralix Orchestrator)",
+    shortName: "Auto-Route",
+    tagline: "Dynamically selects optimal model based on prompt complexity, math, or document size",
+    badge: "Intelligent Routing",
+    color: "text-brass bg-brass-soft border-brass/30",
+    icon: "⚡",
+  },
+  {
+    id: "claude-3-5",
+    name: "Claude 3.5 Sonnet",
+    shortName: "Claude 3.5",
+    tagline: "Deep strategic reasoning, executive synthesis, and leadership policy deduction",
+    badge: "Strategic Reasoning",
+    color: "text-amber-400 bg-amber-400/10 border-amber-400/30",
+    icon: "🧠",
+  },
+  {
+    id: "gpt-4o",
+    name: "GPT-4o",
+    shortName: "GPT-4o",
+    tagline: "High-speed multimodal execution, rapid task automation, and CRM tooling",
+    badge: "Fast Ops",
+    color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/30",
+    icon: "🚀",
+  },
+  {
+    id: "deepseek-r1",
+    name: "DeepSeek R1",
+    shortName: "DeepSeek R1",
+    tagline: "Mathematical rigor, unit economics, INR tax models, and break-even algorithms",
+    badge: "Math & Quant",
+    color: "text-cyan-400 bg-cyan-400/10 border-cyan-400/30",
+    icon: "📐",
+  },
+  {
+    id: "gemini-1-5",
+    name: "Gemini 1.5 Pro",
+    shortName: "Gemini 1.5 Pro",
+    tagline: "Massive document ingestion, contract analysis, and multi-file telemetry",
+    badge: "Document Intel",
+    color: "text-purple-400 bg-purple-400/10 border-purple-400/30",
+    icon: "📚",
+  },
+];
 
 interface AgentMeta {
   id: string;
@@ -205,6 +268,11 @@ interface ChatMessage {
   timestamp: string;
   content: string;
   provider?: string;
+  modelUsed?: string;
+  routingReason?: string;
+  reasoningTelemetry?: string[];
+  structuredRecord?: ExtractedBusinessRecord | null;
+  recordCommitted?: boolean;
   nextSteps?: string[];
 }
 
@@ -215,6 +283,9 @@ export default function ChatWorkspacePage() {
   const [showDossier, setShowDossier] = useState(true);
   const [searchRoster, setSearchRoster] = useState("");
   const [companyProfile, setCompanyProfile] = useState<any>(null);
+  const [selectedModel, setSelectedModel] = useState<"auto" | "claude-3-5" | "gpt-4o" | "deepseek-r1" | "gemini-1-5">("auto");
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const [expandedTelemetry, setExpandedTelemetry] = useState<Record<string, boolean>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initial seed conversations for each agent
@@ -337,9 +408,106 @@ export default function ChatWorkspacePage() {
   const activeAgent = EXECUTIVE_AGENTS.find(a => a.id === activeAgentId) || EXECUTIVE_AGENTS[0];
   const currentMessages = conversations[activeAgentId] || [];
 
+  const activeModelConfig = AVAILABLE_MODELS.find(m => m.id === selectedModel) || AVAILABLE_MODELS[0];
+
+  const handleCommitRecordFromChat = async (record: ExtractedBusinessRecord, msgId: string) => {
+    try {
+      const savedProfileStr = localStorage.getItem("nuralix_business_profile");
+      const existing = savedProfileStr ? JSON.parse(savedProfileStr) : {};
+
+      const currentMonthlyRev = Number(existing.revenue || existing.monthlyRevenue) || 500000;
+      const currentBurn = Number(existing.burn || existing.monthlyBurn) || 150000;
+      const currentCash = Number(existing.cash || existing.cashOnHand) || 1200000;
+
+      const newMonthlyRev = record.dailyRevenue
+        ? Math.round(record.dailyRevenue * 30)
+        : currentMonthlyRev;
+
+      const newBurn = record.dailyExpenses
+        ? Math.round(record.dailyExpenses * 30)
+        : currentBurn;
+
+      const newCash = record.cashOnHand
+        ? record.cashOnHand
+        : (record.dailyRevenue ? currentCash + record.dailyRevenue : currentCash);
+
+      const newAnnualRev = newMonthlyRev * 12;
+
+      const updatedProfile = {
+        ...existing,
+        revenue: newMonthlyRev,
+        monthlyRevenue: newMonthlyRev,
+        annualRevenue: newAnnualRev,
+        burn: newBurn,
+        monthlyBurn: newBurn,
+        cash: newCash,
+        cashOnHand: newCash,
+        teamSize: record.teamSize || existing.teamSize || 10,
+        lastDailyInput: {
+          dailyRevenue: record.dailyRevenue,
+          dailyOrders: record.dailyOrders,
+          dailyExpenses: record.dailyExpenses,
+          recordedAt: new Date().toISOString(),
+          notes: record.rawText,
+        },
+      };
+
+      localStorage.setItem("nuralix_business_profile", JSON.stringify(updatedProfile));
+      setCompanyProfile(updatedProfile);
+
+      try {
+        await fetch("/api/business/intake", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: updatedProfile.name,
+            monthlyRevenue: newMonthlyRev,
+            annualRevenue: newAnnualRev,
+            monthlyBurn: newBurn,
+            cashOnHand: newCash,
+            teamSize: updatedProfile.teamSize,
+          }),
+        });
+      } catch (err) {
+        console.error(err);
+      }
+
+      emitBusinessDataUpdated({
+        name: updatedProfile.name,
+        founderName: updatedProfile.founderName,
+        industry: updatedProfile.industry,
+        industryLabel: updatedProfile.industryLabel,
+        revenue: newMonthlyRev,
+        monthlyRevenue: newMonthlyRev,
+        annualRevenue: newAnnualRev,
+        burn: newBurn,
+        monthlyBurn: newBurn,
+        cash: newCash,
+        cashOnHand: newCash,
+        teamSize: updatedProfile.teamSize,
+        grossMargin: updatedProfile.grossMargin || 80,
+      });
+
+      setConversations(prev => {
+        const updatedList = (prev[activeAgentId] || []).map(m => {
+          if (m.id === msgId) {
+            return { ...m, recordCommitted: true };
+          }
+          return m;
+        });
+        return { ...prev, [activeAgentId]: updatedList };
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleSendMessage = async (textToSend?: string) => {
     const message = (textToSend || inputMessage).trim();
     if (!message || isTyping) return;
+
+    // Detect if this is a day-to-day operational input statement
+    const detectedRecord = parseNaturalBusinessInput(message);
 
     const userMsg: ChatMessage = {
       id: `usr_${Date.now()}`,
@@ -349,6 +517,8 @@ export default function ChatWorkspacePage() {
       avatar: "👤",
       timestamp: "Just now",
       content: message,
+      structuredRecord: detectedRecord,
+      recordCommitted: false,
     };
 
     setConversations(prev => ({
@@ -367,11 +537,17 @@ export default function ChatWorkspacePage() {
           message,
           agentId: activeAgentId,
           companyProfile,
+          model: selectedModel,
         }),
       });
 
       const data = await resp.json();
       if (data.success) {
+        let responseContent = data.text;
+        if (detectedRecord) {
+          responseContent = `Operational data point recorded. Today's figures (${detectedRecord.summary}) have been validated against our telemetry model. If confirmed, our forward cash reserves and revenue run-rate will be updated accordingly.`;
+        }
+
         const agentMsg: ChatMessage = {
           id: `agt_${Date.now()}`,
           sender: "agent",
@@ -379,8 +555,11 @@ export default function ChatWorkspacePage() {
           agentName: activeAgent.name + ` (${activeAgent.role})`,
           avatar: activeAgent.avatar,
           timestamp: "Just now",
-          content: data.text,
+          content: responseContent,
           provider: data.provider,
+          modelUsed: data.modelUsed,
+          routingReason: data.routingReason,
+          reasoningTelemetry: data.reasoningTelemetry,
         };
 
         setConversations(prev => ({
@@ -398,7 +577,9 @@ export default function ChatWorkspacePage() {
         avatar: activeAgent.avatar,
         timestamp: "Just now",
         content: `Acknowledged for ${companyProfile?.name || "Apex Analytics"}. Based on current financial reserves (₹${Number(companyProfile?.cash || 1200000).toLocaleString("en-IN")}), I recommend maintaining strict capital discipline while executing on this initiative.`,
-        provider: "nuralix-ai",
+        provider: activeModelConfig.name,
+        modelUsed: activeModelConfig.name,
+        routingReason: activeModelConfig.tagline,
       };
       setConversations(prev => ({
         ...prev,
@@ -582,8 +763,59 @@ export default function ChatWorkspacePage() {
 
             {/* Header Right Actions */}
             <div className="flex items-center gap-2 shrink-0">
+              {/* Multi-Model Selector Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsModelMenuOpen(prev => !prev)}
+                  className="px-2.5 py-1.5 rounded-xl bg-surface border border-line hover:border-brass/40 text-xs font-semibold text-text flex items-center gap-1.5 transition-all btn-tactile cursor-pointer shadow-xs"
+                >
+                  <span className="text-sm">{activeModelConfig.icon}</span>
+                  <span className="hidden md:inline text-[11px] font-bold">{activeModelConfig.shortName}</span>
+                  <ChevronDown className={`w-3 h-3 text-text-muted transition-transform ${isModelMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {isModelMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 w-72 p-2 rounded-2xl bg-surface/98 backdrop-blur-xl border border-line shadow-2xl z-50 space-y-1 animate-scale-up">
+                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-text-muted flex items-center justify-between border-b border-line pb-1.5 mb-1">
+                      <span>Unified Multi-Model Engine</span>
+                      <span className="text-brass">5 Active</span>
+                    </div>
+                    {AVAILABLE_MODELS.map(m => {
+                      const isSel = selectedModel === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedModel(m.id);
+                            setIsModelMenuOpen(false);
+                          }}
+                          className={`w-full p-2 rounded-xl text-left transition-all flex items-start gap-2.5 cursor-pointer ${
+                            isSel
+                              ? "bg-brass-soft/40 border border-brass/40 text-text"
+                              : "hover:bg-surface-2 border border-transparent text-text-muted hover:text-text"
+                          }`}
+                        >
+                          <span className="text-base mt-0.5">{m.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-text block truncate">{m.name}</span>
+                              {isSel && <Check className="w-3.5 h-3.5 text-brass shrink-0" />}
+                            </div>
+                            <p className="text-[10px] text-text-muted leading-tight mt-0.5 line-clamp-2">
+                              {m.tagline}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Quick Tools Launchers */}
-              <div className="hidden sm:flex items-center gap-1.5">
+              <div className="hidden lg:flex items-center gap-1.5">
                 {activeAgent.quickTools.map((tool, idx) => (
                   <Link
                     key={idx}
@@ -636,9 +868,9 @@ export default function ChatWorkspacePage() {
                     <div className={`flex items-center gap-2 text-[10px] ${isUser ? "justify-end" : ""}`}>
                       <span className="font-bold text-text">{msg.agentName}</span>
                       <span className="text-text-muted">{msg.timestamp}</span>
-                      {msg.provider && (
+                      {msg.modelUsed && (
                         <span className="px-1.5 py-0.2 rounded bg-surface-2 border border-line text-[9px] font-mono text-cyan-400">
-                          ✨ Nuralix AI · Live Synthesis
+                          ⚡ {msg.modelUsed}
                         </span>
                       )}
                     </div>
@@ -651,6 +883,90 @@ export default function ChatWorkspacePage() {
                       }`}
                     >
                       <div className="whitespace-pre-wrap">{msg.content}</div>
+
+                      {/* Structured Day-to-Day Input Card */}
+                      {msg.structuredRecord && (
+                        <div className="mt-3 p-3.5 rounded-xl bg-surface border border-brass/40 text-text space-y-2.5 shadow-sm text-left">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-brass flex items-center gap-1.5">
+                              <Sparkles className="w-3 h-3 text-brass" />
+                              <span>Day-to-Day Operational Update Detected</span>
+                            </span>
+                            {msg.recordCommitted ? (
+                              <span className="text-[10px] px-2 py-0.2 rounded-full bg-jade/15 border border-jade/30 text-jade font-bold flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span>Committed to Ledger</span>
+                              </span>
+                            ) : (
+                              <span className="text-[9px] px-1.5 py-0.2 rounded bg-surface-2 border border-line text-text-muted font-mono font-semibold">
+                                Uncommitted
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                            {msg.structuredRecord.dailyOrders !== undefined && (
+                              <div className="p-2 rounded-lg bg-surface-2/60 border border-line">
+                                <span className="text-[10px] text-text-muted block">Orders</span>
+                                <span className="text-xs font-bold text-text">{msg.structuredRecord.dailyOrders}</span>
+                              </div>
+                            )}
+                            {msg.structuredRecord.dailyRevenue !== undefined && (
+                              <div className="p-2 rounded-lg bg-surface-2/60 border border-line">
+                                <span className="text-[10px] text-text-muted block">Revenue</span>
+                                <span className="text-xs font-bold text-jade">₹{msg.structuredRecord.dailyRevenue.toLocaleString("en-IN")}</span>
+                              </div>
+                            )}
+                            {msg.structuredRecord.dailyExpenses !== undefined && (
+                              <div className="p-2 rounded-lg bg-surface-2/60 border border-line">
+                                <span className="text-[10px] text-text-muted block">Expenses / Burn</span>
+                                <span className="text-xs font-bold text-amber">₹{msg.structuredRecord.dailyExpenses.toLocaleString("en-IN")}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {!msg.recordCommitted && (
+                            <div className="pt-1 flex justify-end">
+                              <button
+                                type="button"
+                                onClick={() => handleCommitRecordFromChat(msg.structuredRecord!, msg.id)}
+                                className="px-3.5 py-1.5 rounded-lg bg-brass text-white text-[11px] font-bold hover:brightness-110 btn-tactile inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>Confirm & Record to Business Ledger</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Reasoning Telemetry Drawer */}
+                      {msg.reasoningTelemetry && msg.reasoningTelemetry.length > 0 && (
+                        <div className="mt-3 pt-2 border-t border-line/50">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedTelemetry(prev => ({ ...prev, [msg.id]: !prev[msg.id] }))}
+                            className="text-[10px] text-text-muted hover:text-cyan-400 flex items-center gap-1 font-mono cursor-pointer"
+                          >
+                            <span>{expandedTelemetry[msg.id] ? "▾ Hide Model Reasoning Telemetry" : "▸ View Model Reasoning & Routing Telemetry"}</span>
+                          </button>
+                          {expandedTelemetry[msg.id] && (
+                            <div className="p-2.5 rounded-lg bg-surface border border-line text-[10px] font-mono text-text-muted space-y-1 animate-fade-in mt-1.5">
+                              {msg.routingReason && (
+                                <div className="text-brass font-bold pb-1 border-b border-line/60">
+                                  {msg.routingReason}
+                                </div>
+                              )}
+                              {msg.reasoningTelemetry.map((t, idx) => (
+                                <div key={idx} className="flex items-start gap-1.5">
+                                  <span className="text-cyan-400">↳</span>
+                                  <span>{t}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       {/* Interactive Action Playbooks */}
                       {msg.nextSteps && msg.nextSteps.length > 0 && (

@@ -22,6 +22,7 @@ import {
 import { Suspense } from "react";
 import { DailyCheckInModal } from "@/components/checkin/DailyCheckInModal";
 import { UploadDataModal } from "@/components/upload/UploadDataModal";
+import { QuickBusinessInputModal } from "@/components/intake/QuickBusinessInputModal";
 import { useBusinessDataSync } from "@/lib/upload/events";
 import { Clock, Send, Radio } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
@@ -35,6 +36,7 @@ function DashboardContent() {
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [liquidRunwayMo, setLiquidRunwayMo] = useState("8.0");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isQuickInputModalOpen, setIsQuickInputModalOpen] = useState(false);
 
   // Daily Check-In State
   const [checkinData, setCheckinData] = useState<{
@@ -338,6 +340,16 @@ function DashboardContent() {
 
           {/* Action Controls: Upload Business Data + Profile Selector + Customize Layout */}
           <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Quick Business Input Button */}
+            <button
+              type="button"
+              onClick={() => setIsQuickInputModalOpen(true)}
+              className="px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-gradient-to-r from-brass/20 to-amber-500/20 border-brass/40 text-brass hover:brightness-110 shadow-xs"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-brass" />
+              <span>+ Quick Business Input</span>
+            </button>
+
             {/* Upload Business Data Button */}
             <button
               type="button"
@@ -574,6 +586,15 @@ function DashboardContent() {
         onClose={() => setIsUploadModalOpen(false)}
         onSuccess={(metrics) => {
           notify(`Business Data applied: ${metrics.name || companyName}! Telemetry synchronized.`);
+        }}
+      />
+
+      {/* Quick Business Input Modal */}
+      <QuickBusinessInputModal
+        isOpen={isQuickInputModalOpen}
+        onClose={() => setIsQuickInputModalOpen(false)}
+        onSuccess={() => {
+          notify(`Daily Business Input recorded! Live metrics updated.`);
         }}
       />
     </div>

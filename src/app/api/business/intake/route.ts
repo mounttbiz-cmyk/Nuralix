@@ -57,9 +57,30 @@ export async function POST(req: Request) {
       whatsappOptIn = false,
       whatsappNumber = "",
       dynamicAnswers = {},
+      rawText,
+      structured,
     } = body;
 
     const now = new Date().toISOString();
+
+    // If structured daily input was received, calculate updated revenue / burn / cash
+    let finalAnnualRevenue = annualRevenue;
+    let finalMonthlyRevenue = monthlyRevenue;
+    let finalMonthlyBurn = monthlyBurn;
+    let finalCashOnHand = cashOnHand;
+
+    if (structured) {
+      if (structured.revenue) {
+        finalMonthlyRevenue = Number(structured.revenue);
+        finalAnnualRevenue = Number(structured.revenue) * 12;
+      }
+      if (structured.burn || structured.expenses) {
+        finalMonthlyBurn = Number(structured.burn || structured.expenses);
+      }
+      if (structured.cash) {
+        finalCashOnHand = Number(structured.cash);
+      }
+    }
 
     // 1. Update or create business record
     const existing = db.prepare("SELECT id FROM businesses WHERE id = ?").get(DEFAULT_BUSINESS_ID);
@@ -77,30 +98,30 @@ export async function POST(req: Request) {
           monthly_revenue = COALESCE(?, monthly_revenue),
           monthly_burn = COALESCE(?, monthly_burn),
           cash_on_hand = COALESCE(?, cash_on_hand),
-          connected_tools = ?,
-          no_integrations = ?,
-          whatsapp_opt_in = ?,
-          whatsapp_number = ?,
-          dynamic_intake_answers = ?,
+          connected_tools = COALESCE(?, connected_tools),
+          no_integrations = COALESCE(?, no_integrations),
+          whatsapp_opt_in = COALESCE(?, whatsapp_opt_in),
+          whatsapp_number = COALESCE(?, whatsapp_number),
+          dynamic_intake_answers = COALESCE(?, dynamic_intake_answers),
           updated_at = ?
         WHERE id = ?
       `).run(
-        name,
-        industry,
-        industryLabel,
-        customIndustry,
-        founderName,
-        website,
-        teamSize,
-        annualRevenue,
-        monthlyRevenue,
-        monthlyBurn,
-        cashOnHand,
-        JSON.stringify(connectedTools),
-        noIntegrations ? 1 : 0,
-        whatsappOptIn ? 1 : 0,
-        whatsappNumber,
-        JSON.stringify(dynamicAnswers),
+        name ?? null,
+        industry ?? null,
+        industryLabel ?? null,
+        customIndustry ?? null,
+        founderName ?? null,
+        website ?? null,
+        teamSize ?? null,
+        finalAnnualRevenue ?? null,
+        finalMonthlyRevenue ?? null,
+        finalMonthlyBurn ?? null,
+        finalCashOnHand ?? null,
+        connectedTools ? JSON.stringify(connectedTools) : null,
+        noIntegrations !== undefined ? (noIntegrations ? 1 : 0) : null,
+        whatsappOptIn !== undefined ? (whatsappOptIn ? 1 : 0) : null,
+        whatsappNumber ?? null,
+        dynamicAnswers ? JSON.stringify(dynamicAnswers) : null,
         now,
         DEFAULT_BUSINESS_ID
       );

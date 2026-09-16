@@ -7,7 +7,8 @@ import { usePathname } from "next/navigation";
 import { NavItem } from "@/config/schemas/nav";
 import { DynamicIcon } from "./DynamicIcon";
 import { ThemeSwitch } from "./ThemeSwitch";
-import { ShieldCheck, ChevronRight, LogOut, Sliders, Search } from "lucide-react";
+import { ShieldCheck, ChevronRight, LogOut, Sliders, Search, Sparkles } from "lucide-react";
+import { QuickBusinessInputModal } from "../intake/QuickBusinessInputModal";
 import { WEBSITE_URL } from "@/config/urls";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
@@ -56,8 +57,16 @@ export function DesktopRail({
     window.location.href = WEBSITE_URL;
   };
 
+  const [isQuickInputOpen, setIsQuickInputOpen] = React.useState(false);
+
   return (
     <aside className="hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-surface/95 dark:bg-[#080C16]/95 backdrop-blur-2xl border-r border-line select-none z-30 transition-colors">
+      {/* Quick Business Input Modal */}
+      <QuickBusinessInputModal
+        isOpen={isQuickInputOpen}
+        onClose={() => setIsQuickInputOpen(false)}
+      />
+
       {/* Brand Header */}
       <div className="p-4 border-b border-line">
         <Link href="/dashboard" className="flex items-center gap-3 group">
@@ -151,6 +160,15 @@ export function DesktopRail({
 
       {/* Footer Controls & User Menu */}
       <div className="p-3 border-t border-line space-y-3 bg-surface/90 dark:bg-[#080C16]/90 transition-colors">
+        <button
+          type="button"
+          onClick={() => setIsQuickInputOpen(true)}
+          className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-brass/15 to-amber-500/15 border border-brass/40 text-brass text-xs font-bold flex items-center justify-center gap-2 hover:brightness-110 btn-tactile cursor-pointer shadow-xs"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-brass" />
+          <span>+ Quick Business Input</span>
+        </button>
+
         <div>
           <div className="text-[10px] uppercase font-bold tracking-widest text-text-muted mb-1.5 px-1">
             Appearance
