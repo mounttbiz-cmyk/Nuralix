@@ -61,6 +61,7 @@ interface DynamicQuestion {
 
 interface DynamicQuestionParams {
   businessType: string;
+  businessTypesList?: string[];
   customBusinessType?: string;
   companyName?: string;
   founderName?: string;
@@ -79,7 +80,7 @@ interface DynamicQuestionParams {
   };
 }
 
-function getDynamicQuestions(params: DynamicQuestionParams): DynamicQuestion[] {
+function getQuestionsForType(bType: string, params: DynamicQuestionParams): DynamicQuestion[] {
   const cName = params.companyName?.trim() || "Your Company";
   const fName = params.founderName?.trim() || "Founder";
   const teamNum = Number(params.teamSize) || 10;
@@ -90,7 +91,6 @@ function getDynamicQuestions(params: DynamicQuestionParams): DynamicQuestion[] {
   const burnNum = Number(params.monthlyBurn) || 150000;
   const cashNum = Number(params.cashOnHand) || 1200000;
   const runwayMonths = burnNum > 0 ? (cashNum / burnNum).toFixed(1) : "18+";
-  const bType = params.businessType || "it";
 
   switch (bType) {
     case "it":
@@ -433,6 +433,37 @@ function getDynamicQuestions(params: DynamicQuestionParams): DynamicQuestion[] {
   }
 }
 
+function getDynamicQuestions(params: DynamicQuestionParams): DynamicQuestion[] {
+  const types = params.businessTypesList && params.businessTypesList.length > 0
+    ? params.businessTypesList
+    : [params.businessType || "it"];
+
+  if (types.length === 1) {
+    return getQuestionsForType(types[0], params);
+  }
+
+  // When multiple business types/categories are selected, gather questions across sectors
+  const collected: DynamicQuestion[] = [];
+  const seenIds = new Set<string>();
+
+  // Take top 2 questions from each selected type up to a max of 6 questions
+  const questionsPerType = types.length <= 2 ? 2 : 1;
+
+  for (const t of types) {
+    const questions = getQuestionsForType(t, params);
+    let added = 0;
+    for (const q of questions) {
+      if (!seenIds.has(q.id) && added < questionsPerType) {
+        seenIds.add(q.id);
+        collected.push(q);
+        added++;
+      }
+    }
+  }
+
+  return collected.length > 0 ? collected : getQuestionsForType(types[0], params);
+}
+
 const TOOLS_OPTIONS = [
   {
     id: "stripe",
@@ -772,7 +803,8 @@ export default function OnboardingPage() {
   const [statusMessage, setStatusMessage] = useState("Analyzing business shape…");
 
   // Form State
-  const [businessType, setBusinessType] = useState<string>("saas");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(["saas"]);
+  const businessType = selectedCategories[0] || "saas";
   const [customBusinessType, setCustomBusinessType] = useState<string>("");
   const [businessModel, setBusinessModel] = useState<string>("subscription");
   const [companyName, setCompanyName] = useState<string>("");
@@ -914,14 +946,65 @@ export default function OnboardingPage() {
     }
   };
 
+  const toggleCategory = (id: string) => {
+    setSelectedCategories(prev => {
+      const exists = prev.includes(id);
+      let updated: string[];
+      if (exists) {
+        updated = prev.filter(c => c !== id);
+      } else {
+        updated = [...prev, id];
+      }
+
+      if (!updated.includes("other")) {
+        setErrors(err => ({ ...err, customBusinessType: "" }));
+      }
+      if (updated.length > 0) {
+        setErrors(err => ({ ...err, categories: "" }));
+      }
+      return updated;
+    });
+  };
+
+  const getResolvedCategoriesLabel = () => {
+    const active = selectedCategories.length > 0 ? selectedCategories : [businessType];
+    const titles = active.map(catId => {
+      if (catId === "other") {
+        return customBusinessType.trim() || "Custom Business";
+      }
+      return businessTypes.find(b => b.id === catId)?.title || catId;
+    });
+    if (titles.length === 0) return "Business";
+    if (titles.length === 1) return titles[0];
+    if (titles.length === 2) return `${titles[0]} & ${titles[1]}`;
+    return `${titles.slice(0, -1).join(", ")} & ${titles[titles.length - 1]}`;
+  };
+
   const [customNeedInput, setCustomNeedInput] = useState("");
   const [customNeedsList, setCustomNeedsList] = useState<{ id: string; title: string; detail: string; category: string; recommended?: boolean }[]>([]);
 
-  // Dynamically resolve industry priorities
-  const currentNeedsOptions = [
-    ...(INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other),
-    ...customNeedsList,
-  ];
+  // Dynamically resolve industry priorities across all selected categories
+  const currentNeedsOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const combined: { id: string; title: string; detail: string; category: string; recommended?: boolean }[] = [];
+    const activeCategories = selectedCategories.length > 0 ? selectedCategories : [businessType];
+    for (const cat of activeCategories) {
+      const items = INDUSTRY_PRIORITIES[cat] || INDUSTRY_PRIORITIES.other;
+      for (const item of items) {
+        if (!seen.has(item.id)) {
+          seen.add(item.id);
+          combined.push(item);
+        }
+      }
+    }
+    for (const item of customNeedsList) {
+      if (!seen.has(item.id)) {
+        seen.add(item.id);
+        combined.push(item);
+      }
+    }
+    return combined.length > 0 ? combined : INDUSTRY_PRIORITIES.other;
+  }, [selectedCategories, businessType, customNeedsList]);
 
   const handleAddCustomNeed = () => {
     if (!customNeedInput.trim()) return;
@@ -1018,7 +1101,10 @@ export default function OnboardingPage() {
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
-    if (businessType === "other" && !customBusinessType.trim()) {
+    if (selectedCategories.length === 0) {
+      newErrors.categories = "Please select at least one business industry & category";
+    }
+    if (selectedCategories.includes("other") && !customBusinessType.trim()) {
       newErrors.customBusinessType = "Please type your business category / industry";
     }
     setErrors(newErrors);
@@ -1055,10 +1141,7 @@ export default function OnboardingPage() {
     setExtractionProgress(15);
 
     const cleanDomain = website.trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-    const resolvedIndustryLabel =
-      businessType === "other" && customBusinessType.trim()
-        ? customBusinessType.trim()
-        : businessTypes.find(b => b.id === businessType)?.title || "Business";
+    const resolvedIndustryLabel = getResolvedCategoriesLabel();
 
     setExtractionStage(`Connecting to ${cleanDomain} and extracting metadata…`);
 
@@ -1120,10 +1203,7 @@ export default function OnboardingPage() {
 
   const handleCompleteSetup = async () => {
     setIsAssembling(true);
-    const resolvedIndustryLabel =
-      businessType === "other" && customBusinessType.trim()
-        ? customBusinessType.trim()
-        : businessTypes.find(b => b.id === businessType)?.title || businessType;
+    const resolvedIndustryLabel = getResolvedCategoriesLabel();
 
     const statuses = [
       `Persisting company profile for ${companyName}…`,
@@ -1158,10 +1238,14 @@ export default function OnboardingPage() {
           name: companyName.trim() || "My Company",
           founderName: founderName.trim() || "Founder",
           website: website.trim(),
-          industry: businessType === "other" && customBusinessType.trim() ? customBusinessType.trim() : businessType,
+          industry: selectedCategories.includes("other") && customBusinessType.trim()
+            ? customBusinessType.trim()
+            : (selectedCategories.map(c => businessTypes.find(b => b.id === c)?.title || c).join(", ") || businessType),
           industryLabel: resolvedIndustryLabel,
-          industryKey: businessType,
-          customBusinessType: businessType === "other" ? customBusinessType.trim() : "",
+          industryKey: selectedCategories[0] || businessType,
+          selectedCategories: selectedCategories,
+          categoriesLabels: selectedCategories.map(c => c === "other" && customBusinessType.trim() ? customBusinessType.trim() : (businessTypes.find(b => b.id === c)?.title || c)),
+          customBusinessType: selectedCategories.includes("other") ? customBusinessType.trim() : "",
           businessModel,
           currency: "INR",
           teamSize: Number(teamSize) || 10,
@@ -1236,6 +1320,7 @@ export default function OnboardingPage() {
   const currentQuestions = useMemo(() => {
     return getDynamicQuestions({
       businessType,
+      businessTypesList: selectedCategories,
       customBusinessType,
       companyName,
       founderName,
@@ -1249,6 +1334,7 @@ export default function OnboardingPage() {
     });
   }, [
     businessType,
+    selectedCategories,
     customBusinessType,
     companyName,
     founderName,
@@ -1307,43 +1393,65 @@ export default function OnboardingPage() {
             {step === 1 && (
               <div className="space-y-5">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brass-soft text-brass text-[10px] font-bold uppercase tracking-wider mb-2">
-                    Established Business Profile
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brass-soft text-brass text-[10px] font-bold uppercase tracking-wider">
+                      Established Business Profile
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-2 border border-line text-[10px] font-semibold text-text-muted">
+                      Select One or Multiple
+                    </span>
+                    {selectedCategories.length > 0 && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-brass/10 border border-brass/30 text-[10px] font-bold text-brass">
+                        {selectedCategories.length} selected
+                      </span>
+                    )}
                   </div>
                   <h1 className="text-lg sm:text-xl font-bold text-text tracking-tight font-sans">
                     Select your business industry & category
                   </h1>
                   <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                    Nuralix adapts to your established company operations. Select your sector to derive tailored benchmark models, executive metrics, and specialist AI agents.
+                    Nuralix adapts to your established company operations. You can select one sector or multiple sectors that describe your business to derive tailored benchmark models, executive metrics, and specialist AI agents.
                   </p>
                 </div>
 
+                {errors.categories && (
+                  <div className="p-3 rounded-xl bg-rust/10 border border-rust/30 flex items-center gap-2 animate-fade-in">
+                    <AlertTriangle className="w-4 h-4 text-rust shrink-0" />
+                    <p className="text-xs font-semibold text-rust">{errors.categories}</p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {businessTypes.map(type => {
-                    const isSelected = businessType === type.id;
+                    const isSelected = selectedCategories.includes(type.id);
                     return (
                       <div
                         key={type.id}
-                        onClick={() => {
-                          setBusinessType(type.id);
-                          if (type.id !== "other") {
-                            setErrors(prev => ({ ...prev, customBusinessType: "" }));
-                          }
-                        }}
-                        className={`p-4 rounded-xl border transition-all cursor-pointer btn-tactile flex items-start gap-3 ${
+                        id={`category-card-${type.id}`}
+                        onClick={() => toggleCategory(type.id)}
+                        className={`p-4 rounded-xl border transition-all cursor-pointer btn-tactile flex items-start gap-3 relative ${
                           isSelected
-                            ? "bg-surface-2 border-brass ring-1 ring-brass/30 shadow-sm"
-                            : "bg-surface-2/50 border-line hover:border-line-strong"
+                            ? "bg-surface-2 border-brass ring-1 ring-brass/40 shadow-sm"
+                            : "bg-surface-2/50 border-line hover:border-line-strong hover:bg-surface-2/80"
                         }`}
                       >
                         <div className="w-9 h-9 rounded-lg bg-surface border border-line flex items-center justify-center shrink-0 shadow-sm mt-0.5">
                           {getCategoryIcon(type.id)}
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 pr-2">
                           <span className="text-xs font-bold text-text block mb-1">{type.title}</span>
                           <p className="text-[11px] text-text-muted leading-relaxed">
                             {type.desc}
                           </p>
+                        </div>
+                        <div
+                          className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all mt-0.5 ${
+                            isSelected
+                              ? "bg-brass border-brass text-white shadow-xs"
+                              : "border-line bg-surface/70 text-transparent"
+                          }`}
+                        >
+                          <Check className={`w-3.5 h-3.5 stroke-[3] transition-all ${isSelected ? "scale-100 opacity-100" : "scale-75 opacity-0"}`} />
                         </div>
                       </div>
                     );
@@ -1351,7 +1459,7 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* Custom Category Input for 'Others' */}
-                {businessType === "other" && (
+                {selectedCategories.includes("other") && (
                   <div className="p-4 rounded-xl bg-brass-soft/40 border border-brass/40 space-y-2 animate-fade-in">
                     <label className="text-xs font-bold text-text flex items-center">
                       <span>Specify Your Business Industry / Type</span>
@@ -1381,7 +1489,12 @@ export default function OnboardingPage() {
                   </div>
                 )}
 
-                <div className="pt-3 border-t border-line flex justify-end">
+                <div className="pt-3 border-t border-line flex items-center justify-between">
+                  <span className="text-xs text-text-muted font-medium">
+                    {selectedCategories.length === 0
+                      ? "Select at least 1 industry"
+                      : `${selectedCategories.length} categor${selectedCategories.length === 1 ? "y" : "ies"} selected`}
+                  </span>
                   <button
                     id="btn-continue-step-1"
                     type="button"
@@ -1732,7 +1845,7 @@ export default function OnboardingPage() {
                       Operational Anatomy & Mechanics
                     </h1>
                     <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                      Calibrated specifically for <span className="font-semibold text-text">{companyName.trim() || "your company"}</span> ({businessType === "other" && customBusinessType.trim() ? customBusinessType.trim() : businessTypes.find(b => b.id === businessType)?.title || "business"}{teamSize ? ` · ${teamSize} team members` : ""}{annualRevenue ? ` · ₹${Number(annualRevenue).toLocaleString("en-IN")}/yr` : ""}). Answer or customize these questions, or skip to continue anytime.
+                      Calibrated specifically for <span className="font-semibold text-text">{companyName.trim() || "your company"}</span> ({getResolvedCategoriesLabel()}{teamSize ? ` · ${teamSize} team members` : ""}{annualRevenue ? ` · ₹${Number(annualRevenue).toLocaleString("en-IN")}/yr` : ""}). Answer or customize these questions, or skip to continue anytime.
                     </p>
                   </div>
                   <button
@@ -1965,7 +2078,7 @@ export default function OnboardingPage() {
                       } else {
                         setStep(3);
                         if (selectedNeeds.length === 0) {
-                          const recs = (INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other)
+                          const recs = currentNeedsOptions
                             .filter(o => o.recommended)
                             .map(o => o.id);
                           setSelectedNeeds(recs);
@@ -2123,7 +2236,7 @@ export default function OnboardingPage() {
                       onClick={() => {
                         setStep(3);
                         if (selectedNeeds.length === 0) {
-                          const recs = (INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other)
+                          const recs = currentNeedsOptions
                             .filter(o => o.recommended)
                             .map(o => o.id);
                           setSelectedNeeds(recs);
@@ -2138,7 +2251,7 @@ export default function OnboardingPage() {
                       onClick={() => {
                         setStep(3);
                         if (selectedNeeds.length === 0) {
-                          const recs = (INDUSTRY_PRIORITIES[businessType] || INDUSTRY_PRIORITIES.other)
+                          const recs = currentNeedsOptions
                             .filter(o => o.recommended)
                             .map(o => o.id);
                           setSelectedNeeds(recs);
@@ -2165,7 +2278,7 @@ export default function OnboardingPage() {
                     What are your biggest priorities & bottlenecks?
                   </h1>
                   <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                    Tailored for your established <strong className="text-text font-bold">{businessTypes.find(b => b.id === businessType)?.title || "business"}</strong>. Recommended items are pre-selected to seed your gap register, AI executives, and execution queue.
+                    Tailored for your established <strong className="text-text font-bold">{getResolvedCategoriesLabel()}</strong>. Recommended items are pre-selected to seed your gap register, AI executives, and execution queue.
                   </p>
                 </div>
 
