@@ -154,10 +154,12 @@ function DashboardContent() {
   // User's custom layout state (allowing user to customize the website dashboard)
   const [isEditingLayout, setIsEditingLayout] = useState(false);
 
-  // Sync customize parameter from URL (e.g. side panel Customize Dashboard button)
   useEffect(() => {
     if (searchParams.get("customize") === "true") {
       setIsEditingLayout(true);
+    }
+    if (searchParams.get("quickInput") === "true") {
+      setIsQuickInputModalOpen(true);
     }
   }, [searchParams]);
   const [activeWidgets, setActiveWidgets] = useState<WidgetDef[]>(baseConfig.widgets);

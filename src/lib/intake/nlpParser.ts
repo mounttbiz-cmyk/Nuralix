@@ -17,6 +17,7 @@ export interface ExtractedBusinessRecord {
   monthlyBurnEquivalent?: number;
   cashOnHand?: number;
   teamSize?: number;
+  notes?: string;
   summary: string;
   confidence: number;
   matchedFields: string[];
@@ -101,12 +102,20 @@ export function parseNaturalBusinessInput(text: string): ExtractedBusinessRecord
     }
   }
 
-  // 5. Match Team Size (e.g. "team size is 15", "hired 2, team is 18")
-  const teamRegex = /(?:(?:team\s*(?:size)?|headcount|staff|engineers|employees)\s*(?:is|was|at|of|now|:)?\s*(\d+))/i;
+  // 5. Match Team Size & Headcount (e.g. "team headcount is now 16", "team size is 15", "headcount: 20", "team is 18")
+  const teamRegex = /(?:(?:team(?:\s+headcount|\s+size)?|headcount|staff|engineers|employees)\s*(?:is|was|at|of|reached|to|hit|:)?\s*(?:now|currently)?\s*(\d+))/i;
   const teamMatch = clean.match(teamRegex);
   if (teamMatch && teamMatch[1]) {
     teamSize = parseInt(teamMatch[1], 10);
     matchedFields.push("teamSize");
+  }
+
+  // 6. Match Hiring Delta (e.g. "hired 2 engineers", "added 3 members")
+  const hireRegex = /(?:hired|added|onboarded)\s*(\d+)\s*(?:engineers?|developers?|members?|employees?|people|staff)?/i;
+  const hireMatch = clean.match(hireRegex);
+  if (hireMatch && hireMatch[1] && teamSize === undefined) {
+    // If no absolute team size was given, note the delta
+    matchedFields.push("hiringDelta");
   }
 
   // If we only have bare numbers with currency (e.g. "₹85,000 today from 42 orders")
@@ -122,10 +131,6 @@ export function parseNaturalBusinessInput(text: string): ExtractedBusinessRecord
     }
   }
 
-  if (matchedFields.length === 0) {
-    return null;
-  }
-
   // Monthly approximations
   const monthlyRevenueEquivalent = dailyRevenue ? Math.round(dailyRevenue * 30) : undefined;
   const monthlyBurnEquivalent = dailyExpenses ? Math.round(dailyExpenses * 30) : undefined;
@@ -136,7 +141,14 @@ export function parseNaturalBusinessInput(text: string): ExtractedBusinessRecord
   if (dailyRevenue !== undefined) parts.push(`₹${dailyRevenue.toLocaleString("en-IN")} revenue`);
   if (dailyExpenses !== undefined) parts.push(`₹${dailyExpenses.toLocaleString("en-IN")} expenses/burn`);
   if (cashOnHand !== undefined) parts.push(`₹${cashOnHand.toLocaleString("en-IN")} cash reserve`);
-  if (teamSize !== undefined) parts.push(`${teamSize} team members`);
+  if (teamSize !== undefined) parts.push(`${teamSize} team headcount`);
+  if (hireMatch && hireMatch[1]) parts.push(`+${hireMatch[1]} new hires`);
+
+  // If no specific numeric metric was extracted, preserve as operational update note
+  if (matchedFields.length === 0) {
+    matchedFields.push("operationalNotes");
+    parts.push("Daily operational milestone recorded");
+  }
 
   return {
     rawText: clean,
@@ -149,7 +161,7 @@ export function parseNaturalBusinessInput(text: string): ExtractedBusinessRecord
     cashOnHand,
     teamSize,
     summary: parts.join(" · "),
-    confidence: matchedFields.length >= 2 ? 0.95 : 0.85,
+    confidence: matchedFields.includes("dailyRevenue") || matchedFields.includes("teamSize") ? 0.95 : 0.85,
     matchedFields,
   };
 }

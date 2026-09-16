@@ -19,7 +19,10 @@ import {
   ShoppingBag,
   Zap,
   RefreshCw,
-  Clock
+  Clock,
+  Check,
+  Users,
+  DollarSign
 } from "lucide-react";
 import { parseNaturalBusinessInput, ExtractedBusinessRecord } from "@/lib/intake/nlpParser";
 import { emitBusinessDataUpdated } from "@/lib/upload/events";
@@ -50,6 +53,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
     dailyOrders: "",
     dailyExpenses: "",
     cashOnHand: "",
+    teamSize: "",
     operationalNotes: "",
   });
 
@@ -63,7 +67,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
 
   // Live NLP Extraction effect
   useEffect(() => {
-    if (naturalText.trim().length >= 4) {
+    if (naturalText.trim().length >= 3) {
       const parsed = parseNaturalBusinessInput(naturalText);
       setExtractedRecord(parsed);
     } else {
@@ -118,7 +122,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
           setVoiceTranscript(sample);
           setNaturalText(sample);
           setIsListening(false);
-        }, 2200);
+        }, 2000);
       } else {
         setIsListening(false);
       }
@@ -139,7 +143,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
   };
 
   // Commit Business Input
-  const handleCommitRecord = async (dataToCommit: {
+  const handleCommitRecord = async (dataToCommit?: {
     dailyRevenue?: number;
     dailyOrders?: number;
     dailyExpenses?: number;
@@ -149,6 +153,11 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
   }) => {
     setIsSubmitting(true);
     try {
+      // If no explicit data passed, fall back to extractedRecord or naturalText
+      const record = dataToCommit || extractedRecord || {
+        notes: naturalText.trim(),
+      };
+
       // 1. Fetch existing profile
       const savedProfileStr = localStorage.getItem("nuralix_business_profile");
       const existing = savedProfileStr ? JSON.parse(savedProfileStr) : {};
@@ -157,20 +166,21 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
       const currentMonthlyRev = Number(existing.revenue || existing.monthlyRevenue) || 500000;
       const currentBurn = Number(existing.burn || existing.monthlyBurn) || 150000;
       const currentCash = Number(existing.cash || existing.cashOnHand) || 1200000;
+      const currentTeam = Number(existing.teamSize) || 14;
 
-      // Project daily amounts into monthly equivalents if provided, or add incremental daily cash
-      const newMonthlyRev = dataToCommit.dailyRevenue
-        ? Math.round(dataToCommit.dailyRevenue * 30)
+      const newMonthlyRev = record.dailyRevenue
+        ? Math.round(record.dailyRevenue * 30)
         : currentMonthlyRev;
 
-      const newBurn = dataToCommit.dailyExpenses
-        ? Math.round(dataToCommit.dailyExpenses * 30)
+      const newBurn = record.dailyExpenses
+        ? Math.round(record.dailyExpenses * 30)
         : currentBurn;
 
-      const newCash = dataToCommit.cashOnHand
-        ? dataToCommit.cashOnHand
-        : (dataToCommit.dailyRevenue ? currentCash + dataToCommit.dailyRevenue : currentCash);
+      const newCash = record.cashOnHand
+        ? record.cashOnHand
+        : (record.dailyRevenue ? currentCash + record.dailyRevenue : currentCash);
 
+      const newTeam = record.teamSize ? record.teamSize : currentTeam;
       const newAnnualRev = newMonthlyRev * 12;
 
       const updatedProfile = {
@@ -182,13 +192,14 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
         monthlyBurn: newBurn,
         cash: newCash,
         cashOnHand: newCash,
-        teamSize: dataToCommit.teamSize || existing.teamSize || 10,
+        teamSize: newTeam,
         lastDailyInput: {
-          dailyRevenue: dataToCommit.dailyRevenue,
-          dailyOrders: dataToCommit.dailyOrders,
-          dailyExpenses: dataToCommit.dailyExpenses,
+          dailyRevenue: record.dailyRevenue,
+          dailyOrders: record.dailyOrders,
+          dailyExpenses: record.dailyExpenses,
+          teamSize: record.teamSize,
           recordedAt: new Date().toISOString(),
-          notes: dataToCommit.notes || naturalText.trim(),
+          notes: record.notes || naturalText.trim(),
         },
       };
 
@@ -206,7 +217,15 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
             annualRevenue: newAnnualRev,
             monthlyBurn: newBurn,
             cashOnHand: newCash,
-            teamSize: updatedProfile.teamSize,
+            teamSize: newTeam,
+            rawText: naturalText.trim(),
+            structured: {
+              revenue: record.dailyRevenue,
+              orders: record.dailyOrders,
+              expenses: record.dailyExpenses,
+              cash: record.cashOnHand,
+              teamSize: record.teamSize,
+            },
           }),
         });
       } catch (err) {
@@ -226,18 +245,18 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
         monthlyBurn: newBurn,
         cash: newCash,
         cashOnHand: newCash,
-        teamSize: updatedProfile.teamSize,
+        teamSize: newTeam,
         grossMargin: updatedProfile.grossMargin || 80,
       });
 
-      setSuccessMessage("Business telemetry updated successfully! Dashboard recalibrated.");
+      setSuccessMessage("Business update saved! Dashboard, ledger, and briefings recalibrated.");
       setTimeout(() => {
         setSuccessMessage(null);
         setNaturalText("");
         setExtractedRecord(null);
         onClose();
         if (onSuccess) onSuccess();
-      }, 1400);
+      }, 1200);
     } catch (e) {
       console.error(e);
     } finally {
@@ -252,30 +271,46 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
       dailyOrders: formData.dailyOrders ? Number(formData.dailyOrders) : undefined,
       dailyExpenses: formData.dailyExpenses ? Number(formData.dailyExpenses) : undefined,
       cashOnHand: formData.cashOnHand ? Number(formData.cashOnHand) : undefined,
+      teamSize: formData.teamSize ? Number(formData.teamSize) : undefined,
       notes: formData.operationalNotes,
     });
   };
 
   if (!isOpen) return null;
 
+  // Determine if primary save button should be enabled
+  const canSaveNatural = naturalText.trim().length > 0;
+  const canSaveForm = Boolean(formData.dailyRevenue || formData.dailyOrders || formData.dailyExpenses || formData.cashOnHand || formData.teamSize || formData.operationalNotes);
+  const isSaveActive = activeTab === "natural" || activeTab === "voice" ? canSaveNatural : canSaveForm;
+
   return (
     <PortalModal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-2xl bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden animate-scale-up">
+      <div
+        className="w-full max-w-2xl bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden animate-scale-up text-text"
+        style={{
+          backgroundColor: "var(--surface)",
+          borderColor: "var(--line)",
+          color: "var(--text)",
+        }}
+      >
         {/* Header */}
-        <div className="p-5 border-b border-line flex items-center justify-between bg-surface-2/40">
+        <div
+          className="p-5 border-b border-line flex items-center justify-between"
+          style={{ backgroundColor: "var(--surface-2)", borderColor: "var(--line)" }}
+        >
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brass-soft flex items-center justify-center text-brass">
+            <div className="w-8 h-8 rounded-xl bg-brass/15 border border-brass/30 flex items-center justify-center text-brass">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-text">Day-to-Day Business Input</h2>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-brass-soft text-brass font-bold uppercase">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-brass-soft text-brass font-bold uppercase tracking-wider">
                   Multi-Modal
                 </span>
               </div>
               <p className="text-xs text-text-muted mt-0.5">
-                Record operational updates naturally. Nuralix extracts, validates, and syncs metrics.
+                Record operational updates naturally. Nuralix extracts metrics and synchronizes your business ledger.
               </p>
             </div>
           </div>
@@ -289,7 +324,10 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-line bg-surface-2/20 px-5 pt-2 gap-2">
+        <div
+          className="flex border-b border-line px-5 pt-2 gap-2"
+          style={{ backgroundColor: "var(--surface)", borderColor: "var(--line)" }}
+        >
           {[
             { id: "natural", label: "Natural Language", icon: Send },
             { id: "voice", label: "Voice Dictation", icon: Mic },
@@ -317,7 +355,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 max-h-[65vh] overflow-y-auto">
           {successMessage && (
             <div className="p-3.5 rounded-xl bg-jade/10 border border-jade/30 flex items-center gap-2 text-xs font-semibold text-jade animate-fade-in">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -329,7 +367,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
           {activeTab === "natural" && (
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-text block mb-1.5">
+                <label className="text-xs font-bold text-text block mb-1.5">
                   Type your daily operations update in natural language:
                 </label>
                 <div className="relative">
@@ -338,14 +376,19 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                     value={naturalText}
                     onChange={e => setNaturalText(e.target.value)}
                     placeholder="e.g. Today we received 42 orders and revenue was ₹85,000 with ₹15,000 ad spend."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-2/60 border border-line text-xs text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brass resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-line text-xs font-sans text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brass focus:border-brass transition-all resize-none shadow-inner"
+                    style={{
+                      backgroundColor: "var(--surface-2)",
+                      borderColor: "var(--line)",
+                      color: "var(--text)",
+                    }}
                     autoFocus
                   />
                   {naturalText && (
                     <button
                       type="button"
                       onClick={() => setNaturalText("")}
-                      className="absolute right-2.5 top-2.5 text-text-muted hover:text-text text-xs"
+                      className="absolute right-3 top-3 text-text-muted hover:text-text text-xs bg-surface px-2 py-0.5 rounded border border-line cursor-pointer"
                     >
                       Clear
                     </button>
@@ -364,7 +407,11 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                       key={idx}
                       type="button"
                       onClick={() => setNaturalText(prompt)}
-                      className="text-[11px] px-2.5 py-1 rounded-lg bg-surface-2 border border-line text-text-muted hover:text-brass hover:border-brass/40 transition-colors text-left btn-tactile"
+                      className="text-[11px] px-3 py-1.5 rounded-lg border border-line text-text-muted hover:text-brass hover:border-brass/40 transition-all text-left btn-tactile cursor-pointer"
+                      style={{
+                        backgroundColor: "var(--surface-2)",
+                        borderColor: "var(--line)",
+                      }}
                     >
                       “{prompt}”
                     </button>
@@ -372,13 +419,16 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                 </div>
               </div>
 
-              {/* Extracted Record Card */}
+              {/* Extracted Record Card Preview */}
               {extractedRecord && (
-                <div className="p-4 rounded-xl border border-brass/40 bg-brass-soft/30 space-y-3 animate-fade-in">
+                <div
+                  className="p-4 rounded-xl border border-brass/40 bg-brass/5 space-y-3 animate-fade-in"
+                  style={{ borderColor: "rgba(0, 217, 255, 0.3)" }}
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold text-brass uppercase tracking-wider flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" />
-                      AI Structured Business Record
+                      AI Parsed Operational Telemetry
                     </span>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface border border-line text-text font-semibold">
                       {Math.round(extractedRecord.confidence * 100)}% Confidence
@@ -386,49 +436,47 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                    <div className="p-2.5 rounded-lg bg-surface border border-line">
-                      <span className="text-[10px] text-text-muted block">Daily Orders</span>
-                      <span className="text-xs font-bold text-text">
-                        {extractedRecord.dailyOrders !== undefined ? extractedRecord.dailyOrders : "—"}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-surface border border-line">
-                      <span className="text-[10px] text-text-muted block">Daily Revenue</span>
-                      <span className="text-xs font-bold text-jade">
-                        {extractedRecord.dailyRevenue !== undefined
-                          ? `₹${extractedRecord.dailyRevenue.toLocaleString("en-IN")}`
-                          : "—"}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-surface border border-line">
-                      <span className="text-[10px] text-text-muted block">Daily Burn/Cost</span>
-                      <span className="text-xs font-bold text-amber">
-                        {extractedRecord.dailyExpenses !== undefined
-                          ? `₹${extractedRecord.dailyExpenses.toLocaleString("en-IN")}`
-                          : "—"}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-surface border border-line">
-                      <span className="text-[10px] text-text-muted block">Monthly Projected</span>
-                      <span className="text-xs font-bold text-text">
-                        {extractedRecord.monthlyRevenueEquivalent
-                          ? `₹${extractedRecord.monthlyRevenueEquivalent.toLocaleString("en-IN")}/mo`
-                          : "—"}
-                      </span>
-                    </div>
+                    {extractedRecord.dailyOrders !== undefined && (
+                      <div className="p-2.5 rounded-lg bg-surface border border-line">
+                        <span className="text-[10px] text-text-muted block">Daily Orders</span>
+                        <span className="text-xs font-bold text-text">{extractedRecord.dailyOrders}</span>
+                      </div>
+                    )}
+                    {extractedRecord.dailyRevenue !== undefined && (
+                      <div className="p-2.5 rounded-lg bg-surface border border-line">
+                        <span className="text-[10px] text-text-muted block">Daily Revenue</span>
+                        <span className="text-xs font-bold text-jade">
+                          ₹{extractedRecord.dailyRevenue.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    )}
+                    {extractedRecord.dailyExpenses !== undefined && (
+                      <div className="p-2.5 rounded-lg bg-surface border border-line">
+                        <span className="text-[10px] text-text-muted block">Daily Spend / Burn</span>
+                        <span className="text-xs font-bold text-amber">
+                          ₹{extractedRecord.dailyExpenses.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    )}
+                    {extractedRecord.teamSize !== undefined && (
+                      <div className="p-2.5 rounded-lg bg-surface border border-line">
+                        <span className="text-[10px] text-text-muted block">Team Headcount</span>
+                        <span className="text-xs font-bold text-brass">{extractedRecord.teamSize} FTE</span>
+                      </div>
+                    )}
+                    {extractedRecord.monthlyRevenueEquivalent && (
+                      <div className="p-2.5 rounded-lg bg-surface border border-line">
+                        <span className="text-[10px] text-text-muted block">Projected Monthly</span>
+                        <span className="text-xs font-bold text-text">
+                          ₹{extractedRecord.monthlyRevenueEquivalent.toLocaleString("en-IN")}/mo
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex justify-end pt-1">
-                    <button
-                      type="button"
-                      disabled={isSubmitting}
-                      onClick={() => handleCommitRecord(extractedRecord)}
-                      className="px-4 py-2 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                    >
-                      <span>{isSubmitting ? "Recording…" : "Confirm & Record into Ledger"}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                  <p className="text-xs text-text-muted italic pt-0.5">
+                    Summary: <strong className="text-text not-italic">{extractedRecord.summary}</strong>
+                  </p>
                 </div>
               )}
             </div>
@@ -460,7 +508,10 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
               </div>
 
               {voiceTranscript && (
-                <div className="p-3 rounded-xl bg-surface-2 border border-line text-left text-xs font-mono text-text">
+                <div
+                  className="p-3.5 rounded-xl border border-line text-left text-xs font-mono text-text"
+                  style={{ backgroundColor: "var(--surface-2)" }}
+                >
                   <strong>Transcribed:</strong> “{voiceTranscript}”
                 </div>
               )}
@@ -476,14 +527,6 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                         Ready to validate and record to business profile.
                       </span>
                     </div>
-                    <button
-                      type="button"
-                      disabled={isSubmitting}
-                      onClick={() => handleCommitRecord(extractedRecord)}
-                      className="px-3.5 py-1.5 rounded-lg bg-brass text-white font-bold text-xs hover:brightness-110 btn-tactile cursor-pointer"
-                    >
-                      {isSubmitting ? "Saving…" : "Save Record"}
-                    </button>
                   </div>
                 </div>
               )}
@@ -495,7 +538,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-text block mb-1">
+                  <label className="text-xs font-bold text-text block mb-1">
                     Today's Revenue (₹)
                   </label>
                   <input
@@ -503,11 +546,12 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                     value={formData.dailyRevenue}
                     onChange={e => setFormData({ ...formData, dailyRevenue: e.target.value })}
                     placeholder="e.g. 85000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-text block mb-1">
+                  <label className="text-xs font-bold text-text block mb-1">
                     Orders / Transactions Count
                   </label>
                   <input
@@ -515,11 +559,12 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                     value={formData.dailyOrders}
                     onChange={e => setFormData({ ...formData, dailyOrders: e.target.value })}
                     placeholder="e.g. 42"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-text block mb-1">
+                  <label className="text-xs font-bold text-text block mb-1">
                     Today's Operating Expenses (₹)
                   </label>
                   <input
@@ -527,11 +572,25 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                     value={formData.dailyExpenses}
                     onChange={e => setFormData({ ...formData, dailyExpenses: e.target.value })}
                     placeholder="e.g. 15000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-text block mb-1">
+                  <label className="text-xs font-bold text-text block mb-1">
+                    Team Headcount (FTE)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.teamSize}
+                    onChange={e => setFormData({ ...formData, teamSize: e.target.value })}
+                    placeholder="e.g. 16"
+                    className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-bold text-text block mb-1">
                     Liquid Bank Reserves (₹) (Optional)
                   </label>
                   <input
@@ -539,33 +598,24 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                     value={formData.cashOnHand}
                     onChange={e => setFormData({ ...formData, cashOnHand: e.target.value })}
                     placeholder="e.g. 1200000"
-                    className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-text block mb-1">
-                  Operational Context / Key Win
+                <label className="text-xs font-bold text-text block mb-1">
+                  Operational Context / Key Milestone
                 </label>
                 <input
                   type="text"
                   value={formData.operationalNotes}
                   onChange={e => setFormData({ ...formData, operationalNotes: e.target.value })}
-                  placeholder="e.g. Launched Diwali campaign, conversion rate up 14%."
-                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                  placeholder="e.g. Hired 2 engineers today, closing 3 enterprise demos."
+                  className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                  style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                 />
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  <span>{isSubmitting ? "Updating Platform…" : "Commit Daily Input"}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
               </div>
             </form>
           )}
@@ -586,7 +636,11 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                 ].map((item, idx) => {
                   const Icon = item.icon;
                   return (
-                    <div key={idx} className="p-3 rounded-xl border border-line bg-surface-2/40 flex items-start gap-2.5">
+                    <div
+                      key={idx}
+                      className="p-3 rounded-xl border border-line flex items-start gap-2.5"
+                      style={{ backgroundColor: "var(--surface-2)" }}
+                    >
                       <div className="w-7 h-7 rounded-lg bg-surface border border-line flex items-center justify-center shrink-0 mt-0.5">
                         <Icon className={`w-3.5 h-3.5 ${item.color}`} />
                       </div>
@@ -603,7 +657,10 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                 })}
               </div>
 
-              <div className="p-3 rounded-xl bg-surface-2 border border-line text-xs flex items-center justify-between">
+              <div
+                className="p-3 rounded-xl border border-line text-xs flex items-center justify-between"
+                style={{ backgroundColor: "var(--surface-2)" }}
+              >
                 <span className="text-text-muted text-[11px]">
                   Next scheduled telemetry pull in <strong className="text-text">4 minutes</strong>
                 </span>
@@ -620,6 +677,57 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
               </div>
             </div>
           )}
+        </div>
+
+        {/* ALWAYS-VISIBLE PERMANENT FOOTER ACTION BAR */}
+        <div
+          className="p-4 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          style={{ backgroundColor: "var(--surface-2)", borderColor: "var(--line)" }}
+        >
+          <div className="flex items-center gap-2 text-xs text-text-muted">
+            <span className="w-2 h-2 rounded-full bg-jade shrink-0 animate-pulse" />
+            <span className="line-clamp-1">
+              {extractedRecord
+                ? `Ready to record: ${extractedRecord.summary}`
+                : "Real-time ledger sync across Dashboard & Executive Briefings"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl border border-line text-xs font-semibold text-text hover:bg-surface-2 transition-colors cursor-pointer"
+              style={{ backgroundColor: "var(--surface)" }}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              disabled={isSubmitting || !isSaveActive}
+              onClick={() => {
+                if (activeTab === "form") {
+                  handleFormSubmit({ preventDefault: () => {} } as any);
+                } else {
+                  handleCommitRecord();
+                }
+              }}
+              className="px-5 py-2 rounded-xl bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Recording…</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Save & Record into Ledger</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </PortalModal>
