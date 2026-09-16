@@ -80,6 +80,257 @@ const INITIAL_DECISIONS: LeadershipDecision[] = [
   },
 ];
 
+interface BriefingEdition {
+  id: string;
+  title: string;
+  cadence: string;
+  periodLabel: string;
+  sentiment: string;
+  status: string;
+  healthScore: number;
+  healthLabel: string;
+  annualRev: number;
+  revDelta: string;
+  burn: number;
+  cash: number;
+  runway: string;
+  fteEfficiency: string;
+  operationalSignals: { title: string; desc: string }[];
+  risks: { title: string; severity: "High" | "Medium" | "Low"; desc: string }[];
+  opportunities: { title: string; badge: string; desc: string }[];
+  decisions: LeadershipDecision[];
+}
+
+const BRIEFING_EDITIONS: Record<string, BriefingEdition> = {
+  "briefing-current": {
+    id: "briefing-current",
+    title: "Week 37 Executive Intelligence Briefing",
+    cadence: "Current · Trailing 7 Days",
+    periodLabel: "Telemetry Period: Trailing 7 Days · Synced Live",
+    sentiment: "Bullish Control",
+    status: "Live Active",
+    healthScore: 89,
+    healthLabel: "Robust Solvency",
+    annualRev: 6000000,
+    revDelta: "+14.2% MoM",
+    burn: 250000,
+    cash: 3800000,
+    runway: "15.2 Months",
+    fteEfficiency: "₹4,28,571 / FTE",
+    operationalSignals: [
+      {
+        title: "Gross Margin Expansion (83.8%)",
+        desc: "Margin widened by 240 bps due to automated cloud provisioning rules implemented in Marcus CFO automation workflow.",
+      },
+      {
+        title: "Enterprise Conversion SLA 98.9%",
+        desc: "Mid-market sales response time compressed to under 4 hours, driving an 18% improvement in outbound meeting hold rates.",
+      },
+    ],
+    risks: [
+      {
+        title: "Founder Deal-Closing Concentration",
+        severity: "High",
+        desc: "62% of deals >₹3,00,000 required founder intervention. Sales playbook delegation required.",
+      },
+      {
+        title: "Unused SaaS Tool Subscriptions",
+        severity: "Medium",
+        desc: "₹65,000 monthly burn tied to software with zero user sessions logged in trailing 30 days.",
+      },
+    ],
+    opportunities: [
+      {
+        title: "Annual Contract Pre-Payment Cash Surge",
+        badge: "+₹18L Liquid",
+        desc: "Offering 15% incentive on annual contracts unlocks immediate non-dilutive liquidity for 8 pending renewals.",
+      },
+      {
+        title: "Mid-Market Tier Lead Expansion",
+        badge: "+₹24L ARR",
+        desc: "Surplus qualified enterprise leads can be converted immediately with one dedicated account executive.",
+      },
+    ],
+    decisions: INITIAL_DECISIONS,
+  },
+  "briefing-monthly": {
+    id: "briefing-monthly",
+    title: "Monthly Board Operations Synthesis",
+    cadence: "September Cycle",
+    periodLabel: "Telemetry Period: Trailing 30 Days · Board Review Cycle",
+    sentiment: "Stable Runway",
+    status: "Archived",
+    healthScore: 85,
+    healthLabel: "Capital Disciplined",
+    annualRev: 5800000,
+    revDelta: "+11.8% MoM",
+    burn: 270000,
+    cash: 4050000,
+    runway: "15.0 Months",
+    fteEfficiency: "₹4,14,285 / FTE",
+    operationalSignals: [
+      {
+        title: "Customer Churn Suppressed to 0.8%",
+        desc: "Automated NPS check-ins and pro-active retention triggers from Maya (COO AI) reduced monthly logo churn to historic low.",
+      },
+      {
+        title: "Billing Automation Coverage Reached 94%",
+        desc: "E-invoicing and recurring INR mandates integrated via RazorpayX ledger feed, shrinking receivables cycle by 6 days.",
+      },
+    ],
+    risks: [
+      {
+        title: "Lead Response Latency on Inbound Tier 2",
+        severity: "Medium",
+        desc: "Inbound tier-2 leads experienced an average lag of 18 hours before initial demo confirmation.",
+      },
+      {
+        title: "Annual Cloud Hosting Overcommit",
+        severity: "Low",
+        desc: "Database storage reserved capacity currently sitting at 41% utilization headroom.",
+      },
+    ],
+    opportunities: [
+      {
+        title: "Multi-Seat Expansion in Financial Tech Accounts",
+        badge: "+₹12L ARR",
+        desc: "3 existing accounts requested bulk licenses for operations teams ahead of Q4 audits.",
+      },
+      {
+        title: "Vendor Rate Renegotiation",
+        badge: "+₹4.2L Savings",
+        desc: "Consolidating 4 auxiliary APIs into internal unified telemetry endpoint.",
+      },
+    ],
+    decisions: [
+      {
+        id: "dec-m-1",
+        title: "Ratify Q4 Revised Operating Budget & Headcount Plan",
+        category: "finance",
+        impact: "Cap net monthly burn at ₹2.8L while scaling engineering capacity",
+        recommendation: "Approved by finance committee with quarterly review checkpoints.",
+        aiConfidence: 95,
+        status: "approved",
+        actionTakenAt: "Sep 1, 2026",
+      },
+      {
+        id: "dec-m-2",
+        title: "Deploy Automated Customer Health Scorecard to CS Team",
+        category: "operations",
+        impact: "Flags churn risk 30 days prior to contract renewal dates",
+        recommendation: "Integrated into morning executive briefing feeds.",
+        aiConfidence: 91,
+        status: "approved",
+        actionTakenAt: "Sep 3, 2026",
+      },
+    ],
+  },
+  "briefing-prev": {
+    id: "briefing-prev",
+    title: "Week 36 Solvency & Burn Health Review",
+    cadence: "7 days ago",
+    periodLabel: "Telemetry Period: Week 36 Review Cycle",
+    sentiment: "Target Met",
+    status: "Archived",
+    healthScore: 82,
+    healthLabel: "Conservative Runway",
+    annualRev: 5500000,
+    revDelta: "+8.5% MoM",
+    burn: 285000,
+    cash: 3950000,
+    runway: "13.8 Months",
+    fteEfficiency: "₹3,92,857 / FTE",
+    operationalSignals: [
+      {
+        title: "Target Sales Quota Reached 4 Days Early",
+        desc: "Sprint team closed two mid-market accounts in retail logistics sector totaling ₹8.4L in contract value.",
+      },
+      {
+        title: "Infrastructure Costs Trimmed by 8%",
+        desc: "Off-peak compute auto-scaling rule reduced server hosting spend without impacting SLA latency.",
+      },
+    ],
+    risks: [
+      {
+        title: "Sales Rep Onboarding Velocity Lag",
+        severity: "Medium",
+        desc: "New SDR ramp time taking 22 days against the 14-day target playbook SLA.",
+      },
+    ],
+    opportunities: [
+      {
+        title: "Upselling Self-Serve Analytics Package",
+        badge: "+₹6L ARR",
+        desc: "14 legacy accounts express interest in autonomous metric drill-downs.",
+      },
+    ],
+    decisions: [
+      {
+        id: "dec-w36-1",
+        title: "Reallocate ₹40,000 Marketing Spend to Search Intent High-Intent Channels",
+        category: "sales",
+        impact: "Generated 19 additional SQLs at lower blended CAC",
+        recommendation: "Elena CMO validated channel performance metrics.",
+        aiConfidence: 93,
+        status: "approved",
+        actionTakenAt: "Aug 29, 2026",
+      },
+    ],
+  },
+  "briefing-q3": {
+    id: "briefing-q3",
+    title: "Quarterly Comprehensive Operating Review",
+    cadence: "Q3 Strategic Audit",
+    periodLabel: "Telemetry Period: Q3 Full Quarter Audit",
+    sentiment: "Expansion Ready",
+    status: "Archived",
+    healthScore: 91,
+    healthLabel: "Optimal Solvency",
+    annualRev: 6200000,
+    revDelta: "+21.4% YoY",
+    burn: 240000,
+    cash: 4200000,
+    runway: "17.5 Months",
+    fteEfficiency: "₹4,42,857 / FTE",
+    operationalSignals: [
+      {
+        title: "Operating Cash Flow Turned Net Positive for Quarter",
+        desc: "Collections efficiency hit 96.2% following auto-reconciliation rollout.",
+      },
+      {
+        title: "Customer Expansion Rate Grew to 118%",
+        desc: "Existing accounts added an average of 2.3 additional department seats.",
+      },
+    ],
+    risks: [
+      {
+        title: "Key Person Dependency on Architecture Decisions",
+        severity: "Medium",
+        desc: "Technical documentation needed to ensure decentralized PR review throughput.",
+      },
+    ],
+    opportunities: [
+      {
+        title: "Series A / Growth Capital Readiness",
+        badge: "+₹5Cr Target",
+        desc: "Operating metrics place business in top quartile of Indian B2B SaaS benchmarks.",
+      },
+    ],
+    decisions: [
+      {
+        id: "dec-q3-1",
+        title: "Formalize Strategic Expansion Playbook for FY2026-27",
+        category: "talent",
+        impact: "Clear departmental milestones tied to board-level ARR targets",
+        recommendation: "Approved unanimously by leadership core.",
+        aiConfidence: 98,
+        status: "approved",
+        actionTakenAt: "Aug 15, 2026",
+      },
+    ],
+  },
+};
+
 export default function ReportsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -119,6 +370,9 @@ export default function ReportsPage() {
     }
   }, []);
 
+  const activeEdition = BRIEFING_EDITIONS[selectedBriefingId] || BRIEFING_EDITIONS["briefing-current"];
+  const displayDecisions = selectedBriefingId === "briefing-current" ? decisions : activeEdition.decisions;
+
   const monthlyRev = Math.round(annualRevenue / 12);
   const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : "18+";
   const healthScore = Math.min(94, Math.max(72, Math.round(75 + (cash / (burn || 1)) * 1.5)));
@@ -128,7 +382,7 @@ export default function ReportsPage() {
     action: "pending" | "approved" | "delegated" | "declined",
     delegatedTo?: string
   ) => {
-    const updated = decisions.map(d => {
+    const updated = (selectedBriefingId === "briefing-current" ? decisions : activeEdition.decisions).map(d => {
       if (d.id === id) {
         return {
           ...d,
@@ -140,11 +394,16 @@ export default function ReportsPage() {
       return d;
     });
 
-    setDecisions(updated);
-    try {
-      localStorage.setItem("nuralix_briefing_decisions", JSON.stringify(updated));
-    } catch (e) {
-      // ignore
+    if (selectedBriefingId === "briefing-current") {
+      setDecisions(updated);
+      try {
+        localStorage.setItem("nuralix_briefing_decisions", JSON.stringify(updated));
+      } catch (e) {
+        // ignore
+      }
+    } else {
+      activeEdition.decisions = updated;
+      setDecisions([...decisions]); // re-render trigger
     }
 
     const actionText =
@@ -381,12 +640,12 @@ export default function ReportsPage() {
                 Confidential · Executive Eyes Only
               </span>
               <span className="text-xs text-text-muted font-mono">
-                Telemetry Period: Trailing 7 Days · Synced Live
+                {activeEdition.periodLabel}
               </span>
             </div>
 
             <h2 className="text-2xl font-extrabold text-text tracking-tight font-sans">
-              State of the Business: {companyName}
+              {activeEdition.title}: {companyName}
             </h2>
             <p className="text-xs text-text-muted">
               Operating Sector: <span className="text-text font-medium">{industryName}</span> · Prepared for <span className="text-text font-medium">{founderName}</span> and C-Suite Leadership.
@@ -404,9 +663,9 @@ export default function ReportsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-text-muted font-semibold">Overall Index:</span>
-                <span className="text-base font-extrabold font-mono text-brass">{healthScore}/100</span>
+                <span className="text-base font-extrabold font-mono text-brass">{selectedBriefingId === "briefing-current" ? healthScore : activeEdition.healthScore}/100</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 font-bold uppercase">
-                  Robust Solvency
+                  {activeEdition.healthLabel}
                 </span>
               </div>
             </div>
@@ -414,25 +673,25 @@ export default function ReportsPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
               <div className="p-3 rounded-xl bg-surface border border-line">
                 <span className="text-[10px] text-text-muted font-semibold uppercase block">Annualized Run-Rate</span>
-                <span className="text-sm font-bold font-mono text-text">₹{annualRevenue.toLocaleString()}</span>
+                <span className="text-sm font-bold font-mono text-text">₹{(selectedBriefingId === "briefing-current" ? annualRevenue : activeEdition.annualRev).toLocaleString()}</span>
                 <span className="text-[10px] text-emerald-500 font-medium flex items-center gap-0.5 mt-0.5">
-                  <ArrowUpRight className="w-3 h-3" /> +14.2% MoM
+                  <ArrowUpRight className="w-3 h-3" /> {activeEdition.revDelta}
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-surface border border-line">
                 <span className="text-[10px] text-text-muted font-semibold uppercase block">Verified Cash Reserves</span>
-                <span className="text-sm font-bold font-mono text-text">₹{cash.toLocaleString()}</span>
+                <span className="text-sm font-bold font-mono text-text">₹{(selectedBriefingId === "briefing-current" ? cash : activeEdition.cash).toLocaleString()}</span>
                 <span className="text-[10px] text-text-muted font-medium block mt-0.5">Liquid accounts</span>
               </div>
               <div className="p-3 rounded-xl bg-surface border border-line">
                 <span className="text-[10px] text-text-muted font-semibold uppercase block">Net Operating Runway</span>
-                <span className="text-sm font-bold font-mono text-emerald-500">{runwayMonths} Months</span>
-                <span className="text-[10px] text-emerald-500 font-medium block mt-0.5">Burn ₹{(burn).toLocaleString()}/mo</span>
+                <span className="text-sm font-bold font-mono text-emerald-500">{selectedBriefingId === "briefing-current" ? `${runwayMonths} Months` : activeEdition.runway}</span>
+                <span className="text-[10px] text-emerald-500 font-medium block mt-0.5">Burn ₹{(selectedBriefingId === "briefing-current" ? burn : activeEdition.burn).toLocaleString()}/mo</span>
               </div>
               <div className="p-3 rounded-xl bg-surface border border-line">
                 <span className="text-[10px] text-text-muted font-semibold uppercase block">FTE Capital Efficiency</span>
                 <span className="text-sm font-bold font-mono text-brass">
-                  ₹{Math.round(annualRevenue / (teamSize || 1)).toLocaleString()} / FTE
+                  {selectedBriefingId === "briefing-current" ? `₹${Math.round(annualRevenue / (teamSize || 1)).toLocaleString()} / FTE` : activeEdition.fteEfficiency}
                 </span>
                 <span className="text-[10px] text-text-muted font-medium block mt-0.5">{teamSize} team members</span>
               </div>
@@ -446,29 +705,21 @@ export default function ReportsPage() {
               2. Operational Signals & Major Developments
             </h3>
             <p className="text-xs text-text-muted">
-              Deterministic highlights synthesized from CRM, banking, and customer delivery feeds over the last cycle:
+              Deterministic highlights synthesized from CRM, banking, and customer delivery feeds for {activeEdition.cadence}:
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-xl bg-surface-2 border border-line space-y-1.5">
-                <div className="flex items-center gap-2 font-bold text-emerald-500 text-xs">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>Gross Margin Expansion (83.8%)</span>
+              {activeEdition.operationalSignals.map((signal, idx) => (
+                <div key={idx} className="p-3.5 rounded-xl bg-surface-2 border border-line space-y-1.5">
+                  <div className="flex items-center gap-2 font-bold text-emerald-500 text-xs">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{signal.title}</span>
+                  </div>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    {signal.desc}
+                  </p>
                 </div>
-                <p className="text-xs text-text-muted leading-relaxed">
-                  Margin widened by 240 bps due to automated cloud provisioning rules implemented in Marcus CFO automation workflow.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-surface-2 border border-line space-y-1.5">
-                <div className="flex items-center gap-2 font-bold text-emerald-500 text-xs">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>Enterprise Conversion SLA 98.9%</span>
-                </div>
-                <p className="text-xs text-text-muted leading-relaxed">
-                  Mid-market sales response time compressed to under 4 hours, driving an 18% improvement in outbound meeting hold rates.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -481,29 +732,21 @@ export default function ReportsPage() {
                 3. Critical Risks & Vulnerabilities
               </h3>
               <div className="space-y-2">
-                <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-text">Founder Deal-Closing Concentration</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-rust/15 text-rust font-bold uppercase">
-                      High
-                    </span>
+                {activeEdition.risks.map((risk, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-text">{risk.title}</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                        risk.severity === "High" ? "bg-rust/15 text-rust" : "bg-amber-500/15 text-amber-500"
+                      }`}>
+                        {risk.severity}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-text-muted leading-relaxed">
+                      {risk.desc}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-text-muted leading-relaxed">
-                    62% of deals &gt;₹3,00,000 required founder intervention. Sales playbook delegation required.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-text">Unused SaaS Tool Subscriptions</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-500 font-bold uppercase">
-                      Medium
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-text-muted leading-relaxed">
-                    ₹65,000 monthly burn tied to software with zero user sessions logged in trailing 30 days.
-                  </p>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -514,29 +757,19 @@ export default function ReportsPage() {
                 4. Strategic Upside Opportunities
               </h3>
               <div className="space-y-2">
-                <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-text">Annual Contract Pre-Payment Cash Surge</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-jade/15 text-jade font-bold uppercase">
-                      +₹18L Liquid
-                    </span>
+                {activeEdition.opportunities.map((opp, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-text">{opp.title}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-jade/15 text-jade font-bold uppercase">
+                        {opp.badge}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-text-muted leading-relaxed">
+                      {opp.desc}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-text-muted leading-relaxed">
-                    Offering 15% incentive on annual contracts unlocks immediate non-dilutive liquidity for 8 pending renewals.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-text">Mid-Market Tier Lead Expansion</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400 font-bold uppercase">
-                      +₹24L ARR
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-text-muted leading-relaxed">
-                    Surplus qualified enterprise leads can be converted immediately with one dedicated account executive.
-                  </p>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -549,7 +782,7 @@ export default function ReportsPage() {
                 5. Decisions Required (Leadership Directives)
               </h3>
               <span className="text-xs text-text-muted font-medium">
-                {decisions.filter(d => d.status === "pending").length} pending founder action
+                {displayDecisions.filter(d => d.status === "pending").length} pending founder action
               </span>
             </div>
             <p className="text-xs text-text-muted">
@@ -557,7 +790,7 @@ export default function ReportsPage() {
             </p>
 
             <div className="space-y-3">
-              {decisions.map(dec => {
+              {displayDecisions.map(dec => {
                 const isPending = dec.status === "pending";
                 return (
                   <div

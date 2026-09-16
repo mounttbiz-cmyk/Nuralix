@@ -116,11 +116,45 @@ export default function AnalyticsPage() {
   const maxRev = Math.max(...revenueHistory.map(d => Math.max(d.revenue, d.burn)));
 
   const handleExport = () => {
-    setExportNotice("Compiling executive intelligence package (PDF/CSV)…");
-    setTimeout(() => {
-      setExportNotice("Adaptive Analytics report generated & verified!");
-      setTimeout(() => setExportNotice(null), 3500);
-    }, 1200);
+    setExportNotice("Compiling executive intelligence package (CSV)…");
+
+    try {
+      // Build real CSV content
+      const rows = [
+        ["Nuralix Enterprise Analytics Report"],
+        ["Company", companyName],
+        ["Sector", industryName],
+        ["Generated", new Date().toLocaleString()],
+        [],
+        ["Core Financial Telemetry"],
+        ["Annualized Run-Rate (INR)", annualRevenue],
+        ["Monthly Revenue (INR)", monthlyRev],
+        ["Monthly Net Operating Burn (INR)", burn],
+        ["Liquid Bank Reserves (INR)", cash],
+        ["Verified Runway (Months)", runwayMonths],
+        ["Gross Profit Margin (%)", "82%"],
+        ["FTE Team Headcount", teamSize],
+        [],
+        ["6-Month Financial Velocity & Forecast"],
+        ["Month", "Projected Revenue (INR)", "Projected Net Burn (INR)", "Forecast Mode"],
+        ...revenueHistory.map(h => [h.month, h.revenue, h.burn, forecastMode]),
+      ];
+
+      const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `nuralix_${companyName.toLowerCase().replace(/\s+/g, "_")}_analytics.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setExportNotice("CSV report generated and downloaded successfully!");
+    } catch (e) {
+      setExportNotice("Export failed. Please check browser permissions.");
+    }
+
+    setTimeout(() => setExportNotice(null), 3500);
   };
 
   return (

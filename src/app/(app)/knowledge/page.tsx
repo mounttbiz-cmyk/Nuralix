@@ -117,6 +117,14 @@ export default function KnowledgeHubPage() {
         const parsed = JSON.parse(savedProfile);
         if (parsed.name) setCompanyName(parsed.name);
       }
+
+      const savedDocs = localStorage.getItem("nuralix_knowledge_docs");
+      if (savedDocs) {
+        const parsed = JSON.parse(savedDocs);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setDocs(parsed);
+        }
+      }
     } catch (e) {
       // ignore
     }
@@ -138,7 +146,15 @@ export default function KnowledgeHubPage() {
       content: newContent.trim() || `### ${newTitle}\n\n${newDescription}`,
     };
 
-    setDocs(prev => [newDocItem, ...prev]);
+    setDocs(prev => {
+      const updated = [newDocItem, ...prev];
+      try {
+        localStorage.setItem("nuralix_knowledge_docs", JSON.stringify(updated));
+      } catch (e) {
+        // ignore
+      }
+      return updated;
+    });
     setIsAddModalOpen(false);
     setNewTitle("");
     setNewDescription("");

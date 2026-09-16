@@ -56,6 +56,14 @@ export default function HelpPage() {
         if (p.name) setCompanyName(p.name);
         if (p.founderName) setFounderName(p.founderName);
       }
+
+      const savedTickets = localStorage.getItem("nuralix_support_tickets");
+      if (savedTickets) {
+        const parsed = JSON.parse(savedTickets);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setTickets(parsed);
+        }
+      }
     } catch (e) {
       // ignore
     }
@@ -120,8 +128,17 @@ export default function HelpPage() {
       status: "open",
     };
 
-    setTickets(prev => [newTicket, ...prev]);
-    setSuccessNotice(`Ticket #${newTicket.id} created successfully! Our executive team is reviewing your question.`);
+    setTickets(prev => {
+      const updated = [newTicket, ...prev];
+      try {
+        localStorage.setItem("nuralix_support_tickets", JSON.stringify(updated));
+      } catch (e) {
+        // ignore
+      }
+      return updated;
+    });
+
+    setSuccessNotice(`Ticket #${newTicket.id} created successfully! Our executive desk is reviewing your question.`);
     setTicketSubject("");
     setTicketMessage("");
     setTimeout(() => setSuccessNotice(null), 5000);

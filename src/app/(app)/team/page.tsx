@@ -112,6 +112,20 @@ export default function TeamPage() {
   // Close invite modal on Escape
   useEscapeKey(() => setIsInviteOpen(false), isInviteOpen);
 
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem("nuralix_team_members");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMembers(parsed);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
@@ -125,7 +139,15 @@ export default function TeamPage() {
       status: "invited",
       lastActive: "Pending invitation",
     };
-    setMembers(prev => [...prev, newMember]);
+    setMembers(prev => {
+      const updated = [...prev, newMember];
+      try {
+        localStorage.setItem("nuralix_team_members", JSON.stringify(updated));
+      } catch (e) {
+        // ignore
+      }
+      return updated;
+    });
     setInviteName("");
     setInviteEmail("");
     setIsInviteOpen(false);

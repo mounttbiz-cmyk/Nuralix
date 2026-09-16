@@ -151,22 +151,36 @@ export default function AutomationsPage() {
         const parsed = JSON.parse(savedProfile);
         if (parsed.name) setCompanyName(parsed.name);
       }
+
+      const savedAutomations = localStorage.getItem("nuralix_automations");
+      if (savedAutomations) {
+        const parsed = JSON.parse(savedAutomations);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAutomations(parsed);
+        }
+      }
     } catch (e) {
       // ignore
     }
   }, []);
 
   const toggleAutomation = (id: string) => {
-    setAutomations(prev =>
-      prev.map(a => {
+    setAutomations(prev => {
+      const updated = prev.map(a => {
         if (a.id === id) {
           const newState = !a.enabled;
           notify(`Automation '${a.name}' is now ${newState ? "ACTIVE" : "PAUSED"}.`);
           return { ...a, enabled: newState };
         }
         return a;
-      })
-    );
+      });
+      try {
+        localStorage.setItem("nuralix_automations", JSON.stringify(updated));
+      } catch (e) {
+        // ignore
+      }
+      return updated;
+    });
   };
 
   const handleTestTrigger = (automation: AutomationItem) => {
@@ -202,7 +216,15 @@ export default function AutomationsPage() {
       runsCount: 0,
     };
 
-    setAutomations(prev => [newItem, ...prev]);
+    setAutomations(prev => {
+      const updated = [newItem, ...prev];
+      try {
+        localStorage.setItem("nuralix_automations", JSON.stringify(updated));
+      } catch (e) {
+        // ignore
+      }
+      return updated;
+    });
     setIsCreateModalOpen(false);
     setNewName("");
     setNewTrigger("");

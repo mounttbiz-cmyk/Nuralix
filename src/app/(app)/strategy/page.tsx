@@ -129,6 +129,14 @@ export default function GrowthStrategyPage() {
         if (p.burn) setMonthlyBurn(Number(p.burn));
         if (p.cashOnHand || p.cash) setCashOnHand(Number(p.cashOnHand || p.cash));
       }
+
+      const savedVectors = localStorage.getItem("nuralix_strategy_vectors");
+      if (savedVectors) {
+        const parsed = JSON.parse(savedVectors);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setVectors(parsed);
+        }
+      }
     } catch (e) {
       // ignore
     }
@@ -141,14 +149,20 @@ export default function GrowthStrategyPage() {
     vectors.find(v => v.id === selectedVectorId) || vectors[0];
 
   const handleToggleMilestone = (vectorId: string, index: number) => {
-    setVectors(prev =>
-      prev.map(v => {
+    setVectors(prev => {
+      const updated = prev.map(v => {
         if (v.id !== vectorId) return v;
         const newM = [...v.milestones];
         newM[index] = { ...newM[index], done: !newM[index].done };
         return { ...v, milestones: newM };
-      })
-    );
+      });
+      try {
+        localStorage.setItem("nuralix_strategy_vectors", JSON.stringify(updated));
+      } catch (e) {
+        // ignore
+      }
+      return updated;
+    });
   };
 
   const handleExecuteInitiative = async (vector: GrowthVector) => {
