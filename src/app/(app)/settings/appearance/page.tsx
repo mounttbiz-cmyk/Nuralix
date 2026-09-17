@@ -11,9 +11,12 @@ export default function AppearancePage() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="space-y-3 pb-4 border-b border-line">
+      <div className="space-y-2 pb-4 border-b border-line">
         <h1 className="text-lg font-bold text-text">Platform Settings</h1>
-        <div className="flex flex-wrap items-center gap-2">
+        <p className="text-xs text-text-muted font-medium">
+          Customize the visual interface, color palette, dark mode behaviors, and font scaling of the Nuralix console.
+        </p>
+        <div className="flex flex-wrap items-center gap-2 pt-1">
           <Link
             href="/settings/profile"
             className="px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface border border-line flex items-center gap-1.5 transition-colors"

@@ -639,8 +639,8 @@ export default function SimulatorPage() {
               Monte Carlo Engine
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
-            Closed-loop business simulation: Understand → Simulate → Compare Outcomes → AI Recommendation → Execute Plan.
+          <p className="text-xs text-text-muted mt-1 font-medium">
+            Model high-impact hiring, pricing, and capital choices in virtual simulations to compare financial risk and ROI before executing.
           </p>
         </div>
 

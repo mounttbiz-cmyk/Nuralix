@@ -18,7 +18,8 @@ import {
   ChevronDown,
   Filter,
   Layers,
-  Activity
+  Activity,
+  RotateCcw
 } from "lucide-react";
 import { ProvenanceBadge } from "@/components/ui/Badge";
 import Link from "next/link";
@@ -317,6 +318,12 @@ export default function GapsPage() {
     }
   };
 
+  // Top level stats
+  const totalGaps = gaps.length;
+  const criticalCount = gaps.filter(g => g.severity === "critical" && g.status !== "resolved").length;
+  const inProgressCount = gaps.filter(g => g.status === "in_progress").length;
+  const resolvedCount = gaps.filter(g => g.status === "resolved").length;
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Top Header */}
@@ -333,8 +340,8 @@ export default function GapsPage() {
                   Autonomous Watch
                 </span>
               </div>
-              <p className="text-xs text-text-muted mt-0.5">
-                AI continuously detects target deviations, assigns owners, and tracks corrective playbooks to verified closure.
+              <p className="text-xs text-text-muted mt-1 font-medium">
+                Detect financial, sales, and operational bottlenecks early, assign dedicated AI executive owners, and resolve them step-by-step.
               </p>
             </div>
           </div>
@@ -370,17 +377,41 @@ export default function GapsPage() {
         </div>
       )}
 
+      {/* Simplified Top KPI Overview Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="p-3.5 rounded-xl bg-surface border border-line">
+          <span className="text-[11px] font-semibold text-text-muted uppercase block">Total Bottlenecks</span>
+          <span className="text-xl font-bold text-text mt-0.5 block">{totalGaps}</span>
+          <span className="text-[10px] text-text-muted">Detected in telemetry</span>
+        </div>
+        <div className="p-3.5 rounded-xl bg-rust/5 border border-rust/30">
+          <span className="text-[11px] font-semibold text-rust uppercase block">Critical Priority</span>
+          <span className="text-xl font-bold text-rust mt-0.5 block">{criticalCount}</span>
+          <span className="text-[10px] text-rust/80">Requires immediate attention</span>
+        </div>
+        <div className="p-3.5 rounded-xl bg-cyan-500/5 border border-cyan-500/30">
+          <span className="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 uppercase block">Under Resolution</span>
+          <span className="text-xl font-bold text-cyan-600 dark:text-cyan-400 mt-0.5 block">{inProgressCount}</span>
+          <span className="text-[10px] text-text-muted">Steps in execution</span>
+        </div>
+        <div className="p-3.5 rounded-xl bg-jade/5 border border-jade/30">
+          <span className="text-[11px] font-semibold text-jade uppercase block">Resolved & Closed</span>
+          <span className="text-xl font-bold text-jade mt-0.5 block">{resolvedCount}</span>
+          <span className="text-[10px] text-jade/80">Safeguards established</span>
+        </div>
+      </div>
+
       {/* Multi-Filter Bar: Status + Category */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-surface-2/40 border border-line">
         {/* Status Lifecycle Filters */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider mr-1 flex items-center gap-1">
             <Filter className="w-3 h-3" />
-            Status:
+            View:
           </span>
           {[
-            { id: "all", label: "All Gaps" },
-            { id: "active", label: "Active" },
+            { id: "all", label: "All Items" },
+            { id: "active", label: "Unresolved Gaps" },
             { id: "in_progress", label: "In Progress" },
             { id: "resolved", label: "Resolved" },
           ].map(f => (
@@ -402,7 +433,7 @@ export default function GapsPage() {
         {/* Category Pills */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider mr-1">
-            Sector:
+            Department:
           </span>
           {["all", "financial", "risk", "marketing", "operations"].map(cat => (
             <button
@@ -421,268 +452,186 @@ export default function GapsPage() {
         </div>
       </div>
 
-      {/* Main Two-Pane Register Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left List of Gaps (5 cols) */}
-        <div className="lg:col-span-5 space-y-3">
-          <div className="flex items-center justify-between text-xs font-bold text-text-muted uppercase tracking-wider px-1">
-            <span>Identified Bottlenecks ({filteredGaps.length})</span>
-            <span className="text-[10px] text-brass">Prioritized by Impact</span>
+      {/* Simple, Readable Bottleneck Cards List */}
+      <div className="space-y-4">
+        {filteredGaps.length === 0 ? (
+          <div className="p-8 rounded-2xl bg-surface border border-line text-center text-xs text-text-muted">
+            No bottlenecks match the selected filters.
           </div>
+        ) : (
+          filteredGaps.map(gap => {
+            const isResolved = gap.status === "resolved";
+            const completedCount = gap.completedSteps.length;
+            const totalSteps = gap.solutionPlaybook.steps.length;
 
-          <div className="space-y-2.5">
-            {filteredGaps.map(gap => {
-              const isActive = gap.id === activeGap.id;
-              const isResolved = gap.status === "resolved";
-
-              return (
-                <div
-                  key={gap.id}
-                  onClick={() => setActiveGapId(gap.id)}
-                  className={`p-3.5 rounded-xl border transition-all cursor-pointer btn-tactile space-y-2 ${
-                    isActive
-                      ? "bg-surface border-brass shadow-theme ring-1 ring-brass/30"
-                      : "bg-surface-2/60 border-line hover:border-line-strong hover:bg-surface-2/90"
-                  } ${isResolved ? "opacity-70" : ""}`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="text-xs font-bold text-text leading-snug">
-                      {gap.title}
-                    </span>
-                    <div className="flex items-center gap-1 shrink-0">
+            return (
+              <div
+                key={gap.id}
+                className={`p-5 rounded-2xl border bg-surface transition-all shadow-theme space-y-4 ${
+                  gap.severity === "critical" && !isResolved
+                    ? "border-rust/40 bg-gradient-to-r from-rust/[0.03] to-surface"
+                    : "border-line"
+                } ${isResolved ? "opacity-75 bg-surface/80" : ""}`}
+              >
+                {/* Header: Title, Category, Severity & Status */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-line/70">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-brass-soft text-brass">
+                        {gap.category}
+                      </span>
+                      <span
+                        className={`text-[9px] px-2 py-0.5 rounded font-bold uppercase ${
+                          gap.severity === "critical"
+                            ? "bg-rust/15 text-rust border border-rust/30"
+                            : "bg-amber/15 text-amber border border-amber/30"
+                        }`}
+                      >
+                        {gap.severity} Priority
+                      </span>
                       {getStatusBadge(gap.status)}
                     </div>
+                    <h3 className="text-base font-bold text-text">{gap.title}</h3>
                   </div>
 
-                  {/* Target vs Actual Deviation Pill */}
-                  <div className="p-2 rounded-lg bg-surface-2/90 border border-line text-[11px] flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-text-muted">
-                      <Target className="w-3 h-3 text-brass" />
-                      <span className="truncate">{gap.actualMetric}</span>
+                  {/* Owner & Reassign Control */}
+                  <div className="flex items-center gap-2 self-start sm:self-auto bg-surface-2/80 px-3 py-1.5 rounded-xl border border-line">
+                    <div className="w-6 h-6 rounded-full bg-brass/20 text-brass text-xs flex items-center justify-center font-bold">
+                      👤
                     </div>
-                    <span
-                      className={`font-mono font-bold text-[10px] px-1.5 py-0.2 rounded ${
-                        gap.deviationPercent < 0
-                          ? "bg-rust/15 text-rust"
-                          : "bg-amber/15 text-amber"
-                      }`}
-                    >
-                      {gap.deviation}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[10px] text-text-muted pt-1 border-t border-line/50">
-                    <span className="text-brass font-semibold">{gap.category}</span>
-                    <span className="flex items-center gap-1">
-                      <UserCheck className="w-3 h-3 text-text-muted" />
-                      <span>{gap.assignedOwner} ({gap.assignedRole})</span>
-                    </span>
-                    <span>{gap.completedSteps.length}/{gap.solutionPlaybook.steps.length} Steps</span>
+                    <div>
+                      <span className="text-[11px] font-bold text-text block">
+                        {gap.assignedOwner} ({gap.assignedRole})
+                      </span>
+                      <span className="text-[9px] text-text-muted">Lead AI Owner</span>
+                    </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* Right Detail & Resolution Workbench (7 cols) */}
-        <div className="lg:col-span-7 rounded-2xl border border-line bg-surface p-5 sm:p-6 shadow-theme space-y-5">
-          {/* Active Gap Header & Status Selector */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-line">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-brass-soft text-brass">
-                {activeGap.category}
-              </span>
-              <span
-                className={`text-[9px] px-2 py-0.5 rounded font-bold uppercase ${
-                  activeGap.severity === "critical"
-                    ? "bg-rust/15 text-rust border border-rust/30"
-                    : "bg-amber/15 text-amber border border-amber/30"
-                }`}
-              >
-                {activeGap.severity} Severity
-              </span>
-              <ProvenanceBadge type="from_data" />
-            </div>
-
-            {/* Lifecycle Status Switcher */}
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-text-muted uppercase">Lifecycle:</span>
-              <select
-                value={activeGap.status}
-                onChange={e => handleStatusChange(activeGap.id, e.target.value as GapStatus)}
-                className="px-2.5 py-1 rounded-lg bg-surface-2 border border-line text-xs font-semibold text-text focus:outline-none focus:ring-1 focus:ring-brass cursor-pointer capitalize"
-              >
-                <option value="detected">Detected</option>
-                <option value="prioritized">Prioritized</option>
-                <option value="in_progress">In Progress</option>
-                <option value="under_verification">Under Verification</option>
-                <option value="resolved">Resolved / Closed</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Gap Title & Deviation Metrics Banner */}
-          <div className="space-y-3">
-            <h2 className="text-base sm:text-lg font-bold text-text">{activeGap.title}</h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <div className="p-3 rounded-xl bg-surface-2/60 border border-line">
-                <span className="text-[10px] font-semibold text-text-muted block uppercase">Benchmark Target</span>
-                <span className="text-xs font-bold text-text font-mono mt-0.5 block">{activeGap.targetMetric}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-surface-2/60 border border-line">
-                <span className="text-[10px] font-semibold text-text-muted block uppercase">Current Actual</span>
-                <span className="text-xs font-bold text-rust font-mono mt-0.5 block">{activeGap.actualMetric}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-rust/10 border border-rust/30">
-                <span className="text-[10px] font-semibold text-rust block uppercase">Detected Deviation</span>
-                <span className="text-xs font-bold text-rust font-mono mt-0.5 block">{activeGap.deviation}</span>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-xl bg-surface-2 border border-line text-xs font-mono text-text">
-              <strong>Telemetry Evidence:</strong> {activeGap.evidenceTemplate}
-            </div>
-          </div>
-
-          {/* Why It Matters (Strategic Implication) */}
-          <div className="space-y-1">
-            <span className="text-xs font-bold text-brass uppercase tracking-wider flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-brass" />
-              Strategic Business Impact
-            </span>
-            <p className="surface-document text-xs sm:text-sm text-text leading-relaxed p-3.5 rounded-xl bg-surface-2/40 border border-line">
-              {activeGap.whyItMatters}
-            </p>
-          </div>
-
-          {/* Assigned Owner Section */}
-          <div className="p-3.5 rounded-xl bg-surface-2/50 border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-brass-soft border border-brass/30 flex items-center justify-center text-sm">
-                👤
-              </div>
-              <div>
-                <span className="text-xs font-bold text-text block">
-                  Assigned Owner: {activeGap.assignedOwner} ({activeGap.assignedRole})
-                </span>
-                <span className="text-[10px] text-text-muted">Responsible for executing resolution milestones</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-text-muted font-medium">Reassign:</span>
-              <select
-                value={activeGap.assignedOwner}
-                onChange={e => {
-                  const found = AVAILABLE_OWNERS.find(o => o.name === e.target.value);
-                  if (found) {
-                    handleOwnerChange(activeGap.id, found.name, found.role);
-                  }
-                }}
-                className="px-2.5 py-1 rounded-lg bg-surface border border-line text-xs font-semibold text-text focus:outline-none focus:ring-1 focus:ring-brass cursor-pointer"
-              >
-                {AVAILABLE_OWNERS.map(o => (
-                  <option key={o.name} value={o.name}>
-                    {o.name} ({o.role})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Solution Playbook with Interactive Checkboxes */}
-          <div className="space-y-3 pt-2 border-t border-line">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-text uppercase tracking-wider flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-jade" />
-                Corrective Action Playbook
-              </span>
-              <span className="text-xs text-jade font-semibold">
-                Target: {activeGap.solutionPlaybook.successMetric}
-              </span>
-            </div>
-
-            <p className="text-xs text-text-muted">
-              {activeGap.solutionPlaybook.summary}
-            </p>
-
-            {/* Checklist of Steps */}
-            <div className="space-y-2">
-              {activeGap.solutionPlaybook.steps.map((step, idx) => {
-                const isStepCompleted = activeGap.completedSteps.includes(idx);
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => handleToggleStep(activeGap.id, idx)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-3 text-xs ${
-                      isStepCompleted
-                        ? "bg-jade/10 border-jade/30 text-text"
-                        : "bg-surface-2/60 border border-line hover:border-line-strong"
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                        isStepCompleted
-                          ? "bg-jade border-jade text-white"
-                          : "border-line bg-surface text-transparent"
-                      }`}
-                    >
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                {/* Plain-English Problem, Metrics & Why It Matters */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  {/* Problem & Impact */}
+                  <div className="md:col-span-2 p-3.5 rounded-xl bg-surface-2/50 border border-line space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-rust font-bold text-xs">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      <span>Why This Matters to Your Business</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-text flex items-center justify-between">
-                        <span className={isStepCompleted ? "line-through text-text-muted" : "text-text"}>
-                          {step.title}
-                        </span>
-                        <span className="text-[10px] text-text-muted font-mono">{step.days} days</span>
-                      </div>
-                      <p className="text-text-muted mt-0.5">{step.detail}</p>
+                    <p className="text-text leading-relaxed text-xs sm:text-[13px]">
+                      {gap.whyItMatters}
+                    </p>
+                    <div className="text-[11px] text-text-muted font-mono pt-1">
+                      <strong>Telemetry Finding:</strong> {gap.evidenceTemplate}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Resolution Closure Actions Bar */}
-          <div className="pt-4 border-t border-line flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              {activeGap.status !== "resolved" ? (
-                <button
-                  type="button"
-                  onClick={() => handleVerifyResolution(activeGap.id)}
-                  className="px-4 py-2 rounded-xl bg-jade text-white text-xs font-bold shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Verify Resolution & Close Gap</span>
-                </button>
-              ) : (
-                <span className="text-xs text-jade font-bold flex items-center gap-1 px-3 py-1.5 rounded-xl bg-jade/15 border border-jade/30">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Gap Successfully Resolved</span>
-                </span>
-              )}
+                  {/* Benchmark vs Actual Target */}
+                  <div className="p-3.5 rounded-xl bg-surface-2/70 border border-line flex flex-col justify-between space-y-2">
+                    <div>
+                      <span className="text-[10px] font-semibold text-text-muted uppercase block">Benchmark Rule</span>
+                      <span className="text-xs font-bold text-text font-mono">{gap.targetMetric}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-semibold text-text-muted uppercase block">Your Current Status</span>
+                      <span className="text-sm font-extrabold text-rust font-mono">{gap.actualMetric}</span>
+                      <span className="text-[10px] text-rust font-semibold block">({gap.deviation})</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-semibold text-jade uppercase block">Resolution Goal</span>
+                      <span className="text-[11px] font-semibold text-jade">{gap.solutionPlaybook.successMetric}</span>
+                    </div>
+                  </div>
+                </div>
 
-              <Link
-                href="/simulator"
-                className="px-3.5 py-2 rounded-xl bg-surface-2 border border-line text-xs font-semibold text-text hover:bg-surface btn-tactile inline-flex items-center gap-1.5"
-              >
-                <Play className="w-3.5 h-3.5 text-brass" />
-                <span>Simulate Fix</span>
-              </Link>
-            </div>
+                {/* Actionable 3-Step Solution Checklist */}
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-text uppercase tracking-wider flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-brass" />
+                      Corrective Action Steps ({completedCount}/{totalSteps} Completed)
+                    </span>
+                    <span className="text-[11px] text-text-muted">
+                      Click any checkbox once implemented
+                    </span>
+                  </div>
 
-            <Link
-              href={`/chat?query=${encodeURIComponent(`How should we resolve "${activeGap.title}"?`)}`}
-              className="text-xs text-brass hover:underline inline-flex items-center gap-1 font-semibold"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>Ask Executive AI</span>
-            </Link>
-          </div>
-        </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {gap.solutionPlaybook.steps.map((step, idx) => {
+                      const isDone = gap.completedSteps.includes(idx);
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => handleToggleStep(gap.id, idx)}
+                          className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 text-xs ${
+                            isDone
+                              ? "bg-jade/10 border-jade/40 text-text"
+                              : "bg-surface-2/60 border-line hover:border-line-strong hover:bg-surface-2"
+                          }`}
+                        >
+                          <div
+                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                              isDone ? "bg-jade border-jade text-white" : "border-line bg-surface text-transparent"
+                            }`}
+                          >
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className={`font-semibold block text-[11px] leading-tight ${isDone ? "line-through text-text-muted" : "text-text"}`}>
+                              Step {idx + 1}: {step.title}
+                            </span>
+                            <p className="text-[10px] text-text-muted mt-1 leading-snug line-clamp-2">
+                              {step.detail}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Action Footer: 1-Click Resolve & Simulator */}
+                <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-line/60">
+                  <div className="flex items-center gap-2">
+                    {gap.status !== "resolved" ? (
+                      <button
+                        type="button"
+                        onClick={() => handleVerifyResolution(gap.id)}
+                        className="px-3.5 py-1.5 rounded-xl bg-jade hover:bg-jade/90 text-white text-xs font-bold shadow-xs btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>1-Click Mark as Resolved</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleStatusChange(gap.id, "in_progress")}
+                        className="px-3 py-1.5 rounded-xl bg-surface-2 hover:bg-surface border border-line text-xs font-semibold text-text btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-text-muted" />
+                        <span>Reopen Bottleneck</span>
+                      </button>
+                    )}
+
+                    <Link
+                      href="/simulator"
+                      className="px-3 py-1.5 rounded-xl bg-surface-2 hover:bg-surface border border-line text-xs font-semibold text-text btn-tactile inline-flex items-center gap-1.5"
+                    >
+                      <Play className="w-3.5 h-3.5 text-brass" />
+                      <span>Simulate Fix in Financial Model</span>
+                    </Link>
+                  </div>
+
+                  <Link
+                    href={`/chat?query=${encodeURIComponent(`How should we resolve this business gap: "${gap.title}"?`)}`}
+                    className="text-xs text-brass hover:underline inline-flex items-center gap-1 font-semibold"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Ask {gap.assignedOwner} AI for Advice →</span>
+                  </Link>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

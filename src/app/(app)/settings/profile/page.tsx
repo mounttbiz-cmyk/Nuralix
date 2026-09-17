@@ -264,9 +264,12 @@ export default function BusinessProfileSettingsPage() {
   return (
     <div className="max-w-3xl space-y-6">
       {/* Top Header & Navigation Tabs */}
-      <div className="space-y-3 pb-4 border-b border-line">
+      <div className="space-y-2 pb-4 border-b border-line">
         <h1 className="text-lg font-bold text-text">Platform Settings</h1>
-        <div className="flex flex-wrap items-center gap-2">
+        <p className="text-xs text-text-muted font-medium">
+          Manage your organization profile, active industry model, security credentials, and account lifecycle preferences.
+        </p>
+        <div className="flex flex-wrap items-center gap-2 pt-1">
           <Link
             href="/settings/profile"
             className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brass text-white shadow-xs flex items-center gap-1.5"

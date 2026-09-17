@@ -554,8 +554,8 @@ function ToolsContent() {
               {enabledTools.length} Specialist Tools Active
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
-            Specialized business tools for unit economics, pipeline forecasting, talent modeling, and strategic defensibility.
+          <p className="text-xs text-text-muted mt-1 font-medium">
+            Access modular calculators and analytical utilities to evaluate customer acquisition cost, runway extensions, pricing matrices, and sales capacity.
           </p>
         </div>
 

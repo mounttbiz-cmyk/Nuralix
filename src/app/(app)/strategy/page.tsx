@@ -215,9 +215,8 @@ export default function GrowthStrategyPage() {
               Horizon 2026
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
-            Calibrated strategic vectors, revenue expansion initiatives, and customer economics for{" "}
-            <span className="font-semibold text-text">{companyName}</span>.
+          <p className="text-xs text-text-muted mt-1 font-medium">
+            Formulate multi-quarter business expansion plans, defensive moat strategies, and competitive positioning vectors tailored for {companyName}.
           </p>
         </div>
 

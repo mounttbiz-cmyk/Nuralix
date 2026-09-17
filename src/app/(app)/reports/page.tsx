@@ -453,8 +453,8 @@ export default function ReportsPage() {
                   Decision-Focused Intelligence
                 </span>
               </div>
-              <p className="text-xs text-text-muted mt-0.5">
-                Deterministic synthesis prepared for <span className="text-text font-medium">{founderName}</span> & leadership team at <span className="text-text font-medium">{companyName}</span>.
+              <p className="text-xs text-text-muted mt-1 font-medium">
+                Synthesizes financial health, key deviations, and top tactical directives into an executive briefing prepared for {founderName} and leadership at {companyName}.
               </p>
             </div>
           </div>

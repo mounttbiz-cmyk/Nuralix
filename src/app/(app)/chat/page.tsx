@@ -621,8 +621,8 @@ export default function ChatWorkspacePage() {
               7 Autonomous Advisors
             </span>
           </div>
-          <p className="text-[11px] text-text-muted mt-0.5">
-            Converse directly with your specialized AI executive team and trigger deterministic playbooks.
+          <p className="text-[11px] text-text-muted mt-1 font-medium">
+            Converse directly with specialized AI executive agents (CEO Astra, CFO Marcus, Marketing Elena, Sales Vikram) to audit decisions and execute playbooks.
           </p>
         </div>
 

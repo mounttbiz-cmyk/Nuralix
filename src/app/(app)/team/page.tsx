@@ -174,8 +174,8 @@ export default function TeamPage() {
               Governance & RBAC
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
-            Manage organizational team access, role-based security matrices, enterprise SSO, and immutable audit logs.
+          <p className="text-xs text-text-muted mt-1 font-medium">
+            Control organizational member roles, AI agent invocation privileges, and security access tiers across your business workspace.
           </p>
         </div>
 

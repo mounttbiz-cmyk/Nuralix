@@ -47,7 +47,7 @@ interface WorkflowItem {
   id: string;
   name: string;
   description: string;
-  category: "sales" | "finance" | "retention" | "operations";
+  category: "sales" | "finance" | "retention" | "operations" | "outreach";
   status: "active" | "paused";
   executionsCount: number;
   successRate: string;
@@ -56,6 +56,78 @@ interface WorkflowItem {
 }
 
 const DEFAULT_WORKFLOWS: WorkflowItem[] = [
+  {
+    id: "wf_bulk_email_100",
+    name: "Autonomous 100-Lead Batch Email Outreach & Engagement Engine",
+    description: "Ingests 100 verified target leads → enriches firmographics → Elena (Marketing AI) drafts hyper-personalized copy per recipient → spam guard audit & 1-click batch dispatch (20/min throttled) → syncs CRM status → tracks opens, replies & booked meetings in real time.",
+    category: "outreach",
+    status: "active",
+    executionsCount: 52,
+    successRate: "98.4%",
+    lastRun: "24m ago",
+    stages: [
+      {
+        stepNumber: 1,
+        stageName: "Trigger (Event)",
+        title: "100-Lead Cohort Ingested",
+        subtitle: "CSV lead list or Apollo/HubSpot webhook pushes batch of 100 prospective contacts",
+        telemetryData: "Payload: 100 lead profiles (Founders, CFOs, VPs) ingested with verified work emails.",
+        icon: "👥",
+        status: "completed",
+        badgeColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+      },
+      {
+        stepNumber: 2,
+        stageName: "Retrieve Relevant Data",
+        title: "Firmographic & Signal Enrichment",
+        subtitle: "Scrape company ARR, hiring velocity, tech stack, and recent funding rounds for each recipient",
+        telemetryData: "100/100 records enriched with LinkedIn & Clearbit telemetry. 0 dead mailboxes.",
+        icon: "🔍",
+        status: "completed",
+        badgeColor: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+      },
+      {
+        stepNumber: 3,
+        stageName: "AI Reasoning & Rules",
+        title: "1-to-1 AI Personalization & Spam Guard",
+        subtitle: "Elena (Marketing AI) writes bespoke icebreakers & value propositions; runs MX/DKIM spam-score check",
+        telemetryData: "100 distinct tailored emails synthesized. Average spam vulnerability score: 0.1/10 (Safe Deliverability).",
+        icon: "🧠",
+        status: "completed",
+        badgeColor: "text-purple-500 bg-purple-500/10 border-purple-500/20",
+      },
+      {
+        stepNumber: 4,
+        stageName: "Action / Approval",
+        title: "Batch Approval & Throttled Dispatch",
+        subtitle: "Founder/Executive 1-click approval initiates staggered email sending via SendGrid/SES (20 emails every 3 mins)",
+        telemetryData: "Batch approved. Throttled dispatch engaged across verified warm domain pool to safeguard reputation.",
+        icon: "✉️",
+        status: "completed",
+        badgeColor: "text-brass bg-brass/10 border-brass/20",
+      },
+      {
+        stepNumber: 5,
+        stageName: "Update Records",
+        title: "CRM Sync & Lead State Transition",
+        subtitle: "Update HubSpot/Salesforce status to 'Cold Outreach Dispatched' with timestamp & copy preview",
+        telemetryData: "100 CRM records transitioned to 'Outreach Sent'. Follow-up reminder task registered.",
+        icon: "📂",
+        status: "completed",
+        badgeColor: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+      },
+      {
+        stepNumber: 6,
+        stageName: "Monitor Outcome",
+        title: "Open, Click & Calendar Booking Telemetry",
+        subtitle: "Listen for real-time webhooks (opens, clicks, positive replies, Cal.com bookings); auto-route hot leads to AE",
+        telemetryData: "Telemetry active: 62% open rate, 24% click-through, 9 demo calls scheduled within 48 hours.",
+        icon: "🎯",
+        status: "running",
+        badgeColor: "text-cyan-500 bg-cyan-500/10 border-cyan-500/20",
+      },
+    ],
+  },
   {
     id: "wf_lead_qualification",
     name: "Enterprise Inbound Lead Auto-Qualification & Executive Dispatch",
@@ -276,7 +348,7 @@ const DEFAULT_WORKFLOWS: WorkflowItem[] = [
 
 export default function WorkflowsPage() {
   const [workflows, setWorkflows] = useState<WorkflowItem[]>(DEFAULT_WORKFLOWS);
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>("wf_lead_qualification");
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>("wf_bulk_email_100");
   const [simulationActive, setSimulationActive] = useState(false);
   const [simulationCurrentStage, setSimulationCurrentStage] = useState<number>(0);
   const [executionLogs, setExecutionLogs] = useState<string[]>([]);
@@ -284,7 +356,46 @@ export default function WorkflowsPage() {
   const [newWorkflowName, setNewWorkflowName] = useState("");
   const [newWorkflowCategory, setNewWorkflowCategory] = useState<"sales" | "finance" | "operations" | "retention">("sales");
 
+  // 100-Email Campaign Execution Simulation State
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailProgress, setEmailProgress] = useState(0);
+  const [isSending100Emails, setIsSending100Emails] = useState(false);
+  const [sentLog, setSentLog] = useState<string[]>([]);
+
   const activeWorkflow = workflows.find(w => w.id === selectedWorkflowId) || workflows[0];
+
+  const handleStart100EmailCampaign = () => {
+    setIsSending100Emails(true);
+    setEmailProgress(0);
+    setSentLog([
+      "[Batch Init] Uploaded 100 enterprise target leads from target_cohort_q3.csv",
+      "[Enrichment] 100/100 accounts enriched via Clearbit & LinkedIn APIs (Verified MX records)",
+      "[AI Personalization] Elena (Marketing AI) generated 100 bespoke 1-to-1 icebreakers and pain-point value propositions",
+      "[Spam Guard] SPF, DKIM, DMARC alignment verified. Spam score 0.08 / 10.0 (Green / Inbox Primary)",
+    ]);
+
+    let count = 0;
+    const interval = setInterval(() => {
+      count += 10;
+      setEmailProgress(count);
+      if (count <= 100) {
+        setSentLog(prev => [
+          ...prev,
+          `[Batch Dispatch] Dispatched batch #${count / 10} (${count}/100 sent) · Throttled at 20 emails/min to protect sender reputation.`,
+        ]);
+      }
+      if (count >= 100) {
+        clearInterval(interval);
+        setIsSending100Emails(false);
+        setSentLog(prev => [
+          ...prev,
+          "[Complete] ✓ All 100 personalized emails dispatched successfully via SendGrid warm pool.",
+          "[Telemetry] 100 CRM records transitioned to 'Outreach Active'. Tracking pixel & link redirects primed.",
+          "[Projected Yield] 64 opens, 22 clicks, and 8-12 demo conversions expected within 72 hours.",
+        ]);
+      }
+    }, 450);
+  };
 
   const toggleWorkflowStatus = (id: string) => {
     setWorkflows(prev =>
@@ -444,12 +555,20 @@ export default function WorkflowsPage() {
               Event-to-Outcome Engine
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
-            Real business systems execute. Connect triggers, data retrieval, multi-model AI reasoning, actions, and record updates into closed autonomous loops.
+          <p className="text-xs text-text-muted mt-1 font-medium">
+            Configure, inspect, and autonomously trigger multi-step business pipelines that convert real system events into verified operational outcomes.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsEmailModalOpen(true)}
+            className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 hover:border-blue-500/50 text-xs font-bold text-blue-600 dark:text-blue-400 btn-tactile inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+          >
+            <Mail className="w-3.5 h-3.5 text-blue-500" />
+            <span>How 100-Email Batch Campaign Works</span>
+          </button>
           <button
             type="button"
             onClick={handleSimulatePipeline}
@@ -467,6 +586,44 @@ export default function WorkflowsPage() {
             <Plus className="w-3.5 h-3.5" />
             <span>Create Workflow</span>
           </button>
+        </div>
+      </div>
+
+      {/* 100-Person Email Campaign Operational Architecture Spotlight */}
+      <div className="p-5 rounded-2xl bg-gradient-to-br from-surface to-surface-2 border-2 border-blue-500/30 shadow-theme relative overflow-hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1.5 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30 flex items-center gap-1">
+                <Mail className="w-3 h-3" />
+                Live Operational Guide
+              </span>
+              <span className="text-xs font-bold text-text">How Mailing 100 People Works in Nuralix</span>
+            </div>
+            <p className="text-xs text-text-muted leading-relaxed">
+              When you launch an email campaign to 100 recipients, Nuralix executes a protected 6-stage closed loop:
+              <strong className="text-text font-semibold"> (1) Ingest 100 Leads</strong> from CSV or CRM →
+              <strong className="text-text font-semibold"> (2) Enrich Firmographics</strong> via Clearbit & LinkedIn →
+              <strong className="text-text font-semibold"> (3) Elena AI Writes 100 Tailored Emails</strong> with zero generic spam copy →
+              <strong className="text-text font-semibold"> (4) Throttled Dispatch</strong> (20 emails every 3 min via SendGrid to guard domain MX health) →
+              <strong className="text-text font-semibold"> (5) CRM State Sync</strong> →
+              <strong className="text-text font-semibold"> (6) Outcome Tracking</strong> for opens, replies, and booked calendar calls.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedWorkflowId("wf_bulk_email_100");
+                setIsEmailModalOpen(true);
+              }}
+              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all btn-tactile inline-flex items-center gap-2 cursor-pointer"
+            >
+              <Zap className="w-4 h-4 text-amber-300" />
+              <span>Launch 100-Email Batch Simulator</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -775,6 +932,125 @@ export default function WorkflowsPage() {
                 className="px-4 py-1.5 rounded-lg bg-brass text-white text-xs font-bold shadow-xs hover:brightness-110 disabled:opacity-50 cursor-pointer"
               >
                 Deploy Pipeline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 100-Lead Batch Email Outreach Execution Modal */}
+      {isEmailModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4">
+          <div className="w-full max-w-2xl bg-surface border border-line rounded-2xl shadow-2xl p-6 space-y-5 animate-scale-in max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-500">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-text">100-Person Batch Email Outreach & Workflow Engine</h3>
+                  <p className="text-[11px] text-text-muted">Interactive live simulator: How Nuralix automates emailing 100 enterprise prospects safely.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEmailModalOpen(false)}
+                className="text-text-muted hover:text-text cursor-pointer p-1 rounded-lg hover:bg-surface-2"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Step-by-Step Architecture Explanation */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
+                <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider block">Stage 1-2: Ingest & Enrich</span>
+                <p className="text-xs font-bold text-text">100 Verified Leads</p>
+                <p className="text-[10px] text-text-muted">Scrapes LinkedIn & Clearbit to identify tech stack, ARR, & pain points.</p>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
+                <span className="text-[10px] font-bold text-purple-500 uppercase tracking-wider block">Stage 3-4: AI & Throttle</span>
+                <p className="text-xs font-bold text-text">1-to-1 Personalization</p>
+                <p className="text-[10px] text-text-muted">Elena AI writes unique copy per lead. Dispatches 20 emails/min to avoid spam filters.</p>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
+                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider block">Stage 5-6: Sync & Track</span>
+                <p className="text-xs font-bold text-text">Telemetry & Meetings</p>
+                <p className="text-[10px] text-text-muted">Updates CRM status & auto-notifies your sales closer when a lead books a demo call.</p>
+              </div>
+            </div>
+
+            {/* Live Progress Bar & Dispatch Controls */}
+            <div className="p-4 rounded-xl bg-surface-2 border border-line space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-text">Live Dispatch Progress: </span>
+                  <span className="text-xs font-extrabold text-blue-500 font-mono">{emailProgress} / 100 Emails Sent</span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface border border-line text-text-muted">
+                  SendGrid Warm Pool · 20/min Throttling
+                </span>
+              </div>
+
+              {/* Visual Progress Bar */}
+              <div className="w-full h-3 bg-surface rounded-full overflow-hidden border border-line">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300 rounded-full"
+                  style={{ width: `${emailProgress}%` }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={handleStart100EmailCampaign}
+                  disabled={isSending100Emails}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <Play className={`w-3.5 h-3.5 ${isSending100Emails ? "animate-spin" : ""}`} />
+                  <span>{isSending100Emails ? "Dispatching 100 Emails…" : "Simulate Mailing 100 People"}</span>
+                </button>
+                {emailProgress === 100 && (
+                  <span className="text-xs font-bold text-emerald-500 flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Campaign Dispatched Successfully!
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Real-time Terminal Log */}
+            <div className="p-3.5 rounded-xl bg-slate-950 text-slate-200 border border-slate-800 space-y-2 font-mono text-[11px]">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span className="flex items-center gap-1.5 text-slate-400 font-semibold text-[10px] uppercase">
+                  <Terminal className="w-3.5 h-3.5 text-blue-400" />
+                  Autonomous Execution Log
+                </span>
+                <span className="text-[9px] text-emerald-400">STATUS: {isSending100Emails ? "STREAMING" : emailProgress === 100 ? "COMPLETED" : "STANDBY"}</span>
+              </div>
+              <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
+                {sentLog.length === 0 ? (
+                  <p className="text-slate-500 italic">Click &quot;Simulate Mailing 100 People&quot; above to watch the end-to-end autonomous pipeline run live.</p>
+                ) : (
+                  sentLog.map((log, idx) => (
+                    <div key={idx} className="leading-relaxed flex items-start gap-2">
+                      <span className="text-blue-400 select-none">›</span>
+                      <span className={log.includes("Complete") ? "text-emerald-400 font-bold" : log.includes("Error") ? "text-red-400" : "text-slate-300"}>
+                        {log}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end border-t border-line pt-3">
+              <button
+                type="button"
+                onClick={() => setIsEmailModalOpen(false)}
+                className="px-4 py-1.5 rounded-lg bg-surface-2 hover:bg-surface border border-line text-xs font-bold text-text cursor-pointer"
+              >
+                Close Simulator
               </button>
             </div>
           </div>

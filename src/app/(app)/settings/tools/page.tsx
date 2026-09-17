@@ -139,12 +139,15 @@ export default function SettingsToolsPage() {
   return (
     <div className="max-w-4xl space-y-6">
       {/* Header and navigation tabs */}
-      <div className="space-y-3 pb-4 border-b border-line">
+      <div className="space-y-2 pb-4 border-b border-line">
         <div className="flex items-center gap-2">
           <Layers className="w-5 h-5 text-brass" />
           <h1 className="text-lg font-bold text-text">Platform Settings</h1>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <p className="text-xs text-text-muted font-medium">
+          Toggle module availability, customize executive tool suites, and configure domain-specific calculators for your team.
+        </p>
+        <div className="flex flex-wrap items-center gap-2 pt-1">
           <Link
             href="/settings/profile"
             className="px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface border border-line flex items-center gap-1.5 transition-colors"

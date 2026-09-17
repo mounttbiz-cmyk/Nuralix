@@ -198,8 +198,8 @@ export default function TasksPage() {
             <CheckSquare className="w-5 h-5 text-jade" />
             <h1 className="text-lg font-bold text-text">Execution & Task Queue</h1>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
-            Concrete action items automatically linked to gap playbooks and decision commitments.
+          <p className="text-xs text-text-muted mt-1 font-medium">
+            Prioritize and track operational directives assigned across human founders and AI executive agents to ensure strategic follow-through.
           </p>
         </div>
 

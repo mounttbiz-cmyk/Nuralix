@@ -57,6 +57,17 @@ export default function AutomationsPage() {
 
   const [automations, setAutomations] = useState<AutomationItem[]>([
     {
+      id: "auto-batch-100",
+      name: "100-Person Lead Outreach & Throttled Batch Dispatch Protocol",
+      category: "communications",
+      trigger: "When 100-recipient target cohort is uploaded or tagged 'Ready for Outreach'",
+      action: "Elena AI verifies MX/DKIM deliverability, generates 100 bespoke personalized emails, and dispatches via SendGrid warm pool throttled at 20 emails/min.",
+      enabled: true,
+      frequency: "Event-triggered batch sweep",
+      lastRun: "24 mins ago",
+      runsCount: 52,
+    },
+    {
       id: "auto-1",
       name: "Runway Critical Threshold Alarm",
       category: "finance",
@@ -252,8 +263,8 @@ export default function AutomationsPage() {
                   Autonomous Engine
                 </span>
               </div>
-              <p className="text-xs text-text-muted mt-0.5">
-                Event triggers and autonomous agent protocols safeguarding {companyName}.
+              <p className="text-xs text-text-muted mt-1 font-medium">
+                Continuous autonomous rules and event monitors that execute real-time interventions, emails, and financial guardrails for {companyName}.
               </p>
             </div>
           </div>

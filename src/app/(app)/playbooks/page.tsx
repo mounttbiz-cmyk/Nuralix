@@ -440,9 +440,8 @@ export default function ExecutivePlaybooksPage() {
               PRO
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
-            Battle-tested operational frameworks and emergency governance protocols powering{" "}
-            <span className="font-semibold text-text">{companyName}</span>.
+          <p className="text-xs text-text-muted mt-1 font-medium">
+            Battle-tested operational playbooks and step-by-step executive protocols to handle cash crunches, key employee exits, and price increases.
           </p>
         </div>
 

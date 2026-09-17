@@ -173,8 +173,8 @@ export default function AnalyticsPage() {
                   {industryName}
                 </span>
               </div>
-              <p className="text-xs text-text-muted mt-0.5">
-                Dynamic telemetry calibrated to {companyName}. Switches from “what happened?” to “what should we do?”.
+              <p className="text-xs text-text-muted mt-1 font-medium">
+                Live performance telemetry and forward-looking financial benchmarks that pinpoint revenue leaks and growth opportunities for {companyName}.
               </p>
             </div>
           </div>

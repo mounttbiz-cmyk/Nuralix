@@ -166,8 +166,8 @@ export default function HelpPage() {
                   24/7 Executive Desk
                 </span>
               </div>
-              <p className="text-xs text-text-muted mt-0.5">
-                Support, system FAQs, and direct inquiry portal for {founderName} at {companyName}.
+              <p className="text-xs text-text-muted mt-1 font-medium">
+                Find answers to common platform questions, troubleshoot integration telemetry, or consult directly with senior enterprise engineering.
               </p>
             </div>
           </div>

@@ -418,8 +418,8 @@ export default function IntegrationsPage() {
               Persistent Registry
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
-            Connect corporate business suites, payment gateways, and data pipelines to power autonomous Nuralix AI agents.
+          <p className="text-xs text-text-muted mt-1 font-medium">
+            Connect your payment processors, accounting software, CRM systems, and cloud data feeds to feed real-time truth to your AI executive suite.
           </p>
         </div>
 
