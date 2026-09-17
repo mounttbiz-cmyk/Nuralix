@@ -13,7 +13,8 @@ import {
   User,
   Sparkles,
   ArrowRight,
-  RotateCw
+  RotateCw,
+  Trash2
 } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 import { PortalModal } from "@/components/ui/PortalModal";
@@ -32,27 +33,45 @@ interface TaskItem {
 const DEFAULT_INITIAL_TASKS: TaskItem[] = [
   {
     id: "task_1",
-    title: "Conduct secondary client outreach calls to reduce top concentration",
-    owner: "Founder",
-    gap: "Client Concentration",
+    title: "Review enterprise proposal & client retainer terms",
+    owner: "Dharmendar Shah (Founder)",
+    gap: "Client Retainers",
     priority: "critical",
     status: "in_progress",
     category: "Revenue Ops",
   },
   {
     id: "task_2",
-    title: "Implement gross-margin floor checklist for delivery team",
-    owner: "Operations Lead",
-    gap: "Margin Volatility",
+    title: "Audit operational SaaS & vendor burn for ₹15,000/mo optimization",
+    owner: "Dharmendar Shah (Founder)",
+    gap: "Cash Runway",
     priority: "high",
     status: "todo",
     category: "Unit Economics",
   },
   {
     id: "task_3",
-    title: "Establish daily executive pulse check-in review workflow",
-    owner: "Founder",
-    gap: "Founder Dependency",
+    title: "Finalize quarterly GST filing and Input Tax Credit (ITC) reconciliation",
+    owner: "Finance Lead",
+    gap: "Tax Compliance",
+    priority: "medium",
+    status: "todo",
+    category: "Compliance",
+  },
+  {
+    id: "task_4",
+    title: "Deploy outbound B2B customer acquisition sprint for SalesPal",
+    owner: "Growth Lead",
+    gap: "Pipeline Velocity",
+    priority: "high",
+    status: "todo",
+    category: "Customer Acquisition",
+  },
+  {
+    id: "task_5",
+    title: "Deliver weekly executive briefing to core team & stakeholders",
+    owner: "Dharmendar Shah (Founder)",
+    gap: "Operations Governance",
     priority: "medium",
     status: "done",
     category: "Governance",
@@ -62,11 +81,12 @@ const DEFAULT_INITIAL_TASKS: TaskItem[] = [
 export default function TasksPage() {
   const [tasks, setTasks] = useState<TaskItem[]>(DEFAULT_INITIAL_TASKS);
   const [loading, setLoading] = useState(true);
+  const [founderName, setFounderName] = useState("Dharmendar Shah");
 
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
-  const [newOwner, setNewOwner] = useState("Founder");
+  const [newOwner, setNewOwner] = useState("Dharmendar Shah (Founder)");
   const [newGap, setNewGap] = useState("Cash Runway");
   const [newPriority, setNewPriority] = useState<TaskItem["priority"]>("high");
   const [newStatus, setNewStatus] = useState<TaskItem["status"]>("todo");
@@ -78,6 +98,18 @@ export default function TasksPage() {
   // Load from persistent SQLite backend
   const fetchTasks = async () => {
     try {
+      // Hydrate founder name from business profile
+      const stored = localStorage.getItem("nuralix_business_profile");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.founderName) {
+            setFounderName(parsed.founderName);
+            setNewOwner(`${parsed.founderName} (Founder)`);
+          }
+        } catch {}
+      }
+
       const res = await fetch("/api/tasks");
       const data = await res.json();
       if (data.success && Array.isArray(data.tasks) && data.tasks.length > 0) {
@@ -130,6 +162,19 @@ export default function TasksPage() {
   const notify = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Delete Task
+  const handleDeleteTask = async (taskId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this task?")) return;
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    try {
+      await fetch(`/api/tasks?id=${taskId}`, { method: "DELETE" });
+      notify("Task deleted");
+    } catch (err) {
+      console.error("Failed to delete task", err);
+    }
   };
 
   // Create Custom Task
@@ -303,7 +348,17 @@ export default function TasksPage() {
                         <User className="w-3 h-3" />
                         <span>{task.owner}</span>
                       </span>
-                      <span className="truncate max-w-[130px] font-mono text-[10px]">{task.gap}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate max-w-[120px] font-mono text-[10px]">{task.gap}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteTask(task.id, e)}
+                          className="p-1 rounded text-text-muted hover:text-rust hover:bg-rust/10 transition-colors cursor-pointer"
+                          title="Delete task"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -352,12 +407,11 @@ export default function TasksPage() {
                   onChange={e => setNewOwner(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
                 >
-                  <option value="Marcus (CFO AI)">Marcus (CFO AI)</option>
-                  <option value="Astra (CEO AI)">Astra (CEO AI)</option>
-                  <option value="Devon (CTO AI)">Devon (CTO AI)</option>
-                  <option value="Valeria (CMO AI)">Valeria (CMO AI)</option>
-                  <option value="Internal Operations">Internal Operations</option>
-                  <option value="Founder / CEO">Founder / CEO</option>
+                  <option value={`${founderName} (Founder)`}>{founderName} (Founder)</option>
+                  <option value="Finance & Runway Lead">Finance & Runway Lead</option>
+                  <option value="Growth & Marketing Lead">Growth & Marketing Lead</option>
+                  <option value="Operations Lead">Operations Lead</option>
+                  <option value="Technical Lead">Technical Lead</option>
                 </select>
               </div>
 

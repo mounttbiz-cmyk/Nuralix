@@ -549,13 +549,13 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {/* Bar Chart Visualization with strict boundary containment */}
-          <div className="pt-6 pb-2 overflow-hidden">
-            <div className="h-56 flex items-end justify-between gap-1.5 sm:gap-3 border-b border-line px-2 relative overflow-hidden">
+          {/* Bar Chart Visualization with clean layout and no clipping */}
+          <div className="pt-4 pb-2">
+            <div className="min-h-[230px] flex items-end justify-between gap-1.5 sm:gap-3 border-b border-line px-2 pb-2 relative">
               {revenueHistory.map((d, i) => {
                 // Ensure height percentage is strictly between 0% and 100%
-                const heightPct = Math.min(100, Math.max(0, Math.round((d.revenue / maxRev) * 88)));
-                const burnPct = Math.min(100, Math.max(0, Math.round((d.burn / maxRev) * 88)));
+                const heightPct = Math.min(100, Math.max(8, Math.round((d.revenue / maxRev) * 85)));
+                const burnPct = Math.min(100, Math.max(5, Math.round((d.burn / maxRev) * 85)));
                 const isForecast = d.month.includes("(F)");
                 const isLastItem = i >= revenueHistory.length - 2;
                 const isFirstItem = i <= 1;
@@ -571,12 +571,12 @@ export default function AnalyticsPage() {
                       <span>₹{d.revenue.toLocaleString("en-IN")}</span>
                     </div>
 
-                    <div className="w-full flex items-end justify-center gap-1 sm:gap-1.5 h-44 overflow-hidden">
+                    <div className="w-full flex items-end justify-center gap-1 sm:gap-1.5 h-36">
                       <div
                         className={`w-full max-w-[22px] rounded-t-md transition-all duration-300 ${
                           isForecast
-                            ? "bg-gradient-to-t from-brass to-cyan-400 border border-brass/40"
-                            : "bg-brass hover:brightness-110"
+                            ? "bg-gradient-to-t from-brass to-cyan-400 border border-brass/40 shadow-xs"
+                            : "bg-brass hover:brightness-110 shadow-xs"
                         }`}
                         style={{ height: `${heightPct}%` }}
                       />
@@ -587,7 +587,7 @@ export default function AnalyticsPage() {
                         style={{ height: `${burnPct}%` }}
                       />
                     </div>
-                    <span className={`text-[10px] font-medium shrink-0 ${isForecast ? "text-brass font-bold" : "text-text-muted"}`}>
+                    <span className={`text-[10px] font-medium shrink-0 pt-1 ${isForecast ? "text-brass font-bold" : "text-text-muted"}`}>
                       {d.month}
                     </span>
                   </div>

@@ -61,14 +61,14 @@ const INITIAL_EXTENDED_GAPS: ExtendedGapItem[] = [
   {
     ...defaultGapRules[0],
     targetMetric: "Runway ≥ 12.0 Months",
-    actualMetric: "7.2 Months",
-    deviation: "-40.0% Deficit",
-    deviationPercent: -40,
+    actualMetric: "8.0 Months",
+    deviation: "-33.3% Deficit",
+    deviationPercent: -33.3,
     status: "in_progress",
-    assignedOwner: "Marcus",
-    assignedRole: "CFO AI",
+    assignedOwner: "Finance & Runway Lead",
+    assignedRole: "Lead Owner",
     completedSteps: [0],
-    evidenceTemplate: "Current cash reserve of ₹12,00,000 against net monthly burn of ₹1,50,000 gives 7.2 months runway.",
+    evidenceTemplate: "Current cash reserve of ₹12,00,000 against net monthly burn of ₹1,50,000 gives 8.0 months runway.",
   },
   {
     ...defaultGapRules[1],
@@ -77,8 +77,8 @@ const INITIAL_EXTENDED_GAPS: ExtendedGapItem[] = [
     deviation: "+82.5% Concentration",
     deviationPercent: 82.5,
     status: "detected",
-    assignedOwner: "Astra",
-    assignedRole: "CEO AI",
+    assignedOwner: "Executive Strategy",
+    assignedRole: "Lead Owner",
     completedSteps: [],
     evidenceTemplate: "Top client represents 36.5% of trailing enterprise revenue against the 20% safe diversification benchmark.",
   },
@@ -89,8 +89,8 @@ const INITIAL_EXTENDED_GAPS: ExtendedGapItem[] = [
     deviation: "+51.1% Vulnerability",
     deviationPercent: 51.1,
     status: "prioritized",
-    assignedOwner: "Elena",
-    assignedRole: "Marketing AI",
+    assignedOwner: "Growth & Acquisition",
+    assignedRole: "Lead Owner",
     completedSteps: [],
     evidenceTemplate: "Meta advertising accounts for 68.0% of customer acquisition, creating critical channel risk.",
   },
@@ -106,8 +106,8 @@ const INITIAL_EXTENDED_GAPS: ExtendedGapItem[] = [
     deviation: "-10.8% Margin Leakage",
     deviationPercent: -10.8,
     status: "detected",
-    assignedOwner: "David",
-    assignedRole: "Operations AI",
+    assignedOwner: "Delivery Operations",
+    assignedRole: "Lead Owner",
     completedSteps: [],
     whyItMatters: "Gross margin dilution below 75% erodes cash retention, ballooning forward net burn and delaying break-even milestones.",
     evidenceTemplate: "Cost of goods and cloud vendor pass-throughs currently total 28.6% of billed revenue.",
@@ -117,7 +117,7 @@ const INITIAL_EXTENDED_GAPS: ExtendedGapItem[] = [
       firstAction: "Review vendor invoices and cloud infrastructure spend",
       steps: [
         { title: "Audit AWS/Azure reserved instances and unallocated compute", detail: "Downsize idle dev environments and enforce 1-year reserved savings plans.", ownerRole: "Operations", days: 4 },
-        { title: "Renegotiate contractor delivery rates", detail: "Standardize contractor master service agreements with performance SLA gates.", ownerRole: "CFO", days: 10 },
+        { title: "Renegotiate contractor delivery rates", detail: "Standardize contractor master service agreements with performance SLA gates.", ownerRole: "Finance", days: 10 },
         { title: "Institute milestone billing sign-off", detail: "Prevent scope creep by requiring written client approvals for out-of-scope work.", ownerRole: "Sales", days: 14 }
       ]
     }
@@ -134,8 +134,8 @@ const INITIAL_EXTENDED_GAPS: ExtendedGapItem[] = [
     deviation: "+72.0% Churn Exposure",
     deviationPercent: 72,
     status: "under_verification",
-    assignedOwner: "Vikram",
-    assignedRole: "Sales AI",
+    assignedOwner: "Client Success",
+    assignedRole: "Lead Owner",
     completedSteps: [0, 1],
     whyItMatters: "High churn creates a leaky bucket where new acquisition spend is consumed just replacing departed accounts.",
     evidenceTemplate: "Over the last 90 days, 3 enterprise accounts cancelled services citing onboarding lag.",
@@ -153,13 +153,11 @@ const INITIAL_EXTENDED_GAPS: ExtendedGapItem[] = [
 ];
 
 const AVAILABLE_OWNERS = [
-  { name: "Founder", role: "Executive Lead", avatar: "👤" },
-  { name: "Astra", role: "CEO AI", avatar: "👑" },
-  { name: "Marcus", role: "CFO AI", avatar: "📊" },
-  { name: "Elena", role: "Marketing AI", avatar: "🎯" },
-  { name: "Vikram", role: "Sales AI", avatar: "⚡" },
-  { name: "David", role: "Operations AI", avatar: "⚙️" },
-  { name: "Sarah", role: "HR & Talent AI", avatar: "🤝" },
+  { name: "Finance & Runway Lead", role: "Financial Operations", avatar: "📊" },
+  { name: "Executive Strategy", role: "Founder & CEO Office", avatar: "🎯" },
+  { name: "Growth & Acquisition", role: "Revenue Operations", avatar: "🚀" },
+  { name: "Client Success", role: "Account Management", avatar: "🤝" },
+  { name: "Delivery Operations", role: "Process & Quality", avatar: "⚙️" },
 ];
 
 export default function GapsPage() {

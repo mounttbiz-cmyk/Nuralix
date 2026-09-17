@@ -29,6 +29,7 @@ import { IntegrationLogo } from "@/components/ui/IntegrationLogo";
 import { isFirebaseConfigured, firebaseConfig } from "@/lib/firebase/config";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 import { PortalModal } from "@/components/ui/PortalModal";
+import { IntegrationAppViewerModal } from "@/components/integrations/IntegrationAppViewerModal";
 
 interface IntegrationItem {
   id: string;
@@ -202,9 +203,15 @@ export default function IntegrationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Modals
+  const [viewerItem, setViewerItem] = useState<IntegrationItem | null>(null);
   const [inspectItem, setInspectItem] = useState<IntegrationItem | null>(null);
   const [stripeModalOpen, setStripeModalOpen] = useState<boolean>(false);
   const [genericModalItem, setGenericModalItem] = useState<IntegrationItem | null>(null);
+
+  // Business Profile Context
+  const [companyName, setCompanyName] = useState<string>("SalesPal");
+  const [founderName, setFounderName] = useState<string>("Dharmendar Shah");
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>("mounttbiz@gmail.com");
 
   // Stripe Modal State
   const [stripeApiKey, setStripeApiKey] = useState<string>("");
@@ -218,14 +225,30 @@ export default function IntegrationsPage() {
 
   // Close any active modal when Escape key is pressed
   useEscapeKey(() => {
+    if (viewerItem) setViewerItem(null);
     if (stripeModalOpen) setStripeModalOpen(false);
     if (genericModalItem) setGenericModalItem(null);
     if (inspectItem) setInspectItem(null);
-  }, Boolean(stripeModalOpen || genericModalItem || inspectItem));
+  }, Boolean(viewerItem || stripeModalOpen || genericModalItem || inspectItem));
 
   // Load real state from backend database
   const loadIntegrations = async () => {
     try {
+      // Hydrate business profile from localStorage
+      const storedProfile = localStorage.getItem("nuralix_business_profile");
+      if (storedProfile) {
+        try {
+          const parsed = JSON.parse(storedProfile);
+          if (parsed.name) setCompanyName(parsed.name);
+          if (parsed.founderName) setFounderName(parsed.founderName);
+          if (parsed.accountEmail) setCurrentUserEmail(parsed.accountEmail);
+        } catch {}
+      }
+      const storedEmail = localStorage.getItem("nuralix_current_user_email");
+      if (storedEmail) {
+        setCurrentUserEmail(storedEmail);
+      }
+
       const res = await fetch("/api/integrations");
       const data = await res.json();
       if (data.success && Array.isArray(data.integrations)) {
@@ -489,7 +512,8 @@ export default function IntegrationsPage() {
           {filtered.map(item => (
             <div
               key={item.id}
-              className="p-4 rounded-xl border border-line bg-surface hover:border-line-strong transition-all flex flex-col justify-between shadow-xs group"
+              onClick={() => setViewerItem(item)}
+              className="p-4 rounded-xl border border-line bg-surface hover:border-brass/50 hover:shadow-md transition-all flex flex-col justify-between shadow-xs group cursor-pointer"
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
@@ -530,41 +554,30 @@ export default function IntegrationsPage() {
               <div className="pt-4 mt-3 border-t border-line flex items-center justify-between">
                 <button
                   type="button"
-                  onClick={() => setInspectItem(item)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewerItem(item);
+                  }}
                   className="text-xs font-semibold text-brass hover:underline inline-flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Inspect Config</span>
+                  <span>Open Live Telemetry</span>
                   <ChevronRight className="w-3 h-3" />
                 </button>
 
-                {item.id === "stripe" ? (
-                  <button
-                    type="button"
-                    onClick={() => setStripeModalOpen(true)}
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-md border btn-tactile cursor-pointer ${
-                      item.status === "connected"
-                        ? "bg-surface-2 border-line text-text-muted hover:text-text"
-                        : "bg-brass text-white border-brass hover:brightness-110"
-                    }`}
-                  >
-                    {item.status === "connected" ? "Manage Stripe" : "Connect Stripe"}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGenericModalItem(item);
-                      setGenericCredential(item.apiKey || "");
-                    }}
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-md border btn-tactile cursor-pointer ${
-                      item.status === "connected"
-                        ? "bg-surface-2 border-line text-text-muted hover:text-text"
-                        : "bg-brass text-white border-brass hover:brightness-110"
-                    }`}
-                  >
-                    {item.status === "connected" ? "Configure" : "Connect"}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewerItem(item);
+                  }}
+                  className={`text-[10px] font-bold px-2.5 py-1 rounded-md border btn-tactile cursor-pointer ${
+                    item.status === "connected"
+                      ? "bg-surface-2 border-line text-text-muted hover:text-text"
+                      : "bg-brass text-white border-brass hover:brightness-110"
+                  }`}
+                >
+                  {item.status === "connected" ? "View App Details" : "Connect Live"}
+                </button>
               </div>
             </div>
           ))}
@@ -880,6 +893,27 @@ export default function IntegrationsPage() {
           </div>
         )}
       </PortalModal>
+
+      {/* RICH APP LIVE TELEMETRY VIEWER MODAL */}
+      <IntegrationAppViewerModal
+        isOpen={Boolean(viewerItem)}
+        onClose={() => setViewerItem(null)}
+        toolId={viewerItem?.id || null}
+        toolName={viewerItem?.name || ""}
+        toolCategory={viewerItem?.category}
+        toolTagline={viewerItem?.tagline}
+        status={viewerItem?.status || "not_connected"}
+        currentUserEmail={currentUserEmail}
+        companyName={companyName}
+        founderName={founderName}
+        apiKey={viewerItem?.apiKey}
+        onUpdateStatus={async (toolKey, newStatus) => {
+          await loadIntegrations();
+          if (viewerItem) {
+            setViewerItem(prev => prev ? { ...prev, status: newStatus as any } : null);
+          }
+        }}
+      />
     </div>
   );
 }
