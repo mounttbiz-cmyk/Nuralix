@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, ArrowRight, Sparkles, Lock, KeyRound, Building2, ExternalLink, Check, Copy, AlertTriangle, X } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 import { useAuth } from "@/lib/firebase/authContext";
-import { isFirebaseConfigured, firebaseConfig } from "@/lib/firebase/config";
+import { auth, isFirebaseConfigured, firebaseConfig } from "@/lib/firebase/config";
+import { fetchSignInMethodsForEmail } from "firebase/auth";
 import { saveUserProfileToFirestore, getUserProfileFromFirestore } from "@/lib/firebase/firestore";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
@@ -117,36 +118,15 @@ export default function LoginPage() {
 
   /**
    * Helper: Restore business details of old user account and navigate directly to dashboard
+   * OPTIMIZED FOR MAX SPEED: reads synchronous local storage, synthesizes immediately,
+   * pushes navigation to /dashboard (<50ms), and syncs with backend in background.
    */
   const restoreAndNavigateOldUser = async (userEmail: string, displayName?: string, uid?: string) => {
     const cleanEmail = (userEmail || "").trim().toLowerCase();
     let businessProfile: any = null;
 
-    // 1. Check SQLite database ledger via account status API
-    try {
-      const res = await fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.businessProfile && (data.businessProfile.name || data.businessProfile.revenue !== undefined)) {
-          businessProfile = data.businessProfile;
-        }
-      }
-    } catch (e) {}
-
-    // 2. Check Firestore profile if uid is available
-    if (!businessProfile && uid && isFirebaseConfigured) {
-      try {
-        const firestoreData = await getUserProfileFromFirestore(uid);
-        if (firestoreData?.businessProfile) {
-          businessProfile = firestoreData.businessProfile;
-        } else if (firestoreData?.companyName || firestoreData?.name) {
-          businessProfile = firestoreData;
-        }
-      } catch (e) {}
-    }
-
-    // 3. Check user-specific localStorage cache
-    if (!businessProfile && cleanEmail) {
+    // 1. Fast synchronous check: user-specific localStorage cache
+    if (cleanEmail) {
       try {
         const localUserBiz = localStorage.getItem(`nuralix_user_business_${cleanEmail}`);
         if (localUserBiz) {
@@ -155,20 +135,7 @@ export default function LoginPage() {
       } catch (e) {}
     }
 
-    // 4. Check global business intake API in SQLite
-    if (!businessProfile) {
-      try {
-        const intakeRes = await fetch("/api/business/intake");
-        if (intakeRes.ok) {
-          const intakeData = await intakeRes.json();
-          if (intakeData?.business && intakeData.business.name) {
-            businessProfile = intakeData.business;
-          }
-        }
-      } catch (e) {}
-    }
-
-    // 5. Check existing general localStorage profile
+    // 2. Fast synchronous check: general business profile in localStorage
     if (!businessProfile) {
       try {
         const existingStr = localStorage.getItem("nuralix_business_profile");
@@ -178,7 +145,7 @@ export default function LoginPage() {
       } catch (e) {}
     }
 
-    // 6. Synthesize default business profile if nothing exists yet
+    // 3. Fallback synthesis immediately
     if (!businessProfile) {
       const fallbackName = displayName || fullName || "Founder";
       businessProfile = {
@@ -195,14 +162,38 @@ export default function LoginPage() {
       };
     }
 
-    // Persist to localStorage and user-specific cache
+    // Persist to localStorage synchronously
     localStorage.setItem("nuralix_business_profile", JSON.stringify(businessProfile));
     if (cleanEmail) {
       localStorage.setItem(`nuralix_user_business_${cleanEmail}`, JSON.stringify(businessProfile));
     }
 
-    // Direct navigation straight to dashboard - NEVER ask questions/onboarding to old user!
+    // Direct navigation straight to dashboard - IMMEDIATE (<50ms)
     router.push("/dashboard");
+
+    // Asynchronous background sync with SQLite and Firestore (non-blocking)
+    (async () => {
+      try {
+        const res = await fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.businessProfile && (data.businessProfile.name || data.businessProfile.revenue !== undefined)) {
+            localStorage.setItem("nuralix_business_profile", JSON.stringify(data.businessProfile));
+            localStorage.setItem(`nuralix_user_business_${cleanEmail}`, JSON.stringify(data.businessProfile));
+          }
+        }
+      } catch (e) {}
+
+      if (uid && isFirebaseConfigured) {
+        try {
+          const firestoreData = await getUserProfileFromFirestore(uid);
+          if (firestoreData?.businessProfile) {
+            localStorage.setItem("nuralix_business_profile", JSON.stringify(firestoreData.businessProfile));
+            localStorage.setItem(`nuralix_user_business_${cleanEmail}`, JSON.stringify(firestoreData.businessProfile));
+          }
+        } catch (e) {}
+      }
+    })().catch(() => {});
   };
 
   // Business Login/Registration handler with multi-layer account protection
@@ -240,66 +231,87 @@ export default function LoginPage() {
           const isGoogleNewUser = googleRes.isNewUser;
           const userEmail = (authUser.email || "").trim().toLowerCase();
 
-          // Check if account already exists across SQLite, Firestore, or Firebase auth metadata
-          const accountAlreadyExists = !isGoogleNewUser || (await checkAccountExists(userEmail, authUser.uid));
-
           if (authMode === "register") {
             // User is in "Create Account" section
-            if (accountAlreadyExists) {
-              // BLOCK: Cannot create account with an existing Google account
+            // In Firebase Auth, if !isGoogleNewUser, this Google account ALREADY exists in Firebase Console Users section
+            if (!isGoogleNewUser) {
               await logout();
               if (userEmail) setEmail(userEmail);
-              setError("This account has been used before, so please go to Log In.");
+              setError("This Google account has been used before, so please go to Log In.");
               setLoading(false);
               return;
             }
 
-            // Valid brand new registration
-            await recordRegisteredAccount(userEmail, authUser.displayName || fullName || "Founder", "google.com", authUser.uid);
-            await saveUserProfileToFirestore(authUser.uid, {
+            // User is brand new (or was deleted from Firebase Console) -> Allow registration!
+            const userSession = {
+              id: authUser.uid,
+              email: userEmail || email,
+              name: authUser.displayName || fullName || "Founder",
+              role: "owner",
+              provider: "google.com",
+              authenticatedAt: new Date().toISOString(),
+            };
+            localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+
+            // Instant navigation to onboarding
+            router.push("/onboarding");
+
+            // Record in SQLite and Firestore in background
+            recordRegisteredAccount(userEmail, authUser.displayName || fullName || "Founder", "google.com", authUser.uid).catch(() => {});
+            saveUserProfileToFirestore(authUser.uid, {
               email: userEmail,
               displayName: authUser.displayName || fullName || "Founder",
               role: "owner",
               createdAt: new Date().toISOString(),
-            });
+            }).catch(() => {});
+            return;
           } else {
             // User is in "Log In" section
-            if (!accountAlreadyExists) {
-              // BLOCK: Cannot log in with an un-registered Google account
+            // In Firebase Auth, if isGoogleNewUser is true, this account was NOT previously registered in Firebase Console!
+            if (isGoogleNewUser) {
+              // Delete the newly-provisioned Google user so Firebase Console stays clean
               try {
                 await authUser.delete();
               } catch (delErr) {}
               await logout();
+
+              // Clean any stale local / SQLite cache for this email
+              try {
+                const rawLocal = localStorage.getItem("nuralix_registered_accounts");
+                if (rawLocal) {
+                  const list: string[] = JSON.parse(rawLocal);
+                  localStorage.setItem("nuralix_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== userEmail)));
+                }
+                fetch(`/api/auth/account-status?email=${encodeURIComponent(userEmail)}`, { method: "DELETE" }).catch(() => {});
+              } catch (e) {}
+
               if (userEmail) setEmail(userEmail);
-              setError("This account has not been registered yet, so please go to Create Account.");
+              setError("No registered account found for this Google account. This account has not been registered yet, so please go to Create Account.");
               setLoading(false);
               return;
             }
-          }
 
-          // Successful Google auth session
-          const userSession = {
-            id: authUser.uid,
-            email: authUser.email || email,
-            name: authUser.displayName || fullName || "Founder",
-            role: "owner",
-            provider: "google.com",
-            authenticatedAt: new Date().toISOString(),
-          };
-          localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+            // Valid existing Google user logging in
+            const userSession = {
+              id: authUser.uid,
+              email: userEmail || email,
+              name: authUser.displayName || fullName || "Founder",
+              role: "owner",
+              provider: "google.com",
+              authenticatedAt: new Date().toISOString(),
+            };
+            localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
 
-          if (authMode === "register") {
-            router.push("/onboarding");
-          } else {
-            // Old user logging in: directly go to dashboard & remember their details!
+            // Directly restore and navigate to dashboard!
             await restoreAndNavigateOldUser(userEmail, authUser.displayName || fullName || "Founder", authUser.uid);
+            return;
           }
-          return;
         }
 
         // Email & Password flow
+        const cleanEmail = (email || "").trim().toLowerCase();
         if (authMode === "register") {
-          if (!email || !email.includes("@")) {
+          if (!cleanEmail || !cleanEmail.includes("@")) {
             setError("Please enter a valid work email address.");
             setLoading(false);
             return;
@@ -310,17 +322,11 @@ export default function LoginPage() {
             return;
           }
 
-          // Pre-check if email already exists in registry
-          const alreadyExists = await checkAccountExists(email);
-          if (alreadyExists) {
-            setError("This account has been used before, so please go to Log In.");
-            setLoading(false);
-            return;
-          }
-
+          // Directly call Firebase signUpWithEmail - Firebase Console is the single source of truth!
+          // No blocking pre-checks that would falsely reject accounts removed from Firebase.
           let authUser: any = null;
           try {
-            authUser = await signUpWithEmail(email, password, fullName);
+            authUser = await signUpWithEmail(cleanEmail, password, fullName);
           } catch (signUpErr: any) {
             if (signUpErr?.code === "auth/email-already-in-use") {
               setError("This account has been used before, so please go to Log In.");
@@ -331,29 +337,32 @@ export default function LoginPage() {
           }
 
           if (authUser) {
-            await recordRegisteredAccount(authUser.email || email, fullName || "Founder", "password", authUser.uid);
-            await saveUserProfileToFirestore(authUser.uid, {
-              email: authUser.email || email,
-              displayName: fullName || "Founder",
-              role: "owner",
-              createdAt: new Date().toISOString(),
-            });
-
             const userSession = {
               id: authUser.uid,
-              email: authUser.email || email,
+              email: authUser.email || cleanEmail,
               name: authUser.displayName || fullName || "Founder",
               role: "owner",
               provider: "password",
               authenticatedAt: new Date().toISOString(),
             };
             localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+
+            // Instant navigation to onboarding
             router.push("/onboarding");
+
+            // Background updates
+            recordRegisteredAccount(cleanEmail, fullName || "Founder", "password", authUser.uid).catch(() => {});
+            saveUserProfileToFirestore(authUser.uid, {
+              email: cleanEmail,
+              displayName: fullName || "Founder",
+              role: "owner",
+              createdAt: new Date().toISOString(),
+            }).catch(() => {});
             return;
           }
         } else {
           // authMode === "signin"
-          if (!email || !email.includes("@")) {
+          if (!cleanEmail || !cleanEmail.includes("@")) {
             setError("Please enter your registered work email address.");
             setLoading(false);
             return;
@@ -365,32 +374,70 @@ export default function LoginPage() {
           }
 
           try {
-            const authUser = await signInWithEmail(email, password);
+            const authUser = await signInWithEmail(cleanEmail, password);
             if (authUser) {
-              await recordRegisteredAccount(authUser.email || email, authUser.displayName || fullName || "Founder", "password", authUser.uid);
               const userSession = {
                 id: authUser.uid,
-                email: authUser.email || email,
+                email: authUser.email || cleanEmail,
                 name: authUser.displayName || fullName || "Founder",
                 role: "owner",
                 provider: "password",
                 authenticatedAt: new Date().toISOString(),
               };
               localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+
               // Old user logging in: directly go to dashboard & remember their details!
-              await restoreAndNavigateOldUser(authUser.email || email, authUser.displayName || fullName || "Founder", authUser.uid);
+              await restoreAndNavigateOldUser(cleanEmail, authUser.displayName || fullName || "Founder", authUser.uid);
+              recordRegisteredAccount(cleanEmail, authUser.displayName || fullName || "Founder", "password", authUser.uid).catch(() => {});
               return;
             }
           } catch (signInErr: any) {
             const code = signInErr?.code || "";
-            if (code === "auth/user-not-found" || code === "auth/invalid-credential") {
-              const exists = await checkAccountExists(email);
-              if (!exists) {
-                setError("This account has not been registered yet, so please go to Create Account.");
-                setLoading(false);
-                return;
-              }
+            if (code === "auth/user-not-found") {
+              // Account does not exist in Firebase console (or was deleted)!
+              try {
+                const rawLocal = localStorage.getItem("nuralix_registered_accounts");
+                if (rawLocal) {
+                  const list: string[] = JSON.parse(rawLocal);
+                  localStorage.setItem("nuralix_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== cleanEmail)));
+                }
+                fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`, { method: "DELETE" }).catch(() => {});
+              } catch (e) {}
+
+              setError("No registered account found with this email. This account has not been registered yet, so please go to Create Account.");
+              setLoading(false);
+              return;
             }
+
+            if (code === "auth/invalid-credential") {
+              // Firebase v10 may return auth/invalid-credential when user does not exist in Firebase.
+              // Verify directly from Firebase users section using fetchSignInMethodsForEmail:
+              try {
+                if (auth) {
+                  const methods = await fetchSignInMethodsForEmail(auth, cleanEmail);
+                  if (!methods || methods.length === 0) {
+                    // Account was deleted or does not exist in Firebase Console!
+                    try {
+                      const rawLocal = localStorage.getItem("nuralix_registered_accounts");
+                      if (rawLocal) {
+                        const list: string[] = JSON.parse(rawLocal);
+                        localStorage.setItem("nuralix_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== cleanEmail)));
+                      }
+                      fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`, { method: "DELETE" }).catch(() => {});
+                    } catch (e) {}
+
+                    setError("No registered account found with this email. This account has not been registered yet, so please go to Create Account.");
+                    setLoading(false);
+                    return;
+                  }
+                }
+              } catch (fetchErr) {}
+
+              setError("Incorrect password. If you forgot your password or need a new account, please switch to Create Account.");
+              setLoading(false);
+              return;
+            }
+
             throw signInErr;
           }
         }
@@ -446,7 +493,7 @@ export default function LoginPage() {
         // authMode === "signin"
         if (provider === "email" && email) {
           if (!accountExists) {
-            setError("This account has not been registered yet, so please go to Create Account.");
+            setError("No registered account found with this email. This account has not been registered yet, so please go to Create Account.");
             setLoading(false);
             return;
           }
