@@ -91,7 +91,7 @@ export default function LoginPage() {
   /**
    * Helper: Record an account as registered across SQLite and local cache
    */
-  const recordRegisteredAccount = async (accountEmail: string, name?: string, prov?: string, uid?: string) => {
+  const recordRegisteredAccount = async (accountEmail: string, name?: string, prov?: string, uid?: string, bizProfile?: any) => {
     if (!accountEmail) return;
     const normalizedEmail = accountEmail.trim().toLowerCase();
 
@@ -110,9 +110,99 @@ export default function LoginPage() {
       await fetch("/api/auth/account-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: normalizedEmail, name, provider: prov, uid }),
+        body: JSON.stringify({ email: normalizedEmail, name, provider: prov, uid, businessProfile: bizProfile }),
       });
     } catch (e) {}
+  };
+
+  /**
+   * Helper: Restore business details of old user account and navigate directly to dashboard
+   */
+  const restoreAndNavigateOldUser = async (userEmail: string, displayName?: string, uid?: string) => {
+    const cleanEmail = (userEmail || "").trim().toLowerCase();
+    let businessProfile: any = null;
+
+    // 1. Check SQLite database ledger via account status API
+    try {
+      const res = await fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.businessProfile && (data.businessProfile.name || data.businessProfile.revenue !== undefined)) {
+          businessProfile = data.businessProfile;
+        }
+      }
+    } catch (e) {}
+
+    // 2. Check Firestore profile if uid is available
+    if (!businessProfile && uid && isFirebaseConfigured) {
+      try {
+        const firestoreData = await getUserProfileFromFirestore(uid);
+        if (firestoreData?.businessProfile) {
+          businessProfile = firestoreData.businessProfile;
+        } else if (firestoreData?.companyName || firestoreData?.name) {
+          businessProfile = firestoreData;
+        }
+      } catch (e) {}
+    }
+
+    // 3. Check user-specific localStorage cache
+    if (!businessProfile && cleanEmail) {
+      try {
+        const localUserBiz = localStorage.getItem(`nuralix_user_business_${cleanEmail}`);
+        if (localUserBiz) {
+          businessProfile = JSON.parse(localUserBiz);
+        }
+      } catch (e) {}
+    }
+
+    // 4. Check global business intake API in SQLite
+    if (!businessProfile) {
+      try {
+        const intakeRes = await fetch("/api/business/intake");
+        if (intakeRes.ok) {
+          const intakeData = await intakeRes.json();
+          if (intakeData?.business && intakeData.business.name) {
+            businessProfile = intakeData.business;
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 5. Check existing general localStorage profile
+    if (!businessProfile) {
+      try {
+        const existingStr = localStorage.getItem("nuralix_business_profile");
+        if (existingStr) {
+          businessProfile = JSON.parse(existingStr);
+        }
+      } catch (e) {}
+    }
+
+    // 6. Synthesize default business profile if nothing exists yet
+    if (!businessProfile) {
+      const fallbackName = displayName || fullName || "Founder";
+      businessProfile = {
+        name: `${fallbackName}'s Enterprise`,
+        founderName: fallbackName,
+        industry: "saas",
+        industryLabel: "B2B SaaS & Cloud Platforms",
+        revenue: 500000,
+        annualRevenue: 6000000,
+        burn: 150000,
+        cash: 1200000,
+        teamSize: 10,
+        completedAt: new Date().toISOString(),
+      };
+    }
+
+    // Persist to localStorage and user-specific cache
+    localStorage.setItem("nuralix_business_profile", JSON.stringify(businessProfile));
+    if (cleanEmail) {
+      localStorage.setItem(`nuralix_user_business_${cleanEmail}`, JSON.stringify(businessProfile));
+    }
+
+    // Direct navigation straight to dashboard - NEVER ask questions/onboarding to old user!
+    router.push("/dashboard");
   };
 
   // Business Login/Registration handler with multi-layer account protection
@@ -201,8 +291,8 @@ export default function LoginPage() {
           if (authMode === "register") {
             router.push("/onboarding");
           } else {
-            const existingProfile = localStorage.getItem("nuralix_business_profile");
-            router.push(existingProfile ? "/dashboard" : "/onboarding");
+            // Old user logging in: directly go to dashboard & remember their details!
+            await restoreAndNavigateOldUser(userEmail, authUser.displayName || fullName || "Founder", authUser.uid);
           }
           return;
         }
@@ -287,8 +377,8 @@ export default function LoginPage() {
                 authenticatedAt: new Date().toISOString(),
               };
               localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
-              const existingProfile = localStorage.getItem("nuralix_business_profile");
-              router.push(existingProfile ? "/dashboard" : "/onboarding");
+              // Old user logging in: directly go to dashboard & remember their details!
+              await restoreAndNavigateOldUser(authUser.email || email, authUser.displayName || fullName || "Founder", authUser.uid);
               return;
             }
           } catch (signInErr: any) {
@@ -370,8 +460,8 @@ export default function LoginPage() {
           authenticatedAt: new Date().toISOString(),
         };
         localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
-        const existingProfile = localStorage.getItem("nuralix_business_profile");
-        router.push(existingProfile ? "/dashboard" : "/onboarding");
+        // Old user logging in: directly go to dashboard & remember their details!
+        await restoreAndNavigateOldUser(targetEmail, fullName || (provider === "google" ? "Alex Vance" : "Founder"));
       }
       setLoading(false);
     }

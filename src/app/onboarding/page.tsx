@@ -796,6 +796,21 @@ const INDUSTRY_PRIORITIES: Record<string, { id: string; title: string; detail: s
 
 export default function OnboardingPage() {
   const router = useRouter();
+
+  // If an old user already has a configured business profile, do NOT ask questions again — directly send to dashboard!
+  React.useEffect(() => {
+    try {
+      const existingProfileStr = localStorage.getItem("nuralix_business_profile");
+      if (existingProfileStr) {
+        const p = JSON.parse(existingProfileStr);
+        if (p.completedAt || (p.name && p.revenue !== undefined)) {
+          router.replace("/dashboard");
+          return;
+        }
+      }
+    } catch (e) {}
+  }, [router]);
+
   // Steps: 1 (Industry), 2 (Scale & Numbers), 2.5 (Website Extraction), 2.7 (Dynamic Business Intake), 2.9 (Connect Tools), 3 (Priorities)
   const [step, setStep] = useState<number>(1);
   const [isAssembling, setIsAssembling] = useState(false);
@@ -1263,6 +1278,23 @@ export default function OnboardingPage() {
           completedAt: new Date().toISOString(),
         };
         localStorage.setItem("nuralix_business_profile", JSON.stringify(profile));
+
+        // Save to user-specific account cache and server-side SQLite ledger
+        try {
+          const sessionStr = localStorage.getItem("nuralix_user_session");
+          if (sessionStr) {
+            const sess = JSON.parse(sessionStr);
+            if (sess.email) {
+              const uEmail = sess.email.trim().toLowerCase();
+              localStorage.setItem(`nuralix_user_business_${uEmail}`, JSON.stringify(profile));
+              fetch("/api/auth/account-status", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: uEmail, businessProfile: profile }),
+              }).catch(() => {});
+            }
+          }
+        } catch (e) {}
 
         // Persist to persistent SQLite database via API
         try {

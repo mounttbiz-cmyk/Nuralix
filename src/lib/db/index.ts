@@ -124,9 +124,17 @@ db.exec(`
     email TEXT UNIQUE NOT NULL,
     name TEXT,
     provider TEXT,
+    business_profile TEXT,
     created_at TEXT NOT NULL
   );
 `);
+
+// Migrate existing registered_users table if business_profile column is missing
+try {
+  db.exec(`ALTER TABLE registered_users ADD COLUMN business_profile TEXT`);
+} catch (e) {
+  // column already exists
+}
 
 /**
  * Check if an email has already been registered
@@ -144,19 +152,69 @@ export function isUserRegistered(email: string): boolean {
 }
 
 /**
- * Record a newly registered user into SQLite
+ * Retrieve registered user record by email, including saved business profile
  */
-export function registerUser(email: string, name?: string, provider?: string, uid?: string): boolean {
+export function getRegisteredUser(email: string): any {
+  if (!email) return null;
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    const row = db.prepare("SELECT id, email, name, provider, business_profile, created_at FROM registered_users WHERE LOWER(email) = ?").get(cleanEmail) as any;
+    if (!row) return null;
+    let businessProfile = null;
+    if (row.business_profile) {
+      try {
+        businessProfile = JSON.parse(row.business_profile);
+      } catch (e) {}
+    }
+    return {
+      ...row,
+      businessProfile,
+    };
+  } catch (err) {
+    console.warn("getRegisteredUser error:", err);
+    return null;
+  }
+}
+
+/**
+ * Save / update a user's business profile in SQLite
+ */
+export function saveUserBusinessProfile(email: string, profile: any): boolean {
+  if (!email || !profile) return false;
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    const profileJson = typeof profile === "string" ? profile : JSON.stringify(profile);
+    const result = db.prepare(`
+      UPDATE registered_users 
+      SET business_profile = ? 
+      WHERE LOWER(email) = ?
+    `).run(profileJson, cleanEmail);
+    return result.changes > 0;
+  } catch (err) {
+    console.warn("saveUserBusinessProfile error:", err);
+    return false;
+  }
+}
+
+/**
+ * Record a newly registered user into SQLite with optional initial business profile
+ */
+export function registerUser(email: string, name?: string, provider?: string, uid?: string, businessProfile?: any): boolean {
   if (!email) return false;
   try {
     const cleanEmail = email.trim().toLowerCase();
     const id = uid || `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const now = new Date().toISOString();
+    const profileJson = businessProfile ? (typeof businessProfile === "string" ? businessProfile : JSON.stringify(businessProfile)) : null;
+
     db.prepare(`
-      INSERT INTO registered_users (id, email, name, provider, created_at)
-      VALUES (?, ?, ?, ?, ?)
-      ON CONFLICT(email) DO UPDATE SET name = excluded.name, provider = excluded.provider
-    `).run(id, cleanEmail, name || "", provider || "email", now);
+      INSERT INTO registered_users (id, email, name, provider, business_profile, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(email) DO UPDATE SET 
+        name = COALESCE(excluded.name, registered_users.name), 
+        provider = COALESCE(excluded.provider, registered_users.provider),
+        business_profile = COALESCE(excluded.business_profile, registered_users.business_profile)
+    `).run(id, cleanEmail, name || "", provider || "email", profileJson, now);
     return true;
   } catch (err) {
     console.warn("registerUser error:", err);
