@@ -121,19 +121,34 @@ function DashboardContent() {
     } else {
       setUploadedFileName(null);
     }
-    const cash = Number(saved.cash || saved.cashOnHand || 1200000);
-    const burn = Number(saved.burn || saved.monthlyBurn || saved.monthlyNetBurn || 150000);
+    const cash = Number(saved.cash || saved.cashOnHand || 0);
+    const burn = Number(saved.burn || saved.monthlyBurn || saved.monthlyNetBurn || 0);
     if (burn > 0) {
       setLiquidRunwayMo((cash / burn).toFixed(1));
+    } else if (cash > 0) {
+      setLiquidRunwayMo("18+");
+    } else {
+      setLiquidRunwayMo("0.0");
     }
   };
 
-  // Read saved business profile if available
+  // Read saved business profile if available from localStorage or backend SQLite database
   useEffect(() => {
     try {
       const savedProfileStr = localStorage.getItem("nuralix_business_profile");
       if (savedProfileStr) {
         applyProfileData(JSON.parse(savedProfileStr));
+      } else {
+        // Fetch real enterprise record from database API
+        fetch("/api/business/intake")
+          .then(r => r.json())
+          .then(d => {
+            if (d.success && d.business) {
+              applyProfileData(d.business);
+              localStorage.setItem("nuralix_business_profile", JSON.stringify(d.business));
+            }
+          })
+          .catch(() => {});
       }
     } catch (e) {
       // ignore

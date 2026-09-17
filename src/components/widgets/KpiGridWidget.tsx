@@ -68,6 +68,15 @@ export function KpiGridWidget() {
       const saved = localStorage.getItem("nuralix_business_profile");
       if (saved) {
         applyProfile(JSON.parse(saved));
+      } else {
+        fetch("/api/business/intake")
+          .then(r => r.json())
+          .then(d => {
+            if (d.success && d.business) {
+              applyProfile(d.business);
+            }
+          })
+          .catch(() => {});
       }
     } catch (e) {
       // ignore

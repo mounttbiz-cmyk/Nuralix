@@ -78,6 +78,15 @@ export function HealthScoreWidget({
       const savedStr = localStorage.getItem("nuralix_business_profile");
       if (savedStr) {
         applyProfile(JSON.parse(savedStr));
+      } else {
+        fetch("/api/business/intake")
+          .then(r => r.json())
+          .then(d => {
+            if (d.success && d.business) {
+              applyProfile(d.business);
+            }
+          })
+          .catch(() => {});
       }
     } catch (e) {
       // ignore

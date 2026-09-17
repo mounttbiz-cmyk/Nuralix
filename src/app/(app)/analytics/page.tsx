@@ -30,6 +30,7 @@ import {
 import { ProvenanceBadge } from "@/components/ui/Badge";
 import { PortalModal } from "@/components/ui/PortalModal";
 import Link from "next/link";
+import { useBusinessDataSync } from "@/lib/upload/events";
 
 type ExecutiveRole = "ceo" | "cfo" | "cmo" | "coo";
 type StrategicGoal = "extend_runway" | "accelerate_growth" | "protect_margins" | "reduce_churn";
@@ -51,43 +52,71 @@ export default function AnalyticsPage() {
   const [goal, setGoal] = useState<StrategicGoal>("extend_runway");
   const [forecastMode, setForecastMode] = useState<"baseline" | "optimized">("optimized");
   const [timeframe, setTimeframe] = useState<"30d" | "90d" | "12m">("90d");
-  const [companyName, setCompanyName] = useState<string>("Apex Technologies");
-  const [industryName, setIndustryName] = useState<string>("B2B SaaS");
-  const [annualRevenue, setAnnualRevenue] = useState<number>(6000000);
-  const [teamSize, setTeamSize] = useState<number>(14);
-  const [burn, setBurn] = useState<number>(150000);
-  const [cash, setCash] = useState<number>(1200000);
-  const [grossMargin, setGrossMargin] = useState<number>(82);
+  const [companyName, setCompanyName] = useState<string>("Your Enterprise");
+  const [industryName, setIndustryName] = useState<string>("B2B SaaS & Services");
+  const [annualRevenue, setAnnualRevenue] = useState<number>(0);
+  const [teamSize, setTeamSize] = useState<number>(1);
+  const [burn, setBurn] = useState<number>(0);
+  const [cash, setCash] = useState<number>(0);
+  const [grossMargin, setGrossMargin] = useState<number>(80);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const [hasRealData, setHasRealData] = useState<boolean>(false);
 
   // Drill-down Modal State
   const [activeDrillDown, setActiveDrillDown] = useState<DrillDownMetric | null>(null);
+
+  const applyProfile = (saved: any) => {
+    if (!saved) return;
+    if (saved.name) setCompanyName(saved.name);
+    if (saved.industryLabel) setIndustryName(saved.industryLabel);
+    else if (saved.industry) setIndustryName(saved.industry);
+    
+    const annRev = Number(saved.annualRevenue || (saved.revenue ? saved.revenue * 12 : saved.monthlyRevenue ? saved.monthlyRevenue * 12 : 0));
+    const mBurn = Number(saved.burn || saved.monthlyBurn || saved.monthlyNetBurn || 0);
+    const mCash = Number(saved.cash || saved.cashOnHand || 0);
+    const mTeam = Number(saved.teamSize || 1);
+    const mMargin = Number(saved.grossMargin || 80);
+
+    if (annRev > 0 || mBurn > 0 || mCash > 0) {
+      setHasRealData(true);
+    }
+    setAnnualRevenue(annRev);
+    setBurn(mBurn);
+    setCash(mCash);
+    setTeamSize(mTeam);
+    setGrossMargin(mMargin);
+  };
 
   useEffect(() => {
     try {
       const savedProfileStr = localStorage.getItem("nuralix_business_profile");
       if (savedProfileStr) {
-        const saved = JSON.parse(savedProfileStr);
-        if (saved.name) setCompanyName(saved.name);
-        if (saved.industryLabel) setIndustryName(saved.industryLabel);
-        else if (saved.industry) setIndustryName(saved.industry);
-        if (saved.annualRevenue) setAnnualRevenue(Number(saved.annualRevenue));
-        if (saved.teamSize) setTeamSize(Number(saved.teamSize));
-        if (saved.burn || saved.monthlyBurn) setBurn(Number(saved.burn || saved.monthlyBurn));
-        if (saved.cash || saved.cashOnHand) setCash(Number(saved.cash || saved.cashOnHand));
-        if (saved.grossMargin) setGrossMargin(Number(saved.grossMargin));
+        applyProfile(JSON.parse(savedProfileStr));
+      } else {
+        // Fetch from persistent SQLite DB
+        fetch("/api/business/intake")
+          .then(r => r.json())
+          .then(d => {
+            if (d.success && d.business) {
+              applyProfile(d.business);
+            }
+          })
+          .catch(() => {});
       }
     } catch (e) {
       // ignore
     }
   }, []);
 
-  const monthlyRev = Math.round(annualRevenue / 12);
-  const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : "18+";
-  const revPerHead = Math.round(annualRevenue / (teamSize || 1));
+  useBusinessDataSync(metrics => {
+    applyProfile(metrics);
+  });
+
+  const monthlyRev = annualRevenue > 0 ? Math.round(annualRevenue / 12) : 0;
+  const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : cash > 0 ? "18+" : "0.0";
+  const revPerHead = teamSize > 0 && annualRevenue > 0 ? Math.round(annualRevenue / teamSize) : 0;
 
   // Trailing vs Forecast Trajectory
-  const months = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr (F)", "May (F)", "Jun (F)"];
   const revenueHistory = [
     { month: "Oct", revenue: Math.round(monthlyRev * 0.84), burn: Math.round(burn * 1.1) },
     { month: "Nov", revenue: Math.round(monthlyRev * 0.88), burn: Math.round(burn * 1.05) },
@@ -113,7 +142,7 @@ export default function AnalyticsPage() {
     },
   ];
 
-  const maxRev = Math.max(...revenueHistory.map(d => Math.max(d.revenue, d.burn)));
+  const maxRev = Math.max(1, ...revenueHistory.map(d => Math.max(d.revenue, d.burn)));
 
   const handleExport = () => {
     setExportNotice("Compiling executive intelligence package (CSV)…");
@@ -520,22 +549,31 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {/* Bar Chart Visualization */}
-          <div className="pt-6 pb-2">
-            <div className="h-56 flex items-end justify-between gap-2 sm:gap-4 border-b border-line px-2">
+          {/* Bar Chart Visualization with strict boundary containment */}
+          <div className="pt-6 pb-2 overflow-hidden">
+            <div className="h-56 flex items-end justify-between gap-1.5 sm:gap-3 border-b border-line px-2 relative overflow-hidden">
               {revenueHistory.map((d, i) => {
-                const heightPct = Math.round((d.revenue / maxRev) * 100);
-                const burnPct = Math.round((d.burn / maxRev) * 100);
+                // Ensure height percentage is strictly between 0% and 100%
+                const heightPct = Math.min(100, Math.max(0, Math.round((d.revenue / maxRev) * 88)));
+                const burnPct = Math.min(100, Math.max(0, Math.round((d.burn / maxRev) * 88)));
                 const isForecast = d.month.includes("(F)");
+                const isLastItem = i >= revenueHistory.length - 2;
+                const isFirstItem = i <= 1;
 
                 return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-mono bg-surface-2 px-1.5 py-0.5 rounded border border-line text-text text-center whitespace-nowrap shadow-sm">
-                      ₹{d.revenue.toLocaleString("en-IN")}
+                  <div key={i} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end relative">
+                    {/* Tooltip positioned inside container bounds */}
+                    <div
+                      className={`pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-mono bg-surface-2 px-2 py-0.5 rounded border border-line text-text text-center whitespace-nowrap shadow-md absolute -top-1 z-30 ${
+                        isLastItem ? "right-0" : isFirstItem ? "left-0" : "left-1/2 -translate-x-1/2"
+                      }`}
+                    >
+                      <span>₹{d.revenue.toLocaleString("en-IN")}</span>
                     </div>
-                    <div className="w-full flex items-end justify-center gap-1.5 h-full">
+
+                    <div className="w-full flex items-end justify-center gap-1 sm:gap-1.5 h-44 overflow-hidden">
                       <div
-                        className={`w-full max-w-[24px] rounded-t-md transition-all ${
+                        className={`w-full max-w-[22px] rounded-t-md transition-all duration-300 ${
                           isForecast
                             ? "bg-gradient-to-t from-brass to-cyan-400 border border-brass/40"
                             : "bg-brass hover:brightness-110"
@@ -543,13 +581,13 @@ export default function AnalyticsPage() {
                         style={{ height: `${heightPct}%` }}
                       />
                       <div
-                        className={`w-full max-w-[12px] rounded-t-sm transition-all ${
+                        className={`w-full max-w-[10px] rounded-t-sm transition-all duration-300 ${
                           isForecast ? "bg-rust/40 border border-rust/30" : "bg-rust/70 hover:bg-rust"
                         }`}
                         style={{ height: `${burnPct}%` }}
                       />
                     </div>
-                    <span className={`text-[10px] font-medium ${isForecast ? "text-brass font-bold" : "text-text-muted"}`}>
+                    <span className={`text-[10px] font-medium shrink-0 ${isForecast ? "text-brass font-bold" : "text-text-muted"}`}>
                       {d.month}
                     </span>
                   </div>
