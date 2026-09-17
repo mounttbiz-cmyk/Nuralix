@@ -2,14 +2,19 @@ import React from "react";
 import { AppShell } from "@/components/shell/AppShell";
 import { resolveTenantConfig } from "@/config/resolver";
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { getActiveBusiness } from "@/lib/db";
 
 export default function MainAppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const activeBiz = getActiveBusiness();
+  const companyName = activeBiz?.name || "Nuralix Enterprise";
+  const industryLabel = activeBiz?.industryLabel || "Technology & Enterprise Services";
+
   const config = resolveTenantConfig({
-    industry: "saas",
+    industry: (activeBiz?.industry as any) || "saas",
     businessModel: "subscription",
     plan: "growth",
   });
@@ -18,8 +23,8 @@ export default function MainAppLayout({
     <AuthGuard>
       <AppShell
         navItems={config.nav}
-        companyName="Apex Analytics"
-        industry="B2B SaaS"
+        companyName={companyName}
+        industry={industryLabel}
       >
         {children}
       </AppShell>

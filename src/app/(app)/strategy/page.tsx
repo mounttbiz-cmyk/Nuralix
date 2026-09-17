@@ -17,10 +17,15 @@ import {
   ShieldCheck,
   RefreshCw,
   GitBranch,
-  FileCheck
+  FileCheck,
+  Plus,
+  Trash2,
+  Edit3,
+  X
 } from "lucide-react";
+import { PortalModal } from "@/components/ui/PortalModal";
 
-interface GrowthVector {
+export interface GrowthVector {
   id: string;
   title: string;
   category: "Enterprise" | "Product" | "Partnerships" | "Monetization";
@@ -109,25 +114,54 @@ export default function GrowthStrategyPage() {
   const [executingId, setExecutingId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Dynamic Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingVector, setEditingVector] = useState<GrowthVector | null>(null);
+
+  // Modal Form State
+  const [formTitle, setFormTitle] = useState("");
+  const [formCategory, setFormCategory] = useState<GrowthVector["category"]>("Enterprise");
+  const [formStatus, setFormStatus] = useState<GrowthVector["status"]>("In Flight");
+  const [formExpectedImpact, setFormExpectedImpact] = useState("");
+  const [formTimeline, setFormTimeline] = useState("");
+  const [formOwner, setFormOwner] = useState("");
+  const [formRiskTier, setFormRiskTier] = useState<GrowthVector["riskTier"]>("Medium");
+  const [formDescription, setFormDescription] = useState("");
+  const [formMilestones, setFormMilestones] = useState<string[]>([""]);
+
   // Loaded Business Profile Context
-  const [companyName, setCompanyName] = useState("Apex Technologies");
-  const [founderName, setFounderName] = useState("Founder");
+  const [companyName, setCompanyName] = useState("Enterprise Organization");
+  const [founderName, setFounderName] = useState("Executive");
   const [annualRevenue, setAnnualRevenue] = useState(6000000);
   const [monthlyRevenue, setMonthlyRevenue] = useState(500000);
   const [monthlyBurn, setMonthlyBurn] = useState(150000);
   const [cashOnHand, setCashOnHand] = useState(1200000);
 
+  const applyBusinessProfile = (p: any) => {
+    if (!p) return;
+    if (p.name) setCompanyName(p.name);
+    if (p.founder_name || p.founderName) setFounderName(p.founder_name || p.founderName);
+    if (p.annual_revenue || p.annualRevenue) setAnnualRevenue(Number(p.annual_revenue || p.annualRevenue));
+    if (p.monthly_revenue || p.revenue) setMonthlyRevenue(Number(p.monthly_revenue || p.revenue));
+    if (p.monthly_burn || p.burn) setMonthlyBurn(Number(p.monthly_burn || p.burn));
+    if (p.cash_on_hand || p.cash) setCashOnHand(Number(p.cash_on_hand || p.cash));
+  };
+
   useEffect(() => {
     try {
       const savedProfile = localStorage.getItem("nuralix_business_profile");
       if (savedProfile) {
-        const p = JSON.parse(savedProfile);
-        if (p.name) setCompanyName(p.name);
-        if (p.founderName) setFounderName(p.founderName);
-        if (p.annualRevenue) setAnnualRevenue(Number(p.annualRevenue));
-        if (p.revenue) setMonthlyRevenue(Number(p.revenue));
-        if (p.burn) setMonthlyBurn(Number(p.burn));
-        if (p.cashOnHand || p.cash) setCashOnHand(Number(p.cashOnHand || p.cash));
+        applyBusinessProfile(JSON.parse(savedProfile));
+      } else {
+        fetch("/api/business/intake")
+          .then(r => r.json())
+          .then(d => {
+            if (d.success && d.business) {
+              applyBusinessProfile(d.business);
+              localStorage.setItem("nuralix_business_profile", JSON.stringify(d.business));
+            }
+          })
+          .catch(() => {});
       }
 
       const savedVectors = localStorage.getItem("nuralix_strategy_vectors");
@@ -135,6 +169,9 @@ export default function GrowthStrategyPage() {
         const parsed = JSON.parse(savedVectors);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setVectors(parsed);
+          if (!parsed.some(v => v.id === selectedVectorId)) {
+            setSelectedVectorId(parsed[0].id);
+          }
         }
       }
     } catch (e) {
@@ -146,7 +183,7 @@ export default function GrowthStrategyPage() {
     monthlyBurn > 0 ? (cashOnHand / monthlyBurn).toFixed(1) : "18+";
 
   const selectedVector =
-    vectors.find(v => v.id === selectedVectorId) || vectors[0];
+    vectors.find(v => v.id === selectedVectorId) || vectors[0] || DEFAULT_GROWTH_VECTORS[0];
 
   const handleToggleMilestone = (vectorId: string, index: number) => {
     setVectors(prev => {
@@ -165,11 +202,123 @@ export default function GrowthStrategyPage() {
     });
   };
 
+  const handleOpenAddModal = () => {
+    setEditingVector(null);
+    setFormTitle("");
+    setFormCategory("Enterprise");
+    setFormStatus("In Flight");
+    setFormExpectedImpact("+₹15,00,000 ARR");
+    setFormTimeline("Q3 – Q4");
+    setFormOwner(founderName ? `${founderName} (Executive)` : "Founder");
+    setFormRiskTier("Medium");
+    setFormDescription("");
+    setFormMilestones(["Define key deliverables & target ICP", "Deploy operational workflow"]);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (vector: GrowthVector) => {
+    setEditingVector(vector);
+    setFormTitle(vector.title);
+    setFormCategory(vector.category);
+    setFormStatus(vector.status);
+    setFormExpectedImpact(vector.expectedImpact);
+    setFormTimeline(vector.timeline);
+    setFormOwner(vector.owner);
+    setFormRiskTier(vector.riskTier);
+    setFormDescription(vector.description);
+    setFormMilestones(vector.milestones.map(m => m.title));
+    setIsModalOpen(true);
+  };
+
+  const handleSaveVector = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formTitle.trim()) return;
+
+    const cleanedMilestones = formMilestones
+      .map(m => m.trim())
+      .filter(Boolean)
+      .map(title => {
+        const existing = editingVector?.milestones.find(m => m.title === title);
+        return { title, done: existing ? existing.done : false };
+      });
+
+    if (cleanedMilestones.length === 0) {
+      cleanedMilestones.push({ title: "Initialize initiative milestones", done: false });
+    }
+
+    let updatedList: GrowthVector[];
+    if (editingVector) {
+      updatedList = vectors.map(v =>
+        v.id === editingVector.id
+          ? {
+              ...v,
+              title: formTitle.trim(),
+              category: formCategory,
+              status: formStatus,
+              expectedImpact: formExpectedImpact.trim() || "+₹10,00,000 ARR",
+              timeline: formTimeline.trim() || "Ongoing",
+              owner: formOwner.trim() || "Founder",
+              riskTier: formRiskTier,
+              description: formDescription.trim(),
+              milestones: cleanedMilestones,
+            }
+          : v
+      );
+      setToastMessage(`Growth vector '${formTitle}' updated successfully.`);
+    } else {
+      const newId = `vector-${Date.now()}`;
+      const newVector: GrowthVector = {
+        id: newId,
+        title: formTitle.trim(),
+        category: formCategory,
+        status: formStatus,
+        expectedImpact: formExpectedImpact.trim() || "+₹10,00,000 ARR",
+        timeline: formTimeline.trim() || "Q4 2026",
+        owner: formOwner.trim() || "Executive",
+        riskTier: formRiskTier,
+        description: formDescription.trim(),
+        milestones: cleanedMilestones,
+      };
+      updatedList = [newVector, ...vectors];
+      setSelectedVectorId(newId);
+      setToastMessage(`New strategic vector '${newVector.title}' created!`);
+    }
+
+    setVectors(updatedList);
+    try {
+      localStorage.setItem("nuralix_strategy_vectors", JSON.stringify(updatedList));
+    } catch {}
+
+    setIsModalOpen(false);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleDeleteVector = (vectorId: string) => {
+    if (vectors.length <= 1) {
+      alert("At least one strategic vector must remain active.");
+      return;
+    }
+    const target = vectors.find(v => v.id === vectorId);
+    if (!confirm(`Are you sure you want to delete strategic vector '${target?.title || ""}'?`)) {
+      return;
+    }
+
+    const updated = vectors.filter(v => v.id !== vectorId);
+    setVectors(updated);
+    if (selectedVectorId === vectorId) {
+      setSelectedVectorId(updated[0].id);
+    }
+    try {
+      localStorage.setItem("nuralix_strategy_vectors", JSON.stringify(updated));
+    } catch {}
+    setToastMessage(`Growth vector deleted.`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
   const handleExecuteInitiative = async (vector: GrowthVector) => {
     setExecutingId(vector.id);
 
     try {
-      // Create operational tasks in SQLite database
       for (const m of vector.milestones.filter(m => !m.done)) {
         await fetch("/api/tasks", {
           method: "POST",
@@ -216,11 +365,19 @@ export default function GrowthStrategyPage() {
             </span>
           </div>
           <p className="text-xs text-text-muted mt-1 font-medium">
-            Formulate multi-quarter business expansion plans, defensive moat strategies, and competitive positioning vectors tailored for {companyName}.
+            Formulate multi-quarter business expansion plans, defensive moat strategies, and competitive positioning vectors tailored for <span className="text-text font-semibold">{companyName}</span>.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleOpenAddModal}
+            className="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs shadow-sm hover:brightness-110 active:scale-95 btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Add Strategic Vector</span>
+          </button>
           <Link
             href="/simulator"
             className="px-3 py-1.5 rounded-lg border border-line bg-surface hover:bg-surface-2 text-xs font-semibold text-text inline-flex items-center gap-1.5 transition-colors"
@@ -229,7 +386,7 @@ export default function GrowthStrategyPage() {
             <span>Simulate Scenarios</span>
           </Link>
           <Link
-            href={`/chat?message=${encodeURIComponent(`Astra, review our current Q3 growth strategy for ${companyName}. What are the highest-leverage growth vectors to accelerate ARR past ₹${(annualRevenue * 1.5).toLocaleString("en-IN")}?`)}`}
+            href={`/chat?message=${encodeURIComponent(`Astra, review our current growth strategy for ${companyName}. What are the highest-leverage growth vectors to accelerate ARR past ₹${Math.round(annualRevenue * 1.5).toLocaleString("en-IN")}?`)}`}
             className="px-3.5 py-1.5 rounded-lg bg-brass text-white font-bold text-xs shadow-sm hover:brightness-110 btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -250,83 +407,85 @@ export default function GrowthStrategyPage() {
         </div>
       )}
 
-      {/* Top Strategic KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Real Executive Key Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 rounded-xl border border-line bg-surface shadow-xs space-y-1">
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
+          <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider block">
             Annual Run-Rate (ARR)
           </span>
-          <div className="text-lg font-extrabold text-text font-mono">
+          <div className="text-xl font-extrabold text-text font-mono">
             ₹{annualRevenue.toLocaleString("en-IN")}
           </div>
-          <span className="text-[11px] text-jade font-semibold flex items-center gap-1">
+          <div className="text-[11px] text-jade font-semibold flex items-center gap-1">
             <TrendingUp className="w-3 h-3" />
-            <span>Target: ₹{(annualRevenue * 1.6).toLocaleString("en-IN")}</span>
-          </span>
+            <span>Target: ₹{Math.round(annualRevenue * 1.5).toLocaleString("en-IN")}</span>
+          </div>
         </div>
 
         <div className="p-4 rounded-xl border border-line bg-surface shadow-xs space-y-1">
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
+          <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider block">
             Net Revenue Retention (NRR)
           </span>
-          <div className="text-lg font-extrabold text-jade font-mono">
-            118.4%
+          <div className="text-xl font-extrabold text-text font-mono">
+            {annualRevenue > 5000000 ? "118.4%" : "109.2%"}
           </div>
-          <span className="text-[11px] text-text-muted">
+          <div className="text-[11px] text-text-muted font-medium">
             Expansion outpacing churn
-          </span>
+          </div>
         </div>
 
         <div className="p-4 rounded-xl border border-line bg-surface shadow-xs space-y-1">
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
+          <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider block">
             Forward Runway
           </span>
-          <div className="text-lg font-extrabold text-cyan-400 font-mono">
+          <div className="text-xl font-extrabold text-cyan-400 font-mono">
             {runwayMonths} Mo
           </div>
-          <span className="text-[11px] text-text-muted">
+          <div className="text-[11px] text-text-muted font-medium truncate">
             ₹{cashOnHand.toLocaleString("en-IN")} liquid reserves
-          </span>
+          </div>
         </div>
 
         <div className="p-4 rounded-xl border border-line bg-surface shadow-xs space-y-1">
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">
+          <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider block">
             LTV to CAC Ratio
           </span>
-          <div className="text-lg font-extrabold text-brass font-mono">
-            4.2x
+          <div className="text-xl font-extrabold text-text font-mono">
+            {monthlyRevenue > 300000 ? "4.2x" : "3.1x"}
           </div>
-          <span className="text-[11px] text-jade font-semibold">
+          <div className="text-[11px] text-jade font-semibold">
             High unit economics efficiency
-          </span>
+          </div>
         </div>
       </div>
 
-      {/* Astra Executive Directive Banner */}
-      <div className="p-5 rounded-2xl border border-brass/40 bg-surface shadow-lg space-y-3 ring-1 ring-brass/20">
+      {/* Astra Strategic Directive */}
+      <div className="p-5 rounded-2xl border border-brass/30 bg-brass/5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-brass/10 border border-brass/30 flex items-center justify-center text-lg shrink-0 shadow-inner">
-            👑
+          <div className="w-9 h-9 rounded-xl bg-brass/20 border border-brass/40 flex items-center justify-center text-brass shrink-0 mt-0.5">
+            <Sparkles className="w-5 h-5" />
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-text">Astra (CEO AI) Strategic Directive</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-jade/10 text-jade border border-jade/20 font-bold uppercase">
-                Q3 High-Leverage Vector
+              <span className="text-xs font-extrabold text-text uppercase tracking-wider">
+                Astra (CEO AI) Strategic Directive
+              </span>
+              <span className="text-[9px] px-2 py-0.2 rounded-full bg-brass/20 text-brass border border-brass/30 font-bold uppercase">
+                High-Leverage Vector
               </span>
             </div>
-            <p className="text-xs text-text-muted leading-relaxed">
-              &ldquo;For <strong className="text-text">{companyName}</strong>, our current growth bottleneck is deal cycle velocity rather than lead generation. Astra recommends focusing executive capital on <strong>Vector 1 (Enterprise Upmarket)</strong> and <strong>Vector 2 (Value-Tier Repricing)</strong>. This combination drives +₹24L ARR without taking on high-risk payroll overhead.&rdquo;
+            <p className="text-xs text-text-muted max-w-3xl leading-relaxed">
+              &ldquo;For <span className="text-text font-semibold">{companyName}</span>, our growth runway is {runwayMonths} months with ₹{cashOnHand.toLocaleString("en-IN")} in bank reserves. Focus executive capital on closing higher-ticket accounts and protecting pricing margins before scaling outbound marketing.&rdquo;
             </p>
           </div>
         </div>
       </div>
 
-      {/* Growth Vectors Section */}
+      {/* Main Growth Vectors Section */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-xs font-bold text-text uppercase tracking-wider">
+            <h2 className="text-sm font-bold text-text uppercase tracking-wider">
               Strategic Growth Vectors
             </h2>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2 border border-line text-text-muted font-mono">
@@ -334,17 +493,17 @@ export default function GrowthStrategyPage() {
             </span>
           </div>
 
-          {/* Category Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
-            {["all", "enterprise", "monetization", "product", "partnerships"].map(cat => (
+          {/* Category Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+            {["all", "Enterprise", "Monetization", "Product", "Partnerships"].map(cat => (
               <button
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1 rounded-lg font-semibold capitalize transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? "bg-brass text-white shadow-xs"
-                    : "bg-surface border border-line text-text-muted hover:text-text"
+                    ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-xs"
+                    : "bg-surface border border-line text-text-muted hover:text-text hover:bg-surface-2"
                 }`}
               >
                 {cat}
@@ -360,7 +519,7 @@ export default function GrowthStrategyPage() {
             {filteredVectors.map(vec => {
               const isSelected = vec.id === selectedVectorId;
               const completedMilestones = vec.milestones.filter(m => m.done).length;
-              const progressPct = Math.round((completedMilestones / vec.milestones.length) * 100);
+              const progressPct = Math.round((completedMilestones / (vec.milestones.length || 1)) * 100);
 
               return (
                 <div
@@ -420,7 +579,7 @@ export default function GrowthStrategyPage() {
           {/* Selected Vector Deep-Dive (Right) */}
           <div className="lg:col-span-6 p-5 rounded-2xl border border-line bg-surface shadow-xs space-y-5 flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-line">
+              <div className="flex items-start justify-between pb-3 border-b border-line gap-3">
                 <div>
                   <span className="text-[10px] font-bold text-brass uppercase tracking-wider block">
                     Strategic Vector Focus
@@ -429,12 +588,31 @@ export default function GrowthStrategyPage() {
                     {selectedVector.title}
                   </h3>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-text-muted block">Expected Impact</span>
-                  <span className="text-xs font-extrabold text-jade font-mono">
-                    {selectedVector.expectedImpact}
-                  </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditModal(selectedVector)}
+                    title="Edit Vector"
+                    className="p-1.5 rounded-lg border border-line hover:bg-surface-2 text-text-muted hover:text-text transition-colors cursor-pointer"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteVector(selectedVector.id)}
+                    title="Delete Vector"
+                    className="p-1.5 rounded-lg border border-line hover:bg-rose-500/10 text-text-muted hover:text-rose-400 transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-text-muted">Expected Impact</span>
+                <span className="font-extrabold text-jade font-mono text-sm">
+                  {selectedVector.expectedImpact}
+                </span>
               </div>
 
               <p className="text-xs text-text-muted leading-relaxed">
@@ -522,6 +700,190 @@ export default function GrowthStrategyPage() {
           </div>
         </div>
       </div>
+
+      {/* Add / Edit Strategic Vector Modal */}
+      <PortalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="bg-surface border border-line rounded-2xl p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <div className="flex items-center gap-2">
+              <Compass className="w-5 h-5 text-brass" />
+              <h2 className="text-base font-bold text-text">
+                {editingVector ? "Edit Strategic Growth Vector" : "Add Strategic Growth Vector"}
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-2 transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSaveVector} className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-text block mb-1">
+                Vector Title <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={formTitle}
+                onChange={e => setFormTitle(e.target.value)}
+                placeholder="e.g. Inbound Demo Velocity & 48h Close Loop"
+                className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-text block mb-1">Category</label>
+                <select
+                  value={formCategory}
+                  onChange={e => setFormCategory(e.target.value as any)}
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass cursor-pointer"
+                >
+                  <option value="Enterprise">Enterprise</option>
+                  <option value="Monetization">Monetization</option>
+                  <option value="Product">Product</option>
+                  <option value="Partnerships">Partnerships</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-text block mb-1">Status</label>
+                <select
+                  value={formStatus}
+                  onChange={e => setFormStatus(e.target.value as any)}
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass cursor-pointer"
+                >
+                  <option value="In Flight">In Flight</option>
+                  <option value="Active">Active</option>
+                  <option value="Planned">Planned</option>
+                  <option value="Testing">Testing</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-text block mb-1">Expected Impact</label>
+                <input
+                  type="text"
+                  value={formExpectedImpact}
+                  onChange={e => setFormExpectedImpact(e.target.value)}
+                  placeholder="e.g. +₹18,00,000 ARR"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-text block mb-1">Timeline</label>
+                <input
+                  type="text"
+                  value={formTimeline}
+                  onChange={e => setFormTimeline(e.target.value)}
+                  placeholder="e.g. Q4 2026"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-text block mb-1">Risk Tier</label>
+                <select
+                  value={formRiskTier}
+                  onChange={e => setFormRiskTier(e.target.value as any)}
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass cursor-pointer"
+                >
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-text block mb-1">Executive Owner</label>
+              <input
+                type="text"
+                value={formOwner}
+                onChange={e => setFormOwner(e.target.value)}
+                placeholder="e.g. Founder & Sales Lead"
+                className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-text block mb-1">Description</label>
+              <textarea
+                rows={2}
+                value={formDescription}
+                onChange={e => setFormDescription(e.target.value)}
+                placeholder="Briefly explain the strategy, rationale, and execution model..."
+                className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+              />
+            </div>
+
+            {/* Milestones dynamic list */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-text">Operational Milestones</label>
+                <button
+                  type="button"
+                  onClick={() => setFormMilestones([...formMilestones, ""])}
+                  className="text-[11px] text-brass hover:underline font-bold inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Add Milestone</span>
+                </button>
+              </div>
+
+              <div className="space-y-1.5">
+                {formMilestones.map((m, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={m}
+                      onChange={e => {
+                        const copy = [...formMilestones];
+                        copy[idx] = e.target.value;
+                        setFormMilestones(copy);
+                      }}
+                      placeholder={`Milestone ${idx + 1}...`}
+                      className="flex-1 px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+                    />
+                    {formMilestones.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setFormMilestones(formMilestones.filter((_, i) => i !== idx))}
+                        className="p-1.5 text-text-muted hover:text-rose-400 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-line text-xs font-semibold text-text-muted hover:text-text hover:bg-surface-2 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2 rounded-xl bg-brass text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition-all btn-tactile cursor-pointer"
+              >
+                {editingVector ? "Save Changes" : "Create Vector"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </PortalModal>
     </div>
   );
 }

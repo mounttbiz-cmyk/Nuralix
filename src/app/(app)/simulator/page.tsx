@@ -68,7 +68,7 @@ function generateSimulation(
   profile: CompanyProfileContext
 ): SimulationResult {
   const q = query.trim().toLowerCase();
-  const cName = profile.companyName || "Apex Technologies";
+  const cName = profile.companyName || "Enterprise Organization";
   const fName = profile.founderName || "Founder";
   const burn = profile.burn || 150000;
   const cash = profile.cash || 1200000;
@@ -509,12 +509,12 @@ const PRESET_QUERIES = [
 export default function SimulatorPage() {
   // Business Profile Context
   const [profile, setProfile] = useState<CompanyProfileContext>({
-    companyName: "Apex Technologies",
-    founderName: "Alex Morgan",
+    companyName: "Enterprise Organization",
+    founderName: "Executive",
     burn: 150000,
     cash: 1200000,
     revenue: 500000,
-    teamSize: 14,
+    teamSize: 10,
   });
 
   // Query & Simulation State
@@ -529,7 +529,7 @@ export default function SimulatorPage() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionMessage, setExecutionMessage] = useState<string | null>(null);
 
-  // Load business profile from storage
+  // Load business profile from storage or database
   useEffect(() => {
     try {
       const savedProfile = localStorage.getItem("nuralix_business_profile");
@@ -539,11 +539,30 @@ export default function SimulatorPage() {
           ...prev,
           companyName: parsed.name || prev.companyName,
           founderName: parsed.founderName || prev.founderName,
-          burn: Number(parsed.burn) || prev.burn,
-          cash: Number(parsed.cash) || prev.cash,
-          revenue: Number(parsed.revenue) || prev.revenue,
-          teamSize: Number(parsed.teamSize) || prev.teamSize,
+          burn: Number(parsed.burn || parsed.monthly_burn) || prev.burn,
+          cash: Number(parsed.cash || parsed.cash_on_hand) || prev.cash,
+          revenue: Number(parsed.revenue || parsed.monthly_revenue) || prev.revenue,
+          teamSize: Number(parsed.teamSize || parsed.team_size) || prev.teamSize,
         }));
+      } else {
+        fetch("/api/business/intake")
+          .then(r => r.json())
+          .then(d => {
+            if (d.success && d.business) {
+              const b = d.business;
+              setProfile(prev => ({
+                ...prev,
+                companyName: b.name || prev.companyName,
+                founderName: b.founder_name || prev.founderName,
+                burn: Number(b.monthly_burn) || prev.burn,
+                cash: Number(b.cash_on_hand) || prev.cash,
+                revenue: Number(b.monthly_revenue) || prev.revenue,
+                teamSize: Number(b.team_size) || prev.teamSize,
+              }));
+              localStorage.setItem("nuralix_business_profile", JSON.stringify(b));
+            }
+          })
+          .catch(() => {});
       }
     } catch (e) {
       // ignore

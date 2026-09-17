@@ -25,8 +25,12 @@ import {
   BrainCircuit,
   Layers,
   History,
-  Info
+  Info,
+  Plus,
+  Trash2,
+  X
 } from "lucide-react";
+import { PortalModal } from "@/components/ui/PortalModal";
 
 interface LeadershipDecision {
   id: string;
@@ -335,35 +339,60 @@ export default function ReportsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedBriefingId, setSelectedBriefingId] = useState("briefing-current");
-  const [companyName, setCompanyName] = useState("Apex Technologies");
-  const [founderName, setFounderName] = useState("Alex Morgan");
-  const [industryName, setIndustryName] = useState("B2B Enterprise SaaS");
+  const [companyName, setCompanyName] = useState("Enterprise Organization");
+  const [founderName, setFounderName] = useState("Executive");
+  const [industryName, setIndustryName] = useState("Technology & Enterprise Services");
   const [annualRevenue, setAnnualRevenue] = useState(6000000);
-  const [teamSize, setTeamSize] = useState(14);
-  const [burn, setBurn] = useState(250000);
-  const [cash, setCash] = useState(3800000);
+  const [teamSize, setTeamSize] = useState(10);
+  const [burn, setBurn] = useState(150000);
+  const [cash, setCash] = useState(1200000);
 
   const [decisions, setDecisions] = useState<LeadershipDecision[]>(INITIAL_DECISIONS);
   const [activeNotification, setActiveNotification] = useState<string | null>(null);
+
+  // Custom Decision Modal
+  const [isAddDecisionOpen, setIsAddDecisionOpen] = useState(false);
+  const [newDecTitle, setNewDecTitle] = useState("");
+  const [newDecCategory, setNewDecCategory] = useState<LeadershipDecision["category"]>("finance");
+  const [newDecImpact, setNewDecImpact] = useState("");
+  const [newDecRecommendation, setNewDecRecommendation] = useState("");
+  const [newDecConfidence, setNewDecConfidence] = useState(94);
+
+  const applyProfile = (p: any) => {
+    if (!p) return;
+    if (p.name) setCompanyName(p.name);
+    if (p.founder_name || p.founderName) setFounderName(p.founder_name || p.founderName);
+    if (p.industry_label || p.industryLabel) setIndustryName(p.industry_label || p.industryLabel);
+    else if (p.industry) setIndustryName(p.industry);
+    if (p.annual_revenue || p.annualRevenue) setAnnualRevenue(Number(p.annual_revenue || p.annualRevenue));
+    if (p.team_size || p.teamSize) setTeamSize(Number(p.team_size || p.teamSize));
+    if (p.monthly_burn || p.burn) setBurn(Number(p.monthly_burn || p.burn));
+    if (p.cash_on_hand || p.cash) setCash(Number(p.cash_on_hand || p.cash));
+  };
 
   useEffect(() => {
     try {
       const savedProfile = localStorage.getItem("nuralix_business_profile");
       if (savedProfile) {
-        const parsed = JSON.parse(savedProfile);
-        if (parsed.name) setCompanyName(parsed.name);
-        if (parsed.founderName) setFounderName(parsed.founderName);
-        if (parsed.industryLabel) setIndustryName(parsed.industryLabel);
-        else if (parsed.industry) setIndustryName(parsed.industry);
-        if (parsed.annualRevenue) setAnnualRevenue(Number(parsed.annualRevenue));
-        if (parsed.teamSize) setTeamSize(Number(parsed.teamSize));
-        if (parsed.burn) setBurn(Number(parsed.burn));
-        if (parsed.cash) setCash(Number(parsed.cash));
+        applyProfile(JSON.parse(savedProfile));
+      } else {
+        fetch("/api/business/intake")
+          .then(r => r.json())
+          .then(d => {
+            if (d.success && d.business) {
+              applyProfile(d.business);
+              localStorage.setItem("nuralix_business_profile", JSON.stringify(d.business));
+            }
+          })
+          .catch(() => {});
       }
 
       const savedDecisions = localStorage.getItem("nuralix_briefing_decisions");
       if (savedDecisions) {
-        setDecisions(JSON.parse(savedDecisions));
+        const parsed = JSON.parse(savedDecisions);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setDecisions(parsed);
+        }
       }
     } catch (e) {
       // ignore
@@ -382,6 +411,24 @@ export default function ReportsPage() {
     action: "pending" | "approved" | "delegated" | "declined",
     delegatedTo?: string
   ) => {
+    const targetDec = (selectedBriefingId === "briefing-current" ? decisions : activeEdition.decisions).find(d => d.id === id);
+
+    // If approved, create real task in /tasks
+    if (action === "approved" && targetDec) {
+      fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `[Directive] ${targetDec.title}`,
+          owner: targetDec.category === "finance" ? "CFO Marcus" : "Founder",
+          gap: "Executive Briefing",
+          priority: "high",
+          category: targetDec.category.toUpperCase(),
+          status: "todo",
+        }),
+      }).catch(() => {});
+    }
+
     const updated = (selectedBriefingId === "briefing-current" ? decisions : activeEdition.decisions).map(d => {
       if (d.id === id) {
         return {
@@ -408,7 +455,7 @@ export default function ReportsPage() {
 
     const actionText =
       action === "approved"
-        ? "Directive Approved & Queued for Execution"
+        ? "Directive Approved & Converted into Actionable Tasks in /tasks"
         : action === "delegated"
         ? `Directive Delegated to ${delegatedTo || "Autonomous AI"}`
         : action === "declined"
@@ -417,6 +464,45 @@ export default function ReportsPage() {
 
     setActiveNotification(actionText);
     setTimeout(() => setActiveNotification(null), 3500);
+  };
+
+  const handleSaveCustomDecision = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDecTitle.trim()) return;
+
+    const newDec: LeadershipDecision = {
+      id: `dec-${Date.now()}`,
+      title: newDecTitle.trim(),
+      category: newDecCategory,
+      impact: newDecImpact.trim() || "+15% operational efficiency",
+      recommendation: newDecRecommendation.trim() || "Approved by leadership directive.",
+      aiConfidence: newDecConfidence,
+      status: "pending",
+    };
+
+    const updated = [newDec, ...decisions];
+    setDecisions(updated);
+    try {
+      localStorage.setItem("nuralix_briefing_decisions", JSON.stringify(updated));
+    } catch {}
+
+    setIsAddDecisionOpen(false);
+    setNewDecTitle("");
+    setNewDecImpact("");
+    setNewDecRecommendation("");
+    setActiveNotification(`Directive '${newDec.title}' proposed successfully!`);
+    setTimeout(() => setActiveNotification(null), 3500);
+  };
+
+  const handleDeleteDecision = (id: string, title: string) => {
+    if (!confirm(`Delete leadership directive '${title}'?`)) return;
+    const updated = decisions.filter(d => d.id !== id);
+    setDecisions(updated);
+    try {
+      localStorage.setItem("nuralix_briefing_decisions", JSON.stringify(updated));
+    } catch {}
+    setActiveNotification(`Directive removed.`);
+    setTimeout(() => setActiveNotification(null), 2500);
   };
 
   const handleGenerate = () => {
@@ -781,9 +867,19 @@ export default function ReportsPage() {
                 <span className="w-1.5 h-4 rounded-full bg-brass" />
                 5. Decisions Required (Leadership Directives)
               </h3>
-              <span className="text-xs text-text-muted font-medium">
-                {displayDecisions.filter(d => d.status === "pending").length} pending founder action
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddDecisionOpen(true)}
+                  className="px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 text-xs font-bold hover:bg-cyan-500/25 transition-all inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Propose Decision</span>
+                </button>
+                <span className="text-xs text-text-muted font-medium">
+                  {displayDecisions.filter(d => d.status === "pending").length} pending founder action
+                </span>
+              </div>
             </div>
             <p className="text-xs text-text-muted">
               Actionable directives generated by Nuralix executive reasoning engine. Approve, delegate to autonomous AI, or decline directly below:
@@ -815,6 +911,16 @@ export default function ReportsPage() {
                           <span className="text-[10px] font-semibold text-brass">
                             {dec.aiConfidence}% AI Confidence
                           </span>
+                          {dec.id.startsWith("dec-") && !["dec-1", "dec-2", "dec-3", "dec-4"].includes(dec.id) && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteDecision(dec.id, dec.title)}
+                              title="Delete Directive"
+                              className="p-1 rounded hover:bg-rose-500/10 text-text-muted hover:text-rose-400 transition-colors cursor-pointer ml-1"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )}
                         </div>
                         <p className="text-xs text-text-muted leading-relaxed">
                           {dec.recommendation}
@@ -843,14 +949,14 @@ export default function ReportsPage() {
                               className="px-3 py-1.5 rounded-lg bg-surface border border-line hover:border-line-strong text-xs font-semibold text-text btn-tactile cursor-pointer inline-flex items-center gap-1"
                             >
                               <BrainCircuit className="w-3.5 h-3.5 text-brass" />
-                              <span>Delegate AI</span>
+                              <span>Delegate</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => handleDecisionAction(dec.id, "declined")}
-                              className="px-2.5 py-1.5 rounded-lg bg-surface border border-line text-xs font-semibold text-text-muted hover:text-rust hover:border-rust/40 btn-tactile cursor-pointer inline-flex items-center"
+                              className="px-2.5 py-1.5 rounded-lg border border-line hover:bg-rose-500/10 text-xs font-semibold text-text-muted hover:text-rose-400 transition-colors cursor-pointer"
                             >
-                              <XCircle className="w-3.5 h-3.5" />
+                              Decline
                             </button>
                           </>
                         ) : (
@@ -890,6 +996,108 @@ export default function ReportsPage() {
           </div>
         </div>
       </div>
+
+      {/* Propose Custom Decision Modal */}
+      {isAddDecisionOpen && (
+        <PortalModal isOpen={isAddDecisionOpen} onClose={() => setIsAddDecisionOpen(false)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <div className="relative w-full max-w-lg rounded-2xl bg-surface border border-line shadow-2xl p-6 space-y-4 animate-scale-up">
+              <div className="flex items-center justify-between border-b border-line pb-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-brass" />
+                  <h3 className="font-bold text-sm text-text">Propose Leadership Decision</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAddDecisionOpen(false)}
+                  className="p-1 rounded-lg text-text-muted hover:text-text hover:bg-surface-2 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveCustomDecision} className="space-y-3 text-xs">
+                <div>
+                  <label className="font-semibold text-text block mb-1">Decision Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={newDecTitle}
+                    onChange={e => setNewDecTitle(e.target.value)}
+                    placeholder="e.g. Approve Q4 Enterprise SDR Hiring Sprint"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-semibold text-text block mb-1">Category</label>
+                    <select
+                      value={newDecCategory}
+                      onChange={e => setNewDecCategory(e.target.value as any)}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass cursor-pointer"
+                    >
+                      <option value="finance">Finance / Capital</option>
+                      <option value="sales">Sales & Revenue</option>
+                      <option value="operations">Operations & Tech</option>
+                      <option value="talent">Talent & Headcount</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="font-semibold text-text block mb-1">Confidence Score (%)</label>
+                    <input
+                      type="number"
+                      min={70}
+                      max={99}
+                      value={newDecConfidence}
+                      onChange={e => setNewDecConfidence(Number(e.target.value))}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-text block mb-1">Projected Impact</label>
+                  <input
+                    type="text"
+                    value={newDecImpact}
+                    onChange={e => setNewDecImpact(e.target.value)}
+                    placeholder="e.g. +₹12,00,000 net pipeline within 60 days"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-semibold text-text block mb-1">AI Recommendation & Rationale</label>
+                  <textarea
+                    rows={2}
+                    value={newDecRecommendation}
+                    onChange={e => setNewDecRecommendation(e.target.value)}
+                    placeholder="Provide executive context or rationale..."
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-brass"
+                  />
+                </div>
+
+                <div className="pt-2 border-t border-line flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddDecisionOpen(false)}
+                    className="px-3.5 py-1.5 rounded-lg border border-line text-xs text-text-muted hover:text-text cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 rounded-lg bg-brass text-white font-bold text-xs shadow-sm hover:brightness-110 btn-tactile cursor-pointer"
+                  >
+                    Submit Directive
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </PortalModal>
+      )}
     </div>
   );
 }

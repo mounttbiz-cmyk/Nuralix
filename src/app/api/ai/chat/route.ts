@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getActiveBusiness } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,50 +19,43 @@ export async function POST(req: NextRequest) {
       } else if (lower.includes("doc") || lower.includes("contract") || lower.includes("pdf") || lower.includes("transcript") || lower.includes("audit") || lower.includes("policy")) {
         resolvedModelKey = "gemini-1-5";
         routingReason = "Auto-routed to Gemini 1.5 Pro for massive document processing & multi-page context";
-      } else if (lower.includes("automate") || lower.includes("workflow") || lower.includes("fast") || lower.includes("action") || lower.includes("task") || lower.includes("crm")) {
-        resolvedModelKey = "gpt-4o";
-        routingReason = "Auto-routed to GPT-4o for multimodal speed & operational tool execution";
-      } else {
+      } else if (lower.includes("code") || lower.includes("api") || lower.includes("sql") || lower.includes("schema") || lower.includes("architecture")) {
         resolvedModelKey = "claude-3-5";
-        routingReason = "Auto-routed to Claude 3.5 Sonnet for strategic reasoning & executive synthesis";
+        routingReason = "Auto-routed to Claude 3.5 Sonnet for system architecture & nuanced technical logic";
+      } else {
+        resolvedModelKey = "gemini-flash";
+        routingReason = "Auto-routed to Gemini Flash for sub-second executive operational speed";
       }
     }
 
-    const MODEL_NAMES: Record<string, string> = {
-      "claude-3-5": "Claude 3.5 Sonnet",
-      "gpt-4o": "GPT-4o",
-      "deepseek-r1": "DeepSeek R1",
-      "gemini-1-5": "Gemini 1.5 Pro",
+    const modelNameMap: Record<string, string> = {
+      "auto": "Astra Router (Dynamic Multi-Model)",
+      "gemini-flash": "Google Gemini 2.0 Flash",
+      "gemini-1-5": "Google Gemini 1.5 Pro",
+      "deepseek-r1": "DeepSeek R1 Reasoning",
+      "claude-3-5": "Anthropic Claude 3.5 Sonnet",
     };
-    const modelDisplayName = MODEL_NAMES[resolvedModelKey] || "Claude 3.5 Sonnet";
 
+    const modelDisplayName = modelNameMap[resolvedModelKey] || "Nuralix Intelligence Engine";
+
+    // 2. Executive Agent Personas
     const agentRoles: Record<string, { title: string; focus: string; tone: string }> = {
       ceo: {
         title: "Astra (CEO AI)",
-        focus: "High-level strategic directives, capital efficiency, enterprise growth, and executive decisions.",
-        tone: "Decisive, visionary, board-level, clear.",
+        focus: "Executive strategy, cross-functional prioritization, founder sanity, market positioning, high-ticket deal closing, and existential risks.",
+        tone: "Decisive, visionary, encouraging, authoritative.",
       },
       cfo: {
         title: "Marcus (CFO AI)",
-        focus: "Cash runway, unit economics, burn rate, INR financial discipline, break-even targets, and solvency risks.",
-        tone: "Analytical, risk-conscious, mathematically rigorous, precise.",
+        focus: "Burn rate compression, liquid cash runway, gross margin health, unit economics (CAC/LTV), pricing models, and solvency governance.",
+        tone: "Fiscally disciplined, data-first, razor-sharp, analytical.",
       },
-      marketing: {
-        title: "Elena (Marketing AI)",
-        focus: "CAC, ROAS, brand positioning, audience segmentation, demand generation, and organic conversion funnels.",
-        tone: "Creative yet metric-driven, growth-oriented, customer-centric.",
+      cmo: {
+        title: "Elena (CMO AI)",
+        focus: "Customer acquisition cost (CAC), pipeline conversion velocity, inbound funnels, ICP qualification, messaging, and partner distribution channels.",
+        tone: "Growth-oriented, energetic, conversion-focused, experimental.",
       },
-      sales: {
-        title: "Vikram (Sales AI)",
-        focus: "Pipeline velocity, enterprise deal structuring, lead scoring, proposal conversion, and sales team quotas.",
-        tone: "Action-oriented, confident, deal-closing, tactical.",
-      },
-      hr: {
-        title: "Sarah (HR & Talent AI)",
-        focus: "Headcount planning, culture, talent retention, compensation benchmarking, and organizational design.",
-        tone: "Empathetic, structured, compliance-minded, talent-focused.",
-      },
-      operations: {
+      coo: {
         title: "David (Operations AI)",
         focus: "Process optimization, vendor SLAs, operational friction, capacity constraints, and operational bottlenecks.",
         tone: "Systematic, efficiency-driven, pragmatic, operational.",
@@ -75,19 +69,25 @@ export async function POST(req: NextRequest) {
 
     const activeRole = agentRoles[agentId] || agentRoles.ceo;
 
-    const companyContext = companyProfile
-      ? `
+    const activeBiz = getActiveBusiness();
+    const resolvedProfile = companyProfile || activeBiz || {};
+    const companyName = resolvedProfile.name || "Enterprise";
+    const founderName = resolvedProfile.founderName || resolvedProfile.founder_name || "Founder";
+    const industry = resolvedProfile.industryLabel || resolvedProfile.industry_label || resolvedProfile.industry || "Enterprise";
+    const monthlyRev = Number(resolvedProfile.revenue || resolvedProfile.monthly_revenue || resolvedProfile.monthlyRevenue || 500000);
+    const monthlyBurn = Number(resolvedProfile.burn || resolvedProfile.monthly_burn || resolvedProfile.monthlyBurn || 150000);
+    const cashReserves = Number(resolvedProfile.cash || resolvedProfile.cash_on_hand || resolvedProfile.cashOnHand || 1200000);
+    const teamSize = resolvedProfile.teamSize || resolvedProfile.team_size || 10;
+
+    const companyContext = `
 Company Context:
-- Company Name: ${companyProfile.name || "Apex Technologies"}
-- Founder / Leader: ${companyProfile.founderName || "Founder"}
-- Industry: ${companyProfile.industryLabel || companyProfile.industry || "B2B SaaS"}
-- Monthly Revenue: ₹${Number(companyProfile.revenue || 500000).toLocaleString("en-IN")}
-- Monthly Net Burn: ₹${Number(companyProfile.burn || 150000).toLocaleString("en-IN")}
-- Liquid Cash Reserves: ₹${Number(companyProfile.cash || 1200000).toLocaleString("en-IN")}
-- Team Size: ${companyProfile.teamSize || 10} FTEs
-`
-      : `
-Company Context: Standard Indian B2B Enterprise, Scale-up phase.
+- Company Name: ${companyName}
+- Founder / Leader: ${founderName}
+- Industry: ${industry}
+- Monthly Revenue: ₹${monthlyRev.toLocaleString("en-IN")}
+- Monthly Net Burn: ₹${monthlyBurn.toLocaleString("en-IN")}
+- Liquid Cash Reserves: ₹${cashReserves.toLocaleString("en-IN")}
+- Team Size: ${teamSize} FTEs
 `;
 
     const systemPrompt = `You are ${activeRole.title} powered by ${modelDisplayName} in the Nuralix Enterprise Business OS.

@@ -111,6 +111,21 @@ export function AppShell({
           } else if (saved.industry) {
             setIndustry(saved.industry);
           }
+        } else {
+          fetch("/api/business/intake")
+            .then(r => r.json())
+            .then(d => {
+              if (d.success && d.business) {
+                if (d.business.name) setCompanyName(d.business.name);
+                if (d.business.industry_label || d.business.industryLabel) {
+                  setIndustry(d.business.industry_label || d.business.industryLabel);
+                }
+                try {
+                  localStorage.setItem("nuralix_business_profile", JSON.stringify(d.business));
+                } catch {}
+              }
+            })
+            .catch(() => {});
         }
       } catch (e) {
         // ignore

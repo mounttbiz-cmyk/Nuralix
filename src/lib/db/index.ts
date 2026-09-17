@@ -1020,5 +1020,30 @@ if (!db.prepare("SELECT config_key FROM platform_config WHERE config_key = ?").g
   setPlatformConfig("tools_catalog", DEFAULT_TOOLS_CATALOG);
 }
 
+export function getActiveBusiness() {
+  try {
+    const row = db.prepare("SELECT * FROM businesses ORDER BY updated_at DESC LIMIT 1").get() as any;
+    if (row) {
+      return {
+        id: row.id,
+        name: row.name || "Nuralix Enterprise",
+        industry: (row.industry as any) || "saas",
+        industryLabel: row.industry_label || "Enterprise",
+        founderName: row.founder_name || "Founder",
+        annualRevenue: Number(row.annual_revenue || 0),
+        monthlyRevenue: Number(row.monthly_revenue || 0),
+        monthlyBurn: Number(row.monthly_burn || 0),
+        cashOnHand: Number(row.cash_on_hand || 0),
+        teamSize: Number(row.team_size || 5),
+        website: row.website || "",
+      };
+    }
+  } catch (e) {
+    console.error("Error fetching active business:", e);
+  }
+  return null;
+}
+
 export { db };
+
 
