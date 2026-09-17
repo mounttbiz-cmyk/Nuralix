@@ -9,14 +9,20 @@ import {
   signInWithPopup,
   signOut,
   updateProfile,
+  getAdditionalUserInfo,
 } from "firebase/auth";
 import { auth, googleProvider, isFirebaseConfigured } from "./config";
+
+export interface GoogleAuthResult {
+  user: User;
+  isNewUser: boolean;
+}
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   isConfigured: boolean;
-  signInWithGoogle: () => Promise<User | null>;
+  signInWithGoogle: () => Promise<GoogleAuthResult | null>;
   signInWithEmail: (email: string, pass: string) => Promise<User | null>;
   signUpWithEmail: (email: string, pass: string, name?: string) => Promise<User | null>;
   logout: () => Promise<void>;
@@ -63,12 +69,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signInWithGoogle = async (): Promise<User | null> => {
+  const signInWithGoogle = async (): Promise<GoogleAuthResult | null> => {
     if (!auth || !googleProvider) {
       throw new Error("Firebase Auth is not configured. Please add your Firebase credentials.");
     }
     const result = await signInWithPopup(auth, googleProvider);
-    return result.user;
+    const info = getAdditionalUserInfo(result);
+    return {
+      user: result.user,
+      isNewUser: Boolean(info?.isNewUser),
+    };
   };
 
   const signInWithEmail = async (email: string, pass: string): Promise<User | null> => {

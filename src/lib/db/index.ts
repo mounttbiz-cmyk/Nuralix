@@ -118,7 +118,51 @@ db.exec(`
     active INTEGER DEFAULT 1,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS registered_users (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    name TEXT,
+    provider TEXT,
+    created_at TEXT NOT NULL
+  );
 `);
+
+/**
+ * Check if an email has already been registered
+ */
+export function isUserRegistered(email: string): boolean {
+  if (!email) return false;
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    const row = db.prepare("SELECT id FROM registered_users WHERE LOWER(email) = ?").get(cleanEmail);
+    return Boolean(row);
+  } catch (err) {
+    console.warn("isUserRegistered check error:", err);
+    return false;
+  }
+}
+
+/**
+ * Record a newly registered user into SQLite
+ */
+export function registerUser(email: string, name?: string, provider?: string, uid?: string): boolean {
+  if (!email) return false;
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    const id = uid || `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const now = new Date().toISOString();
+    db.prepare(`
+      INSERT INTO registered_users (id, email, name, provider, created_at)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(email) DO UPDATE SET name = excluded.name, provider = excluded.provider
+    `).run(id, cleanEmail, name || "", provider || "email", now);
+    return true;
+  } catch (err) {
+    console.warn("registerUser error:", err);
+    return false;
+  }
+}
 
 // Default business ID for single-tenant local workspace
 export const DEFAULT_BUSINESS_ID = "biz_enterprise_01";
