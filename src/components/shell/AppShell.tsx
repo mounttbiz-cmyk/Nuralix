@@ -64,10 +64,21 @@ export function AppShell({
     enableToolsCatalog: true,
   });
 
-  // Sync navItems prop if changes
+  // Sync navItems prop if changes, preserving any dynamically loaded items
   React.useEffect(() => {
     if (navItems && navItems.length > 0) {
-      setItems(navItems);
+      setItems(prev => {
+        const map = new Map<string, NavItem>();
+        // Priority to navItems prop
+        navItems.forEach(item => map.set(item.href, item));
+        // Keep any items that were already in prev state (e.g. from backend or dynamic routes)
+        prev.forEach(item => {
+          if (!map.has(item.href)) {
+            map.set(item.href, item);
+          }
+        });
+        return Array.from(map.values()).sort((a, b) => (a.order || 0) - (b.order || 0));
+      });
     }
   }, [navItems]);
 

@@ -15,9 +15,23 @@ export async function GET() {
   try {
     const website = getPlatformConfig("website_config", DEFAULT_WEBSITE_CONFIG);
     const features = getPlatformConfig("dashboard_features", DEFAULT_DASHBOARD_FEATURES);
-    const nav = getPlatformConfig("dashboard_nav", defaultNavItems);
+    let nav = getPlatformConfig("dashboard_nav", defaultNavItems);
     let tools = getPlatformConfig("tools_catalog", DEFAULT_TOOLS_CATALOG);
     let widgets = getPlatformConfig("dashboard_widgets", defaultWidgets);
+
+    // Ensure any newly added default nav items (e.g. Growth Strategy, Executive Playbooks) are merged if missing from DB
+    const existingNavHrefs = new Set(nav.map((n: any) => n.href));
+    let hasNewNav = false;
+    for (const dn of defaultNavItems) {
+      if (!existingNavHrefs.has(dn.href)) {
+        nav.push(dn);
+        hasNewNav = true;
+      }
+    }
+    if (hasNewNav) {
+      nav.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+      setPlatformConfig("dashboard_nav", nav);
+    }
 
     // Ensure any newly added default tools are merged if missing from DB
     const existingToolIds = new Set(tools.map((t: any) => t.id));
