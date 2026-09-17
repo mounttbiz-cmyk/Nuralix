@@ -243,6 +243,10 @@ export default function LoginPage() {
             }
 
             // User is brand new (or was deleted from Firebase Console) -> Allow registration!
+            // Clean any previous user's business profile from this browser so onboarding questions are presented!
+            localStorage.removeItem("nuralix_business_profile");
+            localStorage.removeItem("nuralix_onboarding_step");
+
             const userSession = {
               id: authUser.uid,
               email: userEmail || email,
@@ -253,8 +257,8 @@ export default function LoginPage() {
             };
             localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
 
-            // Instant navigation to onboarding
-            router.push("/onboarding");
+            // Instant navigation to onboarding registration process
+            router.push("/onboarding?mode=new_signup");
 
             // Record in SQLite and Firestore in background
             recordRegisteredAccount(userEmail, authUser.displayName || fullName || "Founder", "google.com", authUser.uid).catch(() => {});
@@ -337,6 +341,10 @@ export default function LoginPage() {
           }
 
           if (authUser) {
+            // Clean any previous user's business profile from this browser so onboarding questions are presented!
+            localStorage.removeItem("nuralix_business_profile");
+            localStorage.removeItem("nuralix_onboarding_step");
+
             const userSession = {
               id: authUser.uid,
               email: authUser.email || cleanEmail,
@@ -347,8 +355,8 @@ export default function LoginPage() {
             };
             localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
 
-            // Instant navigation to onboarding
-            router.push("/onboarding");
+            // Instant navigation to onboarding registration process
+            router.push("/onboarding?mode=new_signup");
 
             // Background updates
             recordRegisteredAccount(cleanEmail, fullName || "Founder", "password", authUser.uid).catch(() => {});
@@ -478,6 +486,9 @@ export default function LoginPage() {
           setLoading(false);
           return;
         }
+        localStorage.removeItem("nuralix_business_profile");
+        localStorage.removeItem("nuralix_onboarding_step");
+
         await recordRegisteredAccount(targetEmail, fullName || (provider === "google" ? "Alex Vance" : "Founder"), provider);
         const userSession = {
           id: `usr_${Date.now()}`,
@@ -488,7 +499,7 @@ export default function LoginPage() {
           authenticatedAt: new Date().toISOString(),
         };
         localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
-        router.push("/onboarding");
+        router.push("/onboarding?mode=new_signup");
       } else {
         // authMode === "signin"
         if (provider === "email" && email) {

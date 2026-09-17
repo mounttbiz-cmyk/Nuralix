@@ -801,13 +801,43 @@ const INDUSTRY_PRIORITIES: Record<string, { id: string; title: string; detail: s
 export default function OnboardingPage() {
   const router = useRouter();
 
-  // If an old user already has a configured business profile, do NOT ask questions again — directly send to dashboard!
+  // If a returning user already has a configured business profile for THEIR account, send them to dashboard.
+  // BUT if this is a new signup (mode=new_signup or new registration), ALWAYS present the onboarding questionnaire!
   React.useEffect(() => {
     try {
+      const params = new URLSearchParams(window.location.search);
+      const isNewSignup = params.get("mode") === "new_signup" || params.get("signup") === "true";
+      if (isNewSignup) {
+        // User explicitly signed up as a new user: clear previous cached business profile and run onboarding!
+        localStorage.removeItem("nuralix_business_profile");
+        return;
+      }
+
+      // Check current user's session
+      const rawSession = localStorage.getItem("nuralix_user_session");
+      let currentUserEmail = "";
+      if (rawSession) {
+        const sess = JSON.parse(rawSession);
+        currentUserEmail = (sess.email || "").trim().toLowerCase();
+      }
+
+      // Only skip onboarding if this SPECIFIC user already has their business profile completed
+      if (currentUserEmail) {
+        const userSpecificProfile = localStorage.getItem(`nuralix_user_business_${currentUserEmail}`);
+        if (userSpecificProfile) {
+          const p = JSON.parse(userSpecificProfile);
+          if (p.completedAt || (p.name && p.revenue !== undefined)) {
+            router.replace("/dashboard");
+            return;
+          }
+        }
+      }
+
       const existingProfileStr = localStorage.getItem("nuralix_business_profile");
       if (existingProfileStr) {
         const p = JSON.parse(existingProfileStr);
-        if (p.completedAt || (p.name && p.revenue !== undefined)) {
+        // If current session exists and emails match, skip onboarding
+        if (p.completedAt && p.email && currentUserEmail && p.email.toLowerCase() === currentUserEmail) {
           router.replace("/dashboard");
           return;
         }
