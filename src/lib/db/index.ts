@@ -9,29 +9,161 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-// Clear read-only attributes on Windows if set by OneDrive or OS
-if (process.platform === "win32") {
+export function healDatabasePermissions() {
   try {
-    const { execSync } = require("child_process");
-    execSync(`attrib -r "${dataDir}" /d`, { stdio: "ignore" });
-    execSync(`attrib -r "${path.join(dataDir, "*.*")}"`, { stdio: "ignore" });
+    fs.chmodSync(dataDir, 0o777);
   } catch {}
+
+  if (fs.existsSync(dataDir)) {
+    try {
+      const files = fs.readdirSync(dataDir);
+      for (const f of files) {
+        try {
+          fs.chmodSync(path.join(dataDir, f), 0o666);
+        } catch {}
+      }
+    } catch {}
+  }
+
+  // Clear read-only and system attributes on Windows if set by OneDrive or OS
+  if (process.platform === "win32") {
+    try {
+      const { execSync } = require("child_process");
+      execSync(`attrib -r -s "${dataDir}" /d`, { stdio: "ignore" });
+      execSync(`attrib -r -s "${path.join(dataDir, "*.*")}"`, { stdio: "ignore" });
+    } catch {}
+  }
 }
+
+// Immediately heal permissions upon module load
+healDatabasePermissions();
 
 const dbPath = path.join(dataDir, "nuralix.db");
-const db = new DatabaseSync(dbPath);
 
-// Enable WAL mode & resilient pragmas so SQLite handles Windows/OneDrive concurrent locks
-try {
-  db.exec(`
-    PRAGMA busy_timeout = 10000;
-    PRAGMA journal_mode = WAL;
-    PRAGMA synchronous = NORMAL;
-    PRAGMA temp_store = MEMORY;
-  `);
-} catch (e) {
-  console.warn("Could not set SQLite pragmas:", e);
+declare global {
+  var __nuralix_raw_db: any | undefined;
 }
+
+function createRawConnection() {
+  healDatabasePermissions();
+  const conn = new DatabaseSync(dbPath);
+  try {
+    conn.exec(`
+      PRAGMA busy_timeout = 10000;
+      PRAGMA journal_mode = WAL;
+      PRAGMA synchronous = NORMAL;
+      PRAGMA temp_store = MEMORY;
+    `);
+  } catch (e) {
+    console.warn("Could not set SQLite pragmas:", e);
+  }
+  return conn;
+}
+
+function getRawConnection() {
+  if (!globalThis.__nuralix_raw_db) {
+    globalThis.__nuralix_raw_db = createRawConnection();
+  }
+  return globalThis.__nuralix_raw_db;
+}
+
+function resetConnection() {
+  try {
+    if (globalThis.__nuralix_raw_db) {
+      globalThis.__nuralix_raw_db.close();
+    }
+  } catch {}
+  globalThis.__nuralix_raw_db = undefined;
+  return getRawConnection();
+}
+
+// Resilient wrapper interface matching DatabaseSync
+const db = {
+  prepare(sql: string) {
+    return {
+      run(...args: any[]) {
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const raw = getRawConnection();
+            const stmt = raw.prepare(sql);
+            return stmt.run(...args);
+          } catch (err: any) {
+            const msg = String(err?.message || "").toLowerCase();
+            if (
+              msg.includes("readonly") ||
+              msg.includes("busy") ||
+              msg.includes("locked") ||
+              msg.includes("permission")
+            ) {
+              console.warn(`[SQLite SafeRun] Caught "${err.message}" on attempt ${attempt}. Healing permissions & reconnecting...`);
+              healDatabasePermissions();
+              resetConnection();
+              if (attempt === 3) throw err;
+              continue;
+            }
+            throw err;
+          }
+        }
+      },
+      get(...args: any[]) {
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const raw = getRawConnection();
+            return raw.prepare(sql).get(...args);
+          } catch (err: any) {
+            const msg = String(err?.message || "").toLowerCase();
+            if (msg.includes("readonly") || msg.includes("busy") || msg.includes("locked")) {
+              healDatabasePermissions();
+              resetConnection();
+              if (attempt === 3) throw err;
+              continue;
+            }
+            throw err;
+          }
+        }
+      },
+      all(...args: any[]) {
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const raw = getRawConnection();
+            return raw.prepare(sql).all(...args);
+          } catch (err: any) {
+            const msg = String(err?.message || "").toLowerCase();
+            if (msg.includes("readonly") || msg.includes("busy") || msg.includes("locked")) {
+              healDatabasePermissions();
+              resetConnection();
+              if (attempt === 3) throw err;
+              continue;
+            }
+            throw err;
+          }
+        }
+      },
+    };
+  },
+  exec(sql: string) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const raw = getRawConnection();
+        return raw.exec(sql);
+      } catch (err: any) {
+        const msg = String(err?.message || "").toLowerCase();
+        if (
+          msg.includes("readonly") ||
+          msg.includes("busy") ||
+          msg.includes("locked") ||
+          msg.includes("permission")
+        ) {
+          healDatabasePermissions();
+          resetConnection();
+          if (attempt === 3) throw err;
+          continue;
+        }
+        throw err;
+      }
+    }
+  },
+};
 
 // Initialize schema
 db.exec(`
