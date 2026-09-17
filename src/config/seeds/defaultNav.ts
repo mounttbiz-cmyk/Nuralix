@@ -142,7 +142,7 @@ export const defaultNavItems: NavItem[] = [
   {
     id: "nav_settings",
     label: "Settings",
-    href: "/settings/appearance",
+    href: "/settings/profile",
     icon: "Settings",
     order: 14,
     mobileTab: false,

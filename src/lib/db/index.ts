@@ -197,23 +197,47 @@ export function saveUserBusinessProfile(email: string, profile: any): boolean {
 }
 
 /**
+ * Delete a registered user from SQLite
+ */
+export function deleteRegisteredUser(email: string): boolean {
+  if (!email) return false;
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    const result = db.prepare("DELETE FROM registered_users WHERE LOWER(email) = ?").run(cleanEmail);
+    return result.changes > 0;
+  } catch (err) {
+    console.warn("deleteRegisteredUser error:", err);
+    return false;
+  }
+}
+
+/**
  * Record a newly registered user into SQLite with optional initial business profile
  */
 export function registerUser(email: string, name?: string, provider?: string, uid?: string, businessProfile?: any): boolean {
   if (!email) return false;
   try {
     const cleanEmail = email.trim().toLowerCase();
-    const id = uid || `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const now = new Date().toISOString();
+    const existing = db.prepare("SELECT id FROM registered_users WHERE LOWER(email) = ?").get(cleanEmail) as any;
     const profileJson = businessProfile ? (typeof businessProfile === "string" ? businessProfile : JSON.stringify(businessProfile)) : null;
 
+    if (existing) {
+      db.prepare(`
+        UPDATE registered_users SET 
+          name = COALESCE(?, name), 
+          provider = COALESCE(?, provider),
+          business_profile = COALESCE(?, business_profile)
+        WHERE LOWER(email) = ?
+      `).run(name || null, provider || null, profileJson, cleanEmail);
+      return true;
+    }
+
+    const idExists = uid ? db.prepare("SELECT id FROM registered_users WHERE id = ?").get(uid) : false;
+    const id = (uid && !idExists) ? uid : `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const now = new Date().toISOString();
     db.prepare(`
       INSERT INTO registered_users (id, email, name, provider, business_profile, created_at)
       VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(email) DO UPDATE SET 
-        name = COALESCE(excluded.name, registered_users.name), 
-        provider = COALESCE(excluded.provider, registered_users.provider),
-        business_profile = COALESCE(excluded.business_profile, registered_users.business_profile)
     `).run(id, cleanEmail, name || "", provider || "email", profileJson, now);
     return true;
   } catch (err) {

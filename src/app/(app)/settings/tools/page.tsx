@@ -9,7 +9,8 @@ import {
   Save,
   Sparkles,
   AlertCircle,
-  Palette
+  Palette,
+  Building2
 } from "lucide-react";
 import { ToolLogo } from "@/components/tools/ToolLogo";
 import { PhoneCountryInput } from "@/components/ui/PhoneCountryInput";
@@ -143,10 +144,17 @@ export default function SettingsToolsPage() {
           <Layers className="w-5 h-5 text-brass" />
           <h1 className="text-lg font-bold text-text">Platform Settings</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/settings/profile"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface border border-line flex items-center gap-1.5 transition-colors"
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Business & Account</span>
+          </Link>
           <Link
             href="/settings/appearance"
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface border border-line flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface border border-line flex items-center gap-1.5 transition-colors"
           >
             <Palette className="w-3.5 h-3.5" />
             <span>Appearance & Theme</span>

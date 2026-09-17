@@ -89,20 +89,30 @@ export function AppShell({
   }, []);
 
   React.useEffect(() => {
-    try {
-      const savedProfileStr = localStorage.getItem("nuralix_business_profile");
-      if (savedProfileStr) {
-        const saved = JSON.parse(savedProfileStr);
-        if (saved.name) setCompanyName(saved.name);
-        if (saved.industryLabel) {
-          setIndustry(saved.industryLabel);
-        } else if (saved.industry) {
-          setIndustry(saved.industry);
+    const syncProfile = () => {
+      try {
+        const savedProfileStr = localStorage.getItem("nuralix_business_profile");
+        if (savedProfileStr) {
+          const saved = JSON.parse(savedProfileStr);
+          if (saved.name) setCompanyName(saved.name);
+          if (saved.industryLabel) {
+            setIndustry(saved.industryLabel);
+          } else if (saved.industry) {
+            setIndustry(saved.industry);
+          }
         }
+      } catch (e) {
+        // ignore
       }
-    } catch (e) {
-      // ignore
-    }
+    };
+
+    syncProfile();
+    window.addEventListener("nuralix_profile_updated", syncProfile);
+    window.addEventListener("storage", syncProfile);
+    return () => {
+      window.removeEventListener("nuralix_profile_updated", syncProfile);
+      window.removeEventListener("storage", syncProfile);
+    };
   }, []);
 
   const [contextChips, setContextChips] = useState<ContextChip[]>([

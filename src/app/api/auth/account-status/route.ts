@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isUserRegistered, registerUser, getRegisteredUser, saveUserBusinessProfile } from "@/lib/db";
+import { isUserRegistered, registerUser, getRegisteredUser, saveUserBusinessProfile, deleteRegisteredUser } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +43,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ success, email });
   } catch (err: any) {
     console.error("Account status register error:", err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
+
+    if (!email) {
+      return NextResponse.json({ success: false, error: "Email parameter required" }, { status: 400 });
+    }
+
+    const success = deleteRegisteredUser(email);
+    return NextResponse.json({ success, email });
+  } catch (err: any) {
+    console.error("Account delete error:", err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

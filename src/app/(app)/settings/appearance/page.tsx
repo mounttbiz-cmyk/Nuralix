@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 import { useTheme } from "@/lib/theme/ThemeProvider";
-import { Sun, Moon, Monitor, Eye, Palette, Check, Globe, ArrowUpRight, Layers } from "lucide-react";
+import { Sun, Moon, Monitor, Eye, Palette, Check, Globe, ArrowUpRight, Layers, Building2 } from "lucide-react";
 
 export default function AppearancePage() {
   const { theme, resolvedTheme } = useTheme();
@@ -13,7 +13,14 @@ export default function AppearancePage() {
     <div className="max-w-3xl space-y-6">
       <div className="space-y-3 pb-4 border-b border-line">
         <h1 className="text-lg font-bold text-text">Platform Settings</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/settings/profile"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface border border-line flex items-center gap-1.5 transition-colors"
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Business & Account</span>
+          </Link>
           <Link
             href="/settings/appearance"
             className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brass text-white shadow-xs flex items-center gap-1.5"
@@ -23,7 +30,7 @@ export default function AppearancePage() {
           </Link>
           <Link
             href="/settings/tools"
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface border border-line flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text bg-surface border border-line flex items-center gap-1.5 transition-colors"
           >
             <Layers className="w-3.5 h-3.5" />
             <span>Connected Business Tools</span>

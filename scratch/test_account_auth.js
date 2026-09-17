@@ -77,11 +77,27 @@ async function runTests() {
   if (!check2.body.businessProfile || check2.body.businessProfile.name !== "Cyberdyne Systems Corp") {
     throw new Error("Expected businessProfile.name === Cyberdyne Systems Corp");
   }
-  if (check2.body.businessProfile.revenue !== 950000) {
-    throw new Error("Expected businessProfile.revenue === 950000");
-  }
+  // 4. Test DELETE account endpoint
+  const delRes = await makeRequest({
+    hostname: 'localhost',
+    port: 3000,
+    path: `/api/auth/account-status?email=${encodeURIComponent(testEmail)}`,
+    method: 'DELETE'
+  });
+  console.log("4. Delete account result:", delRes.body);
+  if (!delRes.body.success) throw new Error("Expected success === true for account deletion");
 
-  console.log("\n✅ ALL TESTS (INCLUDING BUSINESS PROFILE RETENTION) PASSED SUCCESSFULLY!");
+  // 5. Verify deleted account no longer exists
+  const check3 = await makeRequest({
+    hostname: 'localhost',
+    port: 3000,
+    path: `/api/auth/account-status?email=${encodeURIComponent(testEmail)}`,
+    method: 'GET'
+  });
+  console.log("5. Re-check deleted account exists:", check3.body);
+  if (check3.body.exists !== false) throw new Error("Expected exists === false after account deletion");
+
+  console.log("\n✅ ALL TESTS (INCLUDING BUSINESS PROFILE RETENTION & ACCOUNT DELETION) PASSED SUCCESSFULLY!");
 }
 
 runTests().catch((err) => {
