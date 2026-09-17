@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { ShieldAlert, ArrowLeft, LogOut } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 
@@ -13,9 +13,15 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [authorized, setAuthorized] = useState(false);
 
+  // If visiting the login page, bypass authorization check
+  const isLoginPage = pathname === "/admin/login";
+
   useEffect(() => {
+    if (isLoginPage) return;
+
     // Verify developer superadmin session
     const sessionStr = localStorage.getItem("nuralix_admin_session");
     if (!sessionStr) {
@@ -32,12 +38,11 @@ export default function AdminLayout({
         router.push("/admin/login");
       }
     }
-  }, [router]);
+  }, [router, isLoginPage]);
 
-  const handleAdminLogout = () => {
-    localStorage.removeItem("nuralix_admin_session");
-    router.push("/login");
-  };
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (!authorized) {
     return (
