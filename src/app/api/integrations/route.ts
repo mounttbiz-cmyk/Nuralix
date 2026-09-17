@@ -49,27 +49,69 @@ export async function POST(req: Request) {
 
     const now = new Date().toISOString();
 
-    db.prepare(`
-      UPDATE integrations SET
-        status = COALESCE(?, status),
-        api_key = COALESCE(?, api_key),
-        config = COALESCE(?, config),
-        updated_at = ?
-      WHERE business_id = ? AND tool_key = ?
-    `).run(
-      status,
-      apiKey,
-      config ? JSON.stringify(config) : null,
-      now,
-      DEFAULT_BUSINESS_ID,
-      toolKey
-    );
+    const existing = db
+      .prepare("SELECT id, config FROM integrations WHERE business_id = ? AND tool_key = ?")
+      .get(DEFAULT_BUSINESS_ID, toolKey) as any;
 
-    // If connecting Stripe, also update connected_tools in business record if not already present
+    let mergedConfig = config;
+    if (existing && existing.config && config) {
+      try {
+        const prevConfig = JSON.parse(existing.config);
+        mergedConfig = { ...prevConfig, ...config };
+      } catch (e) {}
+    }
+
+    if (existing) {
+      db.prepare(`
+        UPDATE integrations SET
+          status = COALESCE(?, status),
+          api_key = COALESCE(?, api_key),
+          config = COALESCE(?, config),
+          updated_at = ?
+        WHERE business_id = ? AND tool_key = ?
+      `).run(
+        status || null,
+        apiKey !== undefined ? apiKey : null,
+        mergedConfig ? JSON.stringify(mergedConfig) : null,
+        now,
+        DEFAULT_BUSINESS_ID,
+        toolKey
+      );
+    } else {
+      const toolNames: Record<string, { name: string; category: string }> = {
+        stripe: { name: "Stripe", category: "business" },
+        slack: { name: "Slack", category: "business" },
+        zoho_books: { name: "Zoho Books / QuickBooks", category: "business" },
+        google_calendar: { name: "Google Calendar", category: "business" },
+        help_desk: { name: "Help Desk (Zendesk / Freshdesk)", category: "business" },
+        google_workspace: { name: "Google Workspace", category: "business" },
+        zoom: { name: "Zoom", category: "business" },
+        notion: { name: "Notion", category: "data" },
+        github: { name: "GitHub", category: "automation" },
+        hubspot: { name: "HubSpot", category: "business" },
+      };
+      const def = toolNames[toolKey] || { name: toolKey, category: "business" };
+      db.prepare(`
+        INSERT INTO integrations (id, business_id, tool_key, name, category, status, api_key, config, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        `int_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        DEFAULT_BUSINESS_ID,
+        toolKey,
+        def.name,
+        def.category,
+        status || "connected",
+        apiKey || null,
+        mergedConfig ? JSON.stringify(mergedConfig) : null,
+        now
+      );
+    }
+
+    // If connecting tool, also update connected_tools in business record if not already present
     if (status === "connected") {
       const biz = db.prepare("SELECT connected_tools FROM businesses WHERE id = ?").get(DEFAULT_BUSINESS_ID) as any;
       if (biz) {
-        const tools = biz.connected_tools ? JSON.parse(biz.connected_tools) : [];
+        const tools: string[] = biz.connected_tools ? JSON.parse(biz.connected_tools) : [];
         if (!tools.includes(toolKey)) {
           tools.push(toolKey);
           db.prepare("UPDATE businesses SET connected_tools = ?, no_integrations = 0, updated_at = ? WHERE id = ?").run(
