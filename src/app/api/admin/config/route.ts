@@ -5,6 +5,7 @@ import {
   DEFAULT_WEBSITE_CONFIG,
   DEFAULT_DASHBOARD_FEATURES,
   DEFAULT_TOOLS_CATALOG,
+  DEFAULT_SUBSCRIPTION_PLANS,
 } from "@/lib/db";
 import { defaultNavItems } from "@/config/seeds/defaultNav";
 import { defaultWidgets } from "@/config/seeds/defaultWidgets";
@@ -30,6 +31,7 @@ export async function GET() {
     const nav = getPlatformConfig("dashboard_nav", defaultNavItems);
     const widgets = getPlatformConfig("dashboard_widgets", defaultWidgets);
     const tools = getPlatformConfig("tools_catalog", DEFAULT_TOOLS_CATALOG);
+    const plans = getPlatformConfig("subscription_plans", DEFAULT_SUBSCRIPTION_PLANS);
     const metrics = getPlatformConfig("dashboard_metrics", defaultMetrics);
     const auditLogs = getPlatformConfig<AuditLogItem[]>("audit_logs", [
       {
@@ -52,6 +54,7 @@ export async function GET() {
         nav,
         widgets,
         tools,
+        plans,
         metrics,
         auditLogs,
         version,
@@ -103,12 +106,15 @@ export async function POST(request: Request) {
       }
     } else if (section === "tools" && payload) {
       setPlatformConfig("tools_catalog", payload);
+    } else if (section === "plans" && payload) {
+      setPlatformConfig("subscription_plans", payload);
     } else if (section === "all" && payload) {
       if (payload.website) setPlatformConfig("website_config", payload.website);
       if (payload.features) setPlatformConfig("dashboard_features", payload.features);
       if (payload.nav) setPlatformConfig("dashboard_nav", payload.nav);
       if (payload.widgets) setPlatformConfig("dashboard_widgets", payload.widgets);
       if (payload.tools) setPlatformConfig("tools_catalog", payload.tools);
+      if (payload.plans) setPlatformConfig("subscription_plans", payload.plans);
     } else {
       return NextResponse.json(
         { success: false, error: "Invalid section or missing payload" },

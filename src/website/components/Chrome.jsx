@@ -125,12 +125,16 @@ export function MagneticButton ({ as: Tag = 'a', className = '', children, ...re
   );
 }
 
-const LINKS = [
-  ['About', '#about'], ['Intelligence', '#s03'], ['Solutions', '#solutions'],
-  ['Vision', '#vision'], ['Contact', '#contact']
+const DEFAULT_NAV_LINKS = [
+  { label: 'About', href: '#about' },
+  { label: 'Intelligence', href: '#s03' },
+  { label: 'Solutions', href: '#solutions' },
+  { label: 'Vision', href: '#vision' },
+  { label: 'Contact', href: '#contact' },
+  { label: 'Pricing', href: '/subscription' }
 ];
 
-export function Nav ({ menuOpen, setMenuOpen }) {
+export function Nav ({ menuOpen, setMenuOpen, data }) {
   useEffect(() => {
     document.body.classList.toggle('menu-open', menuOpen);
     const esc = e => { if (e.key === 'Escape') setMenuOpen(false); };
@@ -138,25 +142,31 @@ export function Nav ({ menuOpen, setMenuOpen }) {
     return () => removeEventListener('keydown', esc);
   }, [menuOpen, setMenuOpen]);
 
+  const brand = data?.brand || 'NURALIX';
+  const rawLinks = data?.links || DEFAULT_NAV_LINKS;
+  const links = rawLinks.map(l => Array.isArray(l) ? { label: l[0], href: l[1] } : l);
+  const ctaText = data?.ctaText || 'Start with Nuralix';
+  const ctaHref = data?.ctaHref || DASHBOARD_URL;
+
   return (
     <>
       <header className="nav">
-        <a className="brand" href="#hero" aria-label="Nuralix home">
+        <a className="brand" href="#hero" aria-label={`${brand} home`}>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 19V5l14 14V5" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          NURALIX
+          {brand}
         </a>
 
         <nav className="nav__links" aria-label="Primary">
-          {LINKS.map(([label, href]) => (
+          {links.map(({ label, href }) => (
             <a key={href} className="nav__link" href={href}>{label}</a>
           ))}
         </nav>
 
         <div className="nav__right">
-          <MagneticButton className="btn--nav" href={DASHBOARD_URL}>
-            <span>Start with Nuralix</span><span className="btn__ar" aria-hidden="true">→</span>
+          <MagneticButton className="btn--nav" href={ctaHref}>
+            <span>{ctaText}</span><span className="btn__ar" aria-hidden="true">→</span>
           </MagneticButton>
           <button
             className="burger"
@@ -169,11 +179,11 @@ export function Nav ({ menuOpen, setMenuOpen }) {
       </header>
 
       <div className="menu" id="menu" aria-hidden={!menuOpen}>
-        {LINKS.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
-        <a href={DASHBOARD_URL} className="menu__cta">
-          <span>Start with Nuralix</span> <span aria-hidden="true">→</span>
+        {links.map(({ label, href }) => <a key={href} href={href}>{label}</a>)}
+        <a href={ctaHref} className="menu__cta">
+          <span>{ctaText}</span> <span aria-hidden="true">→</span>
         </a>
-        <div className="menu__meta">Nuralix — Intelligence in Motion</div>
+        <div className="menu__meta">{brand} — Intelligence in Motion</div>
       </div>
     </>
   );

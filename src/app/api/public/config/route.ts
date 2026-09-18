@@ -5,6 +5,7 @@ import {
   DEFAULT_WEBSITE_CONFIG,
   DEFAULT_DASHBOARD_FEATURES,
   DEFAULT_TOOLS_CATALOG,
+  DEFAULT_SUBSCRIPTION_PLANS,
 } from "@/lib/db";
 import { defaultNavItems } from "@/config/seeds/defaultNav";
 import { defaultWidgets } from "@/config/seeds/defaultWidgets";
@@ -18,6 +19,7 @@ export async function GET() {
     let nav = getPlatformConfig("dashboard_nav", defaultNavItems);
     let tools = getPlatformConfig("tools_catalog", DEFAULT_TOOLS_CATALOG);
     let widgets = getPlatformConfig("dashboard_widgets", defaultWidgets);
+    let plans = getPlatformConfig("subscription_plans", DEFAULT_SUBSCRIPTION_PLANS);
 
     // Ensure any newly added default nav items (e.g. Growth Strategy, Executive Playbooks) are merged if missing from DB
     const existingNavHrefs = new Set(nav.map((n: any) => n.href));
@@ -67,6 +69,7 @@ export async function GET() {
       nav,
       tools,
       widgets,
+      plans,
     });
   } catch (error: any) {
     console.error("Failed to fetch public config:", error);
@@ -79,6 +82,7 @@ export async function GET() {
         nav: defaultNavItems,
         tools: DEFAULT_TOOLS_CATALOG,
         widgets: defaultWidgets,
+        plans: DEFAULT_SUBSCRIPTION_PLANS,
       },
       { status: 500 }
     );

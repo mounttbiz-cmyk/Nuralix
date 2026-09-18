@@ -17,6 +17,23 @@ export const DEFAULT_WEBSITE_STATE = {
     contact: { enabled: true, title: "Contact & Onboarding" },
     footer: { enabled: true, title: "Site Footer" },
   },
+  nav: {
+    brand: "NURALIX",
+    links: [
+      { label: "About", href: "#about" },
+      { label: "Intelligence", href: "#s03" },
+      { label: "Solutions", href: "#solutions" },
+      { label: "Vision", href: "#vision" },
+      { label: "Contact", href: "#contact" },
+      { label: "Pricing", href: "/subscription" },
+    ],
+    ctaText: "Start with Nuralix",
+    ctaHref: "/dashboard",
+  },
+  vision: {
+    label: "The next interface is intelligence",
+    words: ["Understand.", "Predict.", "Adapt.", "Create.", "Evolve.", "Nuralix."],
+  },
   announcement: {
     enabled: false,
     text: "🚀 Nuralix Enterprise Platform v2.0 is now live for all partners.",
@@ -70,6 +87,12 @@ export const DEFAULT_WEBSITE_STATE = {
     headline: "We build intelligence that moves the world forward.",
     p1: "Nuralix uses artificial intelligence to automate tasks, analyse data, and help businesses make smarter, faster decisions for growth.",
     p2: "We work at the point where information becomes understanding — designing systems that read complexity, find the signal inside it, and turn that signal into a decision a business can act on today.",
+    approach: [
+      { label: "Understand the problem", num: "01" },
+      { label: "Model the intelligence", num: "02" },
+      { label: "Engineer the system", num: "03" },
+      { label: "Scale what works", num: "04" },
+    ],
   },
   solutions: {
     eyebrow: "Solutions",
@@ -154,8 +177,16 @@ export function useWebsiteConfig() {
     }
 
     fetchConfig();
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("nuralix_config_updated", fetchConfig);
+    }
+
     return () => {
       mounted = false;
+      if (typeof window !== "undefined") {
+        window.removeEventListener("nuralix_config_updated", fetchConfig);
+      }
     };
   }, []);
 

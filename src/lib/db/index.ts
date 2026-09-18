@@ -488,6 +488,23 @@ export const DEFAULT_WEBSITE_CONFIG = {
     contact: { enabled: true, title: "Contact & Onboarding" },
     footer: { enabled: true, title: "Site Footer" },
   },
+  nav: {
+    brand: "NURALIX",
+    links: [
+      { label: "About", href: "#about" },
+      { label: "Intelligence", href: "#s03" },
+      { label: "Solutions", href: "#solutions" },
+      { label: "Vision", href: "#vision" },
+      { label: "Contact", href: "#contact" },
+      { label: "Pricing", href: "/subscription" },
+    ],
+    ctaText: "Start with Nuralix",
+    ctaHref: "/dashboard",
+  },
+  vision: {
+    label: "The next interface is intelligence",
+    words: ["Understand.", "Predict.", "Adapt.", "Create.", "Evolve.", "Nuralix."],
+  },
   announcement: {
     enabled: false,
     text: "🚀 Nuralix Enterprise Platform v2.0 is now live for all partners.",
@@ -541,6 +558,12 @@ export const DEFAULT_WEBSITE_CONFIG = {
     headline: "We build intelligence that moves the world forward.",
     p1: "Nuralix uses artificial intelligence to automate tasks, analyse data, and help businesses make smarter, faster decisions for growth.",
     p2: "We work at the point where information becomes understanding — designing systems that read complexity, find the signal inside it, and turn that signal into a decision a business can act on today.",
+    approach: [
+      { label: "Understand the problem", num: "01" },
+      { label: "Model the intelligence", num: "02" },
+      { label: "Engineer the system", num: "03" },
+      { label: "Scale what works", num: "04" },
+    ],
   },
   solutions: {
     eyebrow: "Solutions",
@@ -578,6 +601,97 @@ export const DEFAULT_WEBSITE_CONFIG = {
     tagline: "Nuralix — Intelligence in Motion",
   },
 };
+
+export const DEFAULT_SUBSCRIPTION_PLANS = [
+  {
+    id: "free",
+    name: "Nuralix Free / Demo",
+    tagline: "Try Nuralix free to see how it works.",
+    price: "₹0",
+    period: "/forever",
+    color: "border-emerald-400/30 text-emerald-400",
+    badge: "Free Trial",
+    isPopular: false,
+    features: [
+      "Business Dashboard",
+      "CEO AI Assistant (Astra)",
+      "Company Health Score",
+      "Profit & ROI Calculators",
+      "Save up to 5 Documents & SOPs",
+      "Daily Business Briefings",
+      "Task Manager",
+      "Free AI questions",
+    ],
+    ctaLabel: "Start Free & Open Dashboard",
+    enabled: true,
+  },
+  {
+    id: "starter",
+    name: "Starter Business OS",
+    tagline: "For solo founders and early teams (1-5 people).",
+    price: "₹3,999",
+    period: "/month",
+    color: "border-cyan-400/30 text-cyan-400",
+    badge: "Most Popular",
+    isPopular: true,
+    features: [
+      "All Free tier features",
+      "All 3 AI Executives (CEO, CFO, CMO)",
+      "Automated Daily 8:00 AM WhatsApp Briefings",
+      "Connect 3 Business Tools (Stripe, Slack, Zoho)",
+      "Cash Runway & Burn Alarm System",
+      "Unlimited AI Strategy Consultations",
+      "3 Team Member Seats",
+      "Email & WhatsApp Support",
+    ],
+    ctaLabel: "Activate Starter Plan",
+    enabled: true,
+  },
+  {
+    id: "growth",
+    name: "Growth Scale",
+    tagline: "For expanding businesses ready to scale (5-30 people).",
+    price: "₹9,999",
+    period: "/month",
+    color: "border-violet-400/30 text-violet-400",
+    badge: "Recommended",
+    isPopular: false,
+    features: [
+      "All Starter tier features",
+      "Scenario Planner & Simulator",
+      "Executive Playbooks & Growth Vectors",
+      "Connect Unlimited Tools & Bank Accounts",
+      "Weekly AI Strategic Audits",
+      "Custom KPI Dashboards & Role-based Access",
+      "10 Team Member Seats",
+      "Dedicated Account Manager",
+    ],
+    ctaLabel: "Activate Growth Scale",
+    enabled: true,
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise Custom",
+    tagline: "For mid-market companies & conglomerates (30+ people).",
+    price: "Custom",
+    period: "/billed annually",
+    color: "border-amber-400/30 text-amber-400",
+    badge: "Enterprise",
+    isPopular: false,
+    features: [
+      "All Growth Scale features",
+      "Self-hosted / Dedicated Cloud Deployment",
+      "Custom AI Executive Models trained on your data",
+      "Custom ERP & Legacy Integrations",
+      "Enterprise SLA (99.9% uptime)",
+      "Unlimited Seats & Departments",
+      "SOC 2 Type II & ISO 27001 Compliance",
+      "24/7 Executive Hotline",
+    ],
+    ctaLabel: "Contact Enterprise Sales",
+    enabled: true,
+  },
+];
 
 export const DEFAULT_DASHBOARD_FEATURES = {
   enableAiCopilot: true,
@@ -1018,6 +1132,10 @@ if (!db.prepare("SELECT config_key FROM platform_config WHERE config_key = ?").g
 
 if (!db.prepare("SELECT config_key FROM platform_config WHERE config_key = ?").get("tools_catalog")) {
   setPlatformConfig("tools_catalog", DEFAULT_TOOLS_CATALOG);
+}
+
+if (!db.prepare("SELECT config_key FROM platform_config WHERE config_key = ?").get("subscription_plans")) {
+  setPlatformConfig("subscription_plans", DEFAULT_SUBSCRIPTION_PLANS);
 }
 
 export function getActiveBusiness() {

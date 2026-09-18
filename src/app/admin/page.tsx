@@ -30,19 +30,27 @@ import {
   ChevronRight,
   Menu,
   ArrowLeft,
-  LogOut
+  LogOut,
+  Building2,
+  Users,
+  CreditCard,
+  Megaphone,
 } from "lucide-react";
 import { NavItem } from "@/config/schemas/nav";
 import { WidgetDef } from "@/config/schemas/widget";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
+import { TenantsManager } from "./components/TenantsManager";
+import { UsersManager } from "./components/UsersManager";
+import { PricingManager } from "./components/PricingManager";
+import { WebsiteCmsExtra } from "./components/WebsiteCmsExtra";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<
-    "website" | "navigation" | "features" | "widgets" | "tools" | "audit"
-  >("website");
+    "website" | "navigation" | "features" | "widgets" | "tools" | "tenants" | "users" | "plans" | "audit"
+  >("tenants");
   const [subWebTab, setSubWebTab] = useState<
-    "sections" | "hero" | "scenes" | "about_solutions" | "contact"
+    "sections" | "hero" | "scenes" | "about_solutions" | "contact" | "nav_brand" | "vision_words" | "announcement"
   >("sections");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -58,6 +66,19 @@ export default function AdminPage() {
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const [widgets, setWidgets] = useState<WidgetDef[]>([]);
   const [tools, setTools] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>([]);
+
+  // Multi-tenant & user state
+  const [tenants, setTenants] = useState<any[]>([]);
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [platformStats, setPlatformStats] = useState<any>({
+    totalBusinesses: 0,
+    totalUsers: 0,
+    totalAnnualRevenue: 0,
+    totalMonthlyRevenue: 0,
+    totalCashReserves: 0,
+    totalMonthlyBurn: 0,
+  });
 
   // Navigation Modal State
   const [isNavModalOpen, setIsNavModalOpen] = useState(false);
@@ -149,6 +170,21 @@ export default function AdminPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  // Fetch tenants and registered users
+  const fetchTenants = async () => {
+    try {
+      const res = await fetch("/api/admin/tenants");
+      const data = await res.json();
+      if (data.success && data.data) {
+        setTenants(data.data.businesses || []);
+        setUsersList(data.data.users || []);
+        if (data.data.stats) setPlatformStats(data.data.stats);
+      }
+    } catch (err) {
+      console.error("Failed to load tenants", err);
+    }
+  };
+
   // Fetch full configuration on mount
   const fetchAllConfig = async () => {
     try {
@@ -161,9 +197,11 @@ export default function AdminPage() {
         setNavItems(data.data.nav || []);
         setWidgets(data.data.widgets || []);
         setTools(data.data.tools || []);
+        setPlans(data.data.plans || []);
         setAuditLogs(data.data.auditLogs || []);
         setVersion(data.data.version || 1);
       }
+      await fetchTenants();
     } catch (err) {
       console.error("Failed to load admin config", err);
       notify("Failed to connect to platform database");
@@ -506,8 +544,20 @@ export default function AdminPage() {
               ? "Story Scenes (01 - 07)"
               : subWebTab === "about_solutions"
               ? "About & Solutions Cards"
-              : "Contact Info & Channels",
+              : subWebTab === "contact"
+              ? "Contact Info & Channels"
+              : subWebTab === "nav_brand"
+              ? "Navbar Links & Brand"
+              : subWebTab === "vision_words"
+              ? "Vision Rotating Words"
+              : "Announcement Banner",
         };
+      case "tenants":
+        return { group: "Multi-Tenant Platform", current: "Registered Enterprises & Businesses" };
+      case "users":
+        return { group: "Multi-Tenant Platform", current: "User Accounts Ledger" };
+      case "plans":
+        return { group: "Monetization & Commercial", current: "Pricing & Subscription Tiers" };
       case "navigation":
         return { group: "Executive Dashboard", current: "Navigation Buttons" };
       case "features":
@@ -603,10 +653,76 @@ export default function AdminPage() {
 
         {/* Sidebar Categorized Navigation */}
         <div className="p-3 flex-1 overflow-y-auto space-y-5 text-xs">
-          {/* GROUP 1: MARKETING & CMS */}
+          {/* GROUP 0: MULTI-TENANT PLATFORM */}
           <div className="space-y-1">
             <div className="px-2.5 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-wider font-mono">
-              Marketing & CMS
+              Multi-Tenant Platform
+            </div>
+            {[
+              { id: "tenants", tab: "tenants", label: "Registered Enterprises", icon: Building2, badge: `${tenants.length}` },
+              { id: "users", tab: "users", label: "User Accounts Ledger", icon: Users, badge: `${usersList.length}` },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.tab;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(item.tab as any);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
+                    isActive
+                      ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
+                      : "text-text-muted hover:text-text hover:bg-surface-2"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-surface-2 border border-line font-mono text-text-muted">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* GROUP 1: MONETIZATION & COMMERCIAL */}
+          <div className="space-y-1">
+            <div className="px-2.5 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-wider font-mono">
+              Commercial & Pricing
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("plans");
+                setIsMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
+                activeTab === "plans"
+                  ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
+                  : "text-text-muted hover:text-text hover:bg-surface-2"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <CreditCard className="w-4 h-4" />
+                <span>Subscription Plans</span>
+              </div>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-surface-2 border border-line font-mono text-text-muted">
+                {plans.length}
+              </span>
+            </button>
+          </div>
+
+          {/* GROUP 2: MARKETING & CMS */}
+          <div className="space-y-1">
+            <div className="px-2.5 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-wider font-mono">
+              Marketing & Website CMS
             </div>
             {[
               { id: "website_sections", tab: "website", sub: "sections", label: "Section Visibility", icon: Eye, badge: "14" },
@@ -614,6 +730,9 @@ export default function AdminPage() {
               { id: "website_scenes", tab: "website", sub: "scenes", label: "Story Scenes (01-07)", icon: Sparkles, badge: "7" },
               { id: "website_about", tab: "website", sub: "about_solutions", label: "About & Solutions", icon: Layers },
               { id: "website_contact", tab: "website", sub: "contact", label: "Contact & Channels", icon: MessageSquare },
+              { id: "website_nav", tab: "website", sub: "nav_brand", label: "Navbar Links & Brand", icon: Globe },
+              { id: "website_vision", tab: "website", sub: "vision_words", label: "Vision Kinetic Words", icon: Sparkles },
+              { id: "website_announcement", tab: "website", sub: "announcement", label: "Announcement Bar", icon: Megaphone },
             ].map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.tab && subWebTab === item.sub;
@@ -866,24 +985,61 @@ export default function AdminPage() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full">
 
       {/* ============================================================= */}
+      {/* TAB: MULTI-TENANT ENTERPRISES & USERS                         */}
+      {/* ============================================================= */}
+      {activeTab === "tenants" && (
+        <TenantsManager
+          tenants={tenants}
+          stats={platformStats}
+          onRefresh={fetchTenants}
+          notify={notify}
+        />
+      )}
+
+      {activeTab === "users" && (
+        <UsersManager
+          users={usersList}
+          onRefresh={fetchTenants}
+          notify={notify}
+        />
+      )}
+
+      {/* ============================================================= */}
+      {/* TAB: SUBSCRIPTION PLANS & COMMERCIAL                          */}
+      {/* ============================================================= */}
+      {activeTab === "plans" && (
+        <PricingManager
+          plans={plans}
+          onSave={async (updated, note) => {
+            await saveSection("plans", updated, note || "Updated subscription pricing tiers");
+          }}
+          notify={notify}
+          saving={saving}
+        />
+      )}
+
+      {/* ============================================================= */}
       {/* TAB 1: WEBSITE CONTENT & CTAs                                 */}
       {/* ============================================================= */}
       {activeTab === "website" && websiteConfig && (
         <div className="space-y-6">
           {/* Website Subtabs */}
-          <div className="flex items-center gap-2 border-b border-line pb-2 text-xs font-semibold">
+          <div className="flex items-center gap-2 border-b border-line pb-2 text-xs font-semibold overflow-x-auto">
             {[
-              { id: "sections", label: "1. Section Toggles & Visibility" },
-              { id: "hero", label: "2. Hero Copy & Primary Buttons" },
+              { id: "sections", label: "1. Section Toggles" },
+              { id: "hero", label: "2. Hero Copy & CTAs" },
               { id: "scenes", label: "3. Story Scenes (01 - 07)" },
-              { id: "about_solutions", label: "4. About & Solutions Cards" },
+              { id: "about_solutions", label: "4. About & Solutions" },
               { id: "contact", label: "5. Contact Info & Socials" },
+              { id: "nav_brand", label: "6. Navbar Links & Brand" },
+              { id: "vision_words", label: "7. Vision Kinetic Words" },
+              { id: "announcement", label: "8. Announcement Banner" },
             ].map((st) => (
               <button
                 key={st.id}
                 type="button"
                 onClick={() => setSubWebTab(st.id as any)}
-                className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-md transition-all cursor-pointer whitespace-nowrap ${
                   subWebTab === st.id
                     ? "bg-surface-2 text-cyan-600 dark:text-cyan-400 font-bold"
                     : "text-text-muted hover:text-text"
@@ -1729,6 +1885,19 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Subtab: Navbar, Vision Words, Announcement Banner */}
+          {(subWebTab === "nav_brand" || subWebTab === "vision_words" || subWebTab === "announcement") && (
+            <WebsiteCmsExtra
+              config={websiteConfig}
+              onChange={setWebsiteConfig}
+              onSave={async () => {
+                await saveSection("website", websiteConfig, `Saved website ${subWebTab} settings`);
+              }}
+              saving={saving}
+              subTab={subWebTab}
+            />
           )}
         </div>
       )}

@@ -31,7 +31,18 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const [selectedIndustry, setSelectedIndustry] = useState<TenantContext["industry"]>("saas");
   const [selectedModel, setSelectedModel] = useState<TenantContext["businessModel"]>("subscription");
-  const [companyName, setCompanyName] = useState("Apex Analytics");
+  const [companyName, setCompanyName] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const p = localStorage.getItem("nuralix_business_profile");
+        if (p) {
+          const parsed = JSON.parse(p);
+          if (parsed.name) return parsed.name;
+        }
+      } catch {}
+    }
+    return "Nuralix Enterprise";
+  });
   const [selectedTimeframe, setSelectedTimeframe] = useState("Live Today");
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [liquidRunwayMo, setLiquidRunwayMo] = useState("8.0");

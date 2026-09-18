@@ -74,7 +74,7 @@ export default function App () {
         <span>Skip to content</span>
       </a>
 
-      <Nav menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+      <Nav menuOpen={menuOpen} setMenuOpen={setMenuOpen} data={config.nav} />
 
       <main>
         {sec.hero?.enabled !== false && <Hero ready={ready} data={config.hero} />}
@@ -87,7 +87,7 @@ export default function App () {
         {sec.solutions?.enabled !== false && <Solutions data={config.solutions} />}
         {sec.stats?.enabled !== false && <Stats data={config.stats} />}
         {sec.sceneHuman?.enabled !== false && <SceneHuman data={config.scenes?.s06} />}
-        {sec.vision?.enabled !== false && <Vision />}
+        {sec.vision?.enabled !== false && <Vision data={config.vision} />}
         {sec.sceneFuture?.enabled !== false && <SceneFuture data={config.scenes?.s07} />}
         {sec.contact?.enabled !== false && <Contact data={config.contact} />}
         {sec.footer?.enabled !== false && <Footer data={config.footer} />}

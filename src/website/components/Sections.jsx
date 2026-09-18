@@ -209,8 +209,10 @@ export const SceneFuture = ({ data }) => {
 
 /* ------------------------------------------------------------------ about */
 const DEFAULT_APPROACH = [
-  ['Understand the problem', '01'], ['Model the intelligence', '02'],
-  ['Engineer the system', '03'], ['Scale what works', '04']
+  { label: 'Understand the problem', num: '01' },
+  { label: 'Model the intelligence', num: '02' },
+  { label: 'Engineer the system', num: '03' },
+  { label: 'Scale what works', num: '04' }
 ];
 
 export const About = ({ data }) => {
@@ -218,6 +220,10 @@ export const About = ({ data }) => {
   const headline = data?.headline || 'We build intelligence that moves the world forward.';
   const p1 = data?.p1 || 'Nuralix uses artificial intelligence to automate tasks, analyse data, and help businesses make smarter, faster decisions for growth.';
   const p2 = data?.p2 || 'We work at the point where information becomes understanding — designing systems that read complexity, find the signal inside it, and turn that signal into a decision a business can act on today.';
+  const rawApproach = data?.approach || DEFAULT_APPROACH;
+  const approach = rawApproach.map((item, idx) =>
+    Array.isArray(item) ? { label: item[0], num: item[1] } : { label: item.label, num: item.num || `0${idx+1}` }
+  );
 
   return (
     <section id="about" aria-labelledby="about-h">
@@ -235,8 +241,8 @@ export const About = ({ data }) => {
               Our approach
             </p>
             <div className="clist" style={{ marginTop: 20 }}>
-              {DEFAULT_APPROACH.map(([label, n]) => (
-                <div className="crow" key={n}><span className="crow__v">{label}</span><span className="crow__k">{n}</span></div>
+              {approach.map(({ label, num }) => (
+                <div className="crow" key={num}><span className="crow__v">{label}</span><span className="crow__k">{num}</span></div>
               ))}
             </div>
           </div>
@@ -354,20 +360,25 @@ export const Stats = ({ data }) => {
 };
 
 /* ----------------------------------------------------------------- vision */
-const WORDS = ['Understand.', 'Predict.', 'Adapt.', 'Create.', 'Evolve.', 'Nuralix.'];
+const DEFAULT_VISION_WORDS = ['Understand.', 'Predict.', 'Adapt.', 'Create.', 'Evolve.', 'Nuralix.'];
 
-export const Vision = () => (
-  <section id="vision" aria-labelledby="vision-h">
-    <div className="pin">
-      <div className="wrap" style={{ position: 'relative', height: '100%' }}>
-        <p className="vision__label" id="vision-h">The next interface is intelligence</p>
-        {WORDS.map((w, i) => (
-          <div className={'vision__word' + (i === WORDS.length - 1 ? ' is-final' : '')} key={w} data-word>{w}</div>
-        ))}
+export const Vision = ({ data }) => {
+  const words = data?.words || DEFAULT_VISION_WORDS;
+  const label = data?.label || 'The next interface is intelligence';
+
+  return (
+    <section id="vision" aria-labelledby="vision-h">
+      <div className="pin">
+        <div className="wrap" style={{ position: 'relative', height: '100%' }}>
+          <p className="vision__label" id="vision-h">{label}</p>
+          {words.map((w, i) => (
+            <div className={'vision__word' + (i === words.length - 1 ? ' is-final' : '')} key={w} data-word>{w}</div>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ---------------------------------------------------------------- contact */
 export function Contact({ data }) {

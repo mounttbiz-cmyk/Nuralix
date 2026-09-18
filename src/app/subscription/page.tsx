@@ -78,7 +78,7 @@ export default function SubscriptionPage() {
     }, 600);
   };
 
-  const plans: PlanTier[] = [
+  const [plans, setPlans] = useState<PlanTier[]>([
     {
       id: "free",
       name: "Nuralix Free / Demo",
@@ -97,74 +97,81 @@ export default function SubscriptionPage() {
         "Task Manager",
         "Free AI questions",
       ],
-      ctaLabel: currentPlan === "free" ? "Continue to Dashboard →" : "Start Free & Open Dashboard",
-      isCurrent: currentPlan === "free",
+      ctaLabel: "Start Free & Open Dashboard",
     },
     {
       id: "starter",
-      name: "Nuralix Starter",
-      tagline: "For small businesses & growing founders.",
-      price: "₹1,999",
+      name: "Starter Business OS",
+      tagline: "For solo founders and early teams (1-5 people).",
+      price: "₹3,999",
       period: "/month",
-      color: "border-blue-400/30 text-blue-400",
-      badge: "Small Business",
-      features: [
-        "Everything in Free, plus:",
-        "4 AI Assistants (CEO, CFO, Sales & Marketing)",
-        "Core Calculators (Break-Even, Cash Flow, CAC, LTV)",
-        "Unlimited Document & SOP Storage",
-        "Automated Daily Executive Briefings",
-        "3 Active Automated Workflows",
-        "Connect with Google Workspace & Slack",
-        "Assign tasks to team members",
-      ],
-      ctaLabel: currentPlan === "starter" ? "Continue to Dashboard →" : "Upgrade to Starter",
-      isCurrent: currentPlan === "starter",
-    },
-    {
-      id: "pro",
-      name: "Nuralix Professional",
-      tagline: "The complete AI executive team for scaling companies.",
-      price: "₹5,999",
-      period: "/month",
-      color: "border-purple-400/40 text-purple-400",
+      color: "border-cyan-400/30 text-cyan-400",
       badge: "Most Popular",
       isPopular: true,
       features: [
-        "Everything in Starter, plus:",
-        "All 7 AI Executives (CEO, CFO, Marketing, Sales, HR, Ops, Strategy)",
-        "All 25 Business Tools & Calculators",
-        "Decision Simulator (Test hiring, pricing & scale)",
-        "Revenue & Cash Forecasting",
-        "Visual Drag-and-Drop Workflow Builder",
-        "Connect with Stripe, QuickBooks, WhatsApp & Zoom",
-        "Multi-User Team Access & Permissions",
+        "All Free tier features",
+        "All 3 AI Executives (CEO, CFO, CMO)",
+        "Automated Daily 8:00 AM WhatsApp Briefings",
+        "Connect 3 Business Tools (Stripe, Slack, Zoho)",
+        "Cash Runway & Burn Alarm System",
+        "Unlimited AI Strategy Consultations",
+        "3 Team Member Seats",
+        "Email & WhatsApp Support",
       ],
-      ctaLabel: currentPlan === "pro" ? "Continue to Dashboard →" : "Upgrade to Professional",
-      isCurrent: currentPlan === "pro",
+      ctaLabel: "Activate Starter Plan",
+    },
+    {
+      id: "growth",
+      name: "Growth Scale",
+      tagline: "For expanding businesses ready to scale (5-30 people).",
+      price: "₹9,999",
+      period: "/month",
+      color: "border-violet-400/30 text-violet-400",
+      badge: "Recommended",
+      features: [
+        "All Starter tier features",
+        "Scenario Planner & Simulator",
+        "Executive Playbooks & Growth Vectors",
+        "Connect Unlimited Tools & Bank Accounts",
+        "Weekly AI Strategic Audits",
+        "Custom KPI Dashboards & Role-based Access",
+        "10 Team Member Seats",
+        "Dedicated Account Manager",
+      ],
+      ctaLabel: "Activate Growth Scale",
     },
     {
       id: "enterprise",
-      name: "Nuralix Business / Enterprise",
-      tagline: "For larger teams needing custom tools, security & integrations.",
-      price: "₹19,999",
-      period: "/month",
-      color: "border-amber-400/40 text-amber-400",
+      name: "Enterprise Custom",
+      tagline: "For mid-market companies & conglomerates (30+ people).",
+      price: "Custom",
+      period: "/billed annually",
+      color: "border-amber-400/30 text-amber-400",
       badge: "Enterprise",
       features: [
-        "Everything in Professional, plus:",
-        "Unlimited AI questions & analysis",
-        "Complete Virtual Business Simulation",
-        "Advanced Custom Automations & Workflows",
-        "Connect with HubSpot, Salesforce & Databases",
-        "Full API Access & Custom Webhooks",
-        "Single Sign-On (Google, Okta, Microsoft)",
-        "Activity & Security Audit Logs",
+        "All Growth Scale features",
+        "Self-hosted / Dedicated Cloud Deployment",
+        "Custom AI Executive Models trained on your data",
+        "Custom ERP & Legacy Integrations",
+        "Enterprise SLA (99.9% uptime)",
+        "Unlimited Seats & Departments",
+        "SOC 2 Type II & ISO 27001 Compliance",
+        "24/7 Executive Hotline",
       ],
-      ctaLabel: currentPlan === "enterprise" ? "Continue to Dashboard →" : "Upgrade to Enterprise",
-      isCurrent: currentPlan === "enterprise",
+      ctaLabel: "Contact Enterprise Sales",
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    fetch("/api/public/config", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && Array.isArray(d.plans) && d.plans.length > 0) {
+          setPlans(d.plans.filter((p: any) => p.enabled !== false));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-bg text-text p-4 sm:p-6 lg:p-8 flex flex-col justify-between">
