@@ -2,14 +2,14 @@
 
 import { useEffect } from "react";
 
-export const BUSINESS_DATA_UPDATED_EVENT = "nuralix_business_data_updated";
+export const BUSINESS_DATA_UPDATED_EVENT = "bizzpal_business_data_updated";
 
 export function emitBusinessDataUpdated(metrics: any) {
   if (typeof window === "undefined") return;
 
   // 1. Sync to local storage business profile
   try {
-    const existingStr = localStorage.getItem("nuralix_business_profile");
+    const existingStr = localStorage.getItem("bizzpal_business_profile");
     const existing = existingStr ? JSON.parse(existingStr) : {};
 
     const updatedProfile = {
@@ -32,7 +32,7 @@ export function emitBusinessDataUpdated(metrics: any) {
       sourceFileName: metrics.sourceFileName || "uploaded_data.csv",
     };
 
-    localStorage.setItem("nuralix_business_profile", JSON.stringify(updatedProfile));
+    localStorage.setItem("bizzpal_business_profile", JSON.stringify(updatedProfile));
   } catch (e) {
     console.error("Failed to update localStorage business profile:", e);
   }
@@ -56,7 +56,7 @@ export function useBusinessDataSync(onUpdate: (metrics: any) => void) {
     };
 
     const storageHandler = (e: StorageEvent) => {
-      if (e.key === "nuralix_business_profile" && e.newValue) {
+      if (e.key === "bizzpal_business_profile" && e.newValue) {
         try {
           onUpdate(JSON.parse(e.newValue));
         } catch {}

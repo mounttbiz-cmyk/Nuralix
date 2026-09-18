@@ -1,7 +1,7 @@
 "use client";
 
 /* ============================================================================
-   NURALIX — INTELLIGENCE IN MOTION
+   BIZZPAL — INTELLIGENCE IN MOTION
    Dynamic Website connected to Super Admin Control Plane
    ========================================================================== */
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
@@ -11,7 +11,7 @@ import { Preloader, Cursor, Nav, Progress, Atmosphere } from './components/Chrom
 import { useWebsiteConfig } from './hooks/useWebsiteConfig';
 import {
   AnnouncementBanner,
-  Hero, SceneAwakening, SceneConnection, SceneIntelligence, SceneNuralix,
+  Hero, SceneAwakening, SceneConnection, SceneIntelligence, SceneBizzPal,
   About, SceneExpansion, Solutions, Stats, SceneHuman, Vision, SceneFuture,
   Contact, Footer
 } from './components/Sections';
@@ -81,7 +81,7 @@ export default function App () {
         {sec.sceneAwakening?.enabled !== false && <SceneAwakening data={config.scenes?.s01} />}
         {sec.sceneConnection?.enabled !== false && <SceneConnection data={config.scenes?.s02} />}
         {sec.sceneIntelligence?.enabled !== false && <SceneIntelligence data={config.scenes?.s03} />}
-        {sec.sceneNuralix?.enabled !== false && <SceneNuralix data={config.scenes?.s04} />}
+        {sec.sceneBizzPal?.enabled !== false && <SceneBizzPal data={config.scenes?.s04} />}
         {sec.about?.enabled !== false && <About data={config.about} />}
         {sec.sceneExpansion?.enabled !== false && <SceneExpansion data={config.scenes?.s05} />}
         {sec.solutions?.enabled !== false && <Solutions data={config.solutions} />}

@@ -18,7 +18,7 @@ export function ProvenanceBadge({ type, citation }: ProvenanceBadgeProps) {
       className: "bg-brass-soft/50 text-brass border-brass/30",
     },
     estimate: {
-      label: "Nuralix Estimate",
+      label: "BizzPal Estimate",
       className: "bg-amber/10 text-amber border-amber/30",
     },
     user: {

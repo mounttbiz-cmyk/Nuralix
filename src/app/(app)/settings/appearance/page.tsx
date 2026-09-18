@@ -14,7 +14,7 @@ export default function AppearancePage() {
       <div className="space-y-2 pb-4 border-b border-line">
         <h1 className="text-lg font-bold text-text">Platform Settings</h1>
         <p className="text-xs text-text-muted font-medium">
-          Customize the visual interface, color palette, dark mode behaviors, and font scaling of the Nuralix console.
+          Customize the visual interface, color palette, dark mode behaviors, and font scaling of the BizzPal console.
         </p>
         <div className="flex flex-wrap items-center gap-2 pt-1">
           <Link
@@ -108,13 +108,13 @@ export default function AppearancePage() {
         </div>
       </div>
 
-      {/* Nuralix Website Link */}
+      {/* BizzPal Website Link */}
       <div className="p-5 rounded-xl border border-line bg-surface shadow-theme space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xs font-bold text-text uppercase tracking-wider flex items-center gap-2">
               <Globe className="w-4 h-4 text-blue-500" />
-              <span>Nuralix Website</span>
+              <span>BizzPal Website</span>
             </h2>
             <p className="text-xs text-text-muted mt-1 leading-relaxed">
               Launch the public 3D interactive intelligence experience, product vision, and platform showcases.

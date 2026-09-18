@@ -157,13 +157,13 @@ export default function AutomationsPage() {
 
   useEffect(() => {
     try {
-      const savedProfile = localStorage.getItem("nuralix_business_profile");
+      const savedProfile = localStorage.getItem("bizzpal_business_profile");
       if (savedProfile) {
         const parsed = JSON.parse(savedProfile);
         if (parsed.name) setCompanyName(parsed.name);
       }
 
-      const savedAutomations = localStorage.getItem("nuralix_automations");
+      const savedAutomations = localStorage.getItem("bizzpal_automations");
       if (savedAutomations) {
         const parsed = JSON.parse(savedAutomations);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -186,7 +186,7 @@ export default function AutomationsPage() {
         return a;
       });
       try {
-        localStorage.setItem("nuralix_automations", JSON.stringify(updated));
+        localStorage.setItem("bizzpal_automations", JSON.stringify(updated));
       } catch (e) {
         // ignore
       }
@@ -230,7 +230,7 @@ export default function AutomationsPage() {
     setAutomations(prev => {
       const updated = [newItem, ...prev];
       try {
-        localStorage.setItem("nuralix_automations", JSON.stringify(updated));
+        localStorage.setItem("bizzpal_automations", JSON.stringify(updated));
       } catch (e) {
         // ignore
       }

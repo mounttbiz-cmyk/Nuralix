@@ -75,7 +75,7 @@ export function HealthScoreWidget({
 
   useEffect(() => {
     try {
-      const savedStr = localStorage.getItem("nuralix_business_profile");
+      const savedStr = localStorage.getItem("bizzpal_business_profile");
       if (savedStr) {
         applyProfile(JSON.parse(savedStr));
       } else {

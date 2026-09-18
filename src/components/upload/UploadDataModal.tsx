@@ -68,7 +68,7 @@ export function UploadDataModal({ isOpen, onClose, onSuccess }: UploadDataModalP
   useEffect(() => {
     if (!isOpen) return;
     try {
-      const savedStr = localStorage.getItem("nuralix_business_profile");
+      const savedStr = localStorage.getItem("bizzpal_business_profile");
       if (savedStr) {
         const saved = JSON.parse(savedStr);
         setManualForm({
@@ -362,7 +362,7 @@ export function UploadDataModal({ isOpen, onClose, onSuccess }: UploadDataModalP
                   <button
                     type="button"
                     onClick={() =>
-                      downloadFile(generateSampleBusinessCsv(), "nuralix_business_data_template.csv")
+                      downloadFile(generateSampleBusinessCsv(), "bizzpal_business_data_template.csv")
                     }
                     className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-surface border border-line hover:border-cyan-500 text-text transition-all flex items-center gap-1 cursor-pointer"
                   >
@@ -375,7 +375,7 @@ export function UploadDataModal({ isOpen, onClose, onSuccess }: UploadDataModalP
                     onClick={() =>
                       downloadFile(
                         generateSampleMonthlyFinancialsCsv(),
-                        "nuralix_monthly_financials_template.csv"
+                        "bizzpal_monthly_financials_template.csv"
                       )
                     }
                     className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-surface border border-line hover:border-cyan-500 text-text transition-all flex items-center gap-1 cursor-pointer"

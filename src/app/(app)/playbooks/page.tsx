@@ -409,7 +409,7 @@ export default function ExecutivePlaybooksPage() {
 
   useEffect(() => {
     try {
-      const savedProfile = localStorage.getItem("nuralix_business_profile");
+      const savedProfile = localStorage.getItem("bizzpal_business_profile");
       if (savedProfile) {
         applyBusiness(JSON.parse(savedProfile));
       } else {
@@ -418,13 +418,13 @@ export default function ExecutivePlaybooksPage() {
           .then(d => {
             if (d.success && d.business) {
               applyBusiness(d.business);
-              localStorage.setItem("nuralix_business_profile", JSON.stringify(d.business));
+              localStorage.setItem("bizzpal_business_profile", JSON.stringify(d.business));
             }
           })
           .catch(() => {});
       }
 
-      const savedPlaybooks = localStorage.getItem("nuralix_executive_playbooks");
+      const savedPlaybooks = localStorage.getItem("bizzpal_executive_playbooks");
       if (savedPlaybooks) {
         const parsed = JSON.parse(savedPlaybooks);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -472,7 +472,7 @@ export default function ExecutivePlaybooksPage() {
     const updated = [newPb, ...playbooks];
     setPlaybooks(updated);
     try {
-      localStorage.setItem("nuralix_executive_playbooks", JSON.stringify(updated));
+      localStorage.setItem("bizzpal_executive_playbooks", JSON.stringify(updated));
     } catch {}
 
     setIsCreateOpen(false);
@@ -489,7 +489,7 @@ export default function ExecutivePlaybooksPage() {
     const updated = playbooks.filter(p => p.id !== id);
     setPlaybooks(updated);
     try {
-      localStorage.setItem("nuralix_executive_playbooks", JSON.stringify(updated));
+      localStorage.setItem("bizzpal_executive_playbooks", JSON.stringify(updated));
     } catch {}
     setToastMessage(`Playbook '${title}' removed.`);
     setTimeout(() => setToastMessage(null), 3000);

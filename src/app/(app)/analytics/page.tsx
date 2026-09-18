@@ -89,7 +89,7 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     try {
-      const savedProfileStr = localStorage.getItem("nuralix_business_profile");
+      const savedProfileStr = localStorage.getItem("bizzpal_business_profile");
       if (savedProfileStr) {
         applyProfile(JSON.parse(savedProfileStr));
       } else {
@@ -150,7 +150,7 @@ export default function AnalyticsPage() {
     try {
       // Build real CSV content
       const rows = [
-        ["Nuralix Enterprise Analytics Report"],
+        ["BizzPal Enterprise Analytics Report"],
         ["Company", companyName],
         ["Sector", industryName],
         ["Generated", new Date().toLocaleString()],
@@ -173,7 +173,7 @@ export default function AnalyticsPage() {
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `nuralix_${companyName.toLowerCase().replace(/\s+/g, "_")}_analytics.csv`);
+      link.setAttribute("download", `bizzpal_${companyName.toLowerCase().replace(/\s+/g, "_")}_analytics.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

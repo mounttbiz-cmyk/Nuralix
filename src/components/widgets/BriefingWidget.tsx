@@ -41,7 +41,7 @@ export function BriefingWidget({
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("nuralix_business_profile");
+      const saved = localStorage.getItem("bizzpal_business_profile");
       if (saved) {
         applyProfile(JSON.parse(saved));
       } else {

@@ -66,7 +66,7 @@ export default function BusinessProfileSettingsPage() {
   useEffect(() => {
     try {
       // 1. Session check
-      const sessionStr = localStorage.getItem("nuralix_user_session");
+      const sessionStr = localStorage.getItem("bizzpal_user_session");
       if (sessionStr) {
         const sess = JSON.parse(sessionStr);
         if (sess.email) setEmail(sess.email);
@@ -75,7 +75,7 @@ export default function BusinessProfileSettingsPage() {
       }
 
       // 2. Business profile check
-      const profileStr = localStorage.getItem("nuralix_business_profile");
+      const profileStr = localStorage.getItem("bizzpal_business_profile");
       if (profileStr) {
         const p = JSON.parse(profileStr);
         if (p.name) setBusinessName(p.name);
@@ -120,7 +120,7 @@ export default function BusinessProfileSettingsPage() {
       const numAnnual = numRevenue * 12;
 
       // Existing profile merged
-      const existingStr = localStorage.getItem("nuralix_business_profile");
+      const existingStr = localStorage.getItem("bizzpal_business_profile");
       const existing = existingStr ? JSON.parse(existingStr) : {};
 
       const updatedProfile = {
@@ -140,9 +140,9 @@ export default function BusinessProfileSettingsPage() {
       };
 
       // 1. Update localStorage
-      localStorage.setItem("nuralix_business_profile", JSON.stringify(updatedProfile));
+      localStorage.setItem("bizzpal_business_profile", JSON.stringify(updatedProfile));
       if (email) {
-        localStorage.setItem(`nuralix_user_business_${email.trim().toLowerCase()}`, JSON.stringify(updatedProfile));
+        localStorage.setItem(`bizzpal_user_business_${email.trim().toLowerCase()}`, JSON.stringify(updatedProfile));
       }
 
       // 2. Persist to SQLite intake endpoint
@@ -187,7 +187,7 @@ export default function BusinessProfileSettingsPage() {
         })
       );
       window.dispatchEvent(
-        new CustomEvent("nuralix_profile_updated", {
+        new CustomEvent("bizzpal_profile_updated", {
           detail: updatedProfile,
         })
       );
@@ -203,12 +203,12 @@ export default function BusinessProfileSettingsPage() {
 
   // Handle Logout
   const handleLogout = async () => {
-    if (!confirm("Are you sure you want to log out of Nuralix Business OS?")) return;
+    if (!confirm("Are you sure you want to log out of BizzPal Business OS?")) return;
     setIsLoggingOut(true);
     try {
       await logout();
     } catch (e) {}
-    localStorage.removeItem("nuralix_user_session");
+    localStorage.removeItem("bizzpal_user_session");
     router.push("/login?signin=true");
   };
 
@@ -246,10 +246,10 @@ export default function BusinessProfileSettingsPage() {
       }
 
       // 3. Clear local storage
-      localStorage.removeItem("nuralix_user_session");
-      localStorage.removeItem("nuralix_business_profile");
+      localStorage.removeItem("bizzpal_user_session");
+      localStorage.removeItem("bizzpal_business_profile");
       if (cleanEmail) {
-        localStorage.removeItem(`nuralix_user_business_${cleanEmail}`);
+        localStorage.removeItem(`bizzpal_user_business_${cleanEmail}`);
       }
 
       // 4. Redirect to login

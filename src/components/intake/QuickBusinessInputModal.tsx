@@ -159,7 +159,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
       };
 
       // 1. Fetch existing profile
-      const savedProfileStr = localStorage.getItem("nuralix_business_profile");
+      const savedProfileStr = localStorage.getItem("bizzpal_business_profile");
       const existing = savedProfileStr ? JSON.parse(savedProfileStr) : {};
 
       // 2. Compute updated metrics
@@ -204,7 +204,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
       };
 
       // 3. Save to localStorage
-      localStorage.setItem("nuralix_business_profile", JSON.stringify(updatedProfile));
+      localStorage.setItem("bizzpal_business_profile", JSON.stringify(updatedProfile));
 
       // 4. Save to persistent SQLite DB via API
       try {
@@ -310,7 +310,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                 </span>
               </div>
               <p className="text-xs text-text-muted mt-0.5">
-                Record operational updates naturally. Nuralix extracts metrics and synchronizes your business ledger.
+                Record operational updates naturally. BizzPal extracts metrics and synchronizes your business ledger.
               </p>
             </div>
           </div>
@@ -624,7 +624,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
           {activeTab === "integrations" && (
             <div className="space-y-3">
               <p className="text-xs text-text-muted">
-                When integrations are active, Nuralix pulls data automatically so you don’t need to enter numbers manually.
+                When integrations are active, BizzPal pulls data automatically so you don’t need to enter numbers manually.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">

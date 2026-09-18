@@ -809,12 +809,12 @@ export default function OnboardingPage() {
       const isNewSignup = params.get("mode") === "new_signup" || params.get("signup") === "true";
       if (isNewSignup) {
         // User explicitly signed up as a new user: clear previous cached business profile and run onboarding!
-        localStorage.removeItem("nuralix_business_profile");
+        localStorage.removeItem("bizzpal_business_profile");
         return;
       }
 
       // Check current user's session
-      const rawSession = localStorage.getItem("nuralix_user_session");
+      const rawSession = localStorage.getItem("bizzpal_user_session");
       let currentUserEmail = "";
       if (rawSession) {
         const sess = JSON.parse(rawSession);
@@ -823,7 +823,7 @@ export default function OnboardingPage() {
 
       // Only skip onboarding if this SPECIFIC user already has their business profile completed
       if (currentUserEmail) {
-        const userSpecificProfile = localStorage.getItem(`nuralix_user_business_${currentUserEmail}`);
+        const userSpecificProfile = localStorage.getItem(`bizzpal_user_business_${currentUserEmail}`);
         if (userSpecificProfile) {
           const p = JSON.parse(userSpecificProfile);
           if (p.completedAt || (p.name && p.revenue !== undefined)) {
@@ -833,7 +833,7 @@ export default function OnboardingPage() {
         }
       }
 
-      const existingProfileStr = localStorage.getItem("nuralix_business_profile");
+      const existingProfileStr = localStorage.getItem("bizzpal_business_profile");
       if (existingProfileStr) {
         const p = JSON.parse(existingProfileStr);
         // If current session exists and emails match, skip onboarding
@@ -857,7 +857,7 @@ export default function OnboardingPage() {
 
   React.useEffect(() => {
     try {
-      const rawSession = localStorage.getItem("nuralix_user_session");
+      const rawSession = localStorage.getItem("bizzpal_user_session");
       if (rawSession) {
         const sess = JSON.parse(rawSession);
         if (sess.email) setCurrentUserEmail(sess.email);
@@ -1393,16 +1393,16 @@ export default function OnboardingPage() {
           extractedWebsiteData: website.trim() ? extractedData : null,
           completedAt: new Date().toISOString(),
         };
-        localStorage.setItem("nuralix_business_profile", JSON.stringify(profile));
+        localStorage.setItem("bizzpal_business_profile", JSON.stringify(profile));
 
         // Save to user-specific account cache and server-side SQLite ledger
         try {
-          const sessionStr = localStorage.getItem("nuralix_user_session");
+          const sessionStr = localStorage.getItem("bizzpal_user_session");
           if (sessionStr) {
             const sess = JSON.parse(sessionStr);
             if (sess.email) {
               const uEmail = sess.email.trim().toLowerCase();
-              localStorage.setItem(`nuralix_user_business_${uEmail}`, JSON.stringify(profile));
+              localStorage.setItem(`bizzpal_user_business_${uEmail}`, JSON.stringify(profile));
               fetch("/api/auth/account-status", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1442,7 +1442,7 @@ export default function OnboardingPage() {
 
         // Guarantee user session is active
         try {
-          const existingSession = localStorage.getItem("nuralix_user_session");
+          const existingSession = localStorage.getItem("bizzpal_user_session");
           if (!existingSession) {
             const userSession = {
               id: `usr_${Date.now()}`,
@@ -1452,7 +1452,7 @@ export default function OnboardingPage() {
               provider: "email",
               authenticatedAt: new Date().toISOString(),
             };
-            localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+            localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
           }
         } catch (e) {
           // ignore
@@ -1503,14 +1503,14 @@ export default function OnboardingPage() {
           <div className="w-9 h-9 rounded-xl bg-surface border border-line flex items-center justify-center p-1 shadow-sm">
             <Image
               src="/logo.png"
-              alt="Nuralix Logo"
+              alt="BizzPal Logo"
               width={28}
               height={28}
               className="object-contain"
             />
           </div>
           <div>
-            <span className="font-extrabold text-sm tracking-tight text-text font-sans">Nuralix</span>
+            <span className="font-extrabold text-sm tracking-tight text-text font-sans">BizzPal</span>
             <span className="text-[10px] ml-2 px-1.5 py-0.2 rounded bg-brass-soft text-brass font-bold uppercase">
               Business Intake
             </span>
@@ -1558,7 +1558,7 @@ export default function OnboardingPage() {
                     Select your business industry & category
                   </h1>
                   <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                    Nuralix adapts to your established company operations. You can select one sector or multiple sectors that describe your business to derive tailored benchmark models, executive metrics, and specialist AI agents.
+                    BizzPal adapts to your established company operations. You can select one sector or multiple sectors that describe your business to derive tailored benchmark models, executive metrics, and specialist AI agents.
                   </p>
                 </div>
 
@@ -1836,7 +1836,7 @@ export default function OnboardingPage() {
                       />
                       <label htmlFor="auto-extract-toggle" className="text-[11px] text-text leading-relaxed cursor-pointer select-none">
                         <span className="font-bold text-brass block">Automated Business Intelligence Extraction</span>
-                        <span>If provided, Nuralix AI will crawl your website to automatically extract positioning, products, customer segments, and market telemetry in the next step.</span>
+                        <span>If provided, BizzPal AI will crawl your website to automatically extract positioning, products, customer segments, and market telemetry in the next step.</span>
                       </label>
                     </div>
                   </div>
@@ -1878,7 +1878,7 @@ export default function OnboardingPage() {
                     Extracted Business Intelligence
                   </h1>
                   <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                    Nuralix AI has crawled <span className="font-mono text-text font-semibold">{website}</span> to automatically extract and structure your company positioning, offerings, and commercial model.
+                    BizzPal AI has crawled <span className="font-mono text-text font-semibold">{website}</span> to automatically extract and structure your company positioning, offerings, and commercial model.
                   </p>
                 </div>
 
@@ -2164,7 +2164,7 @@ export default function OnboardingPage() {
                 <div className="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-text space-y-1">
                   <div className="font-bold text-cyan-400 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>How Nuralix Collects Your Daily Data</span>
+                    <span>How BizzPal Collects Your Daily Data</span>
                   </div>
                   <p className="text-[11px] text-text-muted leading-relaxed">
                     Selected tools sync your data automatically. For anything not connected, we&apos;ll ask you for a quick daily update instead — no manual dashboard work required.
@@ -2181,7 +2181,7 @@ export default function OnboardingPage() {
                       <div>
                         <h2 className="text-xs font-bold text-text">WhatsApp Daily Executive Check-In Bot</h2>
                         <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
-                          Receive a 60-second morning message. Reply with 1 line or a voice note and Nuralix updates your dashboard and executive briefings automatically.
+                          Receive a 60-second morning message. Reply with 1 line or a voice note and BizzPal updates your dashboard and executive briefings automatically.
                         </p>
                       </div>
                     </div>
@@ -2257,7 +2257,7 @@ export default function OnboardingPage() {
                     Sign in & authorize your connected tools
                   </h1>
                   <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                    Authenticate your selected platforms so Nuralix can ingest live daily metrics, calibrate executive briefings, and eliminate manual reporting.
+                    Authenticate your selected platforms so BizzPal can ingest live daily metrics, calibrate executive briefings, and eliminate manual reporting.
                   </p>
                 </div>
 
@@ -2533,7 +2533,7 @@ export default function OnboardingPage() {
             <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-line flex items-center justify-center mx-auto p-2.5 shadow-md">
               <Image
                 src="/logo.png"
-                alt="Nuralix Logo"
+                alt="BizzPal Logo"
                 width={48}
                 height={48}
                 className="object-contain animate-pulse"
@@ -2564,7 +2564,7 @@ export default function OnboardingPage() {
 
       {/* Footer */}
       <div className="text-center text-[11px] text-text-muted">
-        Nuralix OS v3 · Enterprise Setup Wizard
+        BizzPal OS v3 · Enterprise Setup Wizard
       </div>
 
       {/* Real Tool Authorization & Credential Modal */}

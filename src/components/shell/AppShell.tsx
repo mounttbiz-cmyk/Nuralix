@@ -102,7 +102,7 @@ export function AppShell({
   React.useEffect(() => {
     const syncProfile = () => {
       try {
-        const savedProfileStr = localStorage.getItem("nuralix_business_profile");
+        const savedProfileStr = localStorage.getItem("bizzpal_business_profile");
         if (savedProfileStr) {
           const saved = JSON.parse(savedProfileStr);
           if (saved.name) setCompanyName(saved.name);
@@ -121,7 +121,7 @@ export function AppShell({
                   setIndustry(d.business.industry_label || d.business.industryLabel);
                 }
                 try {
-                  localStorage.setItem("nuralix_business_profile", JSON.stringify(d.business));
+                  localStorage.setItem("bizzpal_business_profile", JSON.stringify(d.business));
                 } catch {}
               }
             })
@@ -133,10 +133,10 @@ export function AppShell({
     };
 
     syncProfile();
-    window.addEventListener("nuralix_profile_updated", syncProfile);
+    window.addEventListener("bizzpal_profile_updated", syncProfile);
     window.addEventListener("storage", syncProfile);
     return () => {
-      window.removeEventListener("nuralix_profile_updated", syncProfile);
+      window.removeEventListener("bizzpal_profile_updated", syncProfile);
       window.removeEventListener("storage", syncProfile);
     };
   }, []);

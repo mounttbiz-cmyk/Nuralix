@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       "claude-3-5": "Anthropic Claude 3.5 Sonnet",
     };
 
-    const modelDisplayName = modelNameMap[resolvedModelKey] || "Nuralix Intelligence Engine";
+    const modelDisplayName = modelNameMap[resolvedModelKey] || "BizzPal Intelligence Engine";
 
     // 2. Executive Agent Personas
     const agentRoles: Record<string, { title: string; focus: string; tone: string }> = {
@@ -90,7 +90,7 @@ Company Context:
 - Team Size: ${teamSize} FTEs
 `;
 
-    const systemPrompt = `You are ${activeRole.title} powered by ${modelDisplayName} in the Nuralix Enterprise Business OS.
+    const systemPrompt = `You are ${activeRole.title} powered by ${modelDisplayName} in the BizzPal Enterprise Business OS.
 Your Focus: ${activeRole.focus}
 Your Tone: ${activeRole.tone}
 

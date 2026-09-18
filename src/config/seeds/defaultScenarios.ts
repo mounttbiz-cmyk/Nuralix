@@ -16,7 +16,7 @@ export const defaultScenarioTemplates: ScenarioTemplate[] = [
     ],
     defaultAssumptions: [
       { key: "rampEfficiency", label: "Ramp curve efficiency", low: 0.6, likely: 0.85, high: 1.1, unit: "ratio", source: "benchmark" },
-      { key: "recruitingCost", label: "One-off recruiting & placement cost", low: 8000, likely: 15000, high: 25000, unit: "$", source: "nuralix_estimate" },
+      { key: "recruitingCost", label: "One-off recruiting & placement cost", low: 8000, likely: 15000, high: 25000, unit: "$", source: "bizzpal_estimate" },
     ],
     outputs: [
       { key: "monthlyLoadedCost", label: "Monthly Fully Loaded Cost", format: "currency" },
@@ -40,7 +40,7 @@ export const defaultScenarioTemplates: ScenarioTemplate[] = [
     ],
     defaultAssumptions: [
       { key: "churnSensitivity", label: "Churn sensitivity (% lost on price hike)", low: 0.04, likely: 0.08, high: 0.16, unit: "%", source: "benchmark" },
-      { key: "newConversionImpact", label: "New inbound conversion impact", low: -0.15, likely: -0.05, high: 0.02, unit: "%", source: "nuralix_estimate" },
+      { key: "newConversionImpact", label: "New inbound conversion impact", low: -0.15, likely: -0.05, high: 0.02, unit: "%", source: "bizzpal_estimate" },
     ],
     outputs: [
       { key: "netMonthlyRevenueDelta", label: "Monthly Revenue Delta", format: "currency" },

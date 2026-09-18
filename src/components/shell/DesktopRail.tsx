@@ -53,7 +53,7 @@ export function DesktopRail({
     } catch (e) {
       // ignore
     }
-    localStorage.removeItem("nuralix_user_session");
+    localStorage.removeItem("bizzpal_user_session");
     window.location.href = WEBSITE_URL;
   };
 
@@ -73,7 +73,7 @@ export function DesktopRail({
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-transparent border border-cyan-500/30 flex items-center justify-center p-1.5 shadow-lg shadow-cyan-500/10 group-hover:scale-105 group-hover:border-cyan-500/50 transition-all">
             <Image
               src="/logo.png"
-              alt="Nuralix Logo"
+              alt="BizzPal Logo"
               width={26}
               height={26}
               className="object-contain drop-shadow"
@@ -83,7 +83,7 @@ export function DesktopRail({
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white font-sans">
-                Nuralix
+                BizzPal
               </span>
               <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-semibold font-mono">
                 AI OS

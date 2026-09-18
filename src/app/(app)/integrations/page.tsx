@@ -70,7 +70,7 @@ const CATALOG_DEFINITIONS: Omit<IntegrationItem, "status">[] = [
     name: "Slack",
     category: "business",
     tagline: "Real-time executive briefing alerts, solvency alarms, and approval bots.",
-    services: ["Bot Notifications", "Slash Commands (/nuralix)", "Interactive Approvals"],
+    services: ["Bot Notifications", "Slash Commands (/bizzpal)", "Interactive Approvals"],
     permissions: ["Post messages to #boardroom", "Listen for executive slash commands"],
     usedBy: ["Astra (CEO AI)", "Marcus (CFO AI)", "Solvency Alarms"],
     configSummary: "Webhook link for executive broadcasts and daily briefing delivery.",
@@ -139,9 +139,9 @@ const CATALOG_DEFINITIONS: Omit<IntegrationItem, "status">[] = [
     id: "zapier",
     name: "Zapier",
     category: "automation",
-    tagline: "Connect Nuralix actions and triggers with 6,000+ business applications.",
+    tagline: "Connect BizzPal actions and triggers with 6,000+ business applications.",
     services: ["Zapier Triggers", "Zapier Actions", "Multi-step Zaps"],
-    permissions: ["Trigger external workflows from Nuralix actions"],
+    permissions: ["Trigger external workflows from BizzPal actions"],
     usedBy: ["Workflows Builder", "Operations AI"],
   },
   {
@@ -235,7 +235,7 @@ export default function IntegrationsPage() {
   const loadIntegrations = async () => {
     try {
       // Hydrate business profile from localStorage
-      const storedProfile = localStorage.getItem("nuralix_business_profile");
+      const storedProfile = localStorage.getItem("bizzpal_business_profile");
       if (storedProfile) {
         try {
           const parsed = JSON.parse(storedProfile);
@@ -244,7 +244,7 @@ export default function IntegrationsPage() {
           if (parsed.accountEmail) setCurrentUserEmail(parsed.accountEmail);
         } catch {}
       }
-      const storedEmail = localStorage.getItem("nuralix_current_user_email");
+      const storedEmail = localStorage.getItem("bizzpal_current_user_email");
       if (storedEmail) {
         setCurrentUserEmail(storedEmail);
       }
@@ -293,7 +293,7 @@ export default function IntegrationsPage() {
   const handleConnectStripe = async (testKeyOverride?: string) => {
     setStripeConnecting(true);
     setStripeSuccessMsg("");
-    const keyToUse = testKeyOverride || stripeApiKey || "sk_test_nuralix_live_auth_token_99";
+    const keyToUse = testKeyOverride || stripeApiKey || "sk_test_bizzpal_live_auth_token_99";
 
     try {
       const res = await fetch("/api/integrations", {
@@ -476,7 +476,7 @@ export default function IntegrationsPage() {
             </Link>
           </div>
           <p className="text-text-muted text-[11px]">
-            Connected systems stream metrics automatically. For anything marked <span className="text-text font-semibold">Manual Check-in</span>, Nuralix dynamically prompts you for a quick 60-second update on the dashboard and via WhatsApp without requiring spreadsheet uploads.
+            Connected systems stream metrics automatically. For anything marked <span className="text-text font-semibold">Manual Check-in</span>, BizzPal dynamically prompts you for a quick 60-second update on the dashboard and via WhatsApp without requiring spreadsheet uploads.
           </p>
         </div>
       </div>
@@ -761,7 +761,7 @@ export default function IntegrationsPage() {
               <div className="p-3 rounded-lg bg-surface-2 border border-line text-[11px] text-text-muted flex items-start gap-2">
                 <Shield className="w-3.5 h-3.5 text-brass shrink-0 mt-0.5" />
                 <span>
-                  Telemetry credentials are encrypted at rest in your local workspace database (<code className="font-mono text-text">data/nuralix.db</code>).
+                  Telemetry credentials are encrypted at rest in your local workspace database (<code className="font-mono text-text">data/bizzpal.db</code>).
                 </span>
               </div>
 

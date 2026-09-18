@@ -8,10 +8,10 @@ import { applyFX, resetFX } from '../lib/engine';
 import { DASHBOARD_URL } from '../config';
 
 export const DEFAULT_CONTACT = {
-  email: 'hello@nuralix.in',
-  site: 'nuralix.in',
-  linkedin: 'https://linkedin.com/company/nuralix',
-  twitter: 'https://twitter.com/nuralix'
+  email: 'hello@bizzpal.in',
+  site: 'bizzpal.in',
+  linkedin: 'https://linkedin.com/company/bizzpal',
+  twitter: 'https://twitter.com/bizzpal'
 };
 
 const IS_TOUCH = () => typeof window !== 'undefined' && window.matchMedia('(hover:none), (pointer:coarse)').matches;
@@ -36,16 +36,16 @@ export function AnnouncementBanner({ data }) {
 
 /* ------------------------------------------------------------------- hero */
 export function Hero({ ready, data }) {
-  const word = data?.word || 'NURALIX';
-  const eyebrow = data?.eyebrow || 'Artificial Intelligence · Nuralix.in';
+  const word = data?.word || 'BIZZPAL';
+  const eyebrow = data?.eyebrow || 'Artificial Intelligence · BizzPal.in';
   const subtitle = data?.subtitle || 'Intelligence. Engineered for Tomorrow.';
-  const primaryCtaText = data?.primaryCtaText || 'Explore Nuralix';
+  const primaryCtaText = data?.primaryCtaText || 'Explore BizzPal';
   const primaryCtaHref = data?.primaryCtaHref || '#s01';
   const secondaryCtaText = data?.secondaryCtaText || 'Discover Our Intelligence';
   const secondaryCtaHref = data?.secondaryCtaHref || '#s03';
 
   return (
-    <section id="hero" className="story" aria-label="Nuralix — Intelligence engineered for tomorrow">
+    <section id="hero" className="story" aria-label="BizzPal — Intelligence engineered for tomorrow">
       <div className="pin">
         <div className="wrap hero__inner">
           <p className={'eyebrow rv' + (ready ? ' in' : '')} data-d="1">{eyebrow}</p>
@@ -146,10 +146,10 @@ export const SceneIntelligence = ({ data }) => (
   </section>
 );
 
-export const SceneNuralix = ({ data }) => (
-  <Beat id="s04" height="175svh" label="This is Nuralix" modifier="beat--n">
+export const SceneBizzPal = ({ data }) => (
+  <Beat id="s04" height="175svh" label="This is BizzPal" modifier="beat--n">
     <h2 className="h-xl" style={{ fontWeight: 500 }}>
-      {data?.headline || 'This is Nuralix.'}
+      {data?.headline || 'This is BizzPal.'}
     </h2>
     <p className="lead" style={{ margin: '26px auto 0', textAlign: 'center' }}>
       {data?.lead || 'Building intelligent systems for a rapidly evolving world.'}
@@ -185,7 +185,7 @@ export const SceneHuman = ({ data }) => (
 export const SceneFuture = ({ data }) => {
   const eyebrow = data?.eyebrow || 'Scene 07 — Future';
   const headline = data?.headline || 'The future isn’t coming.\nWe’re engineering it.';
-  const ctaText = data?.ctaText || 'Build the Future with Nuralix';
+  const ctaText = data?.ctaText || 'Build the Future with BizzPal';
   const ctaHref = data?.ctaHref || DASHBOARD_URL;
 
   return (
@@ -216,9 +216,9 @@ const DEFAULT_APPROACH = [
 ];
 
 export const About = ({ data }) => {
-  const eyebrow = data?.eyebrow || 'About Nuralix';
+  const eyebrow = data?.eyebrow || 'About BizzPal';
   const headline = data?.headline || 'We build intelligence that moves the world forward.';
-  const p1 = data?.p1 || 'Nuralix uses artificial intelligence to automate tasks, analyse data, and help businesses make smarter, faster decisions for growth.';
+  const p1 = data?.p1 || 'BizzPal uses artificial intelligence to automate tasks, analyse data, and help businesses make smarter, faster decisions for growth.';
   const p2 = data?.p2 || 'We work at the point where information becomes understanding — designing systems that read complexity, find the signal inside it, and turn that signal into a decision a business can act on today.';
   const rawApproach = data?.approach || DEFAULT_APPROACH;
   const approach = rawApproach.map((item, idx) =>
@@ -360,7 +360,7 @@ export const Stats = ({ data }) => {
 };
 
 /* ----------------------------------------------------------------- vision */
-const DEFAULT_VISION_WORDS = ['Understand.', 'Predict.', 'Adapt.', 'Create.', 'Evolve.', 'Nuralix.'];
+const DEFAULT_VISION_WORDS = ['Understand.', 'Predict.', 'Adapt.', 'Create.', 'Evolve.', 'BizzPal.'];
 
 export const Vision = ({ data }) => {
   const words = data?.words || DEFAULT_VISION_WORDS;
@@ -386,9 +386,9 @@ export function Contact({ data }) {
   const [note, setNote] = useState(data?.note || 'Enter your email to begin your executive onboarding.');
   const [alert, setAlert] = useState(false);
 
-  const eyebrow = data?.eyebrow || 'Start with Nuralix';
+  const eyebrow = data?.eyebrow || 'Start with BizzPal';
   const headline = data?.headline || 'Ready to build\nwhat’s next?';
-  const ctaText = data?.ctaText || 'Start with Nuralix';
+  const ctaText = data?.ctaText || 'Start with BizzPal';
   const ctaHref = data?.ctaHref || DASHBOARD_URL;
   const contactInfo = {
     email: data?.email || DEFAULT_CONTACT.email,
@@ -457,8 +457,8 @@ export function Contact({ data }) {
 }
 
 export const Footer = ({ data }) => {
-  const copyright = data?.copyright || `© ${new Date().getFullYear()} Nuralix`;
-  const tagline = data?.tagline || 'Nuralix — Intelligence in Motion';
+  const copyright = data?.copyright || `© ${new Date().getFullYear()} BizzPal`;
+  const tagline = data?.tagline || 'BizzPal — Intelligence in Motion';
   return (
     <footer>
       <div className="wrap foot">

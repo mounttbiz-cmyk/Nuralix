@@ -2,7 +2,7 @@
 export const themeInitScript = `
 (function() {
   try {
-    var stored = localStorage.getItem('nuralix-theme');
+    var stored = localStorage.getItem('bizzpal-theme');
     var theme = 'dark';
     if (stored === 'light' || stored === 'dark') {
       theme = stored;

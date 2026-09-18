@@ -97,7 +97,7 @@ export const defaultGapRules: GapRule[] = [
     effort: "quick win",
     evidenceTemplate: "Currently tracking {tracked_kpis_count} core operational metrics.",
     solutionPlaybook: {
-      summary: "Instrument primary financial and conversion metrics from the Nuralix metric registry.",
+      summary: "Instrument primary financial and conversion metrics from the BizzPal metric registry.",
       steps: [
         { title: "Connect revenue data or enter monthly baseline", detail: "Add trailing 3-month revenue and expenses to unlock live health score.", ownerRole: "CFO", days: 2 }
       ],

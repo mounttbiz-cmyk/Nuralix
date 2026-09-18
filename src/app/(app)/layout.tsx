@@ -10,7 +10,7 @@ export default function MainAppLayout({
   children: React.ReactNode;
 }) {
   const activeBiz = getActiveBusiness();
-  const companyName = activeBiz?.name || "Nuralix Enterprise";
+  const companyName = activeBiz?.name || "BizzPal Enterprise";
   const industryLabel = activeBiz?.industryLabel || "Technology & Enterprise Services";
 
   const config = resolveTenantConfig({

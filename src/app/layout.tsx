@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/lib/theme/ThemeProvider";
 import { AuthProvider } from "@/lib/firebase/authContext";
 
 export const metadata: Metadata = {
-  title: "Nuralix — AI Business Operating System",
+  title: "BizzPal — AI Business Operating System",
   description: "Autonomous executive intelligence, dynamic dashboard, and decision simulation platform for businesses.",
   icons: {
     icon: "/logo.png",

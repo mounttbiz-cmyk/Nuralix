@@ -102,7 +102,7 @@ function generateSimulation(
         {
           id: "it_opt_b",
           name: "Option B: Fractional IT Architect + Autonomous DevOps (Recommended)",
-          subtitle: `Retain a fractional enterprise IT architect (15 hrs/mo) paired with Nuralix automated infrastructure & security workflows.`,
+          subtitle: `Retain a fractional enterprise IT architect (15 hrs/mo) paired with BizzPal automated infrastructure & security workflows.`,
           hiringCount: 0,
           monthlyCost: 45000,
           projectedRevenueIncrease: 410000,
@@ -127,7 +127,7 @@ function generateSimulation(
       consensusQuote: `"For ${cName}, hiring a single full-time IT guy introduces a single point of failure when they take leave, and creates fixed payroll drag of ₹1,20,000/mo. Option B is our executive consensus: pairing an on-demand fractional IT architect with autonomous monitoring workflows saves ₹75,000/mo in net burn while providing 24/7 uptime coverage at a 380% expected ROI."`,
       executionTasks: [
         {
-          title: `Configure Nuralix Automated DevOps & Security Alerting for ${cName}`,
+          title: `Configure BizzPal Automated DevOps & Security Alerting for ${cName}`,
           owner: "Operations Lead",
           gap: "Operational Continuity",
           priority: "critical",
@@ -178,7 +178,7 @@ function generateSimulation(
         {
           id: "eng_opt_b",
           name: "Option B: Lean AI Workflows + 2 Senior Leads (Recommended)",
-          subtitle: `Automate delivery pipelines with Nuralix Workflows & hire 2 architects.`,
+          subtitle: `Automate delivery pipelines with BizzPal Workflows & hire 2 architects.`,
           hiringCount: 2,
           monthlyCost: 320000,
           projectedRevenueIncrease: 1050000,
@@ -246,7 +246,7 @@ function generateSimulation(
         {
           id: "sales_opt_b",
           name: "Option B: 1 Senior Closer + AI Outbound Ingestion (Recommended)",
-          subtitle: `Hire 1 veteran enterprise sales lead and deploy Nuralix autonomous lead qualification bots.`,
+          subtitle: `Hire 1 veteran enterprise sales lead and deploy BizzPal autonomous lead qualification bots.`,
           hiringCount: 1,
           monthlyCost: 180000,
           projectedRevenueIncrease: 1150000,
@@ -271,7 +271,7 @@ function generateSimulation(
       consensusQuote: `"Hiring 3 full-time reps risks heavy cash drawdown before their 4-month ramp period. Option B (1 senior closer + AI outbound automation) captures 82% of target quota at 60% lower burn, turning cash-flow positive within 60 days."`,
       executionTasks: [
         {
-          title: "Deploy Nuralix Outbound AI Lead Scraper & Qualifier",
+          title: "Deploy BizzPal Outbound AI Lead Scraper & Qualifier",
           owner: "Revenue Ops",
           gap: "Sales Velocity",
           priority: "high",
@@ -383,7 +383,7 @@ function generateSimulation(
         {
           id: "mkt_opt_b",
           name: "Option B: In-House Growth Specialist + AI Performance Loops (Recommended)",
-          subtitle: `Hire 1 internal growth marketer armed with Nuralix automated ad creative & analytics pipelines.`,
+          subtitle: `Hire 1 internal growth marketer armed with BizzPal automated ad creative & analytics pipelines.`,
           hiringCount: 1,
           monthlyCost: 160000,
           projectedRevenueIncrease: 840000,
@@ -415,7 +415,7 @@ function generateSimulation(
           category: "Talent",
         },
         {
-          title: "Integrate Google Ads & Meta conversion tracking with Nuralix telemetry",
+          title: "Integrate Google Ads & Meta conversion tracking with BizzPal telemetry",
           owner: "Operations Lead",
           gap: "Data Integrity",
           priority: "high",
@@ -532,7 +532,7 @@ export default function SimulatorPage() {
   // Load business profile from storage or database
   useEffect(() => {
     try {
-      const savedProfile = localStorage.getItem("nuralix_business_profile");
+      const savedProfile = localStorage.getItem("bizzpal_business_profile");
       if (savedProfile) {
         const parsed = JSON.parse(savedProfile);
         setProfile(prev => ({
@@ -559,7 +559,7 @@ export default function SimulatorPage() {
                 revenue: Number(b.monthly_revenue) || prev.revenue,
                 teamSize: Number(b.team_size) || prev.teamSize,
               }));
-              localStorage.setItem("nuralix_business_profile", JSON.stringify(b));
+              localStorage.setItem("bizzpal_business_profile", JSON.stringify(b));
             }
           })
           .catch(() => {});

@@ -49,7 +49,7 @@ interface ModelOption {
 const AVAILABLE_MODELS: ModelOption[] = [
   {
     id: "auto",
-    name: "Auto-Route (Nuralix Orchestrator)",
+    name: "Auto-Route (BizzPal Orchestrator)",
     shortName: "Auto-Route",
     tagline: "Dynamically selects optimal model based on prompt complexity, math, or document size",
     badge: "Intelligent Routing",
@@ -300,7 +300,7 @@ export default function ChatWorkspacePage() {
         timestamp: "Just now",
         content:
           "Good day. I am Astra, your CEO AI. I monitor company runway, capital allocation, and top-tier execution priorities. What strategic directive shall we review today?",
-        provider: "nuralix-ai",
+        provider: "bizzpal-ai",
         nextSteps: ["Review Runway & Solvency", "Examine Secondary Pipelines", "Run Decision Simulation"],
       },
     ],
@@ -314,7 +314,7 @@ export default function ChatWorkspacePage() {
         timestamp: "Just now",
         content:
           "Marcus online. Cash burn, working capital, and unit economics are under surveillance. Your current liquid runway stands at 7.2 months. What financial model should we analyze?",
-        provider: "nuralix-ai",
+        provider: "bizzpal-ai",
         nextSteps: ["Open Cash Flow Forecast", "Analyze Tooling Overheads", "Calculate Break-Even Threshold"],
       },
     ],
@@ -328,7 +328,7 @@ export default function ChatWorkspacePage() {
         timestamp: "Just now",
         content:
           "Elena ready. I'm tracking your inbound channel distribution, CAC payback velocity, and positioning resonance. How can we accelerate demand today?",
-        provider: "nuralix-ai",
+        provider: "bizzpal-ai",
         nextSteps: ["Audit Inbound Conversion Rates", "Calculate Blended CAC", "Plan ICP Retargeting Campaign"],
       },
     ],
@@ -342,7 +342,7 @@ export default function ChatWorkspacePage() {
         timestamp: "Just now",
         content:
           "Vikram ready. Let's look at pipeline velocity, deal size qualification, proposal win rates, and enterprise client expansions. What pipeline are we closing?",
-        provider: "nuralix-ai",
+        provider: "bizzpal-ai",
         nextSteps: ["Score Pipeline Deals", "Audit Stalled Leads", "Model Enterprise Contract Tiering"],
       },
     ],
@@ -356,7 +356,7 @@ export default function ChatWorkspacePage() {
         timestamp: "Just now",
         content:
           "Hi there, Sarah here. I specialize in headcount planning, talent retention benchmarks, compensation parity, and operational hiring velocity.",
-        provider: "nuralix-ai",
+        provider: "bizzpal-ai",
         nextSteps: ["Simulate Engineering Hire", "Check Revenue Per FTE", "Benchmark Tech Salaries in India"],
       },
     ],
@@ -370,7 +370,7 @@ export default function ChatWorkspacePage() {
         timestamp: "Just now",
         content:
           "David active. I optimize your day-to-day workflow pipelines, eliminate manual friction, and ensure customer delivery SLAs remain in the top quartile.",
-        provider: "nuralix-ai",
+        provider: "bizzpal-ai",
         nextSteps: ["Launch Workflows Builder", "Audit Delivery Delays", "Review Vendor Subscriptions"],
       },
     ],
@@ -384,7 +384,7 @@ export default function ChatWorkspacePage() {
         timestamp: "Just now",
         content:
           "Rohan here. I analyze competitive defensibility, market expansion opportunities, pricing power moats, and strategic alliances.",
-        provider: "nuralix-ai",
+        provider: "bizzpal-ai",
         nextSteps: ["Open Market Entry Simulator", "Simulate Tier-2 City Expansion", "Map Platform Defensibility"],
       },
     ],
@@ -392,7 +392,7 @@ export default function ChatWorkspacePage() {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("nuralix_business_profile");
+      const saved = localStorage.getItem("bizzpal_business_profile");
       if (saved) {
         setCompanyProfile(JSON.parse(saved));
       }
@@ -412,7 +412,7 @@ export default function ChatWorkspacePage() {
 
   const handleCommitRecordFromChat = async (record: ExtractedBusinessRecord, msgId: string) => {
     try {
-      const savedProfileStr = localStorage.getItem("nuralix_business_profile");
+      const savedProfileStr = localStorage.getItem("bizzpal_business_profile");
       const existing = savedProfileStr ? JSON.parse(savedProfileStr) : {};
 
       const currentMonthlyRev = Number(existing.revenue || existing.monthlyRevenue) || 500000;
@@ -452,7 +452,7 @@ export default function ChatWorkspacePage() {
         },
       };
 
-      localStorage.setItem("nuralix_business_profile", JSON.stringify(updatedProfile));
+      localStorage.setItem("bizzpal_business_profile", JSON.stringify(updatedProfile));
       setCompanyProfile(updatedProfile);
 
       try {

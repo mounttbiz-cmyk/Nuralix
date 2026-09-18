@@ -25,11 +25,11 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
       <Link
         href="/dashboard"
         className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-transparent border border-cyan-500/30 flex items-center justify-center p-1.5 shadow-sm mb-3 hover:scale-105 transition-transform"
-        title="Nuralix Dashboard"
+        title="BizzPal Dashboard"
       >
         <Image
           src="/logo.png"
-          alt="Nuralix Logo"
+          alt="BizzPal Logo"
           width={26}
           height={26}
           className="object-contain"

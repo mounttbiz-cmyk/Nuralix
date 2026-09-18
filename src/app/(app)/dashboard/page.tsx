@@ -34,14 +34,14 @@ function DashboardContent() {
   const [companyName, setCompanyName] = useState<string>(() => {
     if (typeof window !== "undefined") {
       try {
-        const p = localStorage.getItem("nuralix_business_profile");
+        const p = localStorage.getItem("bizzpal_business_profile");
         if (p) {
           const parsed = JSON.parse(p);
           if (parsed.name) return parsed.name;
         }
       } catch {}
     }
-    return "Nuralix Enterprise";
+    return "BizzPal Enterprise";
   });
   const [selectedTimeframe, setSelectedTimeframe] = useState("Live Today");
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -104,7 +104,7 @@ function DashboardContent() {
             const disabledIds = new Set(
               d.widgets.filter((w: any) => w.enabled === false).map((w: any) => w.id)
             );
-            const savedLayout = localStorage.getItem(`nuralix_layout_${selectedIndustry}`);
+            const savedLayout = localStorage.getItem(`bizzpal_layout_${selectedIndustry}`);
             if (savedLayout) {
               try {
                 const parsed = JSON.parse(savedLayout);
@@ -146,7 +146,7 @@ function DashboardContent() {
   // Read saved business profile if available from localStorage or backend SQLite database
   useEffect(() => {
     try {
-      const savedProfileStr = localStorage.getItem("nuralix_business_profile");
+      const savedProfileStr = localStorage.getItem("bizzpal_business_profile");
       if (savedProfileStr) {
         applyProfileData(JSON.parse(savedProfileStr));
       } else {
@@ -156,7 +156,7 @@ function DashboardContent() {
           .then(d => {
             if (d.success && d.business) {
               applyProfileData(d.business);
-              localStorage.setItem("nuralix_business_profile", JSON.stringify(d.business));
+              localStorage.setItem("bizzpal_business_profile", JSON.stringify(d.business));
             }
           })
           .catch(() => {});
@@ -195,7 +195,7 @@ function DashboardContent() {
   useEffect(() => {
     if (hasLoadedBackendWidgetsRef.current) return;
     try {
-      const savedLayout = localStorage.getItem(`nuralix_layout_${selectedIndustry}`);
+      const savedLayout = localStorage.getItem(`bizzpal_layout_${selectedIndustry}`);
       if (savedLayout) {
         setActiveWidgets(JSON.parse(savedLayout));
       } else {
@@ -227,14 +227,14 @@ function DashboardContent() {
 
   // Save layout
   const handleSaveLayout = () => {
-    localStorage.setItem(`nuralix_layout_${selectedIndustry}`, JSON.stringify(activeWidgets));
+    localStorage.setItem(`bizzpal_layout_${selectedIndustry}`, JSON.stringify(activeWidgets));
     setIsEditingLayout(false);
     notify("Custom Dashboard Layout Saved!");
   };
 
   // Reset to default layout
   const handleResetLayout = () => {
-    localStorage.removeItem(`nuralix_layout_${selectedIndustry}`);
+    localStorage.removeItem(`bizzpal_layout_${selectedIndustry}`);
     setActiveWidgets(baseConfig.widgets);
     setIsEditingLayout(false);
     notify("Restored default dashboard layout");
@@ -362,7 +362,7 @@ function DashboardContent() {
               )}
             </div>
             <p className="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl">
-              Real-time enterprise dashboard synthesized by Nuralix AI. Cross-correlating cash reserves, unit economics, and operational playbooks.
+              Real-time enterprise dashboard synthesized by BizzPal AI. Cross-correlating cash reserves, unit economics, and operational playbooks.
             </p>
           </div>
 

@@ -50,14 +50,14 @@ export default function HelpPage() {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("nuralix_business_profile");
+      const saved = localStorage.getItem("bizzpal_business_profile");
       if (saved) {
         const p = JSON.parse(saved);
         if (p.name) setCompanyName(p.name);
         if (p.founderName) setFounderName(p.founderName);
       }
 
-      const savedTickets = localStorage.getItem("nuralix_support_tickets");
+      const savedTickets = localStorage.getItem("bizzpal_support_tickets");
       if (savedTickets) {
         const parsed = JSON.parse(savedTickets);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -84,8 +84,8 @@ export default function HelpPage() {
   const faqs: FAQItem[] = [
     {
       id: "faq-1",
-      question: "How does Nuralix calculate our real Cash Runway and Solvency Health?",
-      answer: "Nuralix divides your liquid Cash on Hand (in INR ₹) by your Monthly Net Operating Burn. If liquid reserves are ₹12,00,000 and monthly net burn is ₹1,50,000, your verified runway is 8.0 months. If runway falls under 6.0 months, the system triggers the Layer 1 Solvency Safeguard Protocol.",
+      question: "How does BizzPal calculate our real Cash Runway and Solvency Health?",
+      answer: "BizzPal divides your liquid Cash on Hand (in INR ₹) by your Monthly Net Operating Burn. If liquid reserves are ₹12,00,000 and monthly net burn is ₹1,50,000, your verified runway is 8.0 months. If runway falls under 6.0 months, the system triggers the Layer 1 Solvency Safeguard Protocol.",
       category: "kpis",
     },
     {
@@ -97,7 +97,7 @@ export default function HelpPage() {
     {
       id: "faq-3",
       question: "Is all business data formatted in Indian Rupees (INR ₹)?",
-      answer: "Yes, Nuralix is calibrated for Indian businesses. All figures across your dashboard, executive briefings, simulator, and gap registers are expressed in INR (₹) using standard Indian currency notation.",
+      answer: "Yes, BizzPal is calibrated for Indian businesses. All figures across your dashboard, executive briefings, simulator, and gap registers are expressed in INR (₹) using standard Indian currency notation.",
       category: "general",
     },
     {
@@ -131,7 +131,7 @@ export default function HelpPage() {
     setTickets(prev => {
       const updated = [newTicket, ...prev];
       try {
-        localStorage.setItem("nuralix_support_tickets", JSON.stringify(updated));
+        localStorage.setItem("bizzpal_support_tickets", JSON.stringify(updated));
       } catch (e) {
         // ignore
       }

@@ -41,7 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = (mode: ThemeMode) => {
     setThemeState(mode);
-    localStorage.setItem("nuralix-theme", mode);
+    localStorage.setItem("bizzpal-theme", mode);
     applyTheme(mode);
   };
 
@@ -50,7 +50,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const cycleOrder: ThemeMode[] = ["dark", "light", "system"];
       const nextIndex = (cycleOrder.indexOf(prev) + 1) % cycleOrder.length;
       const nextMode = cycleOrder[nextIndex];
-      localStorage.setItem("nuralix-theme", nextMode);
+      localStorage.setItem("bizzpal-theme", nextMode);
       applyTheme(nextMode);
       return nextMode;
     });
@@ -58,7 +58,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("nuralix-theme") as ThemeMode | null;
+    const stored = localStorage.getItem("bizzpal-theme") as ThemeMode | null;
     const initialMode: ThemeMode = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
     setThemeState(initialMode);
     applyTheme(initialMode);
@@ -66,7 +66,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Live system listener
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleSystemChange = () => {
-      const currentStored = localStorage.getItem("nuralix-theme") || "system";
+      const currentStored = localStorage.getItem("bizzpal-theme") || "system";
       if (currentStored === "system") {
         applyTheme("system");
       }

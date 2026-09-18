@@ -34,7 +34,7 @@ export default function SubscriptionPage() {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("nuralix_subscription_plan");
+      const saved = localStorage.getItem("bizzpal_subscription_plan");
       if (saved) {
         setCurrentPlan(saved);
       }
@@ -50,13 +50,13 @@ export default function SubscriptionPage() {
 
   const ensureSessionAndOpenDashboard = (planId: string, planName: string) => {
     try {
-      localStorage.setItem("nuralix_subscription_plan", planId);
+      localStorage.setItem("bizzpal_subscription_plan", planId);
       setCurrentPlan(planId);
 
       // Guarantee user session is active so AuthGuard always admits the user to dashboard
-      let session = localStorage.getItem("nuralix_user_session");
+      let session = localStorage.getItem("bizzpal_user_session");
       if (!session) {
-        const profileStr = localStorage.getItem("nuralix_business_profile");
+        const profileStr = localStorage.getItem("bizzpal_business_profile");
         const profile = profileStr ? JSON.parse(profileStr) : null;
         const userSession = {
           id: `usr_${Date.now()}`,
@@ -66,7 +66,7 @@ export default function SubscriptionPage() {
           provider: "email",
           authenticatedAt: new Date().toISOString(),
         };
-        localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+        localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
       }
     } catch (e) {
       // ignore
@@ -81,8 +81,8 @@ export default function SubscriptionPage() {
   const [plans, setPlans] = useState<PlanTier[]>([
     {
       id: "free",
-      name: "Nuralix Free / Demo",
-      tagline: "Try Nuralix free to see how it works.",
+      name: "BizzPal Free / Demo",
+      tagline: "Try BizzPal free to see how it works.",
       price: "₹0",
       period: "/forever",
       color: "border-emerald-400/30 text-emerald-400",
@@ -190,14 +190,14 @@ export default function SubscriptionPage() {
             <div className="w-9 h-9 rounded-xl bg-surface border border-line flex items-center justify-center p-1 shadow-sm group-hover:scale-105 transition-transform">
               <Image
                 src="/logo.png"
-                alt="Nuralix Logo"
+                alt="BizzPal Logo"
                 width={28}
                 height={28}
                 className="object-contain"
               />
             </div>
             <div>
-              <span className="font-extrabold text-sm tracking-tight text-text font-sans">Nuralix</span>
+              <span className="font-extrabold text-sm tracking-tight text-text font-sans">BizzPal</span>
               <span className="text-[10px] ml-2 px-1.5 py-0.2 rounded bg-brass-soft text-brass font-bold uppercase">
                 Capability Tiers
               </span>
@@ -229,7 +229,7 @@ export default function SubscriptionPage() {
             Choose the Plan That Fits Your Business
           </h1>
           <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
-            Start free to see what Nuralix can do, or choose a plan with more tools, AI executives, and automated workflows.
+            Start free to see what BizzPal can do, or choose a plan with more tools, AI executives, and automated workflows.
           </p>
         </div>
 
@@ -378,7 +378,7 @@ export default function SubscriptionPage() {
 
       {/* Footer */}
       <div className="text-center text-[11px] text-text-muted pt-4">
-        Nuralix OS v3 · Enterprise Capability Matrix
+        BizzPal OS v3 · Enterprise Capability Matrix
       </div>
     </div>
   );

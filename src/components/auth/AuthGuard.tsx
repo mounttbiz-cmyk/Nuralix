@@ -9,8 +9,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      const session = localStorage.getItem("nuralix_user_session");
-      const profile = localStorage.getItem("nuralix_business_profile");
+      const session = localStorage.getItem("bizzpal_user_session");
+      const profile = localStorage.getItem("bizzpal_business_profile");
 
       if (session) {
         setChecked(true);
@@ -25,19 +25,19 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           provider: "email",
           authenticatedAt: new Date().toISOString(),
         };
-        localStorage.setItem("nuralix_user_session", JSON.stringify(autoSession));
+        localStorage.setItem("bizzpal_user_session", JSON.stringify(autoSession));
         setChecked(true);
       } else {
         // Auto-provision demo session so dashboard & settings are immediately accessible
         const demoSession = {
           id: `usr_demo_${Date.now()}`,
-          email: "founder@nuralix.ai",
+          email: "founder@bizzpal.ai",
           name: "Founder",
           role: "owner",
           provider: "demo",
           authenticatedAt: new Date().toISOString(),
         };
-        localStorage.setItem("nuralix_user_session", JSON.stringify(demoSession));
+        localStorage.setItem("bizzpal_user_session", JSON.stringify(demoSession));
         setChecked(true);
       }
     } catch (e) {
@@ -48,7 +48,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (!checked) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center text-xs text-text-muted">
-        Loading Nuralix Business OS…
+        Loading BizzPal Business OS…
       </div>
     );
   }

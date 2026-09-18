@@ -74,7 +74,7 @@ const DEFAULT_MEMBERS: TeamMember[] = [
   {
     id: "mem_5",
     name: "Astra (CEO Copilot)",
-    email: "astra.ai@nuralix.internal",
+    email: "astra.ai@bizzpal.internal",
     role: "Executive",
     department: "Autonomous Strategy",
     twoFactor: true,
@@ -84,7 +84,7 @@ const DEFAULT_MEMBERS: TeamMember[] = [
   {
     id: "mem_6",
     name: "Marcus (CFO Copilot)",
-    email: "marcus.ai@nuralix.internal",
+    email: "marcus.ai@bizzpal.internal",
     role: "Executive",
     department: "Autonomous Finance",
     twoFactor: true,
@@ -114,7 +114,7 @@ export default function TeamPage() {
 
   React.useEffect(() => {
     try {
-      const saved = localStorage.getItem("nuralix_team_members");
+      const saved = localStorage.getItem("bizzpal_team_members");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -142,7 +142,7 @@ export default function TeamPage() {
     setMembers(prev => {
       const updated = [...prev, newMember];
       try {
-        localStorage.setItem("nuralix_team_members", JSON.stringify(updated));
+        localStorage.setItem("bizzpal_team_members", JSON.stringify(updated));
       } catch (e) {
         // ignore
       }
@@ -377,7 +377,7 @@ export default function TeamPage() {
             <div>
               <h2 className="text-xs font-bold text-text uppercase tracking-wider">Enterprise Single Sign-On (SSO)</h2>
               <p className="text-xs text-text-muted mt-0.5">
-                Enforce SAML 2.0 / OIDC authentication for all employees logging into Nuralix OS.
+                Enforce SAML 2.0 / OIDC authentication for all employees logging into BizzPal OS.
               </p>
             </div>
           </div>
@@ -437,7 +437,7 @@ export default function TeamPage() {
       <PortalModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)}>
         <div className="w-full max-w-md p-6 rounded-2xl border border-line bg-surface shadow-2xl space-y-4 animate-scale-in">
           <div className="flex items-center justify-between pb-3 border-b border-line">
-            <h3 className="text-sm font-bold text-text">Invite Colleague to Nuralix</h3>
+            <h3 className="text-sm font-bold text-text">Invite Colleague to BizzPal</h3>
             <button
               type="button"
               onClick={() => setIsInviteOpen(false)}

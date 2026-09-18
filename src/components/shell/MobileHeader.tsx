@@ -26,14 +26,14 @@ export function MobileHeader({
         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-transparent border border-cyan-500/30 flex items-center justify-center p-1 shadow-sm">
           <Image
             src="/logo.png"
-            alt="Nuralix Logo"
+            alt="BizzPal Logo"
             width={24}
             height={24}
             className="object-contain"
           />
         </div>
         <div className="flex flex-col">
-          <span className="font-extrabold text-xs tracking-tight text-white leading-tight font-sans">Nuralix</span>
+          <span className="font-extrabold text-xs tracking-tight text-white leading-tight font-sans">BizzPal</span>
           <span className="text-[10px] text-text-muted leading-tight truncate max-w-[120px]">
             {companyName}
           </span>

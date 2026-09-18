@@ -13,7 +13,7 @@ interface WebsiteCmsExtraProps {
 
 export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: WebsiteCmsExtraProps) {
   const nav = config?.nav || {
-    brand: "NURALIX",
+    brand: "BIZZPAL",
     links: [
       { label: "About", href: "#about" },
       { label: "Intelligence", href: "#s03" },
@@ -22,18 +22,18 @@ export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: We
       { label: "Contact", href: "#contact" },
       { label: "Pricing", href: "/subscription" },
     ],
-    ctaText: "Start with Nuralix",
+    ctaText: "Start with BizzPal",
     ctaHref: "/dashboard",
   };
 
   const vision = config?.vision || {
     label: "The next interface is intelligence",
-    words: ["Understand.", "Predict.", "Adapt.", "Create.", "Evolve.", "Nuralix."],
+    words: ["Understand.", "Predict.", "Adapt.", "Create.", "Evolve.", "BizzPal."],
   };
 
   const announcement = config?.announcement || {
     enabled: false,
-    text: "🚀 Nuralix Enterprise Platform v2.0 is now live for all partners.",
+    text: "🚀 BizzPal Enterprise Platform v2.0 is now live for all partners.",
     linkText: "Read announcement",
     linkUrl: "#s01",
   };
@@ -112,7 +112,7 @@ export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: We
                 <label className="font-semibold text-text">Brand / Logo Text</label>
                 <input
                   type="text"
-                  value={nav.brand || "NURALIX"}
+                  value={nav.brand || "BIZZPAL"}
                   onChange={(e) =>
                     onChange({
                       ...config,
@@ -127,7 +127,7 @@ export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: We
                 <label className="font-semibold text-text">Header CTA Button Text</label>
                 <input
                   type="text"
-                  value={nav.ctaText || "Start with Nuralix"}
+                  value={nav.ctaText || "Start with BizzPal"}
                   onChange={(e) =>
                     onChange({
                       ...config,
@@ -350,7 +350,7 @@ export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: We
                 })
               }
               className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text"
-              placeholder="e.g. 🚀 Nuralix Enterprise Platform v2.0 is now live for all partners."
+              placeholder="e.g. 🚀 BizzPal Enterprise Platform v2.0 is now live for all partners."
             />
           </div>
 

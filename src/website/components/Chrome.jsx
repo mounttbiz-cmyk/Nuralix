@@ -21,7 +21,7 @@ export function Preloader ({ done }) {
 
   return (
     <div className={'pre' + (done ? ' done' : '')} role="status" aria-live="polite">
-      <div className="pre__word">NURALIX</div>
+      <div className="pre__word">BIZZPAL</div>
       <div className="pre__track"><span className="pre__fill" style={{ width: pct + '%' }} /></div>
       <div className="pre__pct">{String(pct).padStart(2, '0')}</div>
     </div>
@@ -142,10 +142,10 @@ export function Nav ({ menuOpen, setMenuOpen, data }) {
     return () => removeEventListener('keydown', esc);
   }, [menuOpen, setMenuOpen]);
 
-  const brand = data?.brand || 'NURALIX';
+  const brand = data?.brand || 'BIZZPAL';
   const rawLinks = data?.links || DEFAULT_NAV_LINKS;
   const links = rawLinks.map(l => Array.isArray(l) ? { label: l[0], href: l[1] } : l);
-  const ctaText = data?.ctaText || 'Start with Nuralix';
+  const ctaText = data?.ctaText || 'Start with BizzPal';
   const ctaHref = data?.ctaHref || DASHBOARD_URL;
 
   return (

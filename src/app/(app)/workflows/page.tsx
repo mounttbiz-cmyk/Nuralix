@@ -598,10 +598,10 @@ export default function WorkflowsPage() {
                 <Mail className="w-3 h-3" />
                 Live Operational Guide
               </span>
-              <span className="text-xs font-bold text-text">How Mailing 100 People Works in Nuralix</span>
+              <span className="text-xs font-bold text-text">How Mailing 100 People Works in BizzPal</span>
             </div>
             <p className="text-xs text-text-muted leading-relaxed">
-              When you launch an email campaign to 100 recipients, Nuralix executes a protected 6-stage closed loop:
+              When you launch an email campaign to 100 recipients, BizzPal executes a protected 6-stage closed loop:
               <strong className="text-text font-semibold"> (1) Ingest 100 Leads</strong> from CSV or CRM →
               <strong className="text-text font-semibold"> (2) Enrich Firmographics</strong> via Clearbit & LinkedIn →
               <strong className="text-text font-semibold"> (3) Elena AI Writes 100 Tailored Emails</strong> with zero generic spam copy →
@@ -632,7 +632,7 @@ export default function WorkflowsPage() {
         <div className="flex items-center justify-between pb-3 border-b border-line/60">
           <span className="text-xs font-bold text-text uppercase tracking-wider flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-brass" />
-            <span>Nuralix Closed-Loop Architecture: Event to Outcome</span>
+            <span>BizzPal Closed-Loop Architecture: Event to Outcome</span>
           </span>
           <span className="text-[10px] text-text-muted font-mono">100% Deterministic & Auditable</span>
         </div>
@@ -949,7 +949,7 @@ export default function WorkflowsPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-text">100-Person Batch Email Outreach & Workflow Engine</h3>
-                  <p className="text-[11px] text-text-muted">Interactive live simulator: How Nuralix automates emailing 100 enterprise prospects safely.</p>
+                  <p className="text-[11px] text-text-muted">Interactive live simulator: How BizzPal automates emailing 100 enterprise prospects safely.</p>
                 </div>
               </div>
               <button

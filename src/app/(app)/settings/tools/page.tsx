@@ -117,14 +117,14 @@ export default function SettingsToolsPage() {
         setSavedSuccess(true);
         // Also update local storage profile
         try {
-          const raw = localStorage.getItem("nuralix_business_profile");
+          const raw = localStorage.getItem("bizzpal_business_profile");
           if (raw) {
             const parsed = JSON.parse(raw);
             parsed.connectedTools = noIntegrations ? [] : selectedTools;
             parsed.noIntegrations = noIntegrations;
             parsed.whatsappOptIn = whatsappOptIn;
             parsed.whatsappNumber = whatsappNumber.trim();
-            localStorage.setItem("nuralix_business_profile", JSON.stringify(parsed));
+            localStorage.setItem("bizzpal_business_profile", JSON.stringify(parsed));
           }
         } catch {}
         setTimeout(() => setSavedSuccess(false), 3000);
@@ -243,7 +243,7 @@ export default function SettingsToolsPage() {
                   <div>
                     <h3 className="text-xs font-bold text-text">WhatsApp Daily Executive Check-In Bot</h3>
                     <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
-                      Receive an automated 60-second morning message. Reply with 1 line and Nuralix updates your dashboard and briefings automatically.
+                      Receive an automated 60-second morning message. Reply with 1 line and BizzPal updates your dashboard and briefings automatically.
                     </p>
                   </div>
                 </div>

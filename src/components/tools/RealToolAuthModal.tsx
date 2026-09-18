@@ -377,7 +377,7 @@ export function RealToolAuthModal({
                   <option value="discovery">Sales & Client Discovery Bookings</option>
                 </select>
                 <p className="text-[10px] text-text-muted mt-1">
-                  Nuralix ingests executive meeting loads, average focus hours, and sales call velocity.
+                  BizzPal ingests executive meeting loads, average focus hours, and sales call velocity.
                 </p>
               </div>
             </div>

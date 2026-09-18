@@ -192,7 +192,7 @@ export function IntegrationAppViewerModal({
 
     // Read stored meetings from localStorage if previously updated
     try {
-      const stored = localStorage.getItem(`nuralix_gcal_meetings_${toolId}`);
+      const stored = localStorage.getItem(`bizzpal_gcal_meetings_${toolId}`);
       if (stored) {
         setMeetings(JSON.parse(stored));
       } else {
@@ -242,7 +242,7 @@ export function IntegrationAppViewerModal({
       {
         id: "msg_1",
         channel: "#executive-briefings",
-        sender: "Nuralix Executive AI Bot",
+        sender: "BizzPal Executive AI Bot",
         text: `🚀 Daily Executive Pulse briefing compiled for ${companyName}. Solvency runway holds steady at 8.0 months.`,
         timestamp: "Today at 9:00 AM",
         type: "briefing",
@@ -304,7 +304,7 @@ export function IntegrationAppViewerModal({
     const updated = [newMeeting, ...meetings];
     setMeetings(updated);
     try {
-      localStorage.setItem(`nuralix_gcal_meetings_${toolId}`, JSON.stringify(updated));
+      localStorage.setItem(`bizzpal_gcal_meetings_${toolId}`, JSON.stringify(updated));
     } catch {}
 
     setNewMeetingTitle("");
@@ -987,7 +987,7 @@ export function IntegrationAppViewerModal({
                       <span>Active Escalation Watch</span>
                     </h4>
                     <p className="text-[11px] text-text-muted">
-                      Nuralix monitors your support desk ticket logs in real time. Critical unresolved customer tickets automatically generate task directives in your Operations Queue.
+                      BizzPal monitors your support desk ticket logs in real time. Critical unresolved customer tickets automatically generate task directives in your Operations Queue.
                     </p>
                   </div>
                 </div>

@@ -21,7 +21,7 @@ export async function POST() {
     const { questions: dynamicQuestions } = generateDynamicCheckInQuestions(DEFAULT_BUSINESS_ID);
     const questions = dynamicQuestions.map((q, idx) => `${idx + 1}. [${q.badge}] ${q.title}`);
 
-    const message = `👋 Hi ${business.founder_name || "Founder"}, this is your Nuralix Daily Check-In for ${business.name}!\n\n${questions.join("\n\n")}\n\nReply directly with your updates in 1-2 lines (or voice note).`;
+    const message = `👋 Hi ${business.founder_name || "Founder"}, this is your BizzPal Daily Check-In for ${business.name}!\n\n${questions.join("\n\n")}\n\nReply directly with your updates in 1-2 lines (or voice note).`;
 
     // In production, dispatch via Twilio / Meta API here.
     // For local environment, we return the outbound payload ready for inspection.

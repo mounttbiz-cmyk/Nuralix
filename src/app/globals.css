@@ -14,8 +14,8 @@
   --text:        #F8FAFC;   /* Crisp clean high contrast white */
   --text-muted:  #94A3B8;   /* Balanced slate muted */
   
-  /* Primary metallic & neon accents matching Nuralix branding */
-  --cyan:        #00D9FF;   /* Nuralix electric cyan */
+  /* Primary metallic & neon accents matching BizzPal branding */
+  --cyan:        #00D9FF;   /* BizzPal electric cyan */
   --cyan-soft:   rgba(0, 217, 255, 0.12);
   --violet:      #6366F1;   /* Royal violet / indigo */
   --violet-soft: rgba(99, 102, 241, 0.12);
@@ -62,7 +62,7 @@
   --grid:        #EDF2F7;
 }
 
-/* Sleek custom scrollbars matching Nuralix brass/slate design across the whole dashboard & website */
+/* Sleek custom scrollbars matching BizzPal brass/slate design across the whole dashboard & website */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--line-strong) transparent;

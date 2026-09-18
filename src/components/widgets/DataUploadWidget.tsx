@@ -33,7 +33,7 @@ export function DataUploadWidget() {
   // Sync active dataset info from local storage or API
   const refreshActiveDataset = () => {
     try {
-      const savedStr = localStorage.getItem("nuralix_business_profile");
+      const savedStr = localStorage.getItem("bizzpal_business_profile");
       if (savedStr) {
         const saved = JSON.parse(savedStr);
         if (saved.isUploadedData && saved.sourceFileName) {
@@ -276,7 +276,7 @@ export function DataUploadWidget() {
             <button
               type="button"
               onClick={() =>
-                downloadFile(generateSampleBusinessCsv(), "nuralix_business_data_template.csv")
+                downloadFile(generateSampleBusinessCsv(), "bizzpal_business_data_template.csv")
               }
               className="text-text-muted hover:text-cyan-400 flex items-center gap-1 transition-colors cursor-pointer"
             >

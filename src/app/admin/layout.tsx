@@ -23,7 +23,7 @@ export default function AdminLayout({
     if (isLoginPage) return;
 
     // Verify developer superadmin session
-    const sessionStr = localStorage.getItem("nuralix_admin_session");
+    const sessionStr = localStorage.getItem("bizzpal_admin_session");
     if (!sessionStr) {
       router.push("/admin/login");
     } else {

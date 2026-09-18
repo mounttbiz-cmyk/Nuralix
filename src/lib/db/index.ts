@@ -38,10 +38,10 @@ export function healDatabasePermissions() {
 // Immediately heal permissions upon module load
 healDatabasePermissions();
 
-const dbPath = path.join(dataDir, "nuralix.db");
+const dbPath = path.join(dataDir, "bizzpal.db");
 
 declare global {
-  var __nuralix_raw_db: any | undefined;
+  var __bizzpal_raw_db: any | undefined;
 }
 
 function createRawConnection() {
@@ -61,19 +61,19 @@ function createRawConnection() {
 }
 
 function getRawConnection() {
-  if (!globalThis.__nuralix_raw_db) {
-    globalThis.__nuralix_raw_db = createRawConnection();
+  if (!globalThis.__bizzpal_raw_db) {
+    globalThis.__bizzpal_raw_db = createRawConnection();
   }
-  return globalThis.__nuralix_raw_db;
+  return globalThis.__bizzpal_raw_db;
 }
 
 function resetConnection() {
   try {
-    if (globalThis.__nuralix_raw_db) {
-      globalThis.__nuralix_raw_db.close();
+    if (globalThis.__bizzpal_raw_db) {
+      globalThis.__bizzpal_raw_db.close();
     }
   } catch {}
-  globalThis.__nuralix_raw_db = undefined;
+  globalThis.__bizzpal_raw_db = undefined;
   return getRawConnection();
 }
 
@@ -477,7 +477,7 @@ export const DEFAULT_WEBSITE_CONFIG = {
     sceneAwakening: { enabled: true, title: "Scene 01 — Awakening" },
     sceneConnection: { enabled: true, title: "Scene 02 — Connection" },
     sceneIntelligence: { enabled: true, title: "Scene 03 — Intelligence" },
-    sceneNuralix: { enabled: true, title: "Scene 04 — This is Nuralix" },
+    sceneBizzPal: { enabled: true, title: "Scene 04 — This is BizzPal" },
     about: { enabled: true, title: "About Section" },
     sceneExpansion: { enabled: true, title: "Scene 05 — Expansion" },
     solutions: { enabled: true, title: "Solutions & Capabilities" },
@@ -489,7 +489,7 @@ export const DEFAULT_WEBSITE_CONFIG = {
     footer: { enabled: true, title: "Site Footer" },
   },
   nav: {
-    brand: "NURALIX",
+    brand: "BIZZPAL",
     links: [
       { label: "About", href: "#about" },
       { label: "Intelligence", href: "#s03" },
@@ -498,24 +498,24 @@ export const DEFAULT_WEBSITE_CONFIG = {
       { label: "Contact", href: "#contact" },
       { label: "Pricing", href: "/subscription" },
     ],
-    ctaText: "Start with Nuralix",
+    ctaText: "Start with BizzPal",
     ctaHref: "/dashboard",
   },
   vision: {
     label: "The next interface is intelligence",
-    words: ["Understand.", "Predict.", "Adapt.", "Create.", "Evolve.", "Nuralix."],
+    words: ["Understand.", "Predict.", "Adapt.", "Create.", "Evolve.", "BizzPal."],
   },
   announcement: {
     enabled: false,
-    text: "🚀 Nuralix Enterprise Platform v2.0 is now live for all partners.",
+    text: "🚀 BizzPal Enterprise Platform v2.0 is now live for all partners.",
     linkText: "Read announcement",
     linkUrl: "#s01",
   },
   hero: {
-    eyebrow: "Artificial Intelligence · Nuralix.in",
-    word: "NURALIX",
+    eyebrow: "Artificial Intelligence · BizzPal.in",
+    word: "BIZZPAL",
     subtitle: "Intelligence. Engineered for Tomorrow.",
-    primaryCtaText: "Explore Nuralix",
+    primaryCtaText: "Explore BizzPal",
     primaryCtaHref: "#s01",
     secondaryCtaText: "Discover Our Intelligence",
     secondaryCtaHref: "#s03",
@@ -534,7 +534,7 @@ export const DEFAULT_WEBSITE_CONFIG = {
       headline: "Turning complexity into intelligence.",
     },
     s04: {
-      headline: "This is Nuralix.",
+      headline: "This is BizzPal.",
       lead: "Building intelligent systems for a rapidly evolving world.",
     },
     s05: {
@@ -549,14 +549,14 @@ export const DEFAULT_WEBSITE_CONFIG = {
     s07: {
       eyebrow: "Scene 07 — Future",
       headline: "The future isn't coming. We're engineering it.",
-      ctaText: "Build the Future with Nuralix",
+      ctaText: "Build the Future with BizzPal",
       ctaHref: "/dashboard",
     },
   },
   about: {
-    eyebrow: "About Nuralix",
+    eyebrow: "About BizzPal",
     headline: "We build intelligence that moves the world forward.",
-    p1: "Nuralix uses artificial intelligence to automate tasks, analyse data, and help businesses make smarter, faster decisions for growth.",
+    p1: "BizzPal uses artificial intelligence to automate tasks, analyse data, and help businesses make smarter, faster decisions for growth.",
     p2: "We work at the point where information becomes understanding — designing systems that read complexity, find the signal inside it, and turn that signal into a decision a business can act on today.",
     approach: [
       { label: "Understand the problem", num: "01" },
@@ -586,27 +586,27 @@ export const DEFAULT_WEBSITE_CONFIG = {
     ],
   },
   contact: {
-    eyebrow: "Start with Nuralix",
+    eyebrow: "Start with BizzPal",
     headline: "Ready to build what's next?",
     note: "Enter your email to begin your executive onboarding.",
-    ctaText: "Start with Nuralix",
+    ctaText: "Start with BizzPal",
     ctaHref: "/dashboard",
-    email: "hello@nuralix.in",
-    site: "nuralix.in",
-    linkedin: "https://linkedin.com/company/nuralix",
-    twitter: "https://twitter.com/nuralix",
+    email: "hello@bizzpal.in",
+    site: "bizzpal.in",
+    linkedin: "https://linkedin.com/company/bizzpal",
+    twitter: "https://twitter.com/bizzpal",
   },
   footer: {
-    copyright: "© 2026 Nuralix",
-    tagline: "Nuralix — Intelligence in Motion",
+    copyright: "© 2026 BizzPal",
+    tagline: "BizzPal — Intelligence in Motion",
   },
 };
 
 export const DEFAULT_SUBSCRIPTION_PLANS = [
   {
     id: "free",
-    name: "Nuralix Free / Demo",
-    tagline: "Try Nuralix free to see how it works.",
+    name: "BizzPal Free / Demo",
+    tagline: "Try BizzPal free to see how it works.",
     price: "₹0",
     period: "/forever",
     color: "border-emerald-400/30 text-emerald-400",
@@ -1144,7 +1144,7 @@ export function getActiveBusiness() {
     if (row) {
       return {
         id: row.id,
-        name: row.name || "Nuralix Enterprise",
+        name: row.name || "BizzPal Enterprise",
         industry: (row.industry as any) || "saas",
         industryLabel: row.industry_label || "Enterprise",
         founderName: row.founder_name || "Founder",

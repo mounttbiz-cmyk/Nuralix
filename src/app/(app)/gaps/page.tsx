@@ -171,7 +171,7 @@ export default function GapsPage() {
   // Sync with live business profile data if present
   useEffect(() => {
     try {
-      const savedStr = localStorage.getItem("nuralix_business_profile");
+      const savedStr = localStorage.getItem("bizzpal_business_profile");
       if (savedStr) {
         const saved = JSON.parse(savedStr);
         const cash = Number(saved.cash || saved.cashOnHand) || 1200000;

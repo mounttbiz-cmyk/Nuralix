@@ -151,7 +151,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
       });
       const data = await res.json();
       if (data.success) {
-        localStorage.setItem("nuralix_business_profile", JSON.stringify(t));
+        localStorage.setItem("bizzpal_business_profile", JSON.stringify(t));
         notify(`Switched active enterprise to "${t.name}". Opening app...`);
         setTimeout(() => {
           window.open("/dashboard", "_blank");

@@ -2,7 +2,7 @@ import { ThemeTokens } from "../schemas/theme";
 
 export const defaultTheme: ThemeTokens = {
   id: "theme_default_brass",
-  name: "Nuralix Boardroom & Precision",
+  name: "BizzPal Boardroom & Precision",
   light: {
     bg: "#F4F6F8",
     surface: "#FFFFFF",

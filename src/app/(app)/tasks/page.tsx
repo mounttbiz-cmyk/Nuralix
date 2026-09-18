@@ -99,7 +99,7 @@ export default function TasksPage() {
   const fetchTasks = async () => {
     try {
       // Hydrate founder name from business profile
-      const stored = localStorage.getItem("nuralix_business_profile");
+      const stored = localStorage.getItem("bizzpal_business_profile");
       if (stored) {
         try {
           const parsed = JSON.parse(stored);

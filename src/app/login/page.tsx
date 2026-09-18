@@ -56,7 +56,7 @@ export default function LoginPage() {
 
     // 1. Check local client cache
     try {
-      const rawLocal = localStorage.getItem("nuralix_registered_accounts");
+      const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
       if (rawLocal) {
         const list: string[] = JSON.parse(rawLocal);
         if (Array.isArray(list) && list.map(e => e.toLowerCase()).includes(normalizedEmail)) {
@@ -98,11 +98,11 @@ export default function LoginPage() {
 
     // 1. Client-side local list
     try {
-      const rawLocal = localStorage.getItem("nuralix_registered_accounts");
+      const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
       const list: string[] = rawLocal ? JSON.parse(rawLocal) : [];
       if (!list.map(e => e.toLowerCase()).includes(normalizedEmail)) {
         list.push(normalizedEmail);
-        localStorage.setItem("nuralix_registered_accounts", JSON.stringify(list));
+        localStorage.setItem("bizzpal_registered_accounts", JSON.stringify(list));
       }
     } catch (e) {}
 
@@ -128,7 +128,7 @@ export default function LoginPage() {
     // 1. Fast synchronous check: user-specific localStorage cache
     if (cleanEmail) {
       try {
-        const localUserBiz = localStorage.getItem(`nuralix_user_business_${cleanEmail}`);
+        const localUserBiz = localStorage.getItem(`bizzpal_user_business_${cleanEmail}`);
         if (localUserBiz) {
           businessProfile = JSON.parse(localUserBiz);
         }
@@ -138,7 +138,7 @@ export default function LoginPage() {
     // 2. Fast synchronous check: general business profile in localStorage
     if (!businessProfile) {
       try {
-        const existingStr = localStorage.getItem("nuralix_business_profile");
+        const existingStr = localStorage.getItem("bizzpal_business_profile");
         if (existingStr) {
           businessProfile = JSON.parse(existingStr);
         }
@@ -163,9 +163,9 @@ export default function LoginPage() {
     }
 
     // Persist to localStorage synchronously
-    localStorage.setItem("nuralix_business_profile", JSON.stringify(businessProfile));
+    localStorage.setItem("bizzpal_business_profile", JSON.stringify(businessProfile));
     if (cleanEmail) {
-      localStorage.setItem(`nuralix_user_business_${cleanEmail}`, JSON.stringify(businessProfile));
+      localStorage.setItem(`bizzpal_user_business_${cleanEmail}`, JSON.stringify(businessProfile));
     }
 
     // Direct navigation straight to dashboard - IMMEDIATE (<50ms)
@@ -178,8 +178,8 @@ export default function LoginPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.businessProfile && (data.businessProfile.name || data.businessProfile.revenue !== undefined)) {
-            localStorage.setItem("nuralix_business_profile", JSON.stringify(data.businessProfile));
-            localStorage.setItem(`nuralix_user_business_${cleanEmail}`, JSON.stringify(data.businessProfile));
+            localStorage.setItem("bizzpal_business_profile", JSON.stringify(data.businessProfile));
+            localStorage.setItem(`bizzpal_user_business_${cleanEmail}`, JSON.stringify(data.businessProfile));
           }
         }
       } catch (e) {}
@@ -188,8 +188,8 @@ export default function LoginPage() {
         try {
           const firestoreData = await getUserProfileFromFirestore(uid);
           if (firestoreData?.businessProfile) {
-            localStorage.setItem("nuralix_business_profile", JSON.stringify(firestoreData.businessProfile));
-            localStorage.setItem(`nuralix_user_business_${cleanEmail}`, JSON.stringify(firestoreData.businessProfile));
+            localStorage.setItem("bizzpal_business_profile", JSON.stringify(firestoreData.businessProfile));
+            localStorage.setItem(`bizzpal_user_business_${cleanEmail}`, JSON.stringify(firestoreData.businessProfile));
           }
         } catch (e) {}
       }
@@ -206,13 +206,13 @@ export default function LoginPage() {
     if (provider === "demo") {
       const userSession = {
         id: `usr_demo_${Date.now()}`,
-        email: "demo.founder@nuralix.io",
+        email: "demo.founder@bizzpal.io",
         name: fullName || "Alex Vance",
         role: "owner",
         provider: "demo",
         authenticatedAt: new Date().toISOString(),
       };
-      localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+      localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
       router.push("/onboarding");
       return;
     }
@@ -244,8 +244,8 @@ export default function LoginPage() {
 
             // User is brand new (or was deleted from Firebase Console) -> Allow registration!
             // Clean any previous user's business profile from this browser so onboarding questions are presented!
-            localStorage.removeItem("nuralix_business_profile");
-            localStorage.removeItem("nuralix_onboarding_step");
+            localStorage.removeItem("bizzpal_business_profile");
+            localStorage.removeItem("bizzpal_onboarding_step");
 
             const userSession = {
               id: authUser.uid,
@@ -255,7 +255,7 @@ export default function LoginPage() {
               provider: "google.com",
               authenticatedAt: new Date().toISOString(),
             };
-            localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+            localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
 
             // Instant navigation to onboarding registration process
             router.push("/onboarding?mode=new_signup");
@@ -281,10 +281,10 @@ export default function LoginPage() {
 
               // Clean any stale local / SQLite cache for this email
               try {
-                const rawLocal = localStorage.getItem("nuralix_registered_accounts");
+                const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
                 if (rawLocal) {
                   const list: string[] = JSON.parse(rawLocal);
-                  localStorage.setItem("nuralix_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== userEmail)));
+                  localStorage.setItem("bizzpal_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== userEmail)));
                 }
                 fetch(`/api/auth/account-status?email=${encodeURIComponent(userEmail)}`, { method: "DELETE" }).catch(() => {});
               } catch (e) {}
@@ -304,7 +304,7 @@ export default function LoginPage() {
               provider: "google.com",
               authenticatedAt: new Date().toISOString(),
             };
-            localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+            localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
 
             // Directly restore and navigate to dashboard!
             await restoreAndNavigateOldUser(userEmail, authUser.displayName || fullName || "Founder", authUser.uid);
@@ -342,8 +342,8 @@ export default function LoginPage() {
 
           if (authUser) {
             // Clean any previous user's business profile from this browser so onboarding questions are presented!
-            localStorage.removeItem("nuralix_business_profile");
-            localStorage.removeItem("nuralix_onboarding_step");
+            localStorage.removeItem("bizzpal_business_profile");
+            localStorage.removeItem("bizzpal_onboarding_step");
 
             const userSession = {
               id: authUser.uid,
@@ -353,7 +353,7 @@ export default function LoginPage() {
               provider: "password",
               authenticatedAt: new Date().toISOString(),
             };
-            localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+            localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
 
             // Instant navigation to onboarding registration process
             router.push("/onboarding?mode=new_signup");
@@ -392,7 +392,7 @@ export default function LoginPage() {
                 provider: "password",
                 authenticatedAt: new Date().toISOString(),
               };
-              localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+              localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
 
               // Old user logging in: directly go to dashboard & remember their details!
               await restoreAndNavigateOldUser(cleanEmail, authUser.displayName || fullName || "Founder", authUser.uid);
@@ -404,10 +404,10 @@ export default function LoginPage() {
             if (code === "auth/user-not-found") {
               // Account does not exist in Firebase console (or was deleted)!
               try {
-                const rawLocal = localStorage.getItem("nuralix_registered_accounts");
+                const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
                 if (rawLocal) {
                   const list: string[] = JSON.parse(rawLocal);
-                  localStorage.setItem("nuralix_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== cleanEmail)));
+                  localStorage.setItem("bizzpal_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== cleanEmail)));
                 }
                 fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`, { method: "DELETE" }).catch(() => {});
               } catch (e) {}
@@ -426,10 +426,10 @@ export default function LoginPage() {
                   if (!methods || methods.length === 0) {
                     // Account was deleted or does not exist in Firebase Console!
                     try {
-                      const rawLocal = localStorage.getItem("nuralix_registered_accounts");
+                      const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
                       if (rawLocal) {
                         const list: string[] = JSON.parse(rawLocal);
-                        localStorage.setItem("nuralix_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== cleanEmail)));
+                        localStorage.setItem("bizzpal_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== cleanEmail)));
                       }
                       fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`, { method: "DELETE" }).catch(() => {});
                     } catch (e) {}
@@ -486,8 +486,8 @@ export default function LoginPage() {
           setLoading(false);
           return;
         }
-        localStorage.removeItem("nuralix_business_profile");
-        localStorage.removeItem("nuralix_onboarding_step");
+        localStorage.removeItem("bizzpal_business_profile");
+        localStorage.removeItem("bizzpal_onboarding_step");
 
         await recordRegisteredAccount(targetEmail, fullName || (provider === "google" ? "Alex Vance" : "Founder"), provider);
         const userSession = {
@@ -498,7 +498,7 @@ export default function LoginPage() {
           provider,
           authenticatedAt: new Date().toISOString(),
         };
-        localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+        localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
         router.push("/onboarding?mode=new_signup");
       } else {
         // authMode === "signin"
@@ -517,7 +517,7 @@ export default function LoginPage() {
           provider,
           authenticatedAt: new Date().toISOString(),
         };
-        localStorage.setItem("nuralix_user_session", JSON.stringify(userSession));
+        localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
         // Old user logging in: directly go to dashboard & remember their details!
         await restoreAndNavigateOldUser(targetEmail, fullName || (provider === "google" ? "Alex Vance" : "Founder"));
       }
@@ -533,18 +533,18 @@ export default function LoginPage() {
 
     setTimeout(() => {
       // Secure Developer Passcode Check
-      if (adminPasscode === "nuralix2026" || adminPasscode === "admin") {
+      if (adminPasscode === "bizzpal2026" || adminPasscode === "admin") {
         const adminSession = {
           id: "adm_platform_developer",
           role: "platform_admin",
           mfaVerified: true,
           authenticatedAt: new Date().toISOString(),
         };
-        localStorage.setItem("nuralix_admin_session", JSON.stringify(adminSession));
+        localStorage.setItem("bizzpal_admin_session", JSON.stringify(adminSession));
         router.push("/admin");
       } else {
         setLoading(false);
-        setError("Invalid Developer authorization credentials. Default passcode is: nuralix2026");
+        setError("Invalid Developer authorization credentials. Default passcode is: bizzpal2026");
       }
     }, 500);
   };
@@ -557,7 +557,7 @@ export default function LoginPage() {
           <div className="w-10 h-10 rounded-xl bg-surface border border-line flex items-center justify-center p-1.5 shadow-sm">
             <Image
               src="/logo.png"
-              alt="Nuralix Logo"
+              alt="BizzPal Logo"
               width={30}
               height={30}
               className="object-contain"
@@ -565,7 +565,7 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <span className="font-extrabold text-base tracking-tight text-text font-sans">Nuralix</span>
+            <span className="font-extrabold text-base tracking-tight text-text font-sans">BizzPal</span>
             <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-brass-soft text-brass font-bold uppercase tracking-wider">
               AI Business OS
             </span>
@@ -621,7 +621,7 @@ export default function LoginPage() {
                   {error.includes("Authorized domains") && (
                     <div className="pl-6 pt-0.5">
                       <a
-                        href="https://console.firebase.google.com/project/nuralix-24360/authentication/settings"
+                        href="https://console.firebase.google.com/project/bizzpal-24360/authentication/settings"
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rust/20 hover:bg-rust/30 text-rust font-semibold text-[11px] transition-colors"
@@ -804,7 +804,7 @@ export default function LoginPage() {
                   <Lock className="w-3.5 h-3.5 text-text-muted absolute left-3" />
                   <input
                     type="password"
-                    placeholder="Enter developer passcode (nuralix2026)"
+                    placeholder="Enter developer passcode (bizzpal2026)"
                     value={adminPasscode}
                     onChange={e => setAdminPasscode(e.target.value)}
                     className="w-full text-xs pl-9 pr-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber"
@@ -851,7 +851,7 @@ export default function LoginPage() {
 
       {/* Footer Info */}
       <div className="text-center text-[11px] text-text-muted max-w-md mx-auto">
-        <span>Protected by Nuralix Row-Level Security & Encrypted Tenancy.</span>
+        <span>Protected by BizzPal Row-Level Security & Encrypted Tenancy.</span>
       </div>
 
       {/* Firebase Setup Guide Modal */}
@@ -865,7 +865,7 @@ export default function LoginPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-text">Firebase Cloud Integration</h3>
-                  <p className="text-[11px] text-text-muted">Connect your Firebase Account & Project to Nuralix</p>
+                  <p className="text-[11px] text-text-muted">Connect your Firebase Account & Project to BizzPal</p>
                 </div>
               </div>
               <button

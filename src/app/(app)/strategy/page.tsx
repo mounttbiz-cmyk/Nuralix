@@ -97,7 +97,7 @@ const DEFAULT_GROWTH_VECTORS: GrowthVector[] = [
     expectedImpact: "3.4x Partner Pipeline",
     timeline: "Q4 Launch",
     owner: "Head of Partnerships",
-    description: "Partner with regional consulting firms, digital agencies, and system integrators to distribute Nuralix with zero fixed payroll overhead.",
+    description: "Partner with regional consulting firms, digital agencies, and system integrators to distribute BizzPal with zero fixed payroll overhead.",
     riskTier: "Medium",
     milestones: [
       { title: "Draft partner revenue share & certification terms", done: false },
@@ -149,7 +149,7 @@ export default function GrowthStrategyPage() {
 
   useEffect(() => {
     try {
-      const savedProfile = localStorage.getItem("nuralix_business_profile");
+      const savedProfile = localStorage.getItem("bizzpal_business_profile");
       if (savedProfile) {
         applyBusinessProfile(JSON.parse(savedProfile));
       } else {
@@ -158,13 +158,13 @@ export default function GrowthStrategyPage() {
           .then(d => {
             if (d.success && d.business) {
               applyBusinessProfile(d.business);
-              localStorage.setItem("nuralix_business_profile", JSON.stringify(d.business));
+              localStorage.setItem("bizzpal_business_profile", JSON.stringify(d.business));
             }
           })
           .catch(() => {});
       }
 
-      const savedVectors = localStorage.getItem("nuralix_strategy_vectors");
+      const savedVectors = localStorage.getItem("bizzpal_strategy_vectors");
       if (savedVectors) {
         const parsed = JSON.parse(savedVectors);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -194,7 +194,7 @@ export default function GrowthStrategyPage() {
         return { ...v, milestones: newM };
       });
       try {
-        localStorage.setItem("nuralix_strategy_vectors", JSON.stringify(updated));
+        localStorage.setItem("bizzpal_strategy_vectors", JSON.stringify(updated));
       } catch (e) {
         // ignore
       }
@@ -286,7 +286,7 @@ export default function GrowthStrategyPage() {
 
     setVectors(updatedList);
     try {
-      localStorage.setItem("nuralix_strategy_vectors", JSON.stringify(updatedList));
+      localStorage.setItem("bizzpal_strategy_vectors", JSON.stringify(updatedList));
     } catch {}
 
     setIsModalOpen(false);
@@ -309,7 +309,7 @@ export default function GrowthStrategyPage() {
       setSelectedVectorId(updated[0].id);
     }
     try {
-      localStorage.setItem("nuralix_strategy_vectors", JSON.stringify(updated));
+      localStorage.setItem("bizzpal_strategy_vectors", JSON.stringify(updated));
     } catch {}
     setToastMessage(`Growth vector deleted.`);
     setTimeout(() => setToastMessage(null), 3000);

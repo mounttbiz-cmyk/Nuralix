@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           provider: currentUser.providerData[0]?.providerId || "firebase",
           authenticatedAt: new Date().toISOString(),
         };
-        localStorage.setItem("nuralix_user_session", JSON.stringify(session));
+        localStorage.setItem("bizzpal_user_session", JSON.stringify(session));
       }
     });
 
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (auth) {
       await signOut(auth);
     }
-    localStorage.removeItem("nuralix_user_session");
+    localStorage.removeItem("bizzpal_user_session");
     setUser(null);
   };
 

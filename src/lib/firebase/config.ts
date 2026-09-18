@@ -6,10 +6,10 @@ import { getAnalytics, isSupported, Analytics } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCgDPSYWfrXdRWU3k_oy-SKpER5p3kT3_U",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "nuralix-24360.firebaseapp.com",
-  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "https://nuralix-24360-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "nuralix-24360",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "nuralix-24360.firebasestorage.app",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "bizzpal-24360.firebaseapp.com",
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "https://bizzpal-24360-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "bizzpal-24360",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "bizzpal-24360.firebasestorage.app",
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "544020085393",
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:544020085393:web:f0e9dfa8aced6b18cc9d30",
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-Q8VTHHVTVR",

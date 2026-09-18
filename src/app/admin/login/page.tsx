@@ -19,17 +19,17 @@ export default function AdminLoginPage() {
     setError(null);
 
     setTimeout(() => {
-      if (passcode === "nuralix2026" || passcode === "admin") {
+      if (passcode === "bizzpal2026" || passcode === "admin") {
         const adminSession = {
           id: "adm_platform_developer",
           role: "platform_admin",
           authenticatedAt: new Date().toISOString(),
         };
-        localStorage.setItem("nuralix_admin_session", JSON.stringify(adminSession));
+        localStorage.setItem("bizzpal_admin_session", JSON.stringify(adminSession));
         router.push("/admin");
       } else {
         setLoading(false);
-        setError("Invalid Superadmin credentials. (Default passcode is: nuralix2026)");
+        setError("Invalid Superadmin credentials. (Default passcode is: bizzpal2026)");
       }
     }, 500);
   };
@@ -54,7 +54,7 @@ export default function AdminLoginPage() {
             <div className="w-12 h-12 rounded-xl bg-surface-2 border border-line flex items-center justify-center mx-auto p-1.5 shadow-sm">
               <Image
                 src="/logo.png"
-                alt="Nuralix Logo"
+                alt="BizzPal Logo"
                 width={36}
                 height={36}
                 className="object-contain"
@@ -85,7 +85,7 @@ export default function AdminLoginPage() {
                 <Lock className="w-3.5 h-3.5 text-text-muted absolute left-3" />
                 <input
                   type="password"
-                  placeholder="Enter passcode (nuralix2026)"
+                  placeholder="Enter passcode (bizzpal2026)"
                   value={passcode}
                   onChange={e => setPasscode(e.target.value)}
                   className="w-full text-xs pl-9 pr-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber"
@@ -106,7 +106,7 @@ export default function AdminLoginPage() {
       </div>
 
       <div className="text-center text-[11px] text-text-muted">
-        Nuralix v3 · Superadmin Control Plane Security Gate
+        BizzPal v3 · Superadmin Control Plane Security Gate
       </div>
     </div>
   );

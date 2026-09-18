@@ -113,7 +113,7 @@ export default function KnowledgeHubPage() {
       source: "Financial Express",
       publishedAt: "Today, 10:15 AM",
       summary: "CBIC has issued updated compliance protocols mandating two-way electronic invoice matching for Input Tax Credit (ITC) claims. Companies exceeding ₹5Cr turnover must integrate automated ledger APIs with GSTN within 45 days.",
-      businessImpact: "Requires immediate synchronization between Zoho Books / Tally ledger and Nuralix compliance checks to prevent vendor ITC clawbacks.",
+      businessImpact: "Requires immediate synchronization between Zoho Books / Tally ledger and BizzPal compliance checks to prevent vendor ITC clawbacks.",
       keyTakeaways: [
         "Unreconciled vendor invoices older than 180 days risk automated reversal with 18% penal interest.",
         "Direct API integration through Zoho Books / accounting software eliminates manual GSTR-2B matching.",
@@ -147,7 +147,7 @@ export default function KnowledgeHubPage() {
       source: "LiveMint",
       publishedAt: "1 day ago",
       summary: "The Ministry of Electronics and Information Technology (MeitY) has finalized compliance standards under the DPDP Act. Enterprise platforms storing Indian consumer or B2B customer contact records must maintain verifiable audit trails and explicit consent records.",
-      businessImpact: "Ensures Nuralix automated client databases and marketing outreach lists remain 100% legally compliant without regulatory exposure.",
+      businessImpact: "Ensures BizzPal automated client databases and marketing outreach lists remain 100% legally compliant without regulatory exposure.",
       keyTakeaways: [
         "Data fiduciaries must implement clear opt-out workflows for enterprise communications.",
         "Customer records must be encrypted at rest and in transit (AES-256 / TLS 1.3 enforced).",
@@ -253,13 +253,13 @@ export default function KnowledgeHubPage() {
 
   useEffect(() => {
     try {
-      const savedProfile = localStorage.getItem("nuralix_business_profile");
+      const savedProfile = localStorage.getItem("bizzpal_business_profile");
       if (savedProfile) {
         const parsed = JSON.parse(savedProfile);
         if (parsed.name) setCompanyName(parsed.name);
       }
 
-      const savedDocs = localStorage.getItem("nuralix_knowledge_docs");
+      const savedDocs = localStorage.getItem("bizzpal_knowledge_docs");
       if (savedDocs) {
         const parsed = JSON.parse(savedDocs);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -267,7 +267,7 @@ export default function KnowledgeHubPage() {
         }
       }
 
-      const savedNews = localStorage.getItem("nuralix_business_news");
+      const savedNews = localStorage.getItem("bizzpal_business_news");
       if (savedNews) {
         const parsed = JSON.parse(savedNews);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -308,7 +308,7 @@ export default function KnowledgeHubPage() {
       setNewsList(prev => {
         const updated = [newNewsItem, ...prev];
         try {
-          localStorage.setItem("nuralix_business_news", JSON.stringify(updated));
+          localStorage.setItem("bizzpal_business_news", JSON.stringify(updated));
         } catch (e) {}
         return updated;
       });
@@ -330,7 +330,7 @@ export default function KnowledgeHubPage() {
       setDocs(prev => {
         const updated = [newDocItem, ...prev];
         try {
-          localStorage.setItem("nuralix_knowledge_docs", JSON.stringify(updated));
+          localStorage.setItem("bizzpal_knowledge_docs", JSON.stringify(updated));
         } catch (e) {}
         return updated;
       });

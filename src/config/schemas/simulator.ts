@@ -18,7 +18,7 @@ export const ScenarioAssumptionSchema = z.object({
   likely: z.number(),
   high: z.number(),
   unit: z.string(),
-  source: z.enum(["profile", "benchmark", "user", "nuralix_estimate"]),
+  source: z.enum(["profile", "benchmark", "user", "bizzpal_estimate"]),
 });
 
 export const ScenarioTemplateSchema = z.object({

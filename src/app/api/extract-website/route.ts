@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     
     const response = await fetch(targetUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; NuralixBot/1.0)',
+        'User-Agent': 'Mozilla/5.0 (compatible; BizzPalBot/1.0)',
       },
     });
 

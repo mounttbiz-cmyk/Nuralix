@@ -1782,7 +1782,7 @@ function ToolsContent() {
 
 export default function ToolsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-xs text-text-muted">Loading Nuralix Tools…</div>}>
+    <Suspense fallback={<div className="p-8 text-xs text-text-muted">Loading BizzPal Tools…</div>}>
       <ToolsContent />
     </Suspense>
   );

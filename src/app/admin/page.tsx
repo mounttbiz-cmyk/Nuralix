@@ -524,7 +524,7 @@ export default function AdminPage() {
       <div className="flex flex-col items-center justify-center min-h-[500px] gap-3">
         <div className="w-8 h-8 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin" />
         <p className="text-xs font-semibold text-text-muted font-mono">
-          Connecting to Nuralix SQLite Control Plane...
+          Connecting to BizzPal SQLite Control Plane...
         </p>
       </div>
     );
@@ -574,7 +574,7 @@ export default function AdminPage() {
   })();
 
   const handleAdminLogout = () => {
-    localStorage.removeItem("nuralix_admin_session");
+    localStorage.removeItem("bizzpal_admin_session");
     window.location.href = "/login";
   };
 
@@ -623,7 +623,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <h1 className="text-xs font-extrabold text-text uppercase tracking-wider">
-                  Nuralix Superadmin
+                  BizzPal Superadmin
                 </h1>
                 <span className="text-[10px] text-text-muted font-mono block -mt-0.5">
                   Control Plane §15
@@ -1458,7 +1458,7 @@ export default function AdminPage() {
 
                 {/* Scene 04 */}
                 <div className="p-4 rounded-xl bg-surface-2/60 border border-line space-y-2">
-                  <span className="text-xs font-bold text-text">Scene 04 — This is Nuralix</span>
+                  <span className="text-xs font-bold text-text">Scene 04 — This is BizzPal</span>
                   <input
                     type="text"
                     placeholder="Headline"
@@ -1662,7 +1662,7 @@ export default function AdminPage() {
 
               {/* About Text */}
               <div className="p-4 rounded-xl bg-surface-2/60 border border-line space-y-3">
-                <span className="text-xs font-bold text-text block">About Nuralix Narrative</span>
+                <span className="text-xs font-bold text-text block">About BizzPal Narrative</span>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <label className="text-[11px] text-text-muted">Headline</label>
