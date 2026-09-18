@@ -380,7 +380,7 @@ function ToolsContent() {
     }
   }, [searchParams, toolsList]);
 
-  // Interactive Calculator State (Profit & Margin)
+  // Interactive Calculator State (Profit & Margin) - dynamically hydrated
   const [calcRevenue, setCalcRevenue] = useState(1200000);
   const [calcCogs, setCalcCogs] = useState(300000);
   const [calcOpex, setCalcOpex] = useState(450000);
@@ -439,6 +439,36 @@ function ToolsContent() {
   const [empBenefitsPct, setEmpBenefitsPct] = useState(18);
   const [empToolsAnnual, setEmpToolsAnnual] = useState(120000);
   const [empBillableHours, setEmpBillableHours] = useState(1500);
+
+  // Dynamically hydrate calculators with live company financial data
+  useEffect(() => {
+    fetch("/api/analytics")
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.metrics) {
+          const m = data.metrics;
+          if (m.monthlyRevenue > 0) {
+            setCalcRevenue(m.monthlyRevenue);
+            setMonthlyInflow(m.monthlyRevenue);
+            setWcRevenue(m.annualRevenue || m.monthlyRevenue * 12);
+            setNrrStartingMrr(m.monthlyRevenue);
+            setGstAmount(Math.round(m.monthlyRevenue * 0.25));
+          }
+          if (m.monthlyBurn > 0) {
+            setMonthlyBurn(m.monthlyBurn);
+            setCalcOpex(Math.round(m.monthlyBurn * 0.65));
+            setCalcCogs(Math.round(m.monthlyBurn * 0.35));
+            setFixedCosts(Math.round(m.monthlyBurn * 0.55));
+            setMarketingSpend(Math.round(m.monthlyBurn * 0.15));
+            setWcCogs(Math.round(m.monthlyBurn * 0.35 * 12));
+          }
+          if (m.cashReserve > 0) {
+            setCashReserve(m.cashReserve);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Only consider tools that are not disabled by admin
   const enabledTools = toolsList.filter(tool => (tool as any).enabled !== false);

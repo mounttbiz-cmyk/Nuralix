@@ -48,15 +48,15 @@ export function UploadDataModal({ isOpen, onClose, onSuccess }: UploadDataModalP
 
   // Manual Form State
   const [manualForm, setManualForm] = useState({
-    name: "Apex Analytics",
-    founderName: "Alex Sharma",
+    name: "Your Enterprise",
+    founderName: "Executive Founder",
     industry: "saas",
     monthlyRevenue: 500000,
     annualRevenue: 6000000,
     monthlyBurn: 150000,
     cashOnHand: 1200000,
-    teamSize: 15,
-    grossMargin: 82,
+    teamSize: 10,
+    grossMargin: 80,
   });
 
   // Active / History State
@@ -72,15 +72,15 @@ export function UploadDataModal({ isOpen, onClose, onSuccess }: UploadDataModalP
       if (savedStr) {
         const saved = JSON.parse(savedStr);
         setManualForm({
-          name: saved.name || "Apex Analytics",
-          founderName: saved.founderName || "Alex Sharma",
+          name: saved.name || "Your Enterprise",
+          founderName: saved.founderName || "Executive Founder",
           industry: saved.industry || "saas",
           monthlyRevenue: Number(saved.revenue || saved.monthlyRevenue) || 500000,
           annualRevenue: Number(saved.annualRevenue) || 6000000,
           monthlyBurn: Number(saved.burn || saved.monthlyBurn) || 150000,
           cashOnHand: Number(saved.cash || saved.cashOnHand) || 1200000,
-          teamSize: Number(saved.teamSize) || 15,
-          grossMargin: Number(saved.grossMargin) || 82,
+          teamSize: Number(saved.teamSize) || 10,
+          grossMargin: Number(saved.grossMargin) || 80,
         });
       }
     } catch {}

@@ -30,63 +30,15 @@ interface TaskItem {
   createdAt?: string;
 }
 
-const DEFAULT_INITIAL_TASKS: TaskItem[] = [
-  {
-    id: "task_1",
-    title: "Review enterprise proposal & client retainer terms",
-    owner: "Dharmendar Shah (Founder)",
-    gap: "Client Retainers",
-    priority: "critical",
-    status: "in_progress",
-    category: "Revenue Ops",
-  },
-  {
-    id: "task_2",
-    title: "Audit operational SaaS & vendor burn for ₹15,000/mo optimization",
-    owner: "Dharmendar Shah (Founder)",
-    gap: "Cash Runway",
-    priority: "high",
-    status: "todo",
-    category: "Unit Economics",
-  },
-  {
-    id: "task_3",
-    title: "Finalize quarterly GST filing and Input Tax Credit (ITC) reconciliation",
-    owner: "Finance Lead",
-    gap: "Tax Compliance",
-    priority: "medium",
-    status: "todo",
-    category: "Compliance",
-  },
-  {
-    id: "task_4",
-    title: "Deploy outbound B2B customer acquisition sprint for SalesPal",
-    owner: "Growth Lead",
-    gap: "Pipeline Velocity",
-    priority: "high",
-    status: "todo",
-    category: "Customer Acquisition",
-  },
-  {
-    id: "task_5",
-    title: "Deliver weekly executive briefing to core team & stakeholders",
-    owner: "Dharmendar Shah (Founder)",
-    gap: "Operations Governance",
-    priority: "medium",
-    status: "done",
-    category: "Governance",
-  },
-];
-
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<TaskItem[]>(DEFAULT_INITIAL_TASKS);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [founderName, setFounderName] = useState("Dharmendar Shah");
+  const [founderName, setFounderName] = useState("Founder");
 
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
-  const [newOwner, setNewOwner] = useState("Dharmendar Shah (Founder)");
+  const [newOwner, setNewOwner] = useState("Founder / Executive");
   const [newGap, setNewGap] = useState("Cash Runway");
   const [newPriority, setNewPriority] = useState<TaskItem["priority"]>("high");
   const [newStatus, setNewStatus] = useState<TaskItem["status"]>("todo");

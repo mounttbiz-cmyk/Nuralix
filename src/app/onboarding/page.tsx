@@ -1719,7 +1719,7 @@ export default function OnboardingPage() {
                         setFounderName(e.target.value);
                         if (errors.founderName) setErrors(prev => ({ ...prev, founderName: "" }));
                       }}
-                      placeholder="e.g. Alex Sharma"
+                      placeholder="e.g. Founder Name"
                       className={`w-full px-3 py-2 rounded-lg bg-surface-2 border text-text focus:ring-1 focus:ring-brass ${
                         errors.founderName ? "border-rust ring-1 ring-rust/50" : "border-line"
                       }`}

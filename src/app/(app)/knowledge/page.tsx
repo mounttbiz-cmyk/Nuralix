@@ -66,7 +66,7 @@ export default function KnowledgeHubPage() {
   const [activeDoc, setActiveDoc] = useState<KnowledgeDoc | null>(null);
   const [activeNews, setActiveNews] = useState<BusinessNewsItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [companyName, setCompanyName] = useState("SalesPal");
+  const [companyName, setCompanyName] = useState("Your Business");
   const [isRefreshingNews, setIsRefreshingNews] = useState(false);
 
   // Close modals when Escape key is pressed

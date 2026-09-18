@@ -203,10 +203,10 @@ export async function DELETE() {
     // Reset default business values
     db.prepare(`
       UPDATE businesses SET
-        name = 'Apex Analytics',
+        name = 'BizzPal Enterprise',
         industry = 'saas',
         industry_label = 'B2B SaaS & Cloud Platforms',
-        founder_name = 'Alex Sharma',
+        founder_name = 'Founder',
         team_size = 15,
         annual_revenue = 6000000,
         monthly_revenue = 500000,
@@ -218,12 +218,12 @@ export async function DELETE() {
 
     return NextResponse.json({
       success: true,
-      message: "Restored baseline demo business data",
+      message: "Restored baseline enterprise business data",
       business: {
-        name: "Apex Analytics",
+        name: "BizzPal Enterprise",
         industry: "saas",
         industryLabel: "B2B SaaS & Cloud Platforms",
-        founderName: "Alex Sharma",
+        founderName: "Founder",
         teamSize: 15,
         annualRevenue: 6000000,
         monthlyRevenue: 500000,

@@ -209,9 +209,9 @@ export default function IntegrationsPage() {
   const [genericModalItem, setGenericModalItem] = useState<IntegrationItem | null>(null);
 
   // Business Profile Context
-  const [companyName, setCompanyName] = useState<string>("SalesPal");
-  const [founderName, setFounderName] = useState<string>("Dharmendar Shah");
-  const [currentUserEmail, setCurrentUserEmail] = useState<string>("mounttbiz@gmail.com");
+  const [companyName, setCompanyName] = useState<string>("Your Enterprise");
+  const [founderName, setFounderName] = useState<string>("Founder");
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>("owner@yourcompany.com");
 
   // Stripe Modal State
   const [stripeApiKey, setStripeApiKey] = useState<string>("");

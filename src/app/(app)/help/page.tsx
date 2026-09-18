@@ -38,8 +38,8 @@ interface SupportTicket {
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedFaq, setExpandedFaq] = useState<string | null>("faq-1");
-  const [companyName, setCompanyName] = useState("Apex Technologies");
-  const [founderName, setFounderName] = useState("Alex Sharma");
+  const [companyName, setCompanyName] = useState("Your Enterprise");
+  const [founderName, setFounderName] = useState("Executive Founder");
 
   // Form state
   const [ticketSubject, setTicketSubject] = useState("");

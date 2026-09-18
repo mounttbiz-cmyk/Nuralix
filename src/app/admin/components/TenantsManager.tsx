@@ -423,7 +423,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                   <input
                     type="text"
                     required
-                    placeholder="e.g. SalesPal Technologies"
+                    placeholder="e.g. Acme Technologies"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-cyan-500 font-semibold"
@@ -435,7 +435,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Dharmendar Shah"
+                    placeholder="e.g. Founder Name"
                     value={form.founderName}
                     onChange={(e) => setForm({ ...form, founderName: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-cyan-500"

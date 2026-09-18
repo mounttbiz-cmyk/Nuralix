@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Users,
   ShieldCheck,
@@ -14,7 +14,9 @@ import {
   Sliders,
   Sparkles,
   FileText,
-  AlertTriangle
+  AlertTriangle,
+  Trash2,
+  RotateCw
 } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 import { PortalModal } from "@/components/ui/PortalModal";
@@ -30,127 +32,125 @@ interface TeamMember {
   lastActive: string;
 }
 
-const DEFAULT_MEMBERS: TeamMember[] = [
-  {
-    id: "mem_1",
-    name: "Alex Sharma",
-    email: "alex@apextechnologies.in",
-    role: "Owner",
-    department: "Executive Office",
-    twoFactor: true,
-    status: "active",
-    lastActive: "Just now",
-  },
-  {
-    id: "mem_2",
-    name: "Dharmendar Shah",
-    email: "dharmendar@salespal.io",
-    role: "Executive",
-    department: "Corporate Strategy",
-    twoFactor: true,
-    status: "active",
-    lastActive: "15m ago",
-  },
-  {
-    id: "mem_3",
-    name: "Priya Nair",
-    email: "priya@apextechnologies.in",
-    role: "Manager",
-    department: "Operations & Delivery",
-    twoFactor: false,
-    status: "active",
-    lastActive: "1h ago",
-  },
-  {
-    id: "mem_4",
-    name: "Karan Verma",
-    email: "karan@apextechnologies.in",
-    role: "Operator",
-    department: "Finance & Accounting",
-    twoFactor: true,
-    status: "active",
-    lastActive: "3h ago",
-  },
-  {
-    id: "mem_5",
-    name: "Astra (CEO Copilot)",
-    email: "astra.ai@bizzpal.internal",
-    role: "Executive",
-    department: "Autonomous Strategy",
-    twoFactor: true,
-    status: "active",
-    lastActive: "Real-time engine",
-  },
-  {
-    id: "mem_6",
-    name: "Marcus (CFO Copilot)",
-    email: "marcus.ai@bizzpal.internal",
-    role: "Executive",
-    department: "Autonomous Finance",
-    twoFactor: true,
-    status: "active",
-    lastActive: "Real-time engine",
-  },
-];
-
-const AUDIT_LOGS = [
-  { id: "log_1", action: "Google Workspace OAuth token refreshed", user: "System", time: "12m ago", ip: "103.21.244.1" },
-  { id: "log_2", action: "Decision Simulator: Scenario 'Hire 5 Engineers' run", user: "Alex Sharma", time: "45m ago", ip: "14.139.60.2" },
-  { id: "log_3", action: "Discretionary spend alert dispatched to Slack", user: "Marcus (CFO AI)", time: "2h ago", ip: "Internal" },
-  { id: "log_4", action: "Member role updated: Priya Nair promoted to Executive", user: "Alex Sharma", time: "1 day ago", ip: "14.139.60.2" },
-];
+interface AuditLog {
+  id: string;
+  action: string;
+  user: string;
+  time: string;
+  ip: string;
+}
 
 export default function TeamPage() {
-  const [members, setMembers] = useState<TeamMember[]>(DEFAULT_MEMBERS);
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState<"members" | "roles" | "audit" | "sso">("members");
   const [searchQuery, setSearchQuery] = useState("");
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<TeamMember["role"]>("Manager");
+  const [inviteDept, setInviteDept] = useState("Operations & Delivery");
+  const [invite2FA, setInvite2FA] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   // Close invite modal on Escape
   useEscapeKey(() => setIsInviteOpen(false), isInviteOpen);
 
-  React.useEffect(() => {
+  const fetchTeamData = async () => {
     try {
-      const saved = localStorage.getItem("bizzpal_team_members");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setMembers(parsed);
+      setLoading(true);
+      const res = await fetch("/api/team");
+      const data = await res.json();
+      if (data.success) {
+        if (Array.isArray(data.members) && data.members.length > 0) {
+          setMembers(data.members);
+        }
+        if (Array.isArray(data.auditLogs)) {
+          setAuditLogs(data.auditLogs);
         }
       }
     } catch (e) {
-      // ignore
+      console.error("Failed to fetch team data:", e);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchTeamData();
   }, []);
 
-  const handleInvite = (e: React.FormEvent) => {
+  const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteEmail.trim()) return;
-    const newMember: TeamMember = {
-      id: `mem_${Date.now()}`,
-      name: inviteName.trim() || inviteEmail.split("@")[0],
-      email: inviteEmail.trim(),
-      role: inviteRole,
-      department: "Cross-functional",
-      twoFactor: false,
-      status: "invited",
-      lastActive: "Pending invitation",
-    };
-    setMembers(prev => {
-      const updated = [...prev, newMember];
-      try {
-        localStorage.setItem("bizzpal_team_members", JSON.stringify(updated));
-      } catch (e) {
-        // ignore
+    if (!inviteEmail.trim() || submitting) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/team", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: inviteName.trim() || inviteEmail.split("@")[0],
+          email: inviteEmail.trim(),
+          role: inviteRole,
+          department: inviteDept,
+          twoFactor: invite2FA,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setInviteName("");
+        setInviteEmail("");
+        setIsInviteOpen(false);
+        await fetchTeamData();
       }
-      return updated;
-    });
-    setInviteName("");
-    setInviteEmail("");
-    setIsInviteOpen(false);
+    } catch (err) {
+      console.error("Failed to invite member:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleToggle2FA = async (member: TeamMember) => {
+    try {
+      await fetch("/api/team", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: member.id,
+          twoFactor: !member.twoFactor,
+        }),
+      });
+      await fetchTeamData();
+    } catch (err) {
+      console.error("Failed to toggle 2FA:", err);
+    }
+  };
+
+  const handleChangeRole = async (memberId: string, newRole: string) => {
+    try {
+      await fetch("/api/team", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: memberId,
+          role: newRole,
+        }),
+      });
+      await fetchTeamData();
+    } catch (err) {
+      console.error("Failed to update role:", err);
+    }
+  };
+
+  const handleDeleteMember = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to revoke access and remove ${name}?`)) return;
+    try {
+      await fetch(`/api/team?id=${id}`, { method: "DELETE" });
+      await fetchTeamData();
+    } catch (err) {
+      console.error("Failed to remove member:", err);
+    }
   };
 
   const filteredMembers = members.filter(
@@ -179,14 +179,24 @@ export default function TeamPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsInviteOpen(true)}
-          className="px-4 py-2 rounded-lg bg-brass text-white text-xs font-bold shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
-        >
-          <UserPlus className="w-3.5 h-3.5" />
-          <span>Invite Team Member</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={fetchTeamData}
+            title="Refresh team"
+            className="p-2 rounded-lg border border-line bg-surface hover:bg-surface-2 text-text-muted hover:text-text cursor-pointer"
+          >
+            <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-brass" : ""}`} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsInviteOpen(true)}
+            className="px-4 py-2 rounded-lg bg-brass text-white text-xs font-bold shadow-md hover:brightness-110 btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Invite Team Member</span>
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -195,7 +205,7 @@ export default function TeamPage() {
           { id: "members", label: `Members (${members.length})` },
           { id: "roles", label: "Permission Matrix" },
           { id: "sso", label: "Enterprise SSO / SAML" },
-          { id: "audit", label: "Security Audit Logs" },
+          { id: "audit", label: `Security Audit Logs (${auditLogs.length})` },
         ].map(tab => (
           <button
             key={tab.id}
@@ -220,98 +230,156 @@ export default function TeamPage() {
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
               <input
                 type="text"
+                placeholder="Search employees or copilots..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search colleagues…"
-                className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-surface border border-line text-xs text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
+                className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-surface border border-line text-xs text-text placeholder:text-text-muted focus:outline-none focus:border-brass"
               />
             </div>
-            <span className="text-xs text-text-muted">
-              {filteredMembers.length} seats active
-            </span>
           </div>
 
           <div className="rounded-xl border border-line bg-surface overflow-hidden shadow-xs">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-line bg-surface-2 text-text-muted text-[10px] uppercase tracking-wider font-bold">
-                  <th className="p-3">Member</th>
-                  <th className="p-3">Role</th>
-                  <th className="p-3">Department</th>
-                  <th className="p-3">2FA Security</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Last Active</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {filteredMembers.map(m => (
-                  <tr key={m.id} className="hover:bg-surface-2/50 transition-colors">
-                    <td className="p-3">
-                      <div className="font-bold text-text">{m.name}</div>
-                      <div className="text-[11px] text-text-muted">{m.email}</div>
-                    </td>
-                    <td className="p-3">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                          m.role === "Owner"
-                            ? "bg-amber-400/10 text-amber-400 border-amber-400/30"
-                            : m.role === "Executive"
-                            ? "bg-purple-400/10 text-purple-400 border-purple-400/30"
-                            : "bg-surface-2 text-text-muted border-line"
-                        }`}
-                      >
-                        {m.role}
-                      </span>
-                    </td>
-                    <td className="p-3 text-text-muted">{m.department}</td>
-                    <td className="p-3">
-                      {m.twoFactor ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-jade font-medium">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          <span>Enabled</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-rust font-medium">
-                          <Lock className="w-3.5 h-3.5" />
-                          <span>Not set</span>
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      <span
-                        className={`text-[10px] font-semibold ${
-                          m.status === "active" ? "text-jade" : "text-amber-400"
-                        }`}
-                      >
-                        ● {m.status === "active" ? "Active" : "Invited"}
-                      </span>
-                    </td>
-                    <td className="p-3 text-[11px] text-text-muted font-mono">{m.lastActive}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-line bg-surface-2/60 text-[11px] font-bold text-text-muted uppercase tracking-wider">
+                    <th className="p-3">Member / Entity</th>
+                    <th className="p-3">Role</th>
+                    <th className="p-3">Department</th>
+                    <th className="p-3">2FA Security</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3">Activity</th>
+                    <th className="p-3 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {loading && members.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-xs text-text-muted">
+                        Loading live team directory from SQLite database...
+                      </td>
+                    </tr>
+                  ) : filteredMembers.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-xs text-text-muted">
+                        No team members match the search filter.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredMembers.map(m => (
+                      <tr key={m.id} className="hover:bg-surface-2/40 transition-colors">
+                        <td className="p-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-full bg-brass/10 border border-brass/30 flex items-center justify-center font-bold text-brass text-[11px]">
+                              {m.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-text flex items-center gap-1.5">
+                                <span>{m.name}</span>
+                                {m.role === "Owner" && (
+                                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-brass/20 text-brass font-bold">
+                                    FOUNDER
+                                  </span>
+                                )}
+                                {m.email.includes(".ai@") && (
+                                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-jade/20 text-jade font-bold">
+                                    AUTONOMOUS AGENT
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-text-muted font-mono">{m.email}</div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="p-3">
+                          <select
+                            value={m.role}
+                            disabled={m.role === "Owner"}
+                            onChange={e => handleChangeRole(m.id, e.target.value)}
+                            className="px-2 py-1 rounded bg-surface border border-line text-[11px] font-semibold text-text focus:outline-none focus:border-brass cursor-pointer disabled:opacity-60"
+                          >
+                            <option value="Owner">Owner</option>
+                            <option value="Executive">Executive</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Operator">Operator</option>
+                          </select>
+                        </td>
+
+                        <td className="p-3 text-text-muted font-medium">{m.department}</td>
+
+                        <td className="p-3">
+                          <button
+                            type="button"
+                            onClick={() => handleToggle2FA(m)}
+                            className="inline-flex items-center gap-1 cursor-pointer"
+                            title="Click to toggle 2FA requirement"
+                          >
+                            {m.twoFactor ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] text-jade font-semibold">
+                                <ShieldCheck className="w-3.5 h-3.5" /> Enforced
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] text-rust font-semibold">
+                                <AlertTriangle className="w-3.5 h-3.5" /> Optional
+                              </span>
+                            )}
+                          </button>
+                        </td>
+
+                        <td className="p-3">
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                              m.status === "active"
+                                ? "bg-jade/15 text-jade"
+                                : m.status === "invited"
+                                ? "bg-brass/15 text-brass"
+                                : "bg-rust/15 text-rust"
+                            }`}
+                          >
+                            {m.status}
+                          </span>
+                        </td>
+
+                        <td className="p-3 text-text-muted text-[11px]">{m.lastActive}</td>
+
+                        <td className="p-3 text-right">
+                          {m.role !== "Owner" && !m.email.includes(".ai@") && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMember(m.id, m.name)}
+                              className="p-1.5 rounded text-text-muted hover:text-rust hover:bg-rust/10 transition-colors cursor-pointer"
+                              title="Revoke access"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Tab 2: Permission Matrix */}
+      {/* Tab 2: Roles Matrix */}
       {selectedTab === "roles" && (
-        <div className="p-5 rounded-2xl border border-line bg-surface shadow-xs space-y-4">
+        <div className="rounded-xl border border-line bg-surface overflow-hidden shadow-xs space-y-4 p-5">
           <div>
-            <h2 className="text-xs font-bold text-text uppercase tracking-wider">
-              Role-Based Access Control (RBAC)
-            </h2>
+            <h2 className="text-xs font-bold text-text uppercase tracking-wider">Role-Based Access Control (RBAC)</h2>
             <p className="text-xs text-text-muted mt-0.5">
-              Granular permission matrix across Core, Executive Intelligence, Operations, and Platform.
+              Granular capability authorization enforced at the API gateway layer across all business intelligence domains.
             </p>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left border-collapse">
+            <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-line bg-surface-2 text-[10px] uppercase font-bold text-text-muted">
-                  <th className="p-3">Module / Capability</th>
+                <tr className="border-b border-line bg-surface-2/60 text-[11px] font-bold text-text-muted">
+                  <th className="p-3">Capability / Surface</th>
                   <th className="p-3 text-center">Owner</th>
                   <th className="p-3 text-center">Executive</th>
                   <th className="p-3 text-center">Manager</th>
@@ -320,43 +388,43 @@ export default function TeamPage() {
               </thead>
               <tbody className="divide-y divide-line text-[11px]">
                 <tr>
-                  <td className="p-3 font-semibold text-text">Dashboard & Health Score</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
-                  <td className="p-3 text-center text-jade">✓ Read</td>
-                  <td className="p-3 text-center text-jade">✓ Read</td>
-                </tr>
-                <tr>
-                  <td className="p-3 font-semibold text-text">AI Workspace (All 7 Agents)</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
-                  <td className="p-3 text-center text-text-muted">Filtered</td>
+                  <td className="p-3 font-semibold text-text">Live Cash Ledger & Financial Projections</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-text-muted">Read-only</td>
                   <td className="p-3 text-center text-rust">✕ Restricted</td>
                 </tr>
                 <tr>
-                  <td className="p-3 font-semibold text-text">Decision Simulator & Scenario Commit</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
+                  <td className="p-3 font-semibold text-text">Autonomous AI Copilots (Astra / Marcus)</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-text-muted">Prompt-only</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-semibold text-text">Company Legal & GST Tax Compliance Hub</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Edit</td>
                   <td className="p-3 text-center text-rust">✕ Restricted</td>
                   <td className="p-3 text-center text-rust">✕ Restricted</td>
                 </tr>
                 <tr>
                   <td className="p-3 font-semibold text-text">Tools & Financial Calculators</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
                   <td className="p-3 text-center text-text-muted">Read-only</td>
                 </tr>
                 <tr>
                   <td className="p-3 font-semibold text-text">Visual Workflows Execution & Build</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
-                  <td className="p-3 text-center text-jade">✓ Edit</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Edit</td>
                   <td className="p-3 text-center text-rust">✕ Restricted</td>
                 </tr>
                 <tr>
                   <td className="p-3 font-semibold text-text">Integrations & API Tokens</td>
-                  <td className="p-3 text-center text-jade">✓ Full</td>
+                  <td className="p-3 text-center text-jade font-bold">✓ Full</td>
                   <td className="p-3 text-center text-rust">✕ Restricted</td>
                   <td className="p-3 text-center text-rust">✕ Restricted</td>
                   <td className="p-3 text-center text-rust">✕ Restricted</td>
@@ -415,20 +483,26 @@ export default function TeamPage() {
             <h2 className="text-xs font-bold text-text uppercase tracking-wider">
               Immutable Security Audit Trail
             </h2>
-            <span className="text-[11px] text-text-muted">Retained for 365 days</span>
+            <span className="text-[11px] text-text-muted">Live SQLite Log Stream</span>
           </div>
           <div className="divide-y divide-line text-xs">
-            {AUDIT_LOGS.map(log => (
-              <div key={log.id} className="p-3.5 flex items-center justify-between hover:bg-surface-2/40 transition-colors">
-                <div className="space-y-0.5">
-                  <span className="font-semibold text-text">{log.action}</span>
-                  <div className="text-[11px] text-text-muted">
-                    Initiated by <span className="text-brass font-medium">{log.user}</span> · IP: {log.ip}
-                  </div>
-                </div>
-                <span className="text-[11px] text-text-muted font-mono">{log.time}</span>
+            {auditLogs.length === 0 ? (
+              <div className="p-6 text-center text-xs text-text-muted">
+                No audit events recorded yet.
               </div>
-            ))}
+            ) : (
+              auditLogs.map(log => (
+                <div key={log.id} className="p-3.5 flex items-center justify-between hover:bg-surface-2/40 transition-colors">
+                  <div className="space-y-0.5">
+                    <span className="font-semibold text-text">{log.action}</span>
+                    <div className="text-[11px] text-text-muted">
+                      Initiated by <span className="text-brass font-medium">{log.user}</span> · IP: {log.ip}
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-text-muted font-mono">{log.time}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
@@ -449,41 +523,66 @@ export default function TeamPage() {
 
           <form onSubmit={handleInvite} className="space-y-3 text-xs">
             <div>
-              <label className="font-semibold text-text block mb-1">Full Name</label>
+              <label className="block text-[11px] font-semibold text-text-muted mb-1">Full Name</label>
               <input
                 type="text"
+                placeholder="e.g. Rahul Mehta"
                 value={inviteName}
                 onChange={e => setInviteName(e.target.value)}
-                placeholder="e.g. Rahul Mehta"
-                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:border-brass"
               />
             </div>
+
             <div>
-              <label className="font-semibold text-text block mb-1">Work Email</label>
+              <label className="block text-[11px] font-semibold text-text-muted mb-1">Company Email *</label>
               <input
                 type="email"
                 required
+                placeholder="colleague@yourcompany.com"
                 value={inviteEmail}
                 onChange={e => setInviteEmail(e.target.value)}
-                placeholder="e.g. rahul@company.in"
-                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:border-brass"
               />
             </div>
-            <div>
-              <label className="font-semibold text-text block mb-1">Role & Authority</label>
-              <select
-                value={inviteRole}
-                onChange={e => setInviteRole(e.target.value as any)}
-                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:ring-1 focus:ring-brass"
-              >
-                <option value="Operator">Operator (Read & Execute assigned actions)</option>
-                <option value="Manager">Manager (Team oversight & tool execution)</option>
-                <option value="Executive">Executive (Full AI Copilot & decision authority)</option>
-                <option value="Owner">Owner (Enterprise root billing & permissions)</option>
-              </select>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-text-muted mb-1">Role Permission</label>
+                <select
+                  value={inviteRole}
+                  onChange={e => setInviteRole(e.target.value as any)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:border-brass"
+                >
+                  <option value="Executive">Executive</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Operator">Operator</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-text-muted mb-1">Department</label>
+                <input
+                  type="text"
+                  value={inviteDept}
+                  onChange={e => setInviteDept(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-line text-text focus:outline-none focus:border-brass"
+                />
+              </div>
             </div>
 
-            <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
+            <div className="pt-2 flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={invite2FA}
+                  onChange={e => setInvite2FA(e.target.checked)}
+                  className="rounded border-line text-brass focus:ring-brass"
+                />
+                <span className="text-[11px] text-text">Require 2FA Authentication</span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-4 border-t border-line">
               <button
                 type="button"
                 onClick={() => setIsInviteOpen(false)}
@@ -493,9 +592,10 @@ export default function TeamPage() {
               </button>
               <button
                 type="submit"
-                className="px-4 py-1.5 rounded-lg bg-brass text-white font-bold btn-tactile hover:brightness-110 cursor-pointer"
+                disabled={submitting}
+                className="px-4 py-1.5 rounded-lg bg-brass text-white font-bold hover:brightness-110 shadow-xs cursor-pointer disabled:opacity-60"
               >
-                Send Invitation
+                {submitting ? "Inviting..." : "Send Invitation"}
               </button>
             </div>
           </form>

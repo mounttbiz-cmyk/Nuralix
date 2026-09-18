@@ -13,7 +13,7 @@ interface BriefingWidgetProps {
 }
 
 export function BriefingWidget({
-  companyName: propCompanyName = "Apex Technologies",
+  companyName: propCompanyName = "Your Enterprise",
   ceoName = "Astra",
 }: BriefingWidgetProps) {
   const [companyName, setCompanyName] = useState(propCompanyName);

@@ -44,7 +44,7 @@ export default function AutomationsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [companyName, setCompanyName] = useState("Apex Technologies");
+  const [companyName, setCompanyName] = useState("Your Enterprise");
 
   // Close Create modal when Escape key is pressed
   useEscapeKey(() => setIsCreateModalOpen(false), isCreateModalOpen);
@@ -155,6 +155,28 @@ export default function AutomationsPage() {
     },
   ]);
 
+  const fetchAutomations = async () => {
+    try {
+      const res = await fetch("/api/automations");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.automations) && data.automations.length > 0) {
+        setAutomations(data.automations.map((a: any) => ({
+          id: a.id,
+          name: a.title,
+          category: (a.category?.toLowerCase()?.includes("finance") ? "finance" : a.category?.toLowerCase()?.includes("risk") ? "risk" : a.category?.toLowerCase()?.includes("comm") ? "communications" : "operations") as any,
+          trigger: a.trigger,
+          action: a.action,
+          enabled: a.enabled,
+          frequency: "Event-driven real-time",
+          lastRun: a.lastRun,
+          runsCount: a.executions || 1,
+        })));
+      }
+    } catch (err) {
+      console.error("Failed to load automations:", err);
+    }
+  };
+
   useEffect(() => {
     try {
       const savedProfile = localStorage.getItem("bizzpal_business_profile");
@@ -162,36 +184,29 @@ export default function AutomationsPage() {
         const parsed = JSON.parse(savedProfile);
         if (parsed.name) setCompanyName(parsed.name);
       }
+    } catch (e) {}
 
-      const savedAutomations = localStorage.getItem("bizzpal_automations");
-      if (savedAutomations) {
-        const parsed = JSON.parse(savedAutomations);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setAutomations(parsed);
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
+    fetchAutomations();
   }, []);
 
-  const toggleAutomation = (id: string) => {
-    setAutomations(prev => {
-      const updated = prev.map(a => {
-        if (a.id === id) {
-          const newState = !a.enabled;
-          notify(`Automation '${a.name}' is now ${newState ? "ACTIVE" : "PAUSED"}.`);
-          return { ...a, enabled: newState };
-        }
-        return a;
+  const toggleAutomation = async (id: string) => {
+    const target = automations.find(a => a.id === id);
+    const nextState = !target?.enabled;
+
+    setAutomations(prev =>
+      prev.map(a => (a.id === id ? { ...a, enabled: nextState } : a))
+    );
+
+    try {
+      await fetch("/api/automations", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, enabled: nextState }),
       });
-      try {
-        localStorage.setItem("bizzpal_automations", JSON.stringify(updated));
-      } catch (e) {
-        // ignore
-      }
-      return updated;
-    });
+      notify(`Automation is now ${nextState ? "ACTIVE" : "PAUSED"}.`);
+    } catch (e) {
+      notify("Failed to persist automation toggle.");
+    }
   };
 
   const handleTestTrigger = (automation: AutomationItem) => {
@@ -211,36 +226,35 @@ export default function AutomationsPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleCreateAutomation = (e: React.FormEvent) => {
+  const handleCreateAutomation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim() || !newTrigger.trim() || !newAction.trim()) return;
 
-    const newItem: AutomationItem = {
-      id: `auto-${Date.now()}`,
-      name: newName.trim(),
-      category: newCategory,
-      trigger: newTrigger.trim(),
-      action: newAction.trim(),
-      enabled: true,
-      frequency: "Continuous autonomous watch",
-      lastRun: "Pending initial cycle",
-      runsCount: 0,
-    };
-
-    setAutomations(prev => {
-      const updated = [newItem, ...prev];
-      try {
-        localStorage.setItem("bizzpal_automations", JSON.stringify(updated));
-      } catch (e) {
-        // ignore
+    try {
+      const res = await fetch("/api/automations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newName.trim(),
+          description: newAction.trim(),
+          trigger: newTrigger.trim(),
+          action: newAction.trim(),
+          category: newCategory,
+          toolKey: "custom",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        notify(`Autonomous rule '${newName}' deployed successfully.`);
+        setNewName("");
+        setNewTrigger("");
+        setNewAction("");
+        setIsCreateModalOpen(false);
+        await fetchAutomations();
       }
-      return updated;
-    });
-    setIsCreateModalOpen(false);
-    setNewName("");
-    setNewTrigger("");
-    setNewAction("");
-    notify(`New workflow '${newItem.name}' activated!`);
+    } catch (err) {
+      notify("Failed to deploy new automation.");
+    }
   };
 
   const filteredAutomations = selectedCategory === "all"

@@ -259,6 +259,43 @@ db.exec(`
     business_profile TEXT,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS team_members (
+    id TEXT PRIMARY KEY,
+    business_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    role TEXT NOT NULL, -- 'Owner' | 'Executive' | 'Manager' | 'Operator'
+    department TEXT NOT NULL,
+    two_factor INTEGER DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'active', -- 'active' | 'invited' | 'suspended'
+    last_active TEXT,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS team_audit_logs (
+    id TEXT PRIMARY KEY,
+    business_id TEXT NOT NULL,
+    action TEXT NOT NULL,
+    user_name TEXT NOT NULL,
+    ip_address TEXT,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS business_automations (
+    id TEXT PRIMARY KEY,
+    business_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    trigger_event TEXT NOT NULL,
+    action_event TEXT NOT NULL,
+    tool_key TEXT NOT NULL,
+    category TEXT NOT NULL,
+    enabled INTEGER DEFAULT 1,
+    executions_count INTEGER DEFAULT 0,
+    last_run TEXT,
+    created_at TEXT NOT NULL
+  );
 `);
 
 // Migrate existing registered_users table if business_profile column is missing
@@ -399,11 +436,11 @@ if (!existingBiz) {
     )
   `).run(
     DEFAULT_BUSINESS_ID,
-    "Apex Analytics",
+    "BizzPal Enterprise",
     "saas",
     "B2B SaaS & Cloud Platforms",
-    "Alex Sharma",
-    "apexanalytics.in",
+    "Founder",
+    "bizzpal.in",
     15,
     6000000,
     500000,
@@ -453,10 +490,10 @@ for (const tool of DEFAULT_TOOLS) {
 const taskCountRow = db.prepare("SELECT COUNT(*) as count FROM tasks WHERE business_id = ?").get(DEFAULT_BUSINESS_ID) as { count: number };
 if (taskCountRow.count === 0) {
   const initialTasks = [
-    { id: "task_1", title: "Audit discretionary SaaS tool spend for ₹12,000/mo savings", status: "todo", owner: "Marcus (CFO)", gap: "Cash Runway", priority: "high" },
-    { id: "task_2", title: "Draft enterprise SLA & multi-year contract for top account", status: "in_progress", owner: "Astra (CEO)", gap: "Client Concentration", priority: "critical" },
-    { id: "task_3", title: "Launch secondary customer acquisition sprint on LinkedIn", status: "todo", owner: "Elena (CMO)", gap: "Channel Concentration", priority: "medium" },
-    { id: "task_4", title: "Document sales script & handover discovery calls", status: "done", owner: "Founder", gap: "Founder Dependency", priority: "high" },
+    { id: "task_1", title: "Audit discretionary SaaS tool spend for ₹12,000/mo savings", status: "todo", owner: "Marcus (CFO Copilot)", gap: "Cash Runway", priority: "high" },
+    { id: "task_2", title: "Draft enterprise SLA & multi-year contract for top account", status: "in_progress", owner: "Astra (CEO Copilot)", gap: "Client Concentration", priority: "critical" },
+    { id: "task_3", title: "Launch secondary customer acquisition sprint on LinkedIn", status: "todo", owner: "Growth Lead", gap: "Channel Concentration", priority: "medium" },
+    { id: "task_4", title: "Document core operational handover & runbooks", status: "done", owner: "Executive Owner", gap: "Governance", priority: "high" },
   ];
 
   for (const t of initialTasks) {
@@ -464,6 +501,117 @@ if (taskCountRow.count === 0) {
       INSERT INTO tasks (id, business_id, title, owner, gap, priority, status, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(t.id, DEFAULT_BUSINESS_ID, t.title, t.owner, t.gap, t.priority, t.status, new Date().toISOString());
+  }
+}
+
+// Ensure initial seed team members exist
+const teamCountRow = db.prepare("SELECT COUNT(*) as count FROM team_members WHERE business_id = ?").get(DEFAULT_BUSINESS_ID) as { count: number };
+if (teamCountRow.count === 0) {
+  const initialTeam = [
+    {
+      id: "mem_owner",
+      name: "Executive Founder",
+      email: "founder@bizzpal.in",
+      role: "Owner",
+      department: "Executive Office",
+      two_factor: 1,
+      status: "active",
+      last_active: "Active now"
+    },
+    {
+      id: "mem_astra",
+      name: "Astra (CEO Copilot)",
+      email: "astra.ai@bizzpal.internal",
+      role: "Executive",
+      department: "Autonomous Strategy",
+      two_factor: 1,
+      status: "active",
+      last_active: "Real-time engine"
+    },
+    {
+      id: "mem_marcus",
+      name: "Marcus (CFO Copilot)",
+      email: "marcus.ai@bizzpal.internal",
+      role: "Executive",
+      department: "Autonomous Finance",
+      two_factor: 1,
+      status: "active",
+      last_active: "Real-time engine"
+    }
+  ];
+
+  for (const m of initialTeam) {
+    db.prepare(`
+      INSERT INTO team_members (id, business_id, name, email, role, department, two_factor, status, last_active, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(m.id, DEFAULT_BUSINESS_ID, m.name, m.email, m.role, m.department, m.two_factor, m.status, m.last_active, new Date().toISOString());
+  }
+
+  db.prepare(`
+    INSERT INTO team_audit_logs (id, business_id, action, user_name, ip_address, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(`log_${Date.now()}`, DEFAULT_BUSINESS_ID, "Workspace security & autonomous copilot initialization", "System Engine", "127.0.0.1", new Date().toISOString());
+}
+
+// Ensure initial seed automations exist
+const automationsCountRow = db.prepare("SELECT COUNT(*) as count FROM business_automations WHERE business_id = ?").get(DEFAULT_BUSINESS_ID) as { count: number };
+if (automationsCountRow.count === 0) {
+  const initialAutomations = [
+    {
+      id: "auto_discretionary_spend",
+      title: "Discretionary SaaS Spend Guard",
+      description: "Dispatches instant alert to Slack & WhatsApp when monthly software charges exceed budget by ₹10,000.",
+      trigger_event: "Monthly burn variance > 5%",
+      action_event: "Dispatch notification & log audit event",
+      tool_key: "slack",
+      category: "Finance & Cost Guard",
+      enabled: 1,
+      executions_count: 14,
+      last_run: "Today at 09:15"
+    },
+    {
+      id: "auto_checkin_digest",
+      title: "Daily Executive Check-in Digest",
+      description: "Summarizes team blocker and cash updates from the daily check-in into an executive intelligence brief.",
+      trigger_event: "Daily at 17:00 UTC+5:30",
+      action_event: "Generate executive briefing card & dispatch to WhatsApp",
+      tool_key: "whatsapp",
+      category: "Operations & Governance",
+      enabled: 1,
+      executions_count: 42,
+      last_run: "Yesterday at 17:00"
+    },
+    {
+      id: "auto_stripe_revenue_sync",
+      title: "Stripe Revenue & Inbound Webhook Sync",
+      description: "Auto-reconciles customer payments, calculates net ARR, and updates runway forecast in real time.",
+      trigger_event: "Stripe charge.succeeded webhook",
+      action_event: "Update database cash ledger & refresh runway KPI",
+      tool_key: "stripe",
+      category: "Revenue Operations",
+      enabled: 1,
+      executions_count: 128,
+      last_run: "30m ago"
+    },
+    {
+      id: "auto_tax_gst_reminder",
+      title: "Quarterly GST & Tax Filing Reminder",
+      description: "Auto-computes projected Input Tax Credit (ITC) balance and schedules reconciliation meeting 5 days before filing.",
+      trigger_event: "Calendar: 5 days prior to GST deadline",
+      action_event: "Schedule Google Calendar review & notify finance owner",
+      tool_key: "google_calendar",
+      category: "Compliance & Tax",
+      enabled: 1,
+      executions_count: 3,
+      last_run: "1 week ago"
+    }
+  ];
+
+  for (const a of initialAutomations) {
+    db.prepare(`
+      INSERT INTO business_automations (id, business_id, title, description, trigger_event, action_event, tool_key, category, enabled, executions_count, last_run, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(a.id, DEFAULT_BUSINESS_ID, a.title, a.description, a.trigger_event, a.action_event, a.tool_key, a.category, a.enabled, a.executions_count, a.last_run, new Date().toISOString());
   }
 }
 
@@ -1160,6 +1308,181 @@ export function getActiveBusiness() {
     console.error("Error fetching active business:", e);
   }
   return null;
+}
+
+export function getTeamMembers(businessId = DEFAULT_BUSINESS_ID) {
+  try {
+    const rows = db.prepare("SELECT * FROM team_members WHERE business_id = ? ORDER BY created_at ASC").all(businessId) as any[];
+    return rows.map(r => ({
+      id: r.id,
+      name: r.name,
+      email: r.email,
+      role: r.role,
+      department: r.department,
+      twoFactor: Boolean(r.two_factor),
+      status: r.status,
+      lastActive: r.last_active || "Active recently",
+      createdAt: r.created_at
+    }));
+  } catch (err) {
+    console.error("getTeamMembers error:", err);
+    return [];
+  }
+}
+
+export function addTeamMember(member: {
+  businessId?: string;
+  name: string;
+  email: string;
+  role: string;
+  department: string;
+  twoFactor?: boolean;
+}) {
+  const bId = member.businessId || DEFAULT_BUSINESS_ID;
+  const id = `mem_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+  const now = new Date().toISOString();
+  db.prepare(`
+    INSERT INTO team_members (id, business_id, name, email, role, department, two_factor, status, last_active, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'active', 'Invited today', ?)
+  `).run(id, bId, member.name, member.email, member.role, member.department, member.twoFactor ? 1 : 0, now);
+
+  addTeamAuditLog({
+    businessId: bId,
+    action: `New team member onboarded: ${member.name} (${member.role} in ${member.department})`,
+    userName: "Executive Admin",
+    ipAddress: "127.0.0.1"
+  });
+
+  return { id, ...member, status: "active", lastActive: "Invited today" };
+}
+
+export function updateTeamMember(id: string, updates: any) {
+  const sets: string[] = [];
+  const vals: any[] = [];
+  if (updates.name !== undefined) { sets.push("name = ?"); vals.push(updates.name); }
+  if (updates.email !== undefined) { sets.push("email = ?"); vals.push(updates.email); }
+  if (updates.role !== undefined) { sets.push("role = ?"); vals.push(updates.role); }
+  if (updates.department !== undefined) { sets.push("department = ?"); vals.push(updates.department); }
+  if (updates.twoFactor !== undefined) { sets.push("two_factor = ?"); vals.push(updates.twoFactor ? 1 : 0); }
+  if (updates.status !== undefined) { sets.push("status = ?"); vals.push(updates.status); }
+
+  if (sets.length === 0) return false;
+  vals.push(id);
+  db.prepare(`UPDATE team_members SET ${sets.join(", ")} WHERE id = ?`).run(...vals);
+
+  addTeamAuditLog({
+    businessId: updates.businessId || DEFAULT_BUSINESS_ID,
+    action: `Team member updated: ID ${id}`,
+    userName: "Executive Admin",
+    ipAddress: "127.0.0.1"
+  });
+  return true;
+}
+
+export function deleteTeamMember(id: string, businessId = DEFAULT_BUSINESS_ID) {
+  const member = db.prepare("SELECT name FROM team_members WHERE id = ?").get(id) as any;
+  const res = db.prepare("DELETE FROM team_members WHERE id = ?").run(id);
+  if (member?.name) {
+    addTeamAuditLog({
+      businessId,
+      action: `Team member access revoked & removed: ${member.name}`,
+      userName: "Executive Admin",
+      ipAddress: "127.0.0.1"
+    });
+  }
+  return res.changes > 0;
+}
+
+export function getTeamAuditLogs(businessId = DEFAULT_BUSINESS_ID) {
+  try {
+    const rows = db.prepare("SELECT * FROM team_audit_logs WHERE business_id = ? ORDER BY created_at DESC LIMIT 30").all(businessId) as any[];
+    return rows.map(r => ({
+      id: r.id,
+      action: r.action,
+      user: r.user_name,
+      time: r.created_at,
+      ip: r.ip_address || "Internal"
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
+export function addTeamAuditLog(log: { businessId?: string; action: string; userName: string; ipAddress?: string }) {
+  try {
+    db.prepare(`
+      INSERT INTO team_audit_logs (id, business_id, action, user_name, ip_address, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(`log_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`, log.businessId || DEFAULT_BUSINESS_ID, log.action, log.userName, log.ipAddress || "Internal", new Date().toISOString());
+  } catch (err) {
+    console.error("addTeamAuditLog error:", err);
+  }
+}
+
+export function getBusinessAutomations(businessId = DEFAULT_BUSINESS_ID) {
+  try {
+    const rows = db.prepare("SELECT * FROM business_automations WHERE business_id = ? ORDER BY created_at DESC").all(businessId) as any[];
+    return rows.map(r => ({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      trigger: r.trigger_event,
+      action: r.action_event,
+      toolKey: r.tool_key,
+      category: r.category,
+      enabled: Boolean(r.enabled),
+      executions: r.executions_count,
+      lastRun: r.last_run || "Pending trigger",
+      createdAt: r.created_at
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
+export function toggleBusinessAutomation(id: string, enabled?: boolean) {
+  if (enabled !== undefined) {
+    db.prepare("UPDATE business_automations SET enabled = ? WHERE id = ?").run(enabled ? 1 : 0, id);
+  } else {
+    db.prepare("UPDATE business_automations SET enabled = CASE WHEN enabled = 1 THEN 0 ELSE 1 END WHERE id = ?").run(id);
+  }
+  return true;
+}
+
+export function createBusinessAutomation(data: {
+  businessId?: string;
+  title: string;
+  description: string;
+  trigger: string;
+  action: string;
+  toolKey: string;
+  category: string;
+}) {
+  const id = `auto_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+  db.prepare(`
+    INSERT INTO business_automations (id, business_id, title, description, trigger_event, action_event, tool_key, category, enabled, executions_count, last_run, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0, 'Ready', ?)
+  `).run(id, data.businessId || DEFAULT_BUSINESS_ID, data.title, data.description, data.trigger, data.action, data.toolKey, data.category, new Date().toISOString());
+  return { id, ...data, enabled: true, executions: 0, lastRun: "Ready" };
+}
+
+export function getLiveBusinessContext(businessId = DEFAULT_BUSINESS_ID) {
+  const biz = getActiveBusiness();
+  const tasks = db.prepare("SELECT * FROM tasks WHERE business_id = ?").all(businessId) as any[];
+  const tools = db.prepare("SELECT * FROM integrations WHERE business_id = ?").all(businessId) as any[];
+  const uploads = db.prepare("SELECT * FROM business_data_uploads WHERE business_id = ? AND active = 1").all(businessId) as any[];
+
+  return {
+    business: biz,
+    taskStats: {
+      total: tasks.length,
+      todo: tasks.filter(t => t.status === "todo").length,
+      inProgress: tasks.filter(t => t.status === "in_progress").length,
+      done: tasks.filter(t => t.status === "done").length,
+    },
+    integrations: tools.map(t => ({ toolKey: t.tool_key, name: t.name, status: t.status })),
+    uploads: uploads.map(u => ({ id: u.id, fileName: u.file_name, metricsSummary: u.metrics_summary }))
+  };
 }
 
 export { db };

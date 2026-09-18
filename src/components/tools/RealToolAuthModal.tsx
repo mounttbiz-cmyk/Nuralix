@@ -465,7 +465,7 @@ export function RealToolAuthModal({
                     required
                     value={slackWorkspace}
                     onChange={e => setSlackWorkspace(e.target.value)}
-                    placeholder="salespal.slack.com or acme-corp"
+                    placeholder="yourcompany.slack.com or workspace-name"
                     className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text placeholder:text-text-muted/50 focus:outline-none focus:border-brass"
                   />
                 </div>

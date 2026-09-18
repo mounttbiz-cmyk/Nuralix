@@ -92,9 +92,9 @@ export function IntegrationAppViewerModal({
   toolCategory = "business",
   toolTagline = "",
   status = "not_connected",
-  currentUserEmail = "founder@salespal.in",
-  companyName = "SalesPal",
-  founderName = "Dharmendar Shah",
+  currentUserEmail = "founder@yourcompany.com",
+  companyName = "Your Enterprise",
+  founderName = "Founder",
   apiKey = null,
   config = {},
   onUpdateStatus,
@@ -132,11 +132,13 @@ export function IntegrationAppViewerModal({
   useEffect(() => {
     if (!isOpen || !toolId) return;
 
-    const savedEmail = config?.accountEmail || currentUserEmail || "founder@salespal.in";
+    const savedEmail = config?.accountEmail || currentUserEmail || "founder@yourcompany.com";
     setAccountEmailInput(savedEmail);
     setApiSecretInput(apiKey || config?.apiKey || "");
     setCalendarScopeInput(config?.calendarScope || "primary");
     setSlackChannelInput(config?.channel || "#executive-briefings");
+
+    const compDomain = (companyName || "company").toLowerCase().replace(/[^a-z0-9]/g, '') || "company";
 
     // Initialize Realistic Google Calendar Meetings
     const initialMeetings: ScheduledMeeting[] = [
@@ -158,11 +160,11 @@ export function IntegrationAppViewerModal({
         startTime: "Tomorrow, 10:00 AM",
         endTime: "10:45 AM",
         durationMinutes: 45,
-        attendees: [savedEmail, "finance.lead@salespal.in"],
+        attendees: [savedEmail, `finance.lead@${compDomain}.in`],
         meetLink: "meet.google.com/nur-fin-q3",
         category: "executive",
         status: "upcoming",
-        summaryNotes: "Deep-dive into ₹1,50,000 monthly burn pace and receivables collection cycle.",
+        summaryNotes: "Deep-dive into monthly burn pace and receivables collection cycle.",
       },
       {
         id: "gcal_3",
@@ -182,7 +184,7 @@ export function IntegrationAppViewerModal({
         startTime: "Friday, 11:00 AM",
         endTime: "11:45 AM",
         durationMinutes: 45,
-        attendees: [savedEmail, "team@salespal.in (5 Members)"],
+        attendees: [savedEmail, `team@${compDomain}.in (All Members)`],
         meetLink: "meet.google.com/nur-team-sync",
         category: "internal",
         status: "upcoming",
@@ -269,7 +271,7 @@ export function IntegrationAppViewerModal({
 
   if (!isOpen || !toolId) return null;
 
-  const connectedAccountEmail = config?.accountEmail || currentUserEmail || "founder@salespal.in";
+  const connectedAccountEmail = config?.accountEmail || currentUserEmail || "founder@yourcompany.com";
   const isConnected = status === "connected";
 
   // Trigger Live Refresh / Resync
@@ -637,7 +639,7 @@ export function IntegrationAppViewerModal({
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. client@acme.com, lead@salespal.in"
+                            placeholder="e.g. client@acme.com, colleague@yourcompany.com"
                             value={newMeetingAttendees}
                             onChange={e => setNewMeetingAttendees(e.target.value)}
                             className="w-full px-3 py-2 rounded-lg bg-surface border border-line text-text text-xs focus:ring-1 focus:ring-brass"
@@ -848,7 +850,7 @@ export function IntegrationAppViewerModal({
                     </div>
                     <div className="text-right">
                       <span className="text-[10px] text-text-muted uppercase font-bold block">Workspace</span>
-                      <span className="font-bold text-text">salespal.slack.com</span>
+                      <span className="font-bold text-text font-mono text-xs">{companyName ? `${companyName.toLowerCase().replace(/[^a-z0-9]/g, "")}.slack.com` : "workspace.slack.com"}</span>
                     </div>
                   </div>
 
