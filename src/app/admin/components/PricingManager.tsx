@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   CreditCard,
   Plus,
@@ -38,6 +39,28 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
   const [planList, setPlanList] = useState<PlanTier[]>(plans);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<PlanTier | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent background scroll and support ESC key to close modal
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsModalOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isModalOpen]);
 
   const [form, setForm] = useState<{
     id: string;
@@ -262,23 +285,39 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
       </div>
 
       {/* MODAL: ADD / EDIT PLAN */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 my-8">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-text">
-                {editingPlan ? `Edit Tier: ${editingPlan.name}` : "Create New Pricing Tier"}
-              </h3>
+      {mounted && isModalOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsModalOpen(false);
+          }}
+        >
+          <div className="relative w-full max-w-xl max-h-[88vh] flex flex-col bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-surface shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-500">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-text">
+                    {editingPlan ? `Edit Tier: ${editingPlan.name}` : "Create New Pricing Tier"}
+                  </h3>
+                  <p className="text-[11px] text-text-muted">Subscription pricing, feature entitlements & badges</p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-surface-2 text-text-muted cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-surface-2 text-text-muted hover:text-text cursor-pointer transition-colors"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveModal} className="space-y-3.5 text-xs">
+            {/* Scrollable Form Body */}
+            <form id="pricing-modal-form" onSubmit={handleSaveModal} className="overflow-y-auto px-6 py-4 space-y-3.5 text-xs flex-1">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-semibold text-text">Tier Name</label>
@@ -374,26 +413,39 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
                   <span className="text-xs font-semibold text-text">Highlight as Popular Tier</span>
                 </label>
               </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-3.5 py-1.5 rounded-xl border border-line text-text-muted hover:text-text cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer transition-all shadow-sm"
-                >
-                  {saving ? "Saving..." : "Save Pricing Tier"}
-                </button>
-              </div>
             </form>
+
+            {/* Sticky Footer */}
+            <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-line bg-surface-2/60 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-line text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="pricing-modal-form"
+                disabled={saving}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#1a1206] btn-gold-gradient hover:brightness-110 active:scale-[0.98] cursor-pointer transition-all shadow-md shadow-[0_8px_20px_-6px_var(--gold-glow)] flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {saving ? (
+                  <>
+                    <div className="w-3.5 h-3.5 rounded-full border-2 border-[#1a1206] border-t-transparent animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save Pricing Tier</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

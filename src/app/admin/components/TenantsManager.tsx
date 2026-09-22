@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Building2,
   Users,
@@ -52,6 +53,28 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
   const [saving, setSaving] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent background scroll and support ESC key to close modal
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsModalOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isModalOpen]);
 
   const [form, setForm] = useState({
     name: "",
@@ -411,26 +434,39 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
       </div>
 
       {/* MODAL: ADD / EDIT TENANT */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 my-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-gold" />
-                <h3 className="text-sm font-bold text-text">
-                  {editingTenant ? `Edit Enterprise: ${editingTenant.name}` : "Create New Enterprise Profile"}
-                </h3>
+      {mounted && isModalOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsModalOpen(false);
+          }}
+        >
+          <div className="relative w-full max-w-xl max-h-[88vh] flex flex-col bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-surface shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center text-gold">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-text">
+                    {editingTenant ? `Edit Enterprise: ${editingTenant.name}` : "Create New Enterprise Profile"}
+                  </h3>
+                  <p className="text-[11px] text-text-muted">Multi-tenant profile & financial telemetry</p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-surface-2 text-text-muted cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-surface-2 text-text-muted hover:text-text cursor-pointer transition-colors"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-4 text-xs">
+            {/* Scrollable Form Body */}
+            <form id="tenant-modal-form" onSubmit={handleSave} className="overflow-y-auto px-6 py-4 space-y-4 text-xs flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-semibold text-text">Company / Brand Name</label>
@@ -513,7 +549,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
               </div>
 
               {/* Financial Inputs */}
-              <div className="p-3.5 rounded-xl bg-surface-2/60 border border-line space-y-3">
+              <div className="p-4 rounded-xl bg-surface-2/60 border border-line space-y-3">
                 <span className="text-[11px] font-bold text-text uppercase tracking-wider block">
                   Financial Baseline & Health Metrics (₹)
                 </span>
@@ -548,7 +584,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                       step="1000"
                       value={form.monthlyBurn}
                       onChange={(e) => setForm({ ...form, monthlyBurn: Number(e.target.value) })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-surface border border-line text-rose-400 font-mono"
+                      className="w-full px-3 py-1.5 rounded-lg bg-surface border border-line text-rose-400 font-mono font-bold"
                     />
                   </div>
                   <div className="space-y-1">
@@ -558,31 +594,49 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                       step="10000"
                       value={form.cashOnHand}
                       onChange={(e) => setForm({ ...form, cashOnHand: Number(e.target.value) })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-surface border border-line text-emerald-400 font-mono"
+                      className="w-full px-3 py-1.5 rounded-lg bg-surface border border-line text-emerald-400 font-mono font-bold"
                     />
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-3.5 py-1.5 rounded-xl border border-line text-text-muted hover:text-text cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer transition-all shadow-sm"
-                >
-                  {saving ? "Saving..." : editingTenant ? "Save Changes" : "Create Enterprise"}
-                </button>
-              </div>
             </form>
+
+            {/* Sticky Footer */}
+            <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-line bg-surface-2/60 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-line text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="tenant-modal-form"
+                disabled={saving}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#1a1206] btn-gold-gradient hover:brightness-110 active:scale-[0.98] cursor-pointer transition-all shadow-md shadow-[0_8px_20px_-6px_var(--gold-glow)] flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {saving ? (
+                  <>
+                    <div className="w-3.5 h-3.5 rounded-full border-2 border-[#1a1206] border-t-transparent animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : editingTenant ? (
+                  <>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save Changes</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create Enterprise</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

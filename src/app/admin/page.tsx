@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -1124,10 +1125,10 @@ export default function AdminPage() {
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab + (activeTab === "website" ? subWebTab : "")}
-              initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
               className="space-y-6"
             >
 
@@ -2451,23 +2452,37 @@ export default function AdminPage() {
       {/* ============================================================= */}
       {/* MODAL: ADD / EDIT NAVIGATION BUTTON                           */}
       {/* ============================================================= */}
-      {isNavModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-text">
-                {editingNavItem ? `Edit Navigation Button: ${editingNavItem.label}` : "Add New Navigation Button"}
-              </h3>
+      {!loading && isNavModalOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsNavModalOpen(false);
+          }}
+        >
+          <div className="relative w-full max-w-lg max-h-[88vh] flex flex-col bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-surface shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center text-gold">
+                  <Compass className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-text">
+                    {editingNavItem ? `Edit Navigation Button: ${editingNavItem.label}` : "Add New Navigation Button"}
+                  </h3>
+                  <p className="text-[11px] text-text-muted">Sidebar navigation routing & icon configuration</p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsNavModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-surface-2 text-text-muted cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-surface-2 text-text-muted hover:text-text cursor-pointer transition-colors"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveNavItem} className="space-y-3 text-xs">
+            <form id="nav-modal-form" onSubmit={handleSaveNavItem} className="overflow-y-auto px-6 py-4 space-y-3.5 text-xs flex-1">
               <div className="space-y-1">
                 <label className="font-semibold text-text">Button Label</label>
                 <input
@@ -2476,7 +2491,7 @@ export default function AdminPage() {
                   placeholder="e.g. Financial Models"
                   value={navForm.label}
                   onChange={(e) => setNavForm({ ...navForm, label: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold font-semibold"
                 />
               </div>
 
@@ -2553,48 +2568,64 @@ export default function AdminPage() {
                   />
                 </div>
               </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
-                <button
-                  type="button"
-                  onClick={() => setIsNavModalOpen(false)}
-                  className="px-3.5 py-1.5 rounded-xl border border-line text-text-muted hover:text-text cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer"
-                >
-                  {saving ? "Saving..." : "Save Navigation Button"}
-                </button>
-              </div>
             </form>
+
+            <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-line bg-surface-2/60 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsNavModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-line text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="nav-modal-form"
+                disabled={saving}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#1a1206] btn-gold-gradient hover:brightness-110 active:scale-[0.98] cursor-pointer transition-all shadow-md shadow-[0_8px_20px_-6px_var(--gold-glow)]"
+              >
+                {saving ? "Saving..." : "Save Navigation Button"}
+              </button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ============================================================= */}
       {/* MODAL: ADD / EDIT DASHBOARD WIDGET                            */}
       {/* ============================================================= */}
-      {isWidgetModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-text">
-                {editingWidget ? `Edit Widget: ${editingWidget.title}` : "Add Dashboard Widget"}
-              </h3>
+      {!loading && isWidgetModalOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsWidgetModalOpen(false);
+          }}
+        >
+          <div className="relative w-full max-w-lg max-h-[88vh] flex flex-col bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-surface shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center text-gold">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-text">
+                    {editingWidget ? `Edit Widget: ${editingWidget.title}` : "Add Dashboard Widget"}
+                  </h3>
+                  <p className="text-[11px] text-text-muted">Executive dashboard modular card configuration</p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsWidgetModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-surface-2 text-text-muted cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-surface-2 text-text-muted hover:text-text cursor-pointer transition-colors"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveWidget} className="space-y-3 text-xs">
+            <form id="widget-modal-form" onSubmit={handleSaveWidget} className="overflow-y-auto px-6 py-4 space-y-3.5 text-xs flex-1">
               <div className="space-y-1">
                 <label className="font-semibold text-text">Widget Display Title</label>
                 <input
@@ -2603,7 +2634,7 @@ export default function AdminPage() {
                   placeholder="e.g. Sales Pipeline Velocity"
                   value={widgetForm.title}
                   onChange={(e) => setWidgetForm({ ...widgetForm, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold font-semibold"
                 />
               </div>
 
@@ -2650,48 +2681,64 @@ export default function AdminPage() {
                   />
                 </div>
               </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
-                <button
-                  type="button"
-                  onClick={() => setIsWidgetModalOpen(false)}
-                  className="px-3.5 py-1.5 rounded-xl border border-line text-text-muted hover:text-text cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer"
-                >
-                  {saving ? "Saving..." : "Save Widget"}
-                </button>
-              </div>
             </form>
+
+            <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-line bg-surface-2/60 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsWidgetModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-line text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="widget-modal-form"
+                disabled={saving}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#1a1206] btn-gold-gradient hover:brightness-110 active:scale-[0.98] cursor-pointer transition-all shadow-md shadow-[0_8px_20px_-6px_var(--gold-glow)]"
+              >
+                {saving ? "Saving..." : "Save Widget"}
+              </button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ============================================================= */}
       {/* MODAL: ADD / EDIT SPECIALIST TOOL                             */}
       {/* ============================================================= */}
-      {isToolModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-text">
-                {editingTool ? `Edit Tool: ${editingTool.name}` : "Add Specialist Tool"}
-              </h3>
+      {!loading && isToolModalOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsToolModalOpen(false);
+          }}
+        >
+          <div className="relative w-full max-w-lg max-h-[88vh] flex flex-col bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-surface shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center text-gold">
+                  <Wrench className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-text">
+                    {editingTool ? `Edit Tool: ${editingTool.name}` : "Add Specialist Tool"}
+                  </h3>
+                  <p className="text-[11px] text-text-muted">Business specialist calculator & entitlement settings</p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsToolModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-surface-2 text-text-muted cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-surface-2 text-text-muted hover:text-text cursor-pointer transition-colors"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveTool} className="space-y-3 text-xs">
+            <form id="tool-modal-form" onSubmit={handleSaveTool} className="overflow-y-auto px-6 py-4 space-y-3.5 text-xs flex-1">
               <div className="space-y-1">
                 <label className="font-semibold text-text">Tool Name</label>
                 <input
@@ -2700,7 +2747,7 @@ export default function AdminPage() {
                   placeholder="e.g. Valuation Multiples Calculator"
                   value={toolForm.name}
                   onChange={(e) => setToolForm({ ...toolForm, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold font-semibold"
                 />
               </div>
 
@@ -2784,26 +2831,28 @@ export default function AdminPage() {
                   </div>
                 </label>
               </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
-                <button
-                  type="button"
-                  onClick={() => setIsToolModalOpen(false)}
-                  className="px-3.5 py-1.5 rounded-xl border border-line text-text-muted hover:text-text cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer"
-                >
-                  {saving ? "Saving..." : "Save Tool"}
-                </button>
-              </div>
             </form>
+
+            <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-line bg-surface-2/60 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsToolModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-line text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="tool-modal-form"
+                disabled={saving}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#1a1206] btn-gold-gradient hover:brightness-110 active:scale-[0.98] cursor-pointer transition-all shadow-md shadow-[0_8px_20px_-6px_var(--gold-glow)]"
+              >
+                {saving ? "Saving..." : "Save Tool"}
+              </button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
