@@ -97,7 +97,7 @@ export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: We
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
             <span>{saving ? "Saving..." : "Save Navigation Settings"}</span>
@@ -195,7 +195,7 @@ export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: We
                 <button
                   type="button"
                   onClick={handleAddNavLink}
-                  className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold cursor-pointer shrink-0"
+                  className="px-3 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white text-xs font-bold cursor-pointer shrink-0"
                 >
                   Add Link
                 </button>
@@ -221,7 +221,7 @@ export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: We
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
             <span>{saving ? "Saving..." : "Save Vision Words"}</span>
@@ -278,7 +278,7 @@ export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: We
               <button
                 type="button"
                 onClick={handleAddVisionWord}
-                className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-brass hover:brightness-110 text-white text-xs font-bold cursor-pointer"
               >
                 Add Word
               </button>
@@ -303,7 +303,7 @@ export function WebsiteCmsExtra({ config, onChange, onSave, saving, subTab }: We
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+          className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
         >
           <Save className="w-3.5 h-3.5" />
           <span>{saving ? "Saving..." : "Save Announcement"}</span>

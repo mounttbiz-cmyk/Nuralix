@@ -40,6 +40,7 @@ import { NavItem } from "@/config/schemas/nav";
 import { WidgetDef } from "@/config/schemas/widget";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
+import { StatusBadge } from "@/components/ui/Badge";
 import { TenantsManager } from "./components/TenantsManager";
 import { UsersManager } from "./components/UsersManager";
 import { PricingManager } from "./components/PricingManager";
@@ -647,7 +648,7 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[500px] gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-gold border-t-transparent animate-spin" />
         <p className="text-xs font-semibold text-text-muted font-mono">
           Loading Superadmin...
         </p>
@@ -704,18 +705,18 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col lg:flex-row relative selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
+    <div className="min-h-screen bg-bg text-text flex flex-col lg:flex-row relative selection:bg-gold/30 selection:text-gold overflow-x-hidden">
       {/* Ambient background radiant aura mesh matching 3D Gold Logo */}
-      <div className="fixed top-[-10%] left-[20%] w-[650px] h-[350px] bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-transparent blur-[120px] pointer-events-none -z-10" />
-      <div className="fixed bottom-[-10%] right-[15%] w-[550px] h-[350px] bg-gradient-to-tl from-amber-500/10 via-yellow-500/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed top-[-10%] left-[20%] w-[650px] h-[350px] bg-gradient-to-br from-gold/10 via-gold/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed bottom-[-10%] right-[15%] w-[550px] h-[350px] bg-gradient-to-tl from-gold/10 via-gold/5 to-transparent blur-[120px] pointer-events-none -z-10" />
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[1000] px-4 py-3 rounded-xl bg-slate-900/95 dark:bg-black/95 text-white border border-amber-500/30 shadow-2xl shadow-amber-500/10 flex items-center gap-2.5 text-xs font-semibold animate-fade-in backdrop-blur-md">
+        <div className="fixed bottom-6 right-6 z-[1000] px-4 py-3 rounded-xl bg-surface/95 text-text border border-gold/30 shadow-2xl shadow-[0_16px_40px_-10px_var(--gold-glow)] flex items-center gap-2.5 text-xs font-semibold animate-fade-in backdrop-blur-md">
           {toastMessage.toLowerCase().includes("error") || toastMessage.toLowerCase().includes("failed") ? (
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-rust shrink-0" />
           ) : (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />
           )}
           <span>{toastMessage}</span>
         </div>
@@ -724,7 +725,7 @@ export default function AdminPage() {
       {/* Mobile Drawer Backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-bg/70 backdrop-blur-sm lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -741,7 +742,7 @@ export default function AdminPage() {
         <div className="p-4 border-b border-line/60 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400/25 via-yellow-500/10 to-transparent border border-amber-400/40 flex items-center justify-center p-1 shadow-md shadow-amber-500/15 ring-1 ring-amber-400/30">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gold/25 via-gold/10 to-transparent border border-gold/40 flex items-center justify-center p-1 shadow-md shadow-[0_6px_16px_-4px_var(--gold-glow)] ring-1 ring-gold/30">
                 <Image
                   src="/logo-icon.png"
                   alt="BizzPal Logo"
@@ -752,8 +753,8 @@ export default function AdminPage() {
               </div>
               <div>
                 <h1 className="text-sm font-bold text-text tracking-tight flex items-center gap-1.5">
-                  <span>Bizz<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">Pal</span> OS</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono font-bold border border-amber-500/30">PRO</span>
+                  <span>Bizz<span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-light to-gold">Pal</span> OS</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gold/15 text-gold font-mono font-bold border border-gold/30">PRO</span>
                 </h1>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -795,7 +796,7 @@ export default function AdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                     isActive
-                      ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
+                      ? "bg-gold/[0.12] text-gold border border-gold/30 font-bold"
                       : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
                   }`}
                 >
@@ -826,7 +827,7 @@ export default function AdminPage() {
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                 activeTab === "plans"
-                  ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
+                  ? "bg-gold/[0.12] text-gold border border-gold/30 font-bold"
                   : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
               }`}
             >
@@ -868,7 +869,7 @@ export default function AdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                     isActive
-                      ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
+                      ? "bg-gold/[0.12] text-gold border border-gold/30 font-bold"
                       : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
                   }`}
                 >
@@ -908,7 +909,7 @@ export default function AdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                     isActive
-                      ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
+                      ? "bg-gold/[0.12] text-gold border border-gold/30 font-bold"
                       : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
                   }`}
                 >
@@ -939,7 +940,7 @@ export default function AdminPage() {
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                 activeTab === "tools"
-                  ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
+                  ? "bg-gold/[0.12] text-gold border border-gold/30 font-bold"
                   : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
               }`}
             >
@@ -947,7 +948,7 @@ export default function AdminPage() {
                 <Wrench className="w-4 h-4" />
                 <span>Tools & Calculators</span>
               </div>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono font-bold border border-amber-500/30">
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-gold/15 text-gold font-mono font-bold border border-gold/30">
                 {tools.length}
               </span>
             </button>
@@ -966,7 +967,7 @@ export default function AdminPage() {
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                 activeTab === "audit"
-                  ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
+                  ? "bg-gold/[0.12] text-gold border border-gold/30 font-bold"
                   : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
               }`}
             >
@@ -998,7 +999,7 @@ export default function AdminPage() {
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 rounded-xl text-[11px] font-semibold bg-surface border border-line hover:border-cyan-500/40 text-text hover:text-cyan-500 flex items-center justify-center gap-1.5 transition-all shadow-xs"
+              className="p-2 rounded-xl text-[11px] font-semibold bg-surface border border-line hover:border-gold/40 text-text hover:text-gold flex items-center justify-center gap-1.5 transition-all shadow-xs"
             >
               <Globe className="w-3.5 h-3.5" />
               <span>Website ↗</span>
@@ -1007,7 +1008,7 @@ export default function AdminPage() {
               href="/dashboard"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 rounded-xl text-[11px] font-semibold bg-surface border border-line hover:border-cyan-500/40 text-text hover:text-cyan-500 flex items-center justify-center gap-1.5 transition-all shadow-xs"
+              className="p-2 rounded-xl text-[11px] font-semibold bg-surface border border-line hover:border-gold/40 text-text hover:text-gold flex items-center justify-center gap-1.5 transition-all shadow-xs"
             >
               <Compass className="w-3.5 h-3.5" />
               <span>App ↗</span>
@@ -1056,14 +1057,13 @@ export default function AdminPage() {
 
           <div className="flex items-center gap-3">
             {/* Live System Pulse Indicator */}
-            <div className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              <span>SUPERADMIN SECURE</span>
+            <div className="hidden xl:flex">
+              <StatusBadge label="Superadmin Secure" tone="live" pulse />
             </div>
 
             <Link
               href="/dashboard"
-              className="hidden md:flex items-center gap-1.5 text-xs text-text-muted hover:text-text px-3 py-1.5 rounded-xl border border-line/70 hover:border-amber-500/40 hover:bg-surface-2 transition-all font-semibold"
+              className="hidden md:flex items-center gap-1.5 text-xs text-text-muted hover:text-text px-3 py-1.5 rounded-xl border border-line/70 hover:border-gold/40 hover:bg-surface-2 transition-all font-semibold"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Exit to App</span>
@@ -1074,7 +1074,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => handleOpenNavModal()}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 flex items-center gap-1.5 transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#1a1206] btn-gold-gradient flex items-center gap-1.5 transition-all shadow-lg shadow-[0_8px_20px_-6px_var(--gold-glow)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Nav Button</span>
@@ -1085,7 +1085,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => handleOpenWidgetModal()}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 flex items-center gap-1.5 transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#1a1206] btn-gold-gradient flex items-center gap-1.5 transition-all shadow-lg shadow-[0_8px_20px_-6px_var(--gold-glow)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Widget</span>
@@ -1096,7 +1096,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => handleOpenToolModal()}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 flex items-center gap-1.5 transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#1a1206] btn-gold-gradient flex items-center gap-1.5 transition-all shadow-lg shadow-[0_8px_20px_-6px_var(--gold-glow)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Tool</span>
@@ -1174,7 +1174,7 @@ export default function AdminPage() {
                 onClick={() => setSubWebTab(st.id as any)}
                 className={`px-3 py-1.5 rounded-md transition-all cursor-pointer whitespace-nowrap ${
                   subWebTab === st.id
-                    ? "bg-surface-2 text-cyan-600 dark:text-cyan-400 font-bold"
+                    ? "bg-surface-2 text-gold font-bold"
                     : "text-text-muted hover:text-text"
                 }`}
               >
@@ -1197,7 +1197,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => saveSection("website", websiteConfig, "Saved section visibility switches")}
                   disabled={saving}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{saving ? "Saving..." : "Save Visibility Changes"}</span>
@@ -1209,7 +1209,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-text">Top Announcement Banner</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 font-mono">Optional</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold font-mono">Optional</span>
                   </div>
                   <button
                     type="button"
@@ -1245,7 +1245,7 @@ export default function AdminPage() {
                             announcement: { ...websiteConfig.announcement, text: e.target.value },
                           })
                         }
-                        className="w-full px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-cyan-500"
+                        className="w-full px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-gold"
                       />
                     </div>
                     <div className="space-y-1">
@@ -1261,7 +1261,7 @@ export default function AdminPage() {
                               announcement: { ...websiteConfig.announcement, linkText: e.target.value },
                             })
                           }
-                          className="w-1/2 px-2 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-cyan-500"
+                          className="w-1/2 px-2 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-gold"
                         />
                         <input
                           type="text"
@@ -1273,7 +1273,7 @@ export default function AdminPage() {
                               announcement: { ...websiteConfig.announcement, linkUrl: e.target.value },
                             })
                           }
-                          className="w-1/2 px-2 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-cyan-500"
+                          className="w-1/2 px-2 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-gold"
                         />
                       </div>
                     </div>
@@ -1336,7 +1336,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => saveSection("website", websiteConfig, "Saved Hero section & buttons")}
                   disabled={saving}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{saving ? "Saving..." : "Save Hero Changes"}</span>
@@ -1355,7 +1355,7 @@ export default function AdminPage() {
                         hero: { ...websiteConfig.hero, eyebrow: e.target.value },
                       })
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-gold"
                   />
                 </div>
 
@@ -1370,7 +1370,7 @@ export default function AdminPage() {
                         hero: { ...websiteConfig.hero, word: e.target.value },
                       })
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text font-mono focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text font-mono focus:outline-none focus:border-gold"
                   />
                 </div>
 
@@ -1385,13 +1385,13 @@ export default function AdminPage() {
                         hero: { ...websiteConfig.hero, subtitle: e.target.value },
                       })
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-xs text-text focus:outline-none focus:border-gold"
                   />
                 </div>
 
                 {/* Primary CTA Button */}
                 <div className="p-4 rounded-xl bg-surface-2/60 border border-line space-y-2.5">
-                  <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400 block">
+                  <span className="text-xs font-bold text-gold block">
                     Primary CTA Button (Solid Glow)
                   </span>
                   <div className="space-y-1">
@@ -1476,7 +1476,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => saveSection("website", websiteConfig, "Saved story scene copy")}
                   disabled={saving}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{saving ? "Saving..." : "Save Scenes Changes"}</span>
@@ -1786,7 +1786,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => saveSection("website", websiteConfig, "Saved About & Solutions content")}
                   disabled={saving}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{saving ? "Saving..." : "Save About/Solutions"}</span>
@@ -1863,7 +1863,7 @@ export default function AdminPage() {
                   {(websiteConfig.solutions?.cards || []).map((card: any, idx: number) => (
                     <div key={card.id || idx} className="p-3.5 rounded-xl bg-surface-2/60 border border-line space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400 font-mono">
+                        <span className="text-xs font-bold text-gold font-mono">
                           Card {card.num || `0${idx+1}`}
                         </span>
                         <span className="text-[10px] px-2 py-0.5 rounded bg-surface border border-line font-mono">
@@ -1919,7 +1919,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => saveSection("website", websiteConfig, "Saved contact details & socials")}
                   disabled={saving}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{saving ? "Saving..." : "Save Contact Info"}</span>
@@ -2050,7 +2050,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={() => handleOpenNavModal()}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md self-start sm:self-auto cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Navigation Button</span>
@@ -2079,7 +2079,7 @@ export default function AdminPage() {
                       <tr key={item.id} className="hover:bg-surface-2/40 transition-colors">
                         <td className="p-3 pl-4 font-mono text-text-muted">#{item.order}</td>
                         <td className="p-3 font-bold text-text">{item.label}</td>
-                        <td className="p-3 font-mono text-cyan-600 dark:text-cyan-400">{item.href}</td>
+                        <td className="p-3 font-mono text-gold">{item.href}</td>
                         <td className="p-3 font-mono text-text-muted">{item.icon}</td>
                         <td className="p-3">
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2 border border-line font-mono text-text-muted uppercase">
@@ -2195,7 +2195,7 @@ export default function AdminPage() {
                     <div
                       className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 ${
                         isEnabled
-                          ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-600 dark:text-cyan-400"
+                          ? "bg-gold/10 border-gold/30 text-gold"
                           : "bg-surface-2 border-line text-text-muted"
                       }`}
                     >
@@ -2240,7 +2240,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={() => handleOpenWidgetModal()}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md self-start sm:self-auto cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Custom Widget</span>
@@ -2262,7 +2262,7 @@ export default function AdminPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-xs font-bold text-text">{widget.title}</h3>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-mono font-semibold">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold font-mono font-semibold">
                         {widget.defaultSpan}/4 col span
                       </span>
                     </div>
@@ -2319,7 +2319,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={() => handleOpenToolModal()}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md self-start sm:self-auto cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add New Tool</span>
@@ -2344,7 +2344,7 @@ export default function AdminPage() {
                         {t.category}
                       </span>
                       {t.hasInteractiveCalculator && (
-                        <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 font-bold">
+                        <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-gold/15 text-gold font-bold">
                           Interactive Pop-up
                         </span>
                       )}
@@ -2438,7 +2438,7 @@ export default function AdminPage() {
       {/* MODAL: ADD / EDIT NAVIGATION BUTTON                           */}
       {/* ============================================================= */}
       {isNavModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-text">
@@ -2462,7 +2462,7 @@ export default function AdminPage() {
                   placeholder="e.g. Financial Models"
                   value={navForm.label}
                   onChange={(e) => setNavForm({ ...navForm, label: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold"
                 />
               </div>
 
@@ -2474,7 +2474,7 @@ export default function AdminPage() {
                   placeholder="e.g. /models or https://..."
                   value={navForm.href}
                   onChange={(e) => setNavForm({ ...navForm, href: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text font-mono focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text font-mono focus:outline-none focus:border-gold"
                 />
               </div>
 
@@ -2551,7 +2551,7 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold cursor-pointer"
+                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer"
                 >
                   {saving ? "Saving..." : "Save Navigation Button"}
                 </button>
@@ -2565,7 +2565,7 @@ export default function AdminPage() {
       {/* MODAL: ADD / EDIT DASHBOARD WIDGET                            */}
       {/* ============================================================= */}
       {isWidgetModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-text">
@@ -2589,7 +2589,7 @@ export default function AdminPage() {
                   placeholder="e.g. Sales Pipeline Velocity"
                   value={widgetForm.title}
                   onChange={(e) => setWidgetForm({ ...widgetForm, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold"
                 />
               </div>
 
@@ -2648,7 +2648,7 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold cursor-pointer"
+                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer"
                 >
                   {saving ? "Saving..." : "Save Widget"}
                 </button>
@@ -2662,7 +2662,7 @@ export default function AdminPage() {
       {/* MODAL: ADD / EDIT SPECIALIST TOOL                             */}
       {/* ============================================================= */}
       {isToolModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-text">
@@ -2686,7 +2686,7 @@ export default function AdminPage() {
                   placeholder="e.g. Valuation Multiples Calculator"
                   value={toolForm.name}
                   onChange={(e) => setToolForm({ ...toolForm, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold"
                 />
               </div>
 
@@ -2728,7 +2728,7 @@ export default function AdminPage() {
                   placeholder="Brief description of what this calculator or tool computes."
                   value={toolForm.description}
                   onChange={(e) => setToolForm({ ...toolForm, description: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold"
                 />
               </div>
 
@@ -2744,12 +2744,12 @@ export default function AdminPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-1">
-                <label className="inline-flex items-center gap-2 cursor-pointer p-2.5 rounded-xl bg-surface-2/60 border border-line hover:border-cyan-500/50 transition-colors">
+                <label className="inline-flex items-center gap-2 cursor-pointer p-2.5 rounded-xl bg-surface-2/60 border border-line hover:border-gold/50 transition-colors">
                   <input
                     type="checkbox"
                     checked={toolForm.enabled}
                     onChange={(e) => setToolForm({ ...toolForm, enabled: e.target.checked })}
-                    className="rounded border-line text-cyan-600 focus:ring-0"
+                    className="rounded border-line text-gold focus:ring-0"
                   />
                   <div className="flex flex-col">
                     <span className="text-xs font-semibold text-text">Tool Active</span>
@@ -2757,12 +2757,12 @@ export default function AdminPage() {
                   </div>
                 </label>
 
-                <label className="inline-flex items-center gap-2 cursor-pointer p-2.5 rounded-xl bg-surface-2/60 border border-line hover:border-cyan-500/50 transition-colors">
+                <label className="inline-flex items-center gap-2 cursor-pointer p-2.5 rounded-xl bg-surface-2/60 border border-line hover:border-gold/50 transition-colors">
                   <input
                     type="checkbox"
                     checked={toolForm.hasInteractiveCalculator}
                     onChange={(e) => setToolForm({ ...toolForm, hasInteractiveCalculator: e.target.checked })}
-                    className="rounded border-line text-cyan-600 focus:ring-0"
+                    className="rounded border-line text-gold focus:ring-0"
                   />
                   <div className="flex flex-col">
                     <span className="text-xs font-semibold text-text">Has Calculator</span>
@@ -2782,7 +2782,7 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold cursor-pointer"
+                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer"
                 >
                   {saving ? "Saving..." : "Save Tool"}
                 </button>

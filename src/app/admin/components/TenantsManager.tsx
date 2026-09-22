@@ -20,6 +20,7 @@ import {
   Save,
   RotateCcw,
 } from "lucide-react";
+import { StatusBadge } from "@/components/ui/Badge";
 
 interface Tenant {
   id: string;
@@ -215,7 +216,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
         <div className="p-4 rounded-2xl bg-surface border border-line shadow-theme">
           <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Registered Enterprises</span>
-            <Building2 className="w-4 h-4 text-cyan-500" />
+            <Building2 className="w-4 h-4 text-gold" />
           </div>
           <div className="text-2xl font-extrabold text-text mt-1.5">{stats.totalBusinesses || tenants.length}</div>
           <div className="text-[11px] text-text-muted mt-1 font-mono">Managed in SQLite</div>
@@ -224,18 +225,18 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
         <div className="p-4 rounded-2xl bg-surface border border-line shadow-theme">
           <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Total Annual Revenue</span>
-            <DollarSign className="w-4 h-4 text-emerald-500" />
+            <DollarSign className="w-4 h-4 text-jade" />
           </div>
           <div className="text-2xl font-extrabold text-text mt-1.5">
             ₹{((stats.totalAnnualRevenue || 0) / 100000).toFixed(1)}L
           </div>
-          <div className="text-[11px] text-emerald-500 mt-1 font-semibold">Live Enterprise ARR</div>
+          <div className="text-[11px] text-jade mt-1 font-semibold">Live Enterprise ARR</div>
         </div>
 
         <div className="p-4 rounded-2xl bg-surface border border-line shadow-theme">
           <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Monthly Operational Burn</span>
-            <TrendingUp className="w-4 h-4 text-rose-500" />
+            <TrendingUp className="w-4 h-4 text-rust" />
           </div>
           <div className="text-2xl font-extrabold text-text mt-1.5">
             ₹{((stats.totalMonthlyBurn || 0) / 100000).toFixed(1)}L
@@ -246,12 +247,12 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
         <div className="p-4 rounded-2xl bg-surface border border-line shadow-theme">
           <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Liquid Cash Reserves</span>
-            <ShieldCheck className="w-4 h-4 text-amber-500" />
+            <ShieldCheck className="w-4 h-4 text-gold" />
           </div>
           <div className="text-2xl font-extrabold text-text mt-1.5">
             ₹{((stats.totalCashReserves || 0) / 100000).toFixed(1)}L
           </div>
-          <div className="text-[11px] text-amber-500 mt-1 font-semibold">Aggregate Liquidity</div>
+          <div className="text-[11px] text-gold mt-1 font-semibold">Aggregate Liquidity</div>
         </div>
       </div>
 
@@ -264,7 +265,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
             placeholder="Search enterprise by name, founder, or industry..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-surface-2 border border-line text-text placeholder:text-text-muted focus:outline-none focus:border-cyan-500"
+            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-surface-2 border border-line text-text placeholder:text-text-muted focus:outline-none focus:border-gold"
           />
         </div>
 
@@ -280,7 +281,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
           <button
             type="button"
             onClick={openCreateModal}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>New Enterprise</span>
@@ -303,14 +304,10 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
               <div className="space-y-1.5 min-w-0">
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="font-extrabold text-sm text-text">{t.name}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-semibold border border-cyan-500/20">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold font-semibold border border-gold/20">
                     {t.industryLabel}
                   </span>
-                  {idx === 0 && (
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 font-bold uppercase tracking-wider border border-emerald-500/30">
-                      Active Tenant
-                    </span>
-                  )}
+                  {idx === 0 && <StatusBadge label="Active Tenant" tone="live" />}
                 </div>
 
                 <div className="flex items-center gap-3 text-xs text-text-muted flex-wrap">
@@ -326,7 +323,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                         href={t.website}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-cyan-500 hover:underline flex items-center gap-0.5"
+                        className="text-gold hover:underline flex items-center gap-0.5"
                       >
                         <span>{t.website.replace(/^https?:\/\//, "")}</span>
                         <ExternalLink className="w-2.5 h-2.5" />
@@ -360,17 +357,17 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                 </div>
                 <div>
                   <div className="text-[10px] text-text-muted uppercase font-mono">Monthly Burn</div>
-                  <div className="text-xs font-bold text-rose-500 mt-0.5">₹{(t.monthlyBurn / 1000).toFixed(0)}k</div>
+                  <div className="text-xs font-bold text-rust mt-0.5">₹{(t.monthlyBurn / 1000).toFixed(0)}k</div>
                 </div>
                 <div>
                   <div className="text-[10px] text-text-muted uppercase font-mono">Liquid Cash</div>
-                  <div className="text-xs font-bold text-emerald-500 mt-0.5">₹{(t.cashOnHand / 1000).toFixed(0)}k</div>
+                  <div className="text-xs font-bold text-jade mt-0.5">₹{(t.cashOnHand / 1000).toFixed(0)}k</div>
                 </div>
                 <div>
                   <div className="text-[10px] text-text-muted uppercase font-mono">Runway</div>
                   <div
                     className={`text-xs font-extrabold mt-0.5 ${
-                      Number(t.runwayMonths) <= 6 ? "text-rose-500" : "text-cyan-500"
+                      Number(t.runwayMonths) <= 6 ? "text-rust" : "text-gold"
                     }`}
                   >
                     {t.runwayMonths} mo
@@ -383,10 +380,10 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                 <button
                   type="button"
                   onClick={() => handleSwitchActive(t)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-surface-2 border border-line hover:border-cyan-500/50 text-text hover:text-cyan-500 flex items-center gap-1.5 cursor-pointer transition-all shadow-xs"
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-surface-2 border border-line hover:border-gold/50 text-text hover:text-gold flex items-center gap-1.5 cursor-pointer transition-all shadow-xs"
                   title="Switch to this business on Dashboard"
                 >
-                  <Zap className="w-3.5 h-3.5 text-cyan-500" />
+                  <Zap className="w-3.5 h-3.5 text-gold" />
                   <span>Launch Dashboard</span>
                 </button>
 
@@ -402,7 +399,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                 <button
                   type="button"
                   onClick={() => handleDelete(t)}
-                  className="p-2 rounded-xl border border-line hover:bg-rose-500/10 text-text-muted hover:text-rose-500 cursor-pointer transition-colors"
+                  className="p-2 rounded-xl border border-line hover:bg-rust/10 text-text-muted hover:text-rust cursor-pointer transition-colors"
                   title="Delete business"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -415,11 +412,11 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
 
       {/* MODAL: ADD / EDIT TENANT */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 my-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-cyan-500" />
+                <Building2 className="w-4 h-4 text-gold" />
                 <h3 className="text-sm font-bold text-text">
                   {editingTenant ? `Edit Enterprise: ${editingTenant.name}` : "Create New Enterprise Profile"}
                 </h3>
@@ -443,7 +440,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                     placeholder="e.g. Acme Technologies"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-cyan-500 font-semibold"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold font-semibold"
                   />
                 </div>
 
@@ -455,7 +452,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                     placeholder="e.g. Founder Name"
                     value={form.founderName}
                     onChange={(e) => setForm({ ...form, founderName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -578,7 +575,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold cursor-pointer transition-all shadow-sm"
+                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer transition-all shadow-sm"
                 >
                   {saving ? "Saving..." : editingTenant ? "Save Changes" : "Create Enterprise"}
                 </button>

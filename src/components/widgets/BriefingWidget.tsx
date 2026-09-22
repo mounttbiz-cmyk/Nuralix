@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { ContainerTile } from "../ui/ContainerTile";
+import { StatusBadge } from "../ui/Badge";
 import { Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -79,41 +81,47 @@ export function BriefingWidget({
           {/* Header */}
           <div className="flex items-center justify-between pb-3 border-b border-line/60">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500 dark:text-amber-400 shadow-sm shadow-amber-500/10">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/40 flex items-center justify-center text-gold shadow-sm shadow-[0_4px_12px_-4px_var(--gold-glow)]">
                 <Sparkles className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-sans flex items-center gap-1.5">
+                <h2 className="text-xs font-bold text-text uppercase tracking-wider font-sans flex items-center gap-1.5">
                   <span>Executive AI Briefing</span>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-mono font-bold border border-amber-500/30">
-                    Autonomous
-                  </span>
+                  <StatusBadge label="Autonomous" tone="ai" />
                 </h2>
                 <span className="text-[10px] text-text-muted">
                   Synthesized by {ceoName} (Chief Executive AI)
                 </span>
               </div>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted font-mono border border-line">
-              Live Feed
-            </span>
+            <StatusBadge label="Live Feed" tone="live" pulse />
           </div>
 
-          {/* Structured Intelligence Cards */}
+          {/* Structured Intelligence Cards — fade + slide in as they mount */}
           <div className="py-3 space-y-2.5">
-            <div className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-amber-500/30 transition-colors space-y-1">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.32, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+              className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-gold/30 transition-colors space-y-1"
+            >
               <div className="flex items-center gap-2">
                 <span className="text-xs">📈</span>
-                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-gold uppercase tracking-wider font-mono">
                   Revenue & Growth Trajectory
                 </span>
               </div>
               <p className="text-xs text-text-muted leading-relaxed pl-5">
-                Monthly operating revenue for <strong className="text-slate-900 dark:text-white font-bold">{companyName}</strong> is stable at <strong className="text-slate-900 dark:text-white font-bold">₹{monthlyRev.toLocaleString("en-IN")}</strong> with healthy top-quartile gross margins for {industryLabel}.
+                Monthly operating revenue for <strong className="text-text font-bold">{companyName}</strong> is stable at <strong className="text-text font-bold">₹{monthlyRev.toLocaleString("en-IN")}</strong> with healthy top-quartile gross margins for {industryLabel}.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-line-strong transition-colors space-y-1">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.32, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-line-strong transition-colors space-y-1"
+            >
               <div className="flex items-center gap-2">
                 <span className="text-xs">🛡️</span>
                 <span className="text-[11px] font-bold text-jade uppercase tracking-wider font-mono">
@@ -121,21 +129,26 @@ export function BriefingWidget({
                 </span>
               </div>
               <p className="text-xs text-text-muted leading-relaxed pl-5">
-                Net burn at <strong className="text-slate-900 dark:text-white font-bold">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-slate-900 dark:text-white font-bold">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-jade font-bold">{runwayMonths} month</strong> runway buffer.
+                Net burn at <strong className="text-text font-bold">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-text font-bold">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-jade font-bold">{runwayMonths} month</strong> runway buffer.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 space-y-1">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.32, delay: 0.19, ease: [0.22, 1, 0.36, 1] }}
+              className="p-3 rounded-xl bg-gradient-to-r from-gold/10 via-gold/5 to-transparent border border-gold/30 space-y-1"
+            >
               <div className="flex items-center gap-2">
                 <span className="text-xs">⚡</span>
-                <span className="text-[11px] font-bold text-amber-500 uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-gold uppercase tracking-wider font-mono">
                   Strategic Directive (Immediate)
                 </span>
               </div>
               <p className="text-xs text-text leading-relaxed pl-5 font-medium">
                 Dilute top-client concentration below 25% by advancing secondary deal pipelines within the next 60 days.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
 
@@ -143,7 +156,7 @@ export function BriefingWidget({
         <div className="pt-3 border-t border-line/60 flex items-center justify-between text-xs">
           <Link
             href="/chat"
-            className="inline-flex items-center gap-1.5 text-amber-500 hover:text-amber-400 font-semibold text-xs btn-tactile cursor-pointer group"
+            className="inline-flex items-center gap-1.5 text-gold hover:brightness-110 font-semibold text-xs btn-tactile cursor-pointer group"
           >
             <span>Ask Astra to elaborate</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />

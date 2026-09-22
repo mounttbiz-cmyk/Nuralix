@@ -12,6 +12,8 @@ import { QuickBusinessInputModal } from "../intake/QuickBusinessInputModal";
 import { WEBSITE_URL } from "@/config/urls";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
+import { StatusBadge } from "../ui/Badge";
+import { Button } from "../ui/Button";
 
 interface DesktopRailProps {
   navItems: NavItem[];
@@ -60,7 +62,7 @@ export function DesktopRail({
   const [isQuickInputOpen, setIsQuickInputOpen] = React.useState(false);
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-surface/95 dark:bg-[#080C16]/95 backdrop-blur-2xl border-r border-line select-none z-30 transition-colors">
+    <aside className="hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-surface/95 backdrop-blur-2xl border-r border-line select-none z-30 transition-colors">
       {/* Quick Business Input Modal */}
       <QuickBusinessInputModal
         isOpen={isQuickInputOpen}
@@ -70,7 +72,7 @@ export function DesktopRail({
       {/* Brand Header */}
       <div className="p-4 border-b border-line">
         <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 via-yellow-500/10 to-transparent border border-amber-400/40 flex items-center justify-center p-1.5 shadow-lg shadow-amber-500/15 group-hover:scale-105 group-hover:border-amber-400/70 transition-all shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold/20 via-gold/10 to-transparent border border-gold/40 flex items-center justify-center p-1.5 shadow-lg shadow-[0_8px_20px_-6px_var(--gold-glow)] group-hover:scale-105 group-hover:border-gold/70 transition-all shrink-0">
             <Image
               src="/logo-icon.png"
               alt="BizzPal Logo"
@@ -82,10 +84,10 @@ export function DesktopRail({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white font-sans whitespace-nowrap">
-                Bizz<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500">Pal</span><span className="text-[10px] text-amber-400/80 align-super">™</span>
+              <span className="font-extrabold text-base tracking-tight text-text font-sans whitespace-nowrap">
+                Bizz<span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-light via-gold to-gold-dark">Pal</span><span className="text-[10px] text-gold/80 align-super">™</span>
               </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold font-mono shrink-0">
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30 font-bold font-mono shrink-0">
                 AI OS
               </span>
             </div>
@@ -101,13 +103,13 @@ export function DesktopRail({
         <button
           type="button"
           onClick={onOpenSearch}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-surface-2 border border-line text-text-muted hover:text-text hover:border-amber-500/40 transition-all text-xs group cursor-pointer"
+          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-surface-2 border border-line text-text-muted hover:text-text hover:border-gold/40 transition-all text-xs group cursor-pointer"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <Search className="w-3.5 h-3.5 text-text-muted group-hover:text-amber-400 transition-colors shrink-0" />
+            <Search className="w-3.5 h-3.5 text-text-muted group-hover:text-gold transition-colors shrink-0" />
             <span className="text-[11px] font-medium truncate">Search tools, pages…</span>
           </div>
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-surface border border-line text-text-muted font-mono font-semibold group-hover:border-amber-500/30 shrink-0">
+          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-surface border border-line text-text-muted font-mono font-semibold group-hover:border-gold/30 shrink-0">
             ⌘K
           </kbd>
         </button>
@@ -131,21 +133,27 @@ export function DesktopRail({
                     <Link
                       key={item.id}
                       href={item.href}
-                      className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all btn-tactile ${
+                      className={`relative flex items-center justify-between pl-3.5 pr-3 py-2 rounded-xl text-xs font-medium transition-all btn-tactile ${
                         isActive
-                          ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border-l-2 border-amber-400 pl-[10px] shadow-sm shadow-amber-500/10 font-bold"
-                          : "text-text-muted hover:text-text hover:bg-surface-2"
+                          ? "bg-gold/[0.12] text-gold font-bold"
+                          : "text-text-muted hover:text-text hover:bg-surface-2/70"
                       }`}
                     >
+                      {isActive && (
+                        <span
+                          className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-gold"
+                          aria-hidden="true"
+                        />
+                      )}
                       <div className="flex items-center gap-2.5">
                         <DynamicIcon
                           name={item.icon}
-                          className={`w-4 h-4 ${isActive ? "text-amber-500 dark:text-amber-400" : "text-text-muted group-hover:text-text"}`}
+                          className={`w-4 h-4 ${isActive ? "text-gold" : "text-text-muted group-hover:text-text"}`}
                         />
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-mono font-bold">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30 font-mono font-bold">
                           {item.badge}
                         </span>
                       )}
@@ -159,15 +167,17 @@ export function DesktopRail({
       </div>
 
       {/* Footer Controls & User Menu */}
-      <div className="p-3 border-t border-line space-y-3 bg-surface/90 dark:bg-[#080C16]/90 transition-colors">
-        <button
+      <div className="p-3 border-t border-line space-y-3 bg-surface/90 transition-colors">
+        <Button
           type="button"
+          variant="primary"
+          size="md"
+          fullWidth
           onClick={() => setIsQuickInputOpen(true)}
-          className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-brass/15 to-amber-500/15 border border-brass/40 text-brass text-xs font-bold flex items-center justify-center gap-2 hover:brightness-110 btn-tactile cursor-pointer shadow-xs"
+          icon={<Sparkles className="w-3.5 h-3.5" />}
         >
-          <Sparkles className="w-3.5 h-3.5 text-brass" />
-          <span>+ Quick Business Input</span>
-        </button>
+          Quick Business Input
+        </Button>
 
         <div>
           <div className="text-[10px] uppercase font-bold tracking-widest text-text-muted mb-1.5 px-1">
@@ -180,7 +190,7 @@ export function DesktopRail({
         <div className="flex items-center justify-between p-2 rounded-xl bg-surface-2 border border-line text-xs">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-violet-600 text-white font-bold text-xs flex items-center justify-center ring-2 ring-line shadow-sm shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-light via-gold to-gold-dark text-[#1a1206] font-bold text-xs flex items-center justify-center ring-2 ring-line shadow-sm shrink-0">
                 {initials}
               </div>
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-jade ring-2 ring-surface" />

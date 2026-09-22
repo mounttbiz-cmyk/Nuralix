@@ -57,7 +57,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
     tagline: "",
     price: "₹3,999",
     period: "/month",
-    color: "border-cyan-400/30 text-cyan-400",
+    color: "border-gold/30 text-gold",
     badge: "Popular",
     isPopular: false,
     featuresRaw: "",
@@ -73,7 +73,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
       tagline: "",
       price: "₹4,999",
       period: "/month",
-      color: "border-cyan-400/30 text-cyan-400",
+      color: "border-gold/30 text-gold",
       badge: "New",
       isPopular: false,
       featuresRaw: "Feature 1\nFeature 2\nFeature 3",
@@ -91,7 +91,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
       tagline: p.tagline,
       price: p.price,
       period: p.period,
-      color: p.color || "border-cyan-400/30 text-cyan-400",
+      color: p.color || "border-gold/30 text-gold",
       badge: p.badge || "",
       isPopular: Boolean(p.isPopular),
       featuresRaw: (p.features || []).join("\n"),
@@ -177,7 +177,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
         <button
           type="button"
           onClick={openCreateModal}
-          className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer shrink-0"
+          className="px-4 py-2 rounded-xl text-xs font-bold bg-brass hover:brightness-110 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Pricing Tier</span>
@@ -190,11 +190,11 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
           <div
             key={plan.id}
             className={`p-5 rounded-2xl bg-surface border flex flex-col justify-between shadow-theme transition-all relative ${
-              plan.isPopular ? "border-cyan-500/60 ring-1 ring-cyan-500/30" : "border-line"
+              plan.isPopular ? "border-gold/60 ring-1 ring-gold/30" : "border-line"
             }`}
           >
             {plan.badge && (
-              <div className="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-cyan-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-sm">
+              <div className="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full btn-gold-gradient text-[#1a1206] text-[10px] font-extrabold uppercase tracking-wider shadow-sm">
                 {plan.badge}
               </div>
             )}
@@ -220,7 +220,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
                 <ul className="space-y-1 text-xs text-text-muted">
                   {(plan.features || []).slice(0, 6).map((feat, i) => (
                     <li key={i} className="flex items-start gap-1.5 leading-tight">
-                      <Check className="w-3.5 h-3.5 text-cyan-500 shrink-0 mt-0.5" />
+                      <Check className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5" />
                       <span className="text-[11px] text-text">{feat}</span>
                     </li>
                   ))}
@@ -263,7 +263,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
 
       {/* MODAL: ADD / EDIT PLAN */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-[999] bg-bg/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 my-8">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-text">
@@ -288,7 +288,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
                     placeholder="e.g. Growth Scale"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-cyan-500 font-semibold"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold font-semibold"
                   />
                 </div>
 
@@ -359,7 +359,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
                   placeholder="All Free features&#10;Unlimited AI Executive consultations&#10;Scenario Simulator"
                   value={form.featuresRaw}
                   onChange={(e) => setForm({ ...form, featuresRaw: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text font-mono text-[11px] focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text font-mono text-[11px] focus:outline-none focus:border-gold"
                 />
               </div>
 
@@ -369,7 +369,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
                     type="checkbox"
                     checked={form.isPopular}
                     onChange={(e) => setForm({ ...form, isPopular: e.target.checked })}
-                    className="rounded border-line text-cyan-600 focus:ring-0"
+                    className="rounded border-line text-gold focus:ring-0"
                   />
                   <span className="text-xs font-semibold text-text">Highlight as Popular Tier</span>
                 </label>
@@ -386,7 +386,7 @@ export function PricingManager({ plans, onSave, notify, saving }: PricingManager
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold cursor-pointer transition-all shadow-sm"
+                  className="px-4 py-1.5 rounded-xl bg-brass hover:brightness-110 text-white font-bold cursor-pointer transition-all shadow-sm"
                 >
                   {saving ? "Saving..." : "Save Pricing Tier"}
                 </button>

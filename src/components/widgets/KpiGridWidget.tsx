@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { ContainerTile } from "../ui/ContainerTile";
-import { ProvenanceBadge } from "../ui/Badge";
+import { ProvenanceBadge, StatusBadge } from "../ui/Badge";
+import { AnimatedNumber } from "../ui/AnimatedNumber";
 import { TrendingUp, TrendingDown, HelpCircle, MessageSquare, DollarSign, Clock, Users, Percent, Sparkles } from "lucide-react";
 import Link from "next/link";
 
@@ -156,13 +157,13 @@ export function KpiGridWidget() {
   return (
     <ContainerTile span={4} id="widget_kpi_board">
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/[0.08]">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-line/60">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <div className="w-8 h-8 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-sans">
+              <h2 className="text-xs font-bold text-text uppercase tracking-wider font-sans">
                 Core Performance Indicators
               </h2>
               <p className="text-[11px] text-text-muted">
@@ -172,13 +173,9 @@ export function KpiGridWidget() {
           </div>
           <div className="flex items-center gap-2">
             {isUploaded ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30 font-mono font-bold">
-                ● Uploaded Data Synced
-              </span>
+              <StatusBadge label="Uploaded Data Synced" tone="live" pulse />
             ) : (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2/80 text-text-muted border border-line font-mono">
-                Live Stream
-              </span>
+              <StatusBadge label="Live Stream" tone="neutral" />
             )}
           </div>
         </div>
@@ -210,8 +207,8 @@ export function KpiGridWidget() {
 
               {/* Value and SVG Sparkline with Gradient Fill */}
               <div className="flex items-end justify-between pt-1 relative z-10">
-                <div className="text-2xl sm:text-3xl font-extrabold num-tabular text-slate-900 dark:text-white tracking-tight font-mono">
-                  {kpi.value}
+                <div className="text-2xl sm:text-3xl font-extrabold num-tabular text-text tracking-tight font-mono">
+                  <AnimatedNumber value={kpi.value} />
                 </div>
 
                 {/* SVG Sparkline */}
@@ -238,7 +235,7 @@ export function KpiGridWidget() {
               </div>
 
               {/* Delta & Basis with 'Discuss with AI' */}
-              <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[11px] relative z-10">
+              <div className="flex items-center justify-between pt-2 border-t border-line/60 text-[11px] relative z-10">
                 <div
                   className={`inline-flex items-center gap-1 font-semibold num-tabular ${
                     kpi.sentiment === "positive" ? "text-jade" : "text-rust"
@@ -256,7 +253,7 @@ export function KpiGridWidget() {
                 <Link
                   href="/chat"
                   title="Ask Copilot about this metric"
-                  className="p-1 rounded-lg text-text-muted hover:text-cyan-400 hover:bg-white/[0.06] transition-colors btn-tactile cursor-pointer"
+                  className="p-1 rounded-lg text-text-muted hover:text-gold hover:bg-surface-2 transition-colors btn-tactile cursor-pointer"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                 </Link>

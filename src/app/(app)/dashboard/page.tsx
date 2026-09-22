@@ -27,6 +27,7 @@ import { useBusinessDataSync } from "@/lib/upload/events";
 import { Clock, Send, Radio } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/Button";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -309,13 +310,13 @@ function DashboardContent() {
       {/* Daily Executive Check-in Banner / Status */}
       {featureFlags.enableDailyCheckin !== false && (
         <div className="p-4 sm:p-5 rounded-2xl border border-line/70 bg-surface/80 backdrop-blur-xl shadow-lg shadow-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-amber-500/5 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-gold/5 to-transparent pointer-events-none" />
           <div className="flex items-start gap-3.5 relative z-10">
             <div
               className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 ${
                 checkinData.isCompletedToday
                   ? "bg-jade/10 border-jade/30 text-jade"
-                  : "bg-amber-500/10 border-amber-500/30 text-amber-500"
+                  : "bg-gold/10 border-gold/30 text-gold"
               }`}
             >
               {checkinData.isCompletedToday ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
@@ -331,7 +332,7 @@ function DashboardContent() {
                   className={`text-[9px] px-2 py-0.2 rounded-full font-bold uppercase border ${
                     checkinData.isCompletedToday
                       ? "bg-jade/10 border-jade/30 text-jade"
-                      : "bg-amber-500/10 border-amber-500/30 text-amber-500"
+                      : "bg-gold/10 border-gold/30 text-gold"
                   }`}
                 >
                   {checkinData.isCompletedToday ? `● Synced (${checkinData.todayCheckin?.source || "web"})` : "⚡ 60s Required"}
@@ -351,7 +352,7 @@ function DashboardContent() {
             className={`px-4 py-2 rounded-xl text-xs font-bold btn-tactile inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer relative z-10 ${
               checkinData.isCompletedToday
                 ? "bg-surface-2 border border-line text-text hover:border-line-strong"
-                : "bg-gradient-to-r from-brass to-amber-600 text-white shadow-md hover:brightness-110"
+                : "btn-gold-gradient text-[#1a1206] shadow-md hover:brightness-110"
             }`}
           >
             <span>{checkinData.isCompletedToday ? "Review / Update Check-In" : "Complete 60s Check-In →"}</span>
@@ -361,7 +362,7 @@ function DashboardContent() {
 
       {/* Top Header & Executive Command Center */}
       <div className="glass-card hairline-accent p-5 sm:p-6 space-y-5 rounded-3xl bg-surface/75 backdrop-blur-2xl border border-line/70 shadow-xl shadow-black/5 relative overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-96 h-32 bg-amber-500/5 blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-1/4 w-96 h-32 bg-gold/5 blur-3xl pointer-events-none" />
         
         {/* Live Status Beacon & Timeframe Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-line/60 relative z-10">
@@ -376,7 +377,7 @@ function DashboardContent() {
                 <span className="text-text font-mono text-[10px]">{uploadedFileName}</span>
               </>
             ) : (
-              <span className="text-amber-600 dark:text-amber-400 font-medium font-mono">Telemetry Synced Live</span>
+              <span className="text-gold font-medium font-mono">Telemetry Synced Live</span>
             )}
             <span className="text-line-strong">|</span>
             <span className="font-mono text-[10px] text-text-muted">v{baseConfig.version} Registry</span>
@@ -393,7 +394,7 @@ function DashboardContent() {
                 }}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all btn-tactile cursor-pointer ${
                   selectedTimeframe === tf
-                    ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-500/10 font-bold"
+                    ? "bg-gold/20 text-gold border border-gold/40 shadow-sm shadow-[0_2px_8px_-2px_var(--gold-glow)] font-bold"
                     : "text-text-muted hover:text-text hover:bg-surface"
                 }`}
               >
@@ -407,10 +408,10 @@ function DashboardContent() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight font-sans">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-text tracking-tight font-sans">
                 {companyName}
               </h1>
-              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 font-bold font-mono tracking-normal">
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/40 font-bold font-mono tracking-normal">
                 {selectedIndustry.toUpperCase()} · Growth Plan
               </span>
               {uploadedFileName && (
@@ -431,9 +432,9 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setIsQuickInputModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-slate-950 hover:brightness-110 shadow-md shadow-amber-500/20"
+              className="px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer btn-gold-gradient text-[#1a1206] hover:brightness-110 shadow-md shadow-[0_8px_20px_-6px_var(--gold-glow)]"
             >
-              <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+              <Sparkles className="w-3.5 h-3.5 text-[#1a1206]" />
               <span>+ Quick Business Input</span>
             </button>
 
@@ -441,9 +442,9 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setIsUploadModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-gradient-to-r from-amber-500/15 via-yellow-500/15 to-amber-600/15 border-amber-500/40 text-amber-700 dark:text-amber-300 hover:brightness-110 shadow-xs"
+              className="px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-gold/15 border-gold/40 text-gold hover:brightness-110 shadow-xs"
             >
-              <UploadCloud className="w-3.5 h-3.5 text-amber-500" />
+              <UploadCloud className="w-3.5 h-3.5 text-gold" />
               <span>Upload Business Data</span>
               {uploadedFileName && (
                 <span className="w-2 h-2 rounded-full bg-jade animate-pulse" title="Custom dataset active" />
@@ -468,7 +469,7 @@ function DashboardContent() {
                     }}
                     className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all btn-tactile ${
                       isActive
-                        ? "bg-amber-500/20 text-amber-800 dark:text-amber-300 shadow-sm border border-amber-500/40 font-bold"
+                        ? "bg-gold/20 text-gold shadow-sm border border-gold/40 font-bold"
                         : "text-text-muted hover:text-text hover:bg-surface"
                     }`}
                   >
@@ -484,11 +485,11 @@ function DashboardContent() {
               onClick={() => setIsEditingLayout(!isEditingLayout)}
               className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-2 transition-all btn-tactile cursor-pointer ${
                 isEditingLayout
-                  ? "bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/25 font-bold"
+                  ? "btn-gold-gradient text-[#1a1206] border-gold shadow-lg shadow-[0_10px_24px_-6px_var(--gold-glow)] font-bold"
                   : "bg-surface-2/80 border-line/70 text-text hover:bg-surface-2 hover:border-line-strong"
               }`}
             >
-              <Sliders className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+              <Sliders className="w-3.5 h-3.5 text-gold" />
               <span>{isEditingLayout ? "Exit Layout Editor" : "Customize Layout"}</span>
             </button>
           </div>
@@ -498,11 +499,11 @@ function DashboardContent() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 relative z-10">
           <Link
             href="/analytics"
-            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-amber-500/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/5 flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-gold/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[0_10px_24px_-8px_var(--gold-glow)] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Overall Health</span>
-              <span className="text-base font-extrabold text-slate-900 dark:text-white font-mono">82 / 100</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-gold transition-colors">Overall Health</span>
+              <span className="text-base font-extrabold text-text font-mono">82 / 100</span>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-jade/15 text-jade font-semibold font-mono border border-jade/30">
               Optimal
@@ -511,39 +512,39 @@ function DashboardContent() {
 
           <Link
             href="/simulator"
-            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-amber-500/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/5 flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-gold/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[0_10px_24px_-8px_var(--gold-glow)] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Liquid Runway</span>
-              <span className="text-base font-extrabold text-amber-600 dark:text-amber-400 font-mono">{liquidRunwayMo} mo</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-gold transition-colors">Liquid Runway</span>
+              <span className="text-base font-extrabold text-gold font-mono">{liquidRunwayMo} mo</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold font-mono border border-amber-500/30">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold font-semibold font-mono border border-gold/30">
               {Number(liquidRunwayMo) >= 6 ? "Safe Zone" : "Caution"}
             </span>
           </Link>
 
           <Link
             href="/tasks"
-            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-amber-500/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/5 flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-gold/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[0_10px_24px_-8px_var(--gold-glow)] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Execution Queue</span>
-              <span className="text-base font-extrabold text-slate-900 dark:text-white font-mono">3 Active</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-gold transition-colors">Execution Queue</span>
+              <span className="text-base font-extrabold text-text font-mono">3 Active</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold font-mono border border-amber-500/30">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold font-semibold font-mono border border-gold/30">
               On Schedule
             </span>
           </Link>
 
           <Link
             href="/gaps"
-            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-amber-500/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/5 flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-gold/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[0_10px_24px_-8px_var(--gold-glow)] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Bottleneck Gaps</span>
-              <span className="text-base font-extrabold text-amber-600 dark:text-amber-400 font-mono">3 Flagged</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-gold transition-colors">Bottleneck Gaps</span>
+              <span className="text-base font-extrabold text-gold font-mono">3 Flagged</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold font-mono border border-amber-500/30">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold font-semibold font-mono border border-gold/30">
               Action Ready
             </span>
           </Link>
@@ -552,12 +553,12 @@ function DashboardContent() {
 
       {/* Interactive Dashboard Customization Panel */}
       {isEditingLayout && (
-        <div className="p-5 rounded-2xl border border-cyan-500/40 bg-surface/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/10 space-y-4 animate-fade-in">
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+        <div className="p-5 rounded-2xl border border-gold/40 bg-surface/95 backdrop-blur-xl shadow-2xl shadow-[0_16px_40px_-10px_var(--gold-glow)] space-y-4 animate-fade-in">
+          <div className="flex items-center justify-between pb-3 border-b border-line/60">
             <div>
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-cyan-400" />
-                <h2 className="text-xs font-bold text-white uppercase tracking-wider font-sans">
+                <Sliders className="w-4 h-4 text-gold" />
+                <h2 className="text-xs font-bold text-text uppercase tracking-wider font-sans">
                   Customize Executive Layout
                 </h2>
               </div>
@@ -567,23 +568,12 @@ function DashboardContent() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleResetLayout}
-                className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-white/[0.08] text-text-muted hover:text-text hover:bg-surface-2 flex items-center gap-1.5 transition-all"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Preset</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSaveLayout}
-                className="px-4 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20 hover:brightness-110 flex items-center gap-1.5 btn-tactile"
-              >
-                <Save className="w-3.5 h-3.5" />
-                <span>Save Layout</span>
-              </button>
+              <Button type="button" variant="secondary" size="sm" onClick={handleResetLayout} icon={<RotateCcw className="w-3.5 h-3.5" />}>
+                Reset Preset
+              </Button>
+              <Button type="button" variant="primary" size="sm" onClick={handleSaveLayout} icon={<Save className="w-3.5 h-3.5" />}>
+                Save Layout
+              </Button>
             </div>
           </div>
 
@@ -594,8 +584,8 @@ function DashboardContent() {
                 key={widget.id}
                 className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs transition-all ${
                   widget.enabled
-                    ? "bg-surface-2/80 border-cyan-500/40 shadow-xs"
-                    : "bg-surface-2/20 border-white/[0.06] opacity-50"
+                    ? "bg-surface-2/80 border-gold/40 shadow-xs"
+                    : "bg-surface-2/20 border-line opacity-50"
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -603,7 +593,7 @@ function DashboardContent() {
                     type="button"
                     onClick={() => toggleWidgetVisibility(widget.id)}
                     className={`p-1.5 rounded-lg transition-colors ${
-                      widget.enabled ? "text-cyan-400 bg-cyan-500/15 hover:text-rust" : "text-text-muted hover:text-cyan-400"
+                      widget.enabled ? "text-gold bg-gold/15 hover:text-rust" : "text-text-muted hover:text-gold"
                     }`}
                     title={widget.enabled ? "Hide from dashboard" : "Show on dashboard"}
                   >
@@ -622,8 +612,8 @@ function DashboardContent() {
                         onClick={() => changeWidgetSpan(widget.id, span)}
                         className={`text-[10px] px-2.5 py-1 rounded-lg font-mono font-semibold transition-all ${
                           widget.defaultSpan === span
-                            ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
-                            : "bg-surface border border-white/[0.08] text-text-muted hover:text-text"
+                            ? "bg-gold text-[#1a1206] font-bold shadow-xs"
+                            : "bg-surface border border-line text-text-muted hover:text-text"
                         }`}
                       >
                         {span === 4 ? "Full" : "Half"}
@@ -640,7 +630,7 @@ function DashboardContent() {
       {/* Dynamic Dashboard Grid (Masonry-style dense packing) */}
       <div className="pt-4 mt-2">
         <div className="flex items-center gap-2 mb-4 px-1">
-          <Layers className="w-4 h-4 text-amber-500" />
+          <Layers className="w-4 h-4 text-gold" />
           <h2 className="text-xs font-bold text-text uppercase tracking-wider font-sans">
             Executive Operations & Active Tooling
           </h2>

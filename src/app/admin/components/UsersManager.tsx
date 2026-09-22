@@ -62,7 +62,7 @@ export function UsersManager({ users, onRefresh, notify }: UsersManagerProps) {
       {/* Search & Stats Bar */}
       <div className="p-4 rounded-2xl bg-surface border border-line flex flex-col sm:flex-row items-center justify-between gap-3 shadow-theme">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shrink-0">
             <Users className="w-5 h-5" />
           </div>
           <div>
@@ -81,7 +81,7 @@ export function UsersManager({ users, onRefresh, notify }: UsersManagerProps) {
               placeholder="Search by email, name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-surface-2 border border-line text-text placeholder:text-text-muted focus:outline-none focus:border-cyan-500"
+              className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-surface-2 border border-line text-text placeholder:text-text-muted focus:outline-none focus:border-gold"
             />
           </div>
           <button
@@ -113,8 +113,8 @@ export function UsersManager({ users, onRefresh, notify }: UsersManagerProps) {
                   <span
                     className={`text-[9px] px-2 py-0.5 rounded-full font-mono uppercase font-bold border ${
                       u.provider === "google"
-                        ? "bg-amber-500/10 border-amber-500/30 text-amber-500"
-                        : "bg-cyan-500/10 border-cyan-500/30 text-cyan-500"
+                        ? "bg-gold/10 border-gold/30 text-gold"
+                        : "bg-jade/10 border-jade/30 text-jade"
                     }`}
                   >
                     {u.provider || "email"}
