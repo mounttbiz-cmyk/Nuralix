@@ -52,6 +52,7 @@ import {
   DEFAULT_DASHBOARD_FEATURES,
 } from "@/config/seeds/defaultCatalog";
 import { DEFAULT_WEBSITE_STATE } from "@/website/hooks/useWebsiteConfig";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<
@@ -703,10 +704,14 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-bg text-text flex flex-col lg:flex-row relative selection:bg-cyan-500/30 selection:text-white overflow-x-hidden">
+      {/* Ambient background radiant aura mesh */}
+      <div className="fixed top-[-10%] left-[20%] w-[650px] h-[350px] bg-gradient-to-br from-cyan-500/10 via-indigo-500/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed bottom-[-10%] right-[15%] w-[550px] h-[350px] bg-gradient-to-tl from-purple-500/10 via-cyan-500/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[1000] px-4 py-3 rounded-xl bg-slate-900/95 dark:bg-black/95 text-white border border-line shadow-2xl flex items-center gap-2.5 text-xs font-semibold animate-fade-in backdrop-blur-md">
+        <div className="fixed bottom-6 right-6 z-[1000] px-4 py-3 rounded-xl bg-slate-900/95 dark:bg-black/95 text-white border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 flex items-center gap-2.5 text-xs font-semibold animate-fade-in backdrop-blur-md">
           {toastMessage.toLowerCase().includes("error") || toastMessage.toLowerCase().includes("failed") ? (
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
           ) : (
@@ -728,15 +733,15 @@ export default function AdminPage() {
       {/* PERSISTENT MODERN LEFT SIDEBAR                                            */}
       {/* ========================================================================= */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-surface border-r border-line flex flex-col justify-between transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 shrink-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-surface/80 backdrop-blur-xl border-r border-line/60 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 shrink-0 shadow-2xl lg:shadow-none ${
           isMobileMenuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         }`}
       >
         {/* Sidebar Brand & Status Header */}
-        <div className="p-4 border-b border-line flex flex-col gap-3">
+        <div className="p-4 border-b border-line/60 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center p-1 shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/40 flex items-center justify-center p-1 shadow-sm ring-1 ring-cyan-500/20">
                 <Image
                   src="/logo.png"
                   alt="Logo"
@@ -746,9 +751,14 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <h1 className="text-sm font-bold text-text tracking-tight">
-                  BizzPal Superadmin
+                <h1 className="text-sm font-bold text-text tracking-tight flex items-center gap-2">
+                  <span>BizzPal OS</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 font-mono font-bold border border-cyan-500/20">PRO</span>
                 </h1>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[10px] text-text-muted font-mono tracking-wider uppercase">Superadmin Engine</span>
+                </div>
               </div>
             </div>
 
@@ -785,8 +795,8 @@ export default function AdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                     isActive
-                      ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
-                      : "text-text-muted hover:text-text hover:bg-surface-2"
+                      ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                      : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -816,8 +826,8 @@ export default function AdminPage() {
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                 activeTab === "plans"
-                  ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
-                  : "text-text-muted hover:text-text hover:bg-surface-2"
+                  ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                  : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -858,8 +868,8 @@ export default function AdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                     isActive
-                      ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
-                      : "text-text-muted hover:text-text hover:bg-surface-2"
+                      ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                      : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -898,8 +908,8 @@ export default function AdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                     isActive
-                      ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
-                      : "text-text-muted hover:text-text hover:bg-surface-2"
+                      ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                      : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -929,8 +939,8 @@ export default function AdminPage() {
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                 activeTab === "tools"
-                  ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
-                  : "text-text-muted hover:text-text hover:bg-surface-2"
+                  ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                  : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -956,8 +966,8 @@ export default function AdminPage() {
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                 activeTab === "audit"
-                  ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
-                  : "text-text-muted hover:text-text hover:bg-surface-2"
+                  ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                  : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -1026,7 +1036,7 @@ export default function AdminPage() {
       {/* ========================================================================= */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         {/* Sticky Workspace Top Bar */}
-        <header className="sticky top-0 z-30 h-16 bg-surface/90 backdrop-blur-md border-b border-line px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        <header className="sticky top-0 z-30 h-16 bg-surface/75 backdrop-blur-xl border-b border-line/60 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
@@ -1038,16 +1048,22 @@ export default function AdminPage() {
 
             {/* Breadcrumb Navigation */}
             <div className="flex items-center gap-2 text-xs font-semibold min-w-0">
-              <span className="text-text-muted hidden sm:inline">{breadcrumb.group}</span>
-              <span className="text-text-muted hidden sm:inline">/</span>
-              <span className="text-text font-bold truncate">{breadcrumb.current}</span>
+              <span className="text-text-muted/70 hidden sm:inline">{breadcrumb.group}</span>
+              <span className="text-text-muted/50 hidden sm:inline">/</span>
+              <span className="text-text font-bold tracking-tight truncate">{breadcrumb.current}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Live System Pulse Indicator */}
+            <div className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span>SUPERADMIN SECURE</span>
+            </div>
+
             <Link
               href="/dashboard"
-              className="hidden md:flex items-center gap-1.5 text-xs text-text-muted hover:text-text px-3 py-1.5 rounded-xl border border-line hover:bg-surface-2 transition-colors font-semibold"
+              className="hidden md:flex items-center gap-1.5 text-xs text-text-muted hover:text-text px-3 py-1.5 rounded-xl border border-line/70 hover:border-cyan-500/40 hover:bg-surface-2 transition-all font-semibold"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Exit to App</span>
@@ -1058,7 +1074,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => handleOpenNavModal()}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white flex items-center gap-1.5 transition-all shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Nav Button</span>
@@ -1069,7 +1085,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => handleOpenWidgetModal()}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white flex items-center gap-1.5 transition-all shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Widget</span>
@@ -1080,7 +1096,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => handleOpenToolModal()}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white flex items-center gap-1.5 transition-all shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Tool</span>
@@ -1090,7 +1106,16 @@ export default function AdminPage() {
         </header>
 
         {/* Main Workspace Body */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full relative z-10">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab + (activeTab === "website" ? subWebTab : "")}
+              initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-6"
+            >
 
       {/* ============================================================= */}
       {/* TAB: MULTI-TENANT ENTERPRISES & USERS                         */}
@@ -2404,6 +2429,8 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 

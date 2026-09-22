@@ -11,6 +11,7 @@ import { NavItem } from "@/config/schemas/nav";
 import { MessageSquare } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -209,7 +210,10 @@ export function AppShell({
       />
 
       {/* Main Column */}
-      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0 md:ml-16 lg:ml-64">
+      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0 md:ml-16 lg:ml-64 relative">
+        {/* Ambient Top Glow specific to main column */}
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-surface/50 to-transparent pointer-events-none z-0" />
+        
         {/* Mobile Header (xs/sm) */}
         <MobileHeader
           companyName={companyName}
@@ -217,9 +221,20 @@ export function AppShell({
           onOpenSearch={() => features.enableCommandPalette && setSearchOpen(true)}
         />
 
-        {/* Page Content Container with Container Queries support */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1560px] w-full mx-auto">
-          {children}
+        {/* Page Content Container with Framer Motion Page Transitions */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1560px] w-full mx-auto relative z-10">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="h-full w-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
