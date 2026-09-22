@@ -34,7 +34,7 @@ export function ThemeSwitch({ compact = false }: ThemeSwitchProps) {
             onClick={() => setTheme(opt.mode)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1 px-2 text-xs font-medium rounded-md btn-tactile transition-all cursor-pointer ${
               isActive
-                ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-xs"
+                ? "bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/40 font-bold shadow-sm shadow-amber-500/10"
                 : "text-text-muted hover:text-text hover:bg-surface/50"
             }`}
             title={`Switch to ${opt.label} mode (⌘⇧L to cycle)`}

@@ -24,15 +24,15 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
       {/* Brand Icon with Ribbon Logo */}
       <Link
         href="/dashboard"
-        className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-transparent border border-cyan-500/30 flex items-center justify-center p-1.5 shadow-sm mb-3 hover:scale-105 transition-transform"
+        className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 via-yellow-500/10 to-transparent border border-amber-400/40 flex items-center justify-center p-1.5 shadow-lg shadow-amber-500/15 mb-3 hover:scale-105 transition-transform"
         title="BizzPal Dashboard"
       >
         <Image
           src="/logo.png"
           alt="BizzPal Logo"
-          width={26}
-          height={26}
-          className="object-contain"
+          width={28}
+          height={28}
+          className="object-contain drop-shadow"
         />
       </Link>
 
@@ -41,7 +41,7 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
         type="button"
         onClick={onOpenSearch}
         title="Search tools, pages… (⌘K)"
-        className="w-10 h-10 rounded-xl flex items-center justify-center text-text-muted hover:text-cyan-400 hover:bg-surface-2 transition-all btn-tactile mb-3"
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-text-muted hover:text-amber-400 hover:bg-surface-2 transition-all btn-tactile mb-3"
       >
         <Search className="w-5 h-5" />
       </button>
@@ -57,13 +57,13 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
               title={item.label}
               className={`relative flex items-center justify-center w-10 h-10 rounded-xl transition-all btn-tactile group ${
                 isActive
-                  ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-sm"
+                  ? "bg-gradient-to-br from-amber-500/25 via-yellow-500/15 to-transparent text-amber-500 dark:text-amber-400 border border-amber-400/40 shadow-sm shadow-amber-500/15"
                   : "text-text-muted hover:text-text hover:bg-white/[0.05]"
               }`}
             >
-              <DynamicIcon name={item.icon} className={`w-5 h-5 ${isActive ? "text-cyan-400" : "text-text-muted"}`} />
+              <DynamicIcon name={item.icon} className={`w-5 h-5 ${isActive ? "text-amber-500 dark:text-amber-400" : "text-text-muted"}`} />
               {item.badge && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-surface" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-surface" />
               )}
             </Link>
           );

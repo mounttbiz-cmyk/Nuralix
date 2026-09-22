@@ -112,14 +112,14 @@ export function HealthScoreWidget({
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (displayScore / 100) * circumference;
-  const strokeColor = displayScore >= 80 ? "#10B981" : displayScore >= 70 ? "#06B6D4" : "#F59E0B";
+  const strokeColor = displayScore >= 80 ? "#F5C542" : displayScore >= 70 ? "#E5A93C" : "#D4AF37";
 
   return (
     <ContainerTile span={2} id="widget_health_score">
       <div className="space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-3 border-b border-line/60">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500 dark:text-amber-400 shadow-sm shadow-amber-500/10">
               <Activity className="w-4 h-4" />
             </div>
             <div>
@@ -164,14 +164,14 @@ export function HealthScoreWidget({
               <span className="text-3xl sm:text-4xl font-black num-tabular text-slate-900 dark:text-white font-mono leading-none tracking-tight">
                 {displayScore}
               </span>
-              <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-semibold font-mono mt-1 uppercase tracking-wider">
+              <span className="text-[10px] text-amber-500 dark:text-amber-400 font-bold font-mono mt-1 uppercase tracking-wider">
                 {displayScore >= 80 ? "Optimal" : displayScore >= 70 ? "Stable" : "Needs Review"}
               </span>
             </div>
           </div>
 
           <div className="flex-1 space-y-2 text-center @sm:text-left">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-jade/15 text-jade border border-jade/30 font-mono">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 font-mono">
               <TrendingUp className="w-3.5 h-3.5" />
               <span>+{delta}% vs last month</span>
             </div>
@@ -198,7 +198,7 @@ export function HealthScoreWidget({
                   onClick={() => setSelectedComponent(isSelected ? null : comp.key)}
                   className={`p-2.5 rounded-xl border text-left transition-all btn-tactile ${
                     isSelected
-                      ? "border-cyan-400/50 bg-cyan-500/15 shadow-sm ring-1 ring-cyan-500/30"
+                      ? "border-amber-400/50 bg-amber-500/15 shadow-sm ring-1 ring-amber-500/30"
                       : "border-line bg-surface-2/60 hover:bg-surface-2 hover:border-line-strong"
                   }`}
                 >
@@ -213,10 +213,10 @@ export function HealthScoreWidget({
                     <div
                       className={`h-full rounded-full ${
                         comp.score >= 80
-                          ? "bg-gradient-to-r from-emerald-500 to-cyan-400"
+                          ? "bg-gradient-to-r from-amber-400 to-yellow-300"
                           : comp.score >= 70
-                          ? "bg-gradient-to-r from-cyan-400 to-indigo-500"
-                          : "bg-gradient-to-r from-amber-400 to-rust"
+                          ? "bg-gradient-to-r from-amber-500 to-yellow-500"
+                          : "bg-gradient-to-r from-rose-400 to-amber-500"
                       }`}
                       style={{ width: `${comp.score}%` }}
                     />

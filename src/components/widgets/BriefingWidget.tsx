@@ -77,15 +77,15 @@ export function BriefingWidget({
       <div className="flex flex-col h-full justify-between space-y-4">
         <div>
           {/* Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+          <div className="flex items-center justify-between pb-3 border-b border-line/60">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500 dark:text-amber-400 shadow-sm shadow-amber-500/10">
                 <Sparkles className="w-4 h-4" />
               </div>
               <div>
                 <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-sans flex items-center gap-1.5">
                   <span>Executive AI Briefing</span>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 font-mono font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-mono font-bold border border-amber-500/30">
                     Autonomous
                   </span>
                 </h2>
@@ -101,10 +101,10 @@ export function BriefingWidget({
 
           {/* Structured Intelligence Cards */}
           <div className="py-3 space-y-2.5">
-            <div className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-line-strong transition-colors space-y-1">
+            <div className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-amber-500/30 transition-colors space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs">📈</span>
-                <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">
                   Revenue & Growth Trajectory
                 </span>
               </div>
@@ -121,15 +121,15 @@ export function BriefingWidget({
                 </span>
               </div>
               <p className="text-xs text-text-muted leading-relaxed pl-5">
-                Net burn at <strong className="text-slate-900 dark:text-white font-bold">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-slate-900 dark:text-white font-bold">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-jade font-bold">{runwayMonths} month</strong> runway runway buffer.
+                Net burn at <strong className="text-slate-900 dark:text-white font-bold">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-slate-900 dark:text-white font-bold">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-jade font-bold">{runwayMonths} month</strong> runway buffer.
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs">⚡</span>
-                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">
-                  Priority Directive for {founderName}
+                <span className="text-[11px] font-bold text-amber-500 uppercase tracking-wider font-mono">
+                  Strategic Directive (Immediate)
                 </span>
               </div>
               <p className="text-xs text-text leading-relaxed pl-5 font-medium">
@@ -140,10 +140,10 @@ export function BriefingWidget({
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs">
+        <div className="pt-3 border-t border-line/60 flex items-center justify-between text-xs">
           <Link
             href="/chat"
-            className="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-semibold text-xs btn-tactile cursor-pointer group"
+            className="inline-flex items-center gap-1.5 text-amber-500 hover:text-amber-400 font-semibold text-xs btn-tactile cursor-pointer group"
           >
             <span>Ask Astra to elaborate</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />

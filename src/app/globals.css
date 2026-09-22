@@ -5,28 +5,31 @@
 @tailwind utilities;
 
 :root, [data-theme="dark"] {
-  /* High-end Cosmic Obsidian & Void Palette */
-  --bg:          #07090E;   /* Deepest cosmic obsidian */
-  --surface:     #0D131F;   /* Elevated obsidian surface with rich blue undertone */
-  --surface-2:   #131B2C;   /* Interactive layer */
-  --line:        rgba(255, 255, 255, 0.08);   /* Refined hairline border */
-  --line-strong: rgba(255, 255, 255, 0.16);
-  --text:        #F8FAFC;   /* Crisp clean high contrast white */
-  --text-muted:  #94A3B8;   /* Balanced slate muted */
+  /* High-end Cosmic Obsidian & Royal 3D Gold Palette matching BizzPal Logo */
+  --bg:          #060709;   /* Deepest midnight obsidian void */
+  --surface:     #0D0F15;   /* Elevated obsidian surface with rich warm metallic depth */
+  --surface-2:   #151822;   /* Interactive metallic layer */
+  --line:        rgba(245, 197, 66, 0.12);   /* Refined hairline gold border */
+  --line-strong: rgba(245, 197, 66, 0.28);   /* Illuminated metallic gold border */
+  --text:        #FFFFFF;   /* Crisp diamond white matching "Bizz" in logo */
+  --text-muted:  #9E988D;   /* Champagne slate muted */
   
-  /* Primary metallic & neon accents matching BizzPal branding */
-  --cyan:        #00D9FF;   /* BizzPal electric cyan */
-  --cyan-soft:   rgba(0, 217, 255, 0.12);
-  --violet:      #6366F1;   /* Royal violet / indigo */
-  --violet-soft: rgba(99, 102, 241, 0.12);
-  --brass:       #00D9FF;   /* Primary accent maps to brilliant cyan */
-  --brass-soft:  rgba(0, 217, 255, 0.12);
-  --gold:        #F59E0B;   /* Warm champagne gold */
-  --jade:        #10B981;   /* Cyber emerald */
-  --rust:        #F43F5E;   /* Rose crimson */
-  --amber:       #F59E0B;   /* Amber */
-  --shadow:      0 12px 36px 0 rgba(0, 0, 0, 0.45);
-  --grid:        rgba(255, 255, 255, 0.03);
+  /* Primary Metallic Gold & Champagne Brass accents directly from BizzPal Logo */
+  --gold:        #F5C542;   /* 3D Liquid Gold */
+  --gold-light:  #FFE58F;   /* Champagne highlight shimmer */
+  --gold-dark:   #B8860B;   /* Deep burnished gold */
+  --gold-glow:   rgba(245, 197, 66, 0.25);
+  --brass:       #F5C542;   /* Primary accent maps to luxury metallic gold */
+  --brass-soft:  rgba(245, 197, 66, 0.14);
+  --cyan:        #F5C542;   /* Remap legacy cyan tokens to radiant BizzPal gold */
+  --cyan-soft:   rgba(245, 197, 66, 0.12);
+  --violet:      #C59B27;   /* Secondary metallic brass */
+  --violet-soft: rgba(197, 155, 39, 0.12);
+  --jade:        #10B981;   /* Live operational emerald */
+  --rust:        #F43F5E;   /* Crimson alert */
+  --amber:       #F5C542;   /* Warm Gold */
+  --shadow:      0 12px 36px 0 rgba(0, 0, 0, 0.6);
+  --grid:        rgba(245, 197, 66, 0.03);
 
   /* Motion tokens (§4.1) */
   --dur-instant: 90ms;
@@ -41,25 +44,28 @@
 }
 
 [data-theme="light"] {
-  --bg:          #F8FAFC;   /* Crisp enterprise slate-light paper */
-  --surface:     #FFFFFF;   /* Pure white card surface */
-  --surface-2:   #F1F5F9;   /* Subtle elevated slate */
-  --line:        #E2E8F0;   /* Clean border */
-  --line-strong: #CBD5E1;
-  --text:        #0F172A;   /* Deep slate text */
-  --text-muted:  #64748B;   /* Slate muted */
-  --cyan:        #0098B8;
-  --cyan-soft:   rgba(0, 152, 184, 0.10);
-  --violet:      #4F46E5;
-  --violet-soft: rgba(79, 70, 229, 0.10);
-  --brass:       #0284C7;
-  --brass-soft:  rgba(2, 132, 199, 0.10);
-  --gold:        #D97706;
+  --bg:          #FAF7F2;   /* Warm luxury champagne ivory paper */
+  --surface:     #FFFFFF;   /* Pure crisp white card surface */
+  --surface-2:   #F4EFE6;   /* Subtle elevated champagne surface */
+  --line:        #E8DFD1;   /* Warm golden champagne border */
+  --line-strong: #D6C5AA;
+  --text:        #181511;   /* Deep obsidian black text */
+  --text-muted:  #786F62;   /* Warm muted text */
+  --gold:        #C89218;   /* Burnished royal gold */
+  --gold-light:  #E5A93C;
+  --gold-dark:   #996515;
+  --gold-glow:   rgba(200, 146, 24, 0.18);
+  --brass:       #C89218;
+  --brass-soft:  rgba(200, 146, 24, 0.12);
+  --cyan:        #C89218;   /* Remap to warm royal gold */
+  --cyan-soft:   rgba(200, 146, 24, 0.10);
+  --violet:      #996515;
+  --violet-soft: rgba(153, 101, 21, 0.10);
   --jade:        #059669;
   --rust:        #E11D48;
-  --amber:       #D97706;
-  --shadow:      0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.03);
-  --grid:        #EDF2F7;
+  --amber:       #C89218;
+  --shadow:      0 1px 3px rgba(24, 21, 17, 0.05), 0 4px 16px rgba(200, 146, 24, 0.06);
+  --grid:        #F0EAE1;
 }
 
 /* Sleek custom scrollbars matching BizzPal brass/slate design across the whole dashboard & website */
@@ -154,41 +160,41 @@ body, [data-surface] {
 
 @media (hover: hover) {
   .card-hover {
-    transition: transform 200ms var(--ease-out), border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+    transition: transform 240ms var(--ease-out), border-color 240ms var(--ease-out), box-shadow 240ms var(--ease-out);
   }
   .card-hover:hover {
-    border-color: rgba(0, 217, 255, 0.35);
-    box-shadow: 0 16px 36px -12px rgba(0, 217, 255, 0.12);
-    transform: translateY(-1.5px);
+    border-color: rgba(245, 197, 66, 0.45);
+    box-shadow: 0 16px 36px -12px rgba(245, 197, 66, 0.18);
+    transform: translateY(-2px);
   }
 }
 
-/* Glassmorphic card styling & lighting */
+/* Glassmorphic card styling & metallic gold lighting */
 .glass-card {
   position: relative;
-  background: rgba(13, 19, 31, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1rem;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  background: rgba(13, 15, 21, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 197, 66, 0.14);
+  border-radius: 1.25rem;
+  box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.6);
 }
 
 [data-theme="light"] .glass-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(226, 232, 240, 0.9);
-  box-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.05);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(232, 223, 209, 0.95);
+  box-shadow: 0 4px 24px -4px rgba(200, 146, 24, 0.08);
 }
 
-/* Hairline gradient accent along top edge of card */
+/* 3D Liquid Gold Hairline accent along top edge of card */
 .hairline-accent::after {
   content: "";
   position: absolute;
   top: 0;
-  left: 10%;
-  right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.45), rgba(99, 102, 241, 0.45), transparent);
+  left: 6%;
+  right: 6%;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(245, 197, 66, 0.7), rgba(255, 229, 143, 0.95), rgba(184, 134, 11, 0.7), transparent);
   pointer-events: none;
 }
 

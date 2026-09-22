@@ -190,10 +190,10 @@ export function AppShell({
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col md:flex-row relative overflow-x-hidden selection:bg-cyan-500/30 selection:text-white">
-      {/* Ambient background glow aura */}
-      <div className="fixed top-0 left-1/4 w-[600px] h-[300px] bg-gradient-to-br from-cyan-500/5 via-violet-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
-      <div className="fixed bottom-0 right-1/4 w-[500px] h-[300px] bg-gradient-to-tl from-cyan-500/5 via-transparent to-transparent blur-3xl pointer-events-none -z-10" />
+    <div className="min-h-screen bg-bg text-text flex flex-col md:flex-row relative overflow-x-hidden selection:bg-amber-500/30 selection:text-amber-200">
+      {/* Ambient background glow aura matching 3D Gold BizzPal logo */}
+      <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
+      <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-amber-500/10 via-transparent to-transparent blur-3xl pointer-events-none -z-10" />
 
       {/* Desktop Left Rail (lg+) */}
       <DesktopRail
@@ -238,19 +238,19 @@ export function AppShell({
         </main>
       </div>
 
-      {/* Floating AI Executive Launcher Button (Desktop & Tablet) - hidden on /chat or if disabled */}
+      {/* Floating AI Executive Launcher Button (Desktop & Tablet) - 3D Metallic Gold */}
       {features.enableAiCopilot && pathname !== "/chat" && (
         <button
           type="button"
           onClick={() => setChatOpen(true)}
           aria-label="Open AI Workspace"
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 text-white shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 active:scale-95 transition-all text-xs font-bold border border-cyan-400/40 font-sans cursor-pointer group"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 text-slate-950 shadow-xl shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 active:scale-95 transition-all text-xs font-extrabold border border-amber-300/60 font-sans cursor-pointer group"
         >
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-950" />
           </span>
-          <MessageSquare className="w-4 h-4 text-white group-hover:rotate-6 transition-transform" />
+          <MessageSquare className="w-4 h-4 text-slate-950 group-hover:rotate-6 transition-transform" />
           <span>Ask Executive AI</span>
         </button>
       )}

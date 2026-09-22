@@ -26,7 +26,7 @@ export function ContainerTile({
       id={id}
       className={`@container ${spanClasses[span] || "col-span-1"} ${className} group relative`}
     >
-      <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-cyan-500/20 via-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-amber-500/25 via-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       <div className="h-full glass-card hairline-accent card-hover rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 relative z-0">
         {children}
       </div>

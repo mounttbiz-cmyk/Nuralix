@@ -704,14 +704,14 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col lg:flex-row relative selection:bg-cyan-500/30 selection:text-white overflow-x-hidden">
-      {/* Ambient background radiant aura mesh */}
-      <div className="fixed top-[-10%] left-[20%] w-[650px] h-[350px] bg-gradient-to-br from-cyan-500/10 via-indigo-500/5 to-transparent blur-[120px] pointer-events-none -z-10" />
-      <div className="fixed bottom-[-10%] right-[15%] w-[550px] h-[350px] bg-gradient-to-tl from-purple-500/10 via-cyan-500/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+    <div className="min-h-screen bg-bg text-text flex flex-col lg:flex-row relative selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
+      {/* Ambient background radiant aura mesh matching 3D Gold Logo */}
+      <div className="fixed top-[-10%] left-[20%] w-[650px] h-[350px] bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed bottom-[-10%] right-[15%] w-[550px] h-[350px] bg-gradient-to-tl from-amber-500/10 via-yellow-500/5 to-transparent blur-[120px] pointer-events-none -z-10" />
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[1000] px-4 py-3 rounded-xl bg-slate-900/95 dark:bg-black/95 text-white border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 flex items-center gap-2.5 text-xs font-semibold animate-fade-in backdrop-blur-md">
+        <div className="fixed bottom-6 right-6 z-[1000] px-4 py-3 rounded-xl bg-slate-900/95 dark:bg-black/95 text-white border border-amber-500/30 shadow-2xl shadow-amber-500/10 flex items-center gap-2.5 text-xs font-semibold animate-fade-in backdrop-blur-md">
           {toastMessage.toLowerCase().includes("error") || toastMessage.toLowerCase().includes("failed") ? (
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
           ) : (
@@ -741,19 +741,19 @@ export default function AdminPage() {
         <div className="p-4 border-b border-line/60 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/40 flex items-center justify-center p-1 shadow-sm ring-1 ring-cyan-500/20">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400/25 via-yellow-500/10 to-transparent border border-amber-400/40 flex items-center justify-center p-1 shadow-md shadow-amber-500/15 ring-1 ring-amber-400/30">
                 <Image
                   src="/logo.png"
                   alt="Logo"
-                  width={22}
-                  height={22}
-                  className="object-contain"
+                  width={24}
+                  height={24}
+                  className="object-contain drop-shadow"
                 />
               </div>
               <div>
-                <h1 className="text-sm font-bold text-text tracking-tight flex items-center gap-2">
-                  <span>BizzPal OS</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 font-mono font-bold border border-cyan-500/20">PRO</span>
+                <h1 className="text-sm font-bold text-text tracking-tight flex items-center gap-1.5">
+                  <span>Bizz<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">Pal</span> OS</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono font-bold border border-amber-500/30">PRO</span>
                 </h1>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -795,7 +795,7 @@ export default function AdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                     isActive
-                      ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                      ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
                       : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
                   }`}
                 >
@@ -826,7 +826,7 @@ export default function AdminPage() {
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                 activeTab === "plans"
-                  ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                  ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
                   : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
               }`}
             >
@@ -868,7 +868,7 @@ export default function AdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                     isActive
-                      ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                      ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
                       : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
                   }`}
                 >
@@ -908,7 +908,7 @@ export default function AdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                     isActive
-                      ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                      ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
                       : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
                   }`}
                 >
@@ -939,7 +939,7 @@ export default function AdminPage() {
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                 activeTab === "tools"
-                  ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                  ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
                   : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
               }`}
             >
@@ -947,7 +947,7 @@ export default function AdminPage() {
                 <Wrench className="w-4 h-4" />
                 <span>Tools & Calculators</span>
               </div>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-mono font-bold">
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono font-bold border border-amber-500/30">
                 {tools.length}
               </span>
             </button>
@@ -966,7 +966,7 @@ export default function AdminPage() {
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all font-semibold cursor-pointer ${
                 activeTab === "audit"
-                  ? "bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 font-bold shadow-sm"
+                  ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border border-amber-500/35 font-bold shadow-sm shadow-amber-500/10"
                   : "text-text-muted hover:text-text hover:bg-surface-2/80 border border-transparent"
               }`}
             >
@@ -1063,7 +1063,7 @@ export default function AdminPage() {
 
             <Link
               href="/dashboard"
-              className="hidden md:flex items-center gap-1.5 text-xs text-text-muted hover:text-text px-3 py-1.5 rounded-xl border border-line/70 hover:border-cyan-500/40 hover:bg-surface-2 transition-all font-semibold"
+              className="hidden md:flex items-center gap-1.5 text-xs text-text-muted hover:text-text px-3 py-1.5 rounded-xl border border-line/70 hover:border-amber-500/40 hover:bg-surface-2 transition-all font-semibold"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Exit to App</span>
@@ -1074,7 +1074,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => handleOpenNavModal()}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white flex items-center gap-1.5 transition-all shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 flex items-center gap-1.5 transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Nav Button</span>
@@ -1085,7 +1085,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => handleOpenWidgetModal()}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white flex items-center gap-1.5 transition-all shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 flex items-center gap-1.5 transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Widget</span>
@@ -1096,7 +1096,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => handleOpenToolModal()}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white flex items-center gap-1.5 transition-all shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 flex items-center gap-1.5 transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Tool</span>

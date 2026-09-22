@@ -70,22 +70,22 @@ export function DesktopRail({
       {/* Brand Header */}
       <div className="p-4 border-b border-line">
         <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-transparent border border-cyan-500/30 flex items-center justify-center p-1.5 shadow-lg shadow-cyan-500/10 group-hover:scale-105 group-hover:border-cyan-500/50 transition-all">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 via-yellow-500/10 to-transparent border border-amber-400/40 flex items-center justify-center p-1.5 shadow-lg shadow-amber-500/15 group-hover:scale-105 group-hover:border-amber-400/70 transition-all">
             <Image
               src="/logo.png"
               alt="BizzPal Logo"
-              width={26}
-              height={26}
+              width={28}
+              height={28}
               className="object-contain drop-shadow"
               priority
             />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white font-sans">
-                BizzPal
+              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white font-sans">
+                Bizz<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500">Pal</span><span className="text-[10px] text-amber-400/80 align-super">™</span>
               </span>
-              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-semibold font-mono">
+              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold font-mono">
                 AI OS
               </span>
             </div>
@@ -101,13 +101,13 @@ export function DesktopRail({
         <button
           type="button"
           onClick={onOpenSearch}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-surface-2 border border-line text-text-muted hover:text-text hover:border-cyan-500/30 transition-all text-xs group cursor-pointer"
+          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-surface-2 border border-line text-text-muted hover:text-text hover:border-amber-500/40 transition-all text-xs group cursor-pointer"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <Search className="w-3.5 h-3.5 text-text-muted group-hover:text-cyan-400 transition-colors shrink-0" />
+            <Search className="w-3.5 h-3.5 text-text-muted group-hover:text-amber-400 transition-colors shrink-0" />
             <span className="text-[11px] font-medium truncate">Search tools, pages…</span>
           </div>
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-surface border border-line text-text-muted font-mono font-semibold group-hover:border-cyan-500/30 shrink-0">
+          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-surface border border-line text-text-muted font-mono font-semibold group-hover:border-amber-500/30 shrink-0">
             ⌘K
           </kbd>
         </button>
@@ -121,7 +121,7 @@ export function DesktopRail({
 
           return (
             <div key={group.key} className="space-y-1">
-              <div className="px-3 text-[10px] uppercase font-bold tracking-widest text-text-muted">
+              <div className="px-3 text-[10px] uppercase font-bold tracking-widest text-text-muted font-mono">
                 {group.label}
               </div>
               <nav className="space-y-0.5">
@@ -133,19 +133,19 @@ export function DesktopRail({
                       href={item.href}
                       className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all btn-tactile ${
                         isActive
-                          ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 border-l-2 border-cyan-500 pl-[10px] shadow-sm font-semibold"
+                          ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-500 dark:text-amber-400 border-l-2 border-amber-400 pl-[10px] shadow-sm shadow-amber-500/10 font-bold"
                           : "text-text-muted hover:text-text hover:bg-surface-2"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <DynamicIcon
                           name={item.icon}
-                          className={`w-4 h-4 ${isActive ? "text-cyan-500 dark:text-cyan-400" : "text-text-muted group-hover:text-text"}`}
+                          className={`w-4 h-4 ${isActive ? "text-amber-500 dark:text-amber-400" : "text-text-muted group-hover:text-text"}`}
                         />
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30 font-mono font-medium">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-mono font-bold">
                           {item.badge}
                         </span>
                       )}
