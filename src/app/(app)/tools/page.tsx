@@ -355,17 +355,36 @@ function ToolsContent() {
   // Close active tool calculator on Escape
   useEscapeKey(() => setActiveToolId(null), Boolean(activeToolId));
 
-  // Fetch dynamic tools catalog
-  // Fetch dynamic tools catalog
+  // Fetch dynamic tools catalog with live updates from Superadmin
   useEffect(() => {
-    fetch("/api/public/config", { cache: "no-store" })
-      .then(r => r.json())
-      .then(d => {
-        if (d.success && Array.isArray(d.tools) && d.tools.length > 0) {
-          setToolsList(d.tools);
-        }
-      })
-      .catch(() => {});
+    let mounted = true;
+    const fetchTools = () => {
+      fetch("/api/public/config", { cache: "no-store" })
+        .then(r => r.json())
+        .then(d => {
+          if (mounted && d.success && Array.isArray(d.tools) && d.tools.length > 0) {
+            setToolsList(d.tools);
+          }
+        })
+        .catch(() => {});
+    };
+
+    fetchTools();
+
+    window.addEventListener("bizzpal_config_updated", fetchTools);
+    window.addEventListener("storage", fetchTools);
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("bizzpal_channel");
+      bc.onmessage = () => fetchTools();
+    } catch {}
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("bizzpal_config_updated", fetchTools);
+      window.removeEventListener("storage", fetchTools);
+      if (bc) bc.close();
+    };
   }, []);
 
   // Read URL query parameter if launched from an AI Agent

@@ -251,17 +251,32 @@ export default function AdminPage() {
           actor: "Superadmin",
         }),
       });
-      if (!res.ok) {
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
         const text = await res.text().catch(() => "");
-        throw new Error(`Server returned HTTP ${res.status}${text ? `: ${text.slice(0, 80)}` : ""}`);
+        const isHtml = text.includes("<html") || text.includes("<!DOCTYPE");
+        throw new Error(isHtml ? "The server was temporarily busy or recompiling. Please retry in a moment." : (text.slice(0, 100) || `HTTP ${res.status}`));
       }
-      const data = await res.json();
-      if (data.success) {
-        setVersion(data.version);
-        if (data.auditLogs) setAuditLogs(data.auditLogs);
-        notify(data.message || `Saved ${sectionName} successfully (v${data.version})`);
-      } else {
-        notify(`Error: ${data.error || "Failed to save"}`);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || `Server returned HTTP ${res.status}`);
+      }
+      setVersion(data.version);
+      if (data.auditLogs) setAuditLogs(data.auditLogs);
+      notify(data.message || `Saved ${sectionName} successfully (v${data.version})`);
+
+      // Broadcast live sync event across website & dashboard
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("bizzpal_config_updated", { detail: { section: sectionName, version: data.version } }));
+        try {
+          localStorage.setItem("bizzpal_config_timestamp", String(Date.now()));
+        } catch {}
+        try {
+          const bc = new BroadcastChannel("bizzpal_channel");
+          bc.postMessage({ type: "bizzpal_config_updated", section: sectionName, version: data.version });
+          bc.close();
+        } catch {}
       }
     } catch (err: any) {
       notify(`Save failed: ${err.message}`);
@@ -283,32 +298,47 @@ export default function AdminPage() {
         method: "DELETE",
         headers: { Accept: "application/json" },
       });
-      if (!res.ok) {
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
         const text = await res.text().catch(() => "");
-        throw new Error(`Server returned HTTP ${res.status}${text ? `: ${text.slice(0, 80)}` : ""}`);
+        const isHtml = text.includes("<html") || text.includes("<!DOCTYPE");
+        throw new Error(isHtml ? "The server was temporarily busy or recompiling. Please retry in a moment." : (text.slice(0, 100) || `HTTP ${res.status}`));
       }
-      const data = await res.json();
-      if (data.success) {
-        if (data.data) {
-          if (data.data.website) setWebsiteConfig(data.data.website);
-          if (data.data.features) setFeaturesConfig(data.data.features);
-          setNavItems(data.data.nav || defaultNavItems);
-          setWidgets(data.data.widgets || defaultWidgets);
-          setTools(data.data.tools || DEFAULT_TOOLS_CATALOG);
-          setPlans(data.data.plans || DEFAULT_SUBSCRIPTION_PLANS);
-          if (data.data.auditLogs) setAuditLogs(data.data.auditLogs);
-          if (data.data.version) setVersion(data.data.version);
-        } else {
-          setNavItems(defaultNavItems);
-          setWidgets(defaultWidgets);
-          setTools(DEFAULT_TOOLS_CATALOG);
-          setPlans(DEFAULT_SUBSCRIPTION_PLANS);
-        }
-        notify("Platform restored to default factory settings");
-        fetchAllConfig();
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || `Server returned HTTP ${res.status}`);
+      }
+      if (data.data) {
+        if (data.data.website) setWebsiteConfig(data.data.website);
+        if (data.data.features) setFeaturesConfig(data.data.features);
+        setNavItems(data.data.nav || defaultNavItems);
+        setWidgets(data.data.widgets || defaultWidgets);
+        setTools(data.data.tools || DEFAULT_TOOLS_CATALOG);
+        setPlans(data.data.plans || DEFAULT_SUBSCRIPTION_PLANS);
+        if (data.data.auditLogs) setAuditLogs(data.data.auditLogs);
+        if (data.data.version) setVersion(data.data.version);
       } else {
-        notify(`Reset failed: ${data.error || "Failed to restore defaults"}`);
+        setNavItems(defaultNavItems);
+        setWidgets(defaultWidgets);
+        setTools(DEFAULT_TOOLS_CATALOG);
+        setPlans(DEFAULT_SUBSCRIPTION_PLANS);
       }
+      notify("Platform restored to default factory settings");
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("bizzpal_config_updated", { detail: { section: "all", reset: true } }));
+        try {
+          localStorage.setItem("bizzpal_config_timestamp", String(Date.now()));
+        } catch {}
+        try {
+          const bc = new BroadcastChannel("bizzpal_channel");
+          bc.postMessage({ type: "bizzpal_config_updated", section: "all", reset: true });
+          bc.close();
+        } catch {}
+      }
+
+      fetchAllConfig();
     } catch (err: any) {
       notify(`Reset failed: ${err.message}`);
     } finally {
@@ -559,6 +589,7 @@ export default function AdminPage() {
 
   const handleToggleTool = async (t: any) => {
     const isCurrentlyEnabled = t.enabled !== false;
+    const toolName = t.name || t.id || "Tool";
     const updatedList = tools.map((item) =>
       item.id === t.id ? { ...item, enabled: !isCurrentlyEnabled } : item
     );
@@ -566,7 +597,7 @@ export default function AdminPage() {
     await saveSection(
       "tools",
       updatedList,
-      `Toggled tool "${t.name}" (${isCurrentlyEnabled ? "disabled" : "enabled"})`
+      `Toggled tool "${toolName}" (${isCurrentlyEnabled ? "disabled" : "enabled"})`
     );
   };
 

@@ -64,39 +64,50 @@ export function AppShell({
     enableToolsCatalog: true,
   });
 
-  // Sync navItems prop if changes, preserving any dynamically loaded items
+  // Sync navItems prop if changes
   React.useEffect(() => {
     if (navItems && navItems.length > 0) {
-      setItems(prev => {
-        const map = new Map<string, NavItem>();
-        // Priority to navItems prop
-        navItems.forEach(item => map.set(item.href, item));
-        // Keep any items that were already in prev state (e.g. from backend or dynamic routes)
-        prev.forEach(item => {
-          if (!map.has(item.href)) {
-            map.set(item.href, item);
-          }
-        });
-        return Array.from(map.values()).sort((a, b) => (a.order || 0) - (b.order || 0));
-      });
+      setItems(navItems.filter(item => item.enabled !== false));
     }
   }, [navItems]);
 
-  // Fetch dynamic navigation and feature toggles from backend
+  // Fetch dynamic navigation and feature toggles with real-time Superadmin listeners
   React.useEffect(() => {
-    fetch("/api/public/config", { cache: "no-store" })
-      .then(r => r.json())
-      .then(d => {
-        if (d.success) {
-          if (Array.isArray(d.nav) && d.nav.length > 0) {
-            setItems(d.nav.filter((n: NavItem) => n.enabled !== false));
+    let mounted = true;
+
+    const fetchConfig = () => {
+      fetch("/api/public/config", { cache: "no-store" })
+        .then(r => r.json())
+        .then(d => {
+          if (!mounted) return;
+          if (d.success) {
+            if (Array.isArray(d.nav) && d.nav.length > 0) {
+              setItems(d.nav.filter((n: NavItem) => n.enabled !== false));
+            }
+            if (d.features) {
+              setFeatures(d.features);
+            }
           }
-          if (d.features) {
-            setFeatures(d.features);
-          }
-        }
-      })
-      .catch(() => {});
+        })
+        .catch(() => {});
+    };
+
+    fetchConfig();
+
+    window.addEventListener("bizzpal_config_updated", fetchConfig);
+    window.addEventListener("storage", fetchConfig);
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("bizzpal_channel");
+      bc.onmessage = () => fetchConfig();
+    } catch {}
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("bizzpal_config_updated", fetchConfig);
+      window.removeEventListener("storage", fetchConfig);
+      if (bc) bc.close();
+    };
   }, []);
 
   React.useEffect(() => {

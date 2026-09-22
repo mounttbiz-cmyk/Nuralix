@@ -178,14 +178,22 @@ export function useWebsiteConfig() {
 
     fetchConfig();
 
+    let bc = null;
     if (typeof window !== "undefined") {
       window.addEventListener("bizzpal_config_updated", fetchConfig);
+      window.addEventListener("storage", fetchConfig);
+      try {
+        bc = new BroadcastChannel("bizzpal_channel");
+        bc.onmessage = () => fetchConfig();
+      } catch {}
     }
 
     return () => {
       mounted = false;
       if (typeof window !== "undefined") {
         window.removeEventListener("bizzpal_config_updated", fetchConfig);
+        window.removeEventListener("storage", fetchConfig);
+        if (bc) bc.close();
       }
     };
   }, []);

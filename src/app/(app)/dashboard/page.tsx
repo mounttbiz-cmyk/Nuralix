@@ -91,36 +91,58 @@ function DashboardContent() {
   const hasLoadedBackendWidgetsRef = React.useRef(false);
 
   useEffect(() => {
+    let mounted = true;
     refreshCheckinStatus();
-    fetch("/api/public/config", { cache: "no-store" })
-      .then(r => r.json())
-      .then(d => {
-        if (d.success) {
-          if (d.features) {
-            setFeatureFlags(d.features);
-          }
-          if (Array.isArray(d.widgets) && d.widgets.length > 0) {
-            hasLoadedBackendWidgetsRef.current = true;
-            const disabledIds = new Set(
-              d.widgets.filter((w: any) => w.enabled === false).map((w: any) => w.id)
-            );
-            const savedLayout = localStorage.getItem(`bizzpal_layout_${selectedIndustry}`);
-            if (savedLayout) {
-              try {
-                const parsed = JSON.parse(savedLayout);
-                const existingIds = new Set(parsed.map((w: any) => w.id));
-                const missingDefaults = d.widgets.filter((w: any) => !existingIds.has(w.id) && !disabledIds.has(w.id));
-                setActiveWidgets([...parsed.filter((w: any) => !disabledIds.has(w.id)), ...missingDefaults]);
-              } catch {
+
+    const fetchConfig = () => {
+      fetch("/api/public/config", { cache: "no-store" })
+        .then(r => r.json())
+        .then(d => {
+          if (!mounted) return;
+          if (d.success) {
+            if (d.features) {
+              setFeatureFlags(d.features);
+            }
+            if (Array.isArray(d.widgets) && d.widgets.length > 0) {
+              hasLoadedBackendWidgetsRef.current = true;
+              const disabledIds = new Set(
+                d.widgets.filter((w: any) => w.enabled === false).map((w: any) => w.id)
+              );
+              const savedLayout = localStorage.getItem(`bizzpal_layout_${selectedIndustry}`);
+              if (savedLayout) {
+                try {
+                  const parsed = JSON.parse(savedLayout);
+                  const existingIds = new Set(parsed.map((w: any) => w.id));
+                  const missingDefaults = d.widgets.filter((w: any) => !existingIds.has(w.id) && !disabledIds.has(w.id));
+                  setActiveWidgets([...parsed.filter((w: any) => !disabledIds.has(w.id)), ...missingDefaults]);
+                } catch {
+                  setActiveWidgets(d.widgets.filter((w: any) => w.enabled !== false));
+                }
+              } else {
                 setActiveWidgets(d.widgets.filter((w: any) => w.enabled !== false));
               }
-            } else {
-              setActiveWidgets(d.widgets.filter((w: any) => w.enabled !== false));
             }
           }
-        }
-      })
-      .catch(() => {});
+        })
+        .catch(() => {});
+    };
+
+    fetchConfig();
+
+    window.addEventListener("bizzpal_config_updated", fetchConfig);
+    window.addEventListener("storage", fetchConfig);
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("bizzpal_channel");
+      bc.onmessage = () => fetchConfig();
+    } catch {}
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("bizzpal_config_updated", fetchConfig);
+      window.removeEventListener("storage", fetchConfig);
+      if (bc) bc.close();
+    };
   }, [selectedIndustry]);
 
   const applyProfileData = (saved: any) => {

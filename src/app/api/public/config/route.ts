@@ -21,45 +21,20 @@ export async function GET() {
     let widgets = getPlatformConfig("dashboard_widgets", defaultWidgets);
     let plans = getPlatformConfig("subscription_plans", DEFAULT_SUBSCRIPTION_PLANS);
 
-    // Ensure any newly added default nav items (e.g. Growth Strategy, Executive Playbooks) are merged if missing from DB
-    const existingNavHrefs = new Set(nav.map((n: any) => n.href));
-    let hasNewNav = false;
-    for (const dn of defaultNavItems) {
-      if (!existingNavHrefs.has(dn.href)) {
-        nav.push(dn);
-        hasNewNav = true;
-      }
-    }
-    if (hasNewNav) {
-      nav.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+    // If database had empty sets, seed with defaults
+    if (!Array.isArray(nav) || nav.length === 0) {
+      nav = defaultNavItems;
       setPlatformConfig("dashboard_nav", nav);
     }
 
-    // Ensure any newly added default tools are merged if missing from DB
-    const existingToolIds = new Set(tools.map((t: any) => t.id));
-    let hasNewTools = false;
-    for (const dt of DEFAULT_TOOLS_CATALOG) {
-      if (!existingToolIds.has(dt.id)) {
-        tools.push(dt);
-        hasNewTools = true;
-      }
-    }
-    if (hasNewTools) {
+    if (!Array.isArray(tools) || tools.length === 0) {
+      tools = DEFAULT_TOOLS_CATALOG;
       setPlatformConfig("tools_catalog", tools);
     }
-    
-    // Ensure any newly added default widgets (like DataUploadWidget) are merged if missing from DB
-    const existingIds = new Set(widgets.map((w: any) => w.id));
-    let hasNewWidgets = false;
-    for (const dw of defaultWidgets) {
-      if (!existingIds.has(dw.id)) {
-        widgets.push(dw);
-        hasNewWidgets = true;
-      }
-    }
-    // Re-sort if we added new ones
-    if (hasNewWidgets) {
-      widgets.sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0));
+
+    if (!Array.isArray(widgets) || widgets.length === 0) {
+      widgets = defaultWidgets;
+      setPlatformConfig("dashboard_widgets", widgets);
     }
 
     return NextResponse.json({
