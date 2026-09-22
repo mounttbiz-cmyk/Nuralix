@@ -19,7 +19,7 @@ export function ThemeSwitch({ compact = false }: ThemeSwitchProps) {
 
   return (
     <div
-      className={`inline-flex items-center p-1 rounded-xl border border-white/[0.05] bg-white/[0.03] ${
+      className={`inline-flex items-center p-1 rounded-xl border border-slate-200/90 dark:border-white/[0.06] bg-slate-200/60 dark:bg-white/[0.03] backdrop-blur-md ${
         compact ? "scale-90" : "w-full"
       }`}
       role="radiogroup"
@@ -34,8 +34,8 @@ export function ThemeSwitch({ compact = false }: ThemeSwitchProps) {
             onClick={() => setTheme(opt.mode)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1 px-2 text-xs rounded-lg transition-all cursor-pointer ${
               isActive
-                ? "bg-white/[0.08] text-white font-semibold shadow-xs"
-                : "text-text-muted hover:text-white hover:bg-white/[0.02]"
+                ? "bg-white dark:bg-amber-400/15 text-slate-950 dark:text-amber-300 font-bold shadow-xs border border-slate-300/80 dark:border-amber-400/30"
+                : "text-slate-600 dark:text-text-muted hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/[0.03]"
             }`}
             title={`Switch to ${opt.label} mode (⌘⇧L to cycle)`}
           >

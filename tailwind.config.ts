@@ -1,6 +1,8 @@
 import type { Config } from "tailwindcss";
 import containerQueries from "@tailwindcss/container-queries";
 
+import colors from "tailwindcss/colors";
+
 const config: Config = {
   darkMode: ["class", '[data-theme="dark"]'],
   content: [
@@ -37,6 +39,7 @@ const config: Config = {
           soft: "var(--brass-soft)",
         },
         cyan: {
+          ...colors.cyan,
           DEFAULT: "var(--cyan)",
           soft: "var(--cyan-soft)",
         },
@@ -44,10 +47,18 @@ const config: Config = {
           DEFAULT: "var(--violet)",
           soft: "var(--violet-soft)",
         },
-        gold: "var(--gold)",
+        gold: {
+          DEFAULT: "var(--gold)",
+          light: "var(--gold-light)",
+          dark: "var(--gold-dark)",
+          glow: "var(--gold-glow)",
+        },
         jade: "var(--jade)",
         rust: "var(--rust)",
-        amber: "var(--amber)",
+        amber: {
+          ...colors.amber,
+          DEFAULT: "var(--amber)",
+        },
         grid: "var(--grid)",
         accent: "var(--brass)",
         positive: "var(--jade)",

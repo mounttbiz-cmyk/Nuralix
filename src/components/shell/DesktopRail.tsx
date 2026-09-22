@@ -85,9 +85,20 @@ export function DesktopRail({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-base tracking-tight text-text font-sans whitespace-nowrap">
-                Bizz<span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-light via-gold to-gold-dark">Pal</span><span className="text-[10px] text-gold/80 align-super">™</span>
+                Bizz<span
+                  className="font-black"
+                  style={{
+                    background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    color: "#F5C542",
+                    display: "inline-block",
+                  }}
+                >
+                  Pal
+                </span><span className="text-[10px] text-amber-500 font-bold align-super">™</span>
               </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30 font-bold font-mono shrink-0">
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-400/15 text-amber-500 dark:text-amber-300 border border-amber-500/30 font-bold font-mono shrink-0">
                 AI OS
               </span>
             </div>
@@ -103,13 +114,13 @@ export function DesktopRail({
         <button
           type="button"
           onClick={onOpenSearch}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-text-muted hover:text-text hover:border-white/[0.14] transition-all text-xs group cursor-pointer"
+          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-100/90 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] text-text-muted hover:text-text hover:border-slate-300 dark:hover:border-white/[0.14] transition-all text-xs group cursor-pointer"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <Search className="w-3.5 h-3.5 text-text-muted group-hover:text-amber-400 transition-colors shrink-0" />
+            <Search className="w-3.5 h-3.5 text-text-muted group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors shrink-0" />
             <span className="text-[11px] font-medium truncate">Search tools, pages…</span>
           </div>
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.04] text-text-muted font-mono font-semibold shrink-0">
+          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-white dark:bg-white/[0.06] border border-slate-200/60 dark:border-transparent text-text-muted font-mono font-semibold shrink-0">
             ⌘K
           </kbd>
         </button>
@@ -187,18 +198,18 @@ export function DesktopRail({
         </div>
 
         {/* User profile & logout */}
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-xs">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-100/90 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] text-xs">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 text-[#1a1206] font-bold text-xs flex items-center justify-center shadow-sm shrink-0">
                 {initials}
               </div>
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#080C16]" />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-surface" />
             </div>
             <div className="truncate">
               <div className="font-semibold text-text truncate">{companyName}</div>
               <div className="text-[10px] text-text-muted flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                <ShieldCheck className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
                 <span>Verified Enterprise</span>
               </div>
             </div>
@@ -207,7 +218,7 @@ export function DesktopRail({
             type="button"
             onClick={handleLogout}
             title="Sign Out"
-            className="p-1.5 rounded-lg text-text-muted hover:text-rose-400 hover:bg-white/[0.04] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-text-muted hover:text-rose-500 dark:hover:text-rose-400 hover:bg-slate-200/60 dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
           </button>

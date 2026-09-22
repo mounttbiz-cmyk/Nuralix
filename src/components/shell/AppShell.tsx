@@ -191,9 +191,11 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-bg text-text flex flex-col md:flex-row relative overflow-x-hidden selection:bg-amber-500/30 selection:text-amber-200">
-      {/* Ambient background glow aura matching 3D Gold BizzPal logo (dark mode only to keep light mode pure & clean) */}
+      {/* Ambient background glow aura matching 3D Gold BizzPal logo */}
       <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-amber-500/10 via-transparent to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />
+      <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-slate-200/50 via-amber-100/25 to-transparent blur-3xl pointer-events-none -z-10 dark:hidden block" />
+      <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-slate-200/40 via-amber-50/20 to-transparent blur-3xl pointer-events-none -z-10 dark:hidden block" />
 
       {/* Desktop Left Rail (lg+) */}
       <DesktopRail
@@ -244,14 +246,20 @@ export function AppShell({
           type="button"
           onClick={() => setChatOpen(true)}
           aria-label="Open AI Workspace"
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 text-slate-950 shadow-xl shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 active:scale-95 transition-all text-xs font-extrabold border border-amber-300/60 font-sans cursor-pointer group"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full text-[#0A0D14] shadow-xl hover:scale-105 active:scale-95 transition-all text-xs font-extrabold font-sans cursor-pointer group"
+          style={{
+            background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #D4A017 100%)",
+            color: "#0A0D14",
+            border: "1px solid rgba(255, 235, 160, 0.7)",
+            boxShadow: "0 10px 25px -4px rgba(245, 197, 66, 0.45), 0 4px 10px -2px rgba(0, 0, 0, 0.2)",
+          }}
         >
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-950" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0A0D14] opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#0A0D14]" />
           </span>
-          <MessageSquare className="w-4 h-4 text-slate-950 group-hover:rotate-6 transition-transform" />
-          <span>Ask Executive AI</span>
+          <MessageSquare className="w-4 h-4 text-[#0A0D14] group-hover:rotate-6 transition-transform" />
+          <span className="font-extrabold tracking-wide text-[#0A0D14]">Ask Executive AI</span>
         </button>
       )}
 

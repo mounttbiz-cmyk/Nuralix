@@ -34,7 +34,18 @@ export function MobileHeader({
         </div>
         <div className="flex flex-col">
           <span className="font-extrabold text-xs tracking-tight text-text leading-tight font-sans">
-            Bizz<span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-light to-gold">Pal</span>™
+            Bizz<span
+              className="font-black"
+              style={{
+                background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                color: "#F5C542",
+                display: "inline-block",
+              }}
+            >
+              Pal
+            </span>™
           </span>
           <span className="text-[10px] text-text-muted leading-tight truncate max-w-[120px]">
             {companyName}

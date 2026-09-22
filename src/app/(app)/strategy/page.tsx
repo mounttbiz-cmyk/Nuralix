@@ -357,7 +357,7 @@ export default function GrowthStrategyPage() {
               <Compass className="w-4 h-4" />
             </div>
             <h1 className="text-lg font-bold text-text">Enterprise Growth Strategy</h1>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold uppercase tracking-wider">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-500 dark:text-amber-300 border border-amber-500/30 font-bold uppercase tracking-wider">
               Astra AI Engine
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-brass-soft text-brass font-bold uppercase tracking-wider">
@@ -373,7 +373,7 @@ export default function GrowthStrategyPage() {
           <button
             type="button"
             onClick={handleOpenAddModal}
-            className="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs shadow-sm hover:brightness-110 active:scale-95 btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-lg btn-gold-gradient text-slate-950 font-bold text-xs shadow-md hover:brightness-110 active:scale-95 btn-tactile inline-flex items-center gap-1.5 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>+ Add Strategic Vector</span>
@@ -502,7 +502,7 @@ export default function GrowthStrategyPage() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-xs"
+                    ? "bg-amber-400/20 text-amber-900 dark:text-amber-300 border border-amber-500/40 font-bold shadow-xs"
                     : "bg-surface border border-line text-text-muted hover:text-text hover:bg-surface-2"
                 }`}
               >

@@ -565,8 +565,21 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <span className="font-extrabold text-base tracking-tight text-text font-sans">BizzPal</span>
-            <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-brass-soft text-brass font-bold uppercase tracking-wider">
+            <span className="font-extrabold text-base tracking-tight text-text font-sans">
+              Bizz<span
+                className="font-black"
+                style={{
+                  background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  color: "#F5C542",
+                  display: "inline-block",
+                }}
+              >
+                Pal
+              </span>
+            </span>
+            <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-amber-400/15 text-amber-500 dark:text-amber-300 font-bold uppercase tracking-wider border border-amber-500/30">
               AI Business OS
             </span>
           </div>

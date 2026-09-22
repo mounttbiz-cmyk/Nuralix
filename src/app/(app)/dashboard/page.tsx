@@ -309,14 +309,14 @@ function DashboardContent() {
 
       {/* Daily Executive Check-in Banner / Status */}
       {featureFlags.enableDailyCheckin !== false && (
-        <div className="p-4 sm:p-5 rounded-2xl border border-white/[0.05] bg-surface/60 backdrop-blur-xl shadow-lg shadow-black/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
+        <div className="p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-white/[0.05] bg-white/80 dark:bg-surface/60 backdrop-blur-xl shadow-xs dark:shadow-lg dark:shadow-black/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-amber-500/[0.03] to-transparent pointer-events-none" />
           <div className="flex items-start gap-3.5 relative z-10">
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
                 checkinData.isCompletedToday
-                  ? "bg-emerald-500/10 text-emerald-400"
-                  : "bg-amber-500/10 text-amber-400"
+                  ? "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400"
+                  : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
               }`}
             >
               {checkinData.isCompletedToday ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
@@ -361,27 +361,27 @@ function DashboardContent() {
       )}
 
       {/* Top Header & Executive Command Center */}
-      <div className="p-6 sm:p-7 space-y-6 rounded-3xl bg-surface/70 backdrop-blur-2xl border border-white/[0.06] shadow-xl shadow-black/20 relative overflow-hidden">
+      <div className="p-6 sm:p-7 space-y-6 rounded-3xl bg-white/80 dark:bg-surface/70 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.06] shadow-sm dark:shadow-xl dark:shadow-black/20 relative overflow-hidden">
         {/* Live Status Beacon & Timeframe Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/[0.05] relative z-10">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200/80 dark:border-white/[0.05] relative z-10">
           <div className="inline-flex items-center gap-2.5 text-xs text-text-muted">
             <span className="beacon-dot" />
             <span className="font-semibold text-text">Autonomous Intelligence Engine</span>
-            <span className="text-white/20">•</span>
+            <span className="text-slate-300 dark:text-white/20">•</span>
             {uploadedFileName ? (
               <>
                 <span className="text-jade font-semibold">Custom Telemetry Synced</span>
-                <span className="text-white/20">•</span>
+                <span className="text-slate-300 dark:text-white/20">•</span>
                 <span className="text-text font-mono text-[11px]">{uploadedFileName}</span>
               </>
             ) : (
-              <span className="text-amber-400/90 font-medium font-mono text-[11px]">Telemetry Synced Live</span>
+              <span className="text-amber-600 dark:text-amber-400 font-medium font-mono text-[11px]">Telemetry Synced Live</span>
             )}
-            <span className="text-white/20">•</span>
+            <span className="text-slate-300 dark:text-white/20">•</span>
             <span className="font-mono text-[11px] text-text-muted">v{baseConfig.version} Registry</span>
           </div>
 
-          <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.05] text-xs">
+          <div className="flex items-center gap-1 p-1 bg-slate-100/90 dark:bg-white/[0.03] rounded-xl border border-slate-200/80 dark:border-white/[0.05] text-xs">
             {["Live Today", "7D Trend", "Month to Date", "Q3 Live"].map(tf => (
               <button
                 key={tf}
@@ -392,8 +392,8 @@ function DashboardContent() {
                 }}
                 className={`px-3 py-1 rounded-lg text-xs transition-all btn-tactile cursor-pointer ${
                   selectedTimeframe === tf
-                    ? "bg-amber-400/15 text-amber-300 font-semibold shadow-xs"
-                    : "text-text-muted hover:text-text hover:bg-white/[0.02]"
+                    ? "bg-white dark:bg-amber-400/15 text-slate-900 dark:text-amber-300 font-bold shadow-xs border border-slate-200/90 dark:border-amber-400/30"
+                    : "text-slate-600 dark:text-text-muted hover:text-slate-900 dark:hover:text-text hover:bg-white/60 dark:hover:bg-white/[0.02]"
                 }`}
               >
                 {tf}
@@ -440,9 +440,9 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setIsUploadModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-text hover:text-white"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-slate-100/90 hover:bg-slate-200/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200/90 dark:border-white/[0.08] text-text"
             >
-              <UploadCloud className="w-3.5 h-3.5 text-amber-400" />
+              <UploadCloud className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
               <span>Upload Business Data</span>
               {uploadedFileName && (
                 <span className="w-1.5 h-1.5 rounded-full bg-jade animate-pulse" title="Custom dataset active" />
@@ -450,7 +450,7 @@ function DashboardContent() {
             </button>
 
             {/* Profile Switcher */}
-            <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.05]">
+            <div className="flex items-center gap-1 p-1 bg-slate-100/90 dark:bg-white/[0.03] rounded-xl border border-slate-200/80 dark:border-white/[0.05]">
               {[
                 { ind: "saas", mod: "subscription", label: "B2B SaaS" },
                 { ind: "d2c", mod: "one-time", label: "D2C Brand" },
@@ -467,8 +467,8 @@ function DashboardContent() {
                     }}
                     className={`px-3 py-1.5 text-xs rounded-lg transition-all btn-tactile ${
                       isActive
-                        ? "bg-white/[0.08] text-text font-semibold shadow-xs"
-                        : "text-text-muted hover:text-text hover:bg-white/[0.02]"
+                        ? "bg-white dark:bg-white/[0.08] text-slate-900 dark:text-text font-bold shadow-xs border border-slate-200/80 dark:border-transparent"
+                        : "text-slate-600 dark:text-text-muted hover:text-slate-900 dark:hover:text-text hover:bg-white/60 dark:hover:bg-white/[0.02]"
                     }`}
                   >
                     {profile.label}
@@ -497,52 +497,52 @@ function DashboardContent() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 relative z-10">
           <Link
             href="/analytics"
-            className="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-4 rounded-2xl bg-slate-100/80 dark:bg-white/[0.02] hover:bg-slate-200/60 dark:hover:bg-white/[0.05] border border-slate-200/80 dark:border-white/[0.04] hover:border-slate-300 dark:hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-300 transition-colors">Overall Health</span>
+              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-500 dark:group-hover:text-amber-300 transition-colors">Overall Health</span>
               <span className="text-lg font-bold text-text font-mono mt-0.5 block">82 / 100</span>
             </div>
-            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold font-mono">
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold font-mono">
               Optimal
             </span>
           </Link>
 
           <Link
             href="/simulator"
-            className="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-4 rounded-2xl bg-slate-100/80 dark:bg-white/[0.02] hover:bg-slate-200/60 dark:hover:bg-white/[0.05] border border-slate-200/80 dark:border-white/[0.04] hover:border-slate-300 dark:hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-300 transition-colors">Liquid Runway</span>
-              <span className="text-lg font-bold text-amber-400 font-mono mt-0.5 block">{liquidRunwayMo} mo</span>
+              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-500 dark:group-hover:text-amber-300 transition-colors">Liquid Runway</span>
+              <span className="text-lg font-bold text-amber-600 dark:text-amber-400 font-mono mt-0.5 block">{liquidRunwayMo} mo</span>
             </div>
-            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 font-semibold font-mono">
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold font-mono">
               {Number(liquidRunwayMo) >= 6 ? "Safe Zone" : "Caution"}
             </span>
           </Link>
 
           <Link
             href="/tasks"
-            className="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-4 rounded-2xl bg-slate-100/80 dark:bg-white/[0.02] hover:bg-slate-200/60 dark:hover:bg-white/[0.05] border border-slate-200/80 dark:border-white/[0.04] hover:border-slate-300 dark:hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-300 transition-colors">Execution Queue</span>
+              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-500 dark:group-hover:text-amber-300 transition-colors">Execution Queue</span>
               <span className="text-lg font-bold text-text font-mono mt-0.5 block">3 Active</span>
             </div>
-            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 font-semibold font-mono">
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold font-mono">
               On Schedule
             </span>
           </Link>
 
           <Link
             href="/gaps"
-            className="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-4 rounded-2xl bg-slate-100/80 dark:bg-white/[0.02] hover:bg-slate-200/60 dark:hover:bg-white/[0.05] border border-slate-200/80 dark:border-white/[0.04] hover:border-slate-300 dark:hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-300 transition-colors">Bottleneck Gaps</span>
-              <span className="text-lg font-bold text-amber-400 font-mono mt-0.5 block">3 Flagged</span>
+              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-500 dark:group-hover:text-amber-300 transition-colors">Bottleneck Gaps</span>
+              <span className="text-lg font-bold text-amber-600 dark:text-amber-400 font-mono mt-0.5 block">3 Flagged</span>
             </div>
-            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 font-semibold font-mono">
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-semibold font-mono">
               Action Ready
             </span>
           </Link>
