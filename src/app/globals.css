@@ -9,8 +9,8 @@
   --bg:          #060709;   /* Deepest midnight obsidian void */
   --surface:     #0D0F15;   /* Elevated obsidian surface with rich warm metallic depth */
   --surface-2:   #151822;   /* Interactive metallic layer */
-  --line:        rgba(245, 197, 66, 0.12);   /* Refined hairline gold border */
-  --line-strong: rgba(245, 197, 66, 0.28);   /* Illuminated metallic gold border */
+  --line:        rgba(255, 255, 255, 0.07);   /* Neutral structural hairline, not gold */
+  --line-strong: rgba(255, 255, 255, 0.14);   /* Neutral emphasized hairline */
   --text:        #FFFFFF;   /* Crisp diamond white matching "Bizz" in logo */
   --text-muted:  #9E988D;   /* Champagne slate muted */
   
@@ -51,19 +51,19 @@
   --line-strong: #CBD5E1;   /* Defined border */
   --text:        #0F172A;   /* Crisp deep obsidian slate text */
   --text-muted:  #64748B;   /* Slate neutral muted text */
-  --gold:        #D97706;   /* Rich warm executive gold */
-  --gold-light:  #F59E0B;
-  --gold-dark:   #B45309;
-  --gold-glow:   rgba(217, 119, 6, 0.15);
-  --brass:       #D97706;
-  --brass-soft:  rgba(217, 119, 6, 0.10);
-  --cyan:        #D97706;   /* Remap to rich gold */
-  --cyan-soft:   rgba(217, 119, 6, 0.08);
-  --violet:      #B45309;
-  --violet-soft: rgba(180, 83, 9, 0.08);
+  --gold:        #AB8A2C;   /* Muted antique gold, not orange */
+  --gold-light:  #C9A94A;
+  --gold-dark:   #8A6D1F;
+  --gold-glow:   rgba(171, 138, 44, 0.15);
+  --brass:       #AB8A2C;
+  --brass-soft:  rgba(171, 138, 44, 0.10);
+  --cyan:        #AB8A2C;   /* Remap to muted gold */
+  --cyan-soft:   rgba(171, 138, 44, 0.08);
+  --violet:      #8A6D1F;
+  --violet-soft: rgba(138, 109, 31, 0.08);
   --jade:        #059669;
   --rust:        #E11D48;
-  --amber:       #D97706;
+  --amber:       #AB8A2C;
   --shadow:      0 1px 3px rgba(0, 0, 0, 0.04), 0 6px 20px rgba(0, 0, 0, 0.05);
   --grid:        #F1F5F9;
 }
@@ -181,7 +181,7 @@ body, [data-surface] {
   background: rgba(13, 15, 21, 0.82);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(245, 197, 66, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 1.25rem;
   box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.6);
 }
