@@ -309,7 +309,7 @@ function DashboardContent() {
       {/* Daily Executive Check-in Banner / Status */}
       {featureFlags.enableDailyCheckin !== false && (
         <div className="p-4 sm:p-5 rounded-2xl border border-line/70 bg-surface/80 backdrop-blur-xl shadow-lg shadow-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-cyan-500/5 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-amber-500/5 to-transparent pointer-events-none" />
           <div className="flex items-start gap-3.5 relative z-10">
             <div
               className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 ${

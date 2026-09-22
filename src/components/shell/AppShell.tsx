@@ -191,9 +191,9 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-bg text-text flex flex-col md:flex-row relative overflow-x-hidden selection:bg-amber-500/30 selection:text-amber-200">
-      {/* Ambient background glow aura matching 3D Gold BizzPal logo */}
-      <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
-      <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-amber-500/10 via-transparent to-transparent blur-3xl pointer-events-none -z-10" />
+      {/* Ambient background glow aura matching 3D Gold BizzPal logo (dark mode only to keep light mode pure & clean) */}
+      <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />
+      <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-amber-500/10 via-transparent to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />
 
       {/* Desktop Left Rail (lg+) */}
       <DesktopRail

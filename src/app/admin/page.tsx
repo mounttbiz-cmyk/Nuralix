@@ -743,8 +743,8 @@ export default function AdminPage() {
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400/25 via-yellow-500/10 to-transparent border border-amber-400/40 flex items-center justify-center p-1 shadow-md shadow-amber-500/15 ring-1 ring-amber-400/30">
                 <Image
-                  src="/logo.png"
-                  alt="Logo"
+                  src="/logo-icon.png"
+                  alt="BizzPal Logo"
                   width={24}
                   height={24}
                   className="object-contain drop-shadow"

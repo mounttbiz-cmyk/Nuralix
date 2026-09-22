@@ -3,13 +3,16 @@ export const themeInitScript = `
 (function() {
   try {
     var stored = localStorage.getItem('bizzpal-theme');
-    var theme = 'dark';
-    if (stored === 'light' || stored === 'dark') {
-      theme = stored;
-    } else if (stored === 'system' || !stored) {
-      theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // BizzPal defaults strictly to Dark theme (Midnight Obsidian & 3D Gold)
+    var resolved = 'dark';
+    if (stored === 'light') {
+      resolved = 'light';
+    } else {
+      resolved = 'dark';
+      if (!stored || stored === 'system') {
+        localStorage.setItem('bizzpal-theme', 'dark');
+      }
     }
-    var resolved = theme;
     document.documentElement.setAttribute('data-theme', resolved);
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(resolved);

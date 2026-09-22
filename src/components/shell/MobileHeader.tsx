@@ -25,7 +25,7 @@ export function MobileHeader({
       <Link href="/dashboard" className="flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400/20 via-yellow-500/10 to-transparent border border-amber-400/40 flex items-center justify-center p-1 shadow-md shadow-amber-500/15">
           <Image
-            src="/logo.png"
+            src="/logo-icon.png"
             alt="BizzPal Logo"
             width={24}
             height={24}
@@ -73,9 +73,9 @@ export function MobileHeader({
           className="w-8 h-8 rounded-xl flex items-center justify-center border border-white/[0.08] bg-surface-2/80 text-text-muted hover:text-text btn-tactile"
         >
           {resolvedTheme === "dark" ? (
-            <Moon className="w-3.5 h-3.5 text-cyan-400" />
+            <Moon className="w-3.5 h-3.5 text-amber-400" />
           ) : (
-            <Sun className="w-3.5 h-3.5 text-cyan-400" />
+            <Sun className="w-3.5 h-3.5 text-amber-400" />
           )}
         </button>
       </div>

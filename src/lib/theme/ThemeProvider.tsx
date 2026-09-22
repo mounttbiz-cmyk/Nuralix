@@ -59,19 +59,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem("bizzpal-theme") as ThemeMode | null;
-    const initialMode: ThemeMode = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+    const initialMode: ThemeMode = stored === "light" ? "light" : "dark";
     setThemeState(initialMode);
     applyTheme(initialMode);
-
-    // Live system listener
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleSystemChange = () => {
-      const currentStored = localStorage.getItem("bizzpal-theme") || "system";
-      if (currentStored === "system") {
-        applyTheme("system");
-      }
-    };
-    mediaQuery.addEventListener("change", handleSystemChange);
+    if (!stored || stored === "system") {
+      localStorage.setItem("bizzpal-theme", "dark");
+    }
 
     // Keyboard shortcut: ⌘/Ctrl + Shift + L to cycle themes
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -83,7 +76,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      mediaQuery.removeEventListener("change", handleSystemChange);
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);

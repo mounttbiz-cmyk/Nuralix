@@ -70,9 +70,9 @@ export function DesktopRail({
       {/* Brand Header */}
       <div className="p-4 border-b border-line">
         <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 via-yellow-500/10 to-transparent border border-amber-400/40 flex items-center justify-center p-1.5 shadow-lg shadow-amber-500/15 group-hover:scale-105 group-hover:border-amber-400/70 transition-all">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 via-yellow-500/10 to-transparent border border-amber-400/40 flex items-center justify-center p-1.5 shadow-lg shadow-amber-500/15 group-hover:scale-105 group-hover:border-amber-400/70 transition-all shrink-0">
             <Image
-              src="/logo.png"
+              src="/logo-icon.png"
               alt="BizzPal Logo"
               width={28}
               height={28}
@@ -80,12 +80,12 @@ export function DesktopRail({
               priority
             />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white font-sans">
+              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white font-sans whitespace-nowrap">
                 Bizz<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500">Pal</span><span className="text-[10px] text-amber-400/80 align-super">™</span>
               </span>
-              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold font-mono">
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold font-mono shrink-0">
                 AI OS
               </span>
             </div>

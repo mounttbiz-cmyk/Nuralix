@@ -28,7 +28,7 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
         title="BizzPal Dashboard"
       >
         <Image
-          src="/logo.png"
+          src="/logo-icon.png"
           alt="BizzPal Logo"
           width={28}
           height={28}
