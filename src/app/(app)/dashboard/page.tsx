@@ -95,6 +95,39 @@ function DashboardContent() {
     refreshCheckinStatus();
 
     const fetchConfig = () => {
+      // Instant client-side hydration from Superadmin edits in localStorage
+      if (typeof window !== "undefined") {
+        try {
+          const cachedFeatures = localStorage.getItem("bizzpal_dashboard_features");
+          if (cachedFeatures) {
+            setFeatureFlags(JSON.parse(cachedFeatures));
+          }
+          const cachedWidgets = localStorage.getItem("bizzpal_dashboard_widgets");
+          if (cachedWidgets) {
+            const wList = JSON.parse(cachedWidgets);
+            if (Array.isArray(wList) && wList.length > 0) {
+              hasLoadedBackendWidgetsRef.current = true;
+              const disabledIds = new Set(
+                wList.filter((w: any) => w.enabled === false).map((w: any) => w.id)
+              );
+              const savedLayout = localStorage.getItem(`bizzpal_layout_${selectedIndustry}`);
+              if (savedLayout) {
+                try {
+                  const parsed = JSON.parse(savedLayout);
+                  const existingIds = new Set(parsed.map((w: any) => w.id));
+                  const missingDefaults = wList.filter((w: any) => !existingIds.has(w.id) && !disabledIds.has(w.id));
+                  setActiveWidgets([...parsed.filter((w: any) => !disabledIds.has(w.id)), ...missingDefaults]);
+                } catch {
+                  setActiveWidgets(wList.filter((w: any) => w.enabled !== false));
+                }
+              } else {
+                setActiveWidgets(wList.filter((w: any) => w.enabled !== false));
+              }
+            }
+          }
+        } catch {}
+      }
+
       fetch("/api/public/config", { cache: "no-store" })
         .then(r => r.json())
         .then(d => {

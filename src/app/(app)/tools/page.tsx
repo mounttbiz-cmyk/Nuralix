@@ -329,9 +329,22 @@ const TOOLS_CATALOG: BusinessTool[] = [
   },
 ];
 
+function getInitialToolsList(): BusinessTool[] {
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem("bizzpal_tools_catalog");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+  }
+  return TOOLS_CATALOG;
+}
+
 function ToolsContent() {
   const searchParams = useSearchParams();
-  const [toolsList, setToolsList] = useState<BusinessTool[]>(TOOLS_CATALOG);
+  const [toolsList, setToolsList] = useState<BusinessTool[]>(getInitialToolsList);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
@@ -357,13 +370,30 @@ function ToolsContent() {
 
   // Fetch dynamic tools catalog with live updates from Superadmin
   useEffect(() => {
-    let mounted = true;
+    let active = true;
     const fetchTools = () => {
-      fetch("/api/public/config", { cache: "no-store" })
+      // 1. Instant hydration from localStorage
+      if (typeof window !== "undefined") {
+        try {
+          const saved = localStorage.getItem("bizzpal_tools_catalog");
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (active && Array.isArray(parsed) && parsed.length > 0) {
+              setToolsList(parsed);
+            }
+          }
+        } catch {}
+      }
+
+      // 2. Fetch from public config API
+      fetch("/api/public/config", { cache: "no-store", headers: { "Cache-Control": "no-cache" } })
         .then(r => r.json())
         .then(d => {
-          if (mounted && d.success && Array.isArray(d.tools) && d.tools.length > 0) {
+          if (active && d.success && Array.isArray(d.tools) && d.tools.length > 0) {
             setToolsList(d.tools);
+            try {
+              localStorage.setItem("bizzpal_tools_catalog", JSON.stringify(d.tools));
+            } catch {}
           }
         })
         .catch(() => {});
@@ -380,7 +410,7 @@ function ToolsContent() {
     } catch {}
 
     return () => {
-      mounted = false;
+      active = false;
       window.removeEventListener("bizzpal_config_updated", fetchTools);
       window.removeEventListener("storage", fetchTools);
       if (bc) bc.close();

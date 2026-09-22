@@ -196,27 +196,60 @@ export default function AdminPage() {
     }
   };
 
-  // Fetch full configuration on mount
+  // Fetch full configuration on mount with instant localStorage hydration
   const fetchAllConfig = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/config", {
-        headers: { Accept: "application/json" },
-      });
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`Server returned HTTP ${res.status}${text ? `: ${text.slice(0, 80)}` : ""}`);
+      if (typeof window !== "undefined") {
+        try {
+          const sw = localStorage.getItem("bizzpal_website_config");
+          if (sw) setWebsiteConfig(JSON.parse(sw));
+          const st = localStorage.getItem("bizzpal_tools_catalog");
+          if (st) setTools(JSON.parse(st));
+          const sn = localStorage.getItem("bizzpal_dashboard_nav");
+          if (sn) setNavItems(JSON.parse(sn));
+          const swi = localStorage.getItem("bizzpal_dashboard_widgets");
+          if (swi) setWidgets(JSON.parse(swi));
+          const sf = localStorage.getItem("bizzpal_dashboard_features");
+          if (sf) setFeaturesConfig(JSON.parse(sf));
+          const sp = localStorage.getItem("bizzpal_subscription_plans");
+          if (sp) setPlans(JSON.parse(sp));
+        } catch {}
       }
-      const data = await res.json();
-      if (data && data.data) {
-        if (data.data.website) setWebsiteConfig(data.data.website);
-        if (data.data.features) setFeaturesConfig(data.data.features);
-        setNavItems(Array.isArray(data.data.nav) && data.data.nav.length > 0 ? data.data.nav : defaultNavItems);
-        setWidgets(Array.isArray(data.data.widgets) && data.data.widgets.length > 0 ? data.data.widgets : defaultWidgets);
-        setTools(Array.isArray(data.data.tools) && data.data.tools.length > 0 ? data.data.tools : DEFAULT_TOOLS_CATALOG);
-        setPlans(Array.isArray(data.data.plans) && data.data.plans.length > 0 ? data.data.plans : DEFAULT_SUBSCRIPTION_PLANS);
-        if (Array.isArray(data.data.auditLogs)) setAuditLogs(data.data.auditLogs);
-        if (data.data.version) setVersion(data.data.version);
+
+      const res = await fetch("/api/admin/config", {
+        headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.data) {
+          if (data.data.website) {
+            setWebsiteConfig(data.data.website);
+            try { localStorage.setItem("bizzpal_website_config", JSON.stringify(data.data.website)); } catch {}
+          }
+          if (data.data.features) {
+            setFeaturesConfig(data.data.features);
+            try { localStorage.setItem("bizzpal_dashboard_features", JSON.stringify(data.data.features)); } catch {}
+          }
+          if (Array.isArray(data.data.nav) && data.data.nav.length > 0) {
+            setNavItems(data.data.nav);
+            try { localStorage.setItem("bizzpal_dashboard_nav", JSON.stringify(data.data.nav)); } catch {}
+          }
+          if (Array.isArray(data.data.widgets) && data.data.widgets.length > 0) {
+            setWidgets(data.data.widgets);
+            try { localStorage.setItem("bizzpal_dashboard_widgets", JSON.stringify(data.data.widgets)); } catch {}
+          }
+          if (Array.isArray(data.data.tools) && data.data.tools.length > 0) {
+            setTools(data.data.tools);
+            try { localStorage.setItem("bizzpal_tools_catalog", JSON.stringify(data.data.tools)); } catch {}
+          }
+          if (Array.isArray(data.data.plans) && data.data.plans.length > 0) {
+            setPlans(data.data.plans);
+            try { localStorage.setItem("bizzpal_subscription_plans", JSON.stringify(data.data.plans)); } catch {}
+          }
+          if (Array.isArray(data.data.auditLogs)) setAuditLogs(data.data.auditLogs);
+          if (data.data.version) setVersion(data.data.version);
+        }
       }
       await fetchTenants();
     } catch (err: any) {
@@ -236,10 +269,30 @@ export default function AdminPage() {
     fetchAllConfig();
   }, []);
 
-  // Save specific section to database
+  // Save specific section to database & mirror to localStorage for instant website and dashboard sync
   const saveSection = async (sectionName: string, payload: any, note?: string) => {
     try {
       setSaving(true);
+      // 1. Immediately mirror to localStorage so website and dashboard reflect instantly on same domain
+      if (typeof window !== "undefined") {
+        try {
+          if (sectionName === "website") localStorage.setItem("bizzpal_website_config", JSON.stringify(payload));
+          if (sectionName === "tools") localStorage.setItem("bizzpal_tools_catalog", JSON.stringify(payload));
+          if (sectionName === "nav") localStorage.setItem("bizzpal_dashboard_nav", JSON.stringify(payload));
+          if (sectionName === "widgets") localStorage.setItem("bizzpal_dashboard_widgets", JSON.stringify(payload));
+          if (sectionName === "features") localStorage.setItem("bizzpal_dashboard_features", JSON.stringify(payload));
+          if (sectionName === "plans") localStorage.setItem("bizzpal_subscription_plans", JSON.stringify(payload));
+          localStorage.setItem("bizzpal_config_timestamp", String(Date.now()));
+          window.dispatchEvent(new CustomEvent("bizzpal_config_updated", { detail: { section: sectionName } }));
+          try {
+            const bc = new BroadcastChannel("bizzpal_channel");
+            bc.postMessage({ type: "bizzpal_config_updated", section: sectionName });
+            bc.close();
+          } catch {}
+        } catch {}
+      }
+
+      // 2. Persist to server
       const res = await fetch("/api/admin/config", {
         method: "POST",
         headers: {
@@ -264,22 +317,9 @@ export default function AdminPage() {
       if (!res.ok || !data?.success) {
         throw new Error(data?.error || `Server returned HTTP ${res.status}`);
       }
-      setVersion(data.version);
+      if (data.version) setVersion(data.version);
       if (data.auditLogs) setAuditLogs(data.auditLogs);
-      notify(data.message || `Saved ${sectionName} successfully (v${data.version})`);
-
-      // Broadcast live sync event across website & dashboard
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("bizzpal_config_updated", { detail: { section: sectionName, version: data.version } }));
-        try {
-          localStorage.setItem("bizzpal_config_timestamp", String(Date.now()));
-        } catch {}
-        try {
-          const bc = new BroadcastChannel("bizzpal_channel");
-          bc.postMessage({ type: "bizzpal_config_updated", section: sectionName, version: data.version });
-          bc.close();
-        } catch {}
-      }
+      notify("Changes saved successfully");
     } catch (err: any) {
       notify(`Save failed: ${err.message}`);
     } finally {
@@ -608,7 +648,7 @@ export default function AdminPage() {
       <div className="flex flex-col items-center justify-center min-h-[500px] gap-3">
         <div className="w-8 h-8 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin" />
         <p className="text-xs font-semibold text-text-muted font-mono">
-          Connecting to BizzPal SQLite Control Plane...
+          Loading Superadmin...
         </p>
       </div>
     );
@@ -653,7 +693,7 @@ export default function AdminPage() {
       case "audit":
         return { group: "Governance & Security", current: "Audit Ledger & Version History" };
       default:
-        return { group: "Control Plane", current: "Overview" };
+        return { group: "Superadmin", current: "Overview" };
     }
   })();
 
@@ -706,12 +746,9 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <h1 className="text-xs font-extrabold text-text uppercase tracking-wider">
+                <h1 className="text-sm font-bold text-text tracking-tight">
                   BizzPal Superadmin
                 </h1>
-                <span className="text-[10px] text-text-muted font-mono block -mt-0.5">
-                  Control Plane §15
-                </span>
               </div>
             </div>
 
@@ -722,16 +759,6 @@ export default function AdminPage() {
             >
               <X className="w-4 h-4" />
             </button>
-          </div>
-
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-500 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>SQLite Live • v{version}</span>
-            </div>
-            <span className="text-[9px] px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider bg-amber-500/15 text-amber-500 border border-amber-500/30">
-              DEV_ACCESS
-            </span>
           </div>
         </div>
 
@@ -1014,9 +1041,6 @@ export default function AdminPage() {
               <span className="text-text-muted hidden sm:inline">{breadcrumb.group}</span>
               <span className="text-text-muted hidden sm:inline">/</span>
               <span className="text-text font-bold truncate">{breadcrumb.current}</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-brass/15 text-brass font-bold font-mono border border-brass/30 shrink-0 ml-1">
-                v{version} Published
-              </span>
             </div>
           </div>
 

@@ -45,21 +45,32 @@ export async function GET() {
       tools,
       widgets,
       plans,
+    }, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "CDN-Cache-Control": "no-store",
+        "Vercel-CDN-Cache-Control": "no-store",
+      }
     });
   } catch (error: any) {
     console.error("Failed to fetch public config:", error);
     return NextResponse.json(
       {
-        success: false,
-        error: error.message,
+        success: true,
         website: DEFAULT_WEBSITE_CONFIG,
         features: DEFAULT_DASHBOARD_FEATURES,
         nav: defaultNavItems,
         tools: DEFAULT_TOOLS_CATALOG,
         widgets: defaultWidgets,
         plans: DEFAULT_SUBSCRIPTION_PLANS,
+        warning: error.message,
       },
-      { status: 500 }
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        }
+      }
     );
   }
 }

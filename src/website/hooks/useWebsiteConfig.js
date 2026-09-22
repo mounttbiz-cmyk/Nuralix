@@ -156,21 +156,52 @@ function deepMerge(fallback, override) {
   return result;
 }
 
+function getInitialWebsiteConfig() {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('bizzpal_website_config');
+      if (saved) {
+        return deepMerge(DEFAULT_WEBSITE_STATE, JSON.parse(saved));
+      }
+    } catch {}
+  }
+  return DEFAULT_WEBSITE_STATE;
+}
+
 export function useWebsiteConfig() {
-  const [config, setConfig] = useState(DEFAULT_WEBSITE_STATE);
-  const [loading, setLoading] = useState(true);
+  const [config, setConfig] = useState(getInitialWebsiteConfig);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
+
     async function fetchConfig() {
+      // 1. Instant check from localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          const local = localStorage.getItem('bizzpal_website_config');
+          if (local && mounted) {
+            setConfig(deepMerge(DEFAULT_WEBSITE_STATE, JSON.parse(local)));
+          }
+        } catch {}
+      }
+
+      // 2. Query public config API
       try {
-        const res = await fetch('/api/public/config', { cache: 'no-store' });
+        const res = await fetch('/api/public/config', { 
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
         const json = await res.json();
         if (mounted && json.success && json.website) {
-          setConfig(deepMerge(DEFAULT_WEBSITE_STATE, json.website));
+          const merged = deepMerge(DEFAULT_WEBSITE_STATE, json.website);
+          setConfig(merged);
+          try {
+            localStorage.setItem('bizzpal_website_config', JSON.stringify(merged));
+          } catch {}
         }
       } catch (err) {
-        console.warn('Could not fetch remote website config, using defaults', err);
+        console.warn('Could not fetch remote website config, using cached/defaults', err);
       } finally {
         if (mounted) setLoading(false);
       }

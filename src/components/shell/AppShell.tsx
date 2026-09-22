@@ -76,16 +76,43 @@ export function AppShell({
     let mounted = true;
 
     const fetchConfig = () => {
-      fetch("/api/public/config", { cache: "no-store" })
+      // 1. Instant check from localStorage
+      if (typeof window !== "undefined") {
+        try {
+          const savedNav = localStorage.getItem("bizzpal_dashboard_nav");
+          if (savedNav) {
+            const parsedNav = JSON.parse(savedNav);
+            if (mounted && Array.isArray(parsedNav) && parsedNav.length > 0) {
+              setItems(parsedNav.filter((n: NavItem) => n.enabled !== false));
+            }
+          }
+          const savedFeatures = localStorage.getItem("bizzpal_dashboard_features");
+          if (savedFeatures) {
+            const parsedFeatures = JSON.parse(savedFeatures);
+            if (mounted && parsedFeatures) {
+              setFeatures(parsedFeatures);
+            }
+          }
+        } catch {}
+      }
+
+      // 2. Fetch from backend
+      fetch("/api/public/config", { cache: "no-store", headers: { "Cache-Control": "no-cache" } })
         .then(r => r.json())
         .then(d => {
           if (!mounted) return;
           if (d.success) {
             if (Array.isArray(d.nav) && d.nav.length > 0) {
               setItems(d.nav.filter((n: NavItem) => n.enabled !== false));
+              try {
+                localStorage.setItem("bizzpal_dashboard_nav", JSON.stringify(d.nav));
+              } catch {}
             }
             if (d.features) {
               setFeatures(d.features);
+              try {
+                localStorage.setItem("bizzpal_dashboard_features", JSON.stringify(d.features));
+              } catch {}
             }
           }
         })
