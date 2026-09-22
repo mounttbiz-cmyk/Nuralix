@@ -742,20 +742,21 @@ export default function AdminPage() {
         <div className="p-4 border-b border-line/60 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gold/25 via-gold/10 to-transparent border border-gold/40 flex items-center justify-center p-1 shadow-md shadow-[0_6px_16px_-4px_var(--gold-glow)] ring-1 ring-gold/30">
+              <div className="w-9 h-9 flex items-center justify-center shrink-0">
                 <Image
                   src="/logo-icon.png"
                   alt="BizzPal Logo"
-                  width={24}
-                  height={24}
+                  width={28}
+                  height={28}
                   className="object-contain drop-shadow"
                 />
               </div>
               <div>
                 <h1 className="text-sm font-bold text-text tracking-tight flex items-center gap-1.5">
-                  <span>
-                    Bizz<span
-                      className="font-black"
+                  <span className="font-black text-base flex items-center leading-none">
+                    <span>Bizz</span>
+                    <span
+                      className="font-black ml-0.5"
                       style={{
                         background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
                         WebkitBackgroundClip: "text",
@@ -765,7 +766,7 @@ export default function AdminPage() {
                       }}
                     >
                       Pal
-                    </span> OS
+                    </span>
                   </span>
                   <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-400/15 text-amber-500 dark:text-amber-300 font-mono font-bold border border-amber-500/30">PRO</span>
                 </h1>

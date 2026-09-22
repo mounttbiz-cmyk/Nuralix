@@ -23,19 +23,20 @@ export function MobileHeader({
   return (
     <header className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 h-14 bg-surface/95 backdrop-blur-xl border-b border-line pt-[env(safe-area-inset-top)]">
       <Link href="/dashboard" className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gold/20 via-gold/10 to-transparent border border-gold/40 flex items-center justify-center p-1 shadow-md shadow-[0_4px_12px_-4px_var(--gold-glow)]">
+        <div className="w-8 h-8 flex items-center justify-center shrink-0">
           <Image
             src="/logo-icon.png"
             alt="BizzPal Logo"
-            width={24}
-            height={24}
+            width={26}
+            height={26}
             className="object-contain drop-shadow"
           />
         </div>
         <div className="flex flex-col">
-          <span className="font-extrabold text-xs tracking-tight text-text leading-tight font-sans">
-            Bizz<span
-              className="font-black"
+          <span className="font-black text-sm tracking-tight text-text leading-tight font-sans flex items-center">
+            <span>Bizz</span>
+            <span
+              className="font-black ml-0.5"
               style={{
                 background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
                 WebkitBackgroundClip: "text",
@@ -45,7 +46,8 @@ export function MobileHeader({
               }}
             >
               Pal
-            </span>™
+            </span>
+            <span className="text-[9px] text-amber-500 font-bold ml-0.5 -mt-1">™</span>
           </span>
           <span className="text-[10px] text-text-muted leading-tight truncate max-w-[120px]">
             {companyName}
