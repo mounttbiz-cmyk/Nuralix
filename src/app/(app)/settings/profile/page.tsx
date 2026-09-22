@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/firebase/authContext";
 import { isFirebaseConfigured } from "@/lib/firebase/config";
+import { saveUserProfileToFirestore } from "@/lib/firebase/firestore";
 import { BUSINESS_DATA_UPDATED_EVENT } from "@/lib/upload/events";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
@@ -178,6 +179,25 @@ export default function BusinessProfileSettingsPage() {
             }),
           });
         } catch (e) {}
+      }
+
+      // 3.5 Persist securely to Firebase Firestore & Realtime Database
+      try {
+        let currentUserId = user?.uid;
+        if (!currentUserId) {
+          const sessStr = localStorage.getItem("bizzpal_user_session");
+          if (sessStr) currentUserId = JSON.parse(sessStr).id;
+        }
+        if (currentUserId && isFirebaseConfigured) {
+          await saveUserProfileToFirestore(currentUserId, {
+            email: email.trim().toLowerCase(),
+            displayName: cleanFounderName,
+            role: "owner",
+            businessProfile: updatedProfile,
+          });
+        }
+      } catch (fbErr) {
+        console.warn("Failed to sync profile to Firebase", fbErr);
       }
 
       // 4. Dispatch global custom window events so AppShell & widgets update immediately
