@@ -176,20 +176,6 @@ export function DesktopRail({
           <ThemeSwitch />
         </div>
 
-        {/* Superadmin Control Plane link */}
-        <Link
-          href="/admin"
-          className="flex items-center justify-between p-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-500 text-[11px] font-bold hover:bg-amber-500/15 transition-all btn-tactile"
-        >
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span>Superadmin Control Plane</span>
-          </div>
-          <span className="text-[9px] font-mono uppercase bg-amber-500/20 px-1.5 py-0.2 rounded border border-amber-500/30">
-            ADMIN ↗
-          </span>
-        </Link>
-
         {/* User profile & logout */}
         <div className="flex items-center justify-between p-2 rounded-xl bg-surface-2 border border-line text-xs">
           <div className="flex items-center gap-2.5 min-w-0">
