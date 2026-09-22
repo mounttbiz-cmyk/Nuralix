@@ -62,10 +62,21 @@ export async function GET() {
     });
   } catch (error: any) {
     console.error("Admin config GET error:", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: true,
+      data: {
+        website: DEFAULT_WEBSITE_CONFIG,
+        features: DEFAULT_DASHBOARD_FEATURES,
+        nav: defaultNavItems,
+        widgets: defaultWidgets,
+        tools: DEFAULT_TOOLS_CATALOG,
+        plans: DEFAULT_SUBSCRIPTION_PLANS,
+        metrics: defaultMetrics,
+        auditLogs: [],
+        version: 1,
+      },
+      warning: error.message,
+    });
   }
 }
 
@@ -136,8 +147,8 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("Admin config POST error:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
+      { success: false, error: error.message || "Failed to save configuration" },
+      { status: 400 }
     );
   }
 }

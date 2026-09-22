@@ -51,6 +51,7 @@ import {
   DEFAULT_SUBSCRIPTION_PLANS,
   DEFAULT_DASHBOARD_FEATURES,
 } from "@/config/seeds/defaultCatalog";
+import { DEFAULT_WEBSITE_STATE } from "@/website/hooks/useWebsiteConfig";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<
@@ -68,7 +69,7 @@ export default function AdminPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Platform dynamic configs with resilient seed fallbacks
-  const [websiteConfig, setWebsiteConfig] = useState<any>(null);
+  const [websiteConfig, setWebsiteConfig] = useState<any>(DEFAULT_WEBSITE_STATE);
   const [featuresConfig, setFeaturesConfig] = useState<any>(DEFAULT_DASHBOARD_FEATURES);
   const [navItems, setNavItems] = useState<NavItem[]>(defaultNavItems);
   const [widgets, setWidgets] = useState<WidgetDef[]>(defaultWidgets);
@@ -207,7 +208,7 @@ export default function AdminPage() {
         throw new Error(`Server returned HTTP ${res.status}${text ? `: ${text.slice(0, 80)}` : ""}`);
       }
       const data = await res.json();
-      if (data.success && data.data) {
+      if (data && data.data) {
         if (data.data.website) setWebsiteConfig(data.data.website);
         if (data.data.features) setFeaturesConfig(data.data.features);
         setNavItems(Array.isArray(data.data.nav) && data.data.nav.length > 0 ? data.data.nav : defaultNavItems);
@@ -220,7 +221,8 @@ export default function AdminPage() {
       await fetchTenants();
     } catch (err: any) {
       console.error("Failed to load admin config", err);
-      // Ensure seed defaults remain active so counters never display as (0)
+      // Ensure seed defaults remain active so counters and CMS never display as blank or (0)
+      setWebsiteConfig((prev: any) => prev || DEFAULT_WEBSITE_STATE);
       setNavItems((prev) => (prev && prev.length > 0 ? prev : defaultNavItems));
       setWidgets((prev) => (prev && prev.length > 0 ? prev : defaultWidgets));
       setTools((prev) => (prev && prev.length > 0 ? prev : DEFAULT_TOOLS_CATALOG));
@@ -1103,7 +1105,7 @@ export default function AdminPage() {
       {/* ============================================================= */}
       {/* TAB 1: WEBSITE CONTENT & CTAs                                 */}
       {/* ============================================================= */}
-      {activeTab === "website" && websiteConfig && (
+      {activeTab === "website" && (
         <div className="space-y-6">
           {/* Website Subtabs */}
           <div className="flex items-center gap-2 border-b border-line pb-2 text-xs font-semibold overflow-x-auto">

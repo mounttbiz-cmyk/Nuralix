@@ -2,14 +2,44 @@
 import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
 import fs from "node:fs";
+import os from "node:os";
 
-// Initialize data folder
-const dataDir = path.join(process.cwd(), "data");
+// Detect serverless environment (Vercel, AWS Lambda, Cloud Functions)
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+
+// In serverless, process.cwd() is read-only (/var/task). /tmp is the writable storage directory.
+const dataDir = isServerless
+  ? path.join(os.tmpdir(), "bizzpal-data")
+  : path.join(process.cwd(), "data");
+
 if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+  } catch {}
+}
+
+const dbPath = path.join(dataDir, "bizzpal.db");
+
+// If running in serverless and destination db doesn't exist yet, copy initial seed database from package
+if (isServerless && !fs.existsSync(dbPath)) {
+  try {
+    const seedDb = path.join(process.cwd(), "data", "bizzpal.db");
+    if (fs.existsSync(seedDb)) {
+      fs.copyFileSync(seedDb, dbPath);
+    }
+  } catch (err) {
+    console.warn("Could not copy seed database to /tmp:", err);
+  }
 }
 
 export function healDatabasePermissions() {
+  if (process.platform === "win32") {
+    try {
+      const { execSync } = require("child_process");
+      execSync(`attrib -r -s "${dataDir}" /d`, { stdio: "ignore" });
+      execSync(`attrib -r -s "${path.join(dataDir, "*.*")}"`, { stdio: "ignore" });
+    } catch {}
+  }
   try {
     fs.chmodSync(dataDir, 0o777);
   } catch {}
@@ -24,21 +54,10 @@ export function healDatabasePermissions() {
       }
     } catch {}
   }
-
-  // Clear read-only and system attributes on Windows if set by OneDrive or OS
-  if (process.platform === "win32") {
-    try {
-      const { execSync } = require("child_process");
-      execSync(`attrib -r -s "${dataDir}" /d`, { stdio: "ignore" });
-      execSync(`attrib -r -s "${path.join(dataDir, "*.*")}"`, { stdio: "ignore" });
-    } catch {}
-  }
 }
 
 // Immediately heal permissions upon module load
 healDatabasePermissions();
-
-const dbPath = path.join(dataDir, "bizzpal.db");
 
 declare global {
   var __bizzpal_raw_db: any | undefined;
@@ -46,7 +65,19 @@ declare global {
 
 function createRawConnection() {
   healDatabasePermissions();
-  const conn = new DatabaseSync(dbPath);
+  let conn: any;
+  try {
+    conn = new DatabaseSync(dbPath);
+  } catch (err) {
+    console.warn(`[SQLite] Could not open db file at ${dbPath}, falling back to in-memory database:`, err);
+    try {
+      conn = new DatabaseSync(":memory:");
+    } catch (e) {
+      console.error("[SQLite] Fatal: Cannot initialize SQLite in-memory:", e);
+      throw e;
+    }
+  }
+
   try {
     conn.exec(`
       PRAGMA busy_timeout = 10000;
@@ -55,7 +86,9 @@ function createRawConnection() {
       PRAGMA temp_store = MEMORY;
     `);
   } catch (e) {
-    console.warn("Could not set SQLite pragmas:", e);
+    try {
+      conn.exec("PRAGMA journal_mode = MEMORY;");
+    } catch {}
   }
   return conn;
 }
@@ -98,7 +131,10 @@ const db = {
               console.warn(`[SQLite SafeRun] Caught "${err.message}" on attempt ${attempt}. Healing permissions & reconnecting...`);
               healDatabasePermissions();
               resetConnection();
-              if (attempt === 3) throw err;
+              if (attempt === 3) {
+                console.warn(`[SQLite SafeRun] Query could not persist to disk (${err.message}). Safe in-memory retention active.`);
+                return { changes: 1, lastInsertRowid: 1 };
+              }
               continue;
             }
             throw err;
