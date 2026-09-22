@@ -108,9 +108,13 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
       if (editingTenant) {
         const res = await fetch("/api/admin/tenants", {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify({ ...form, id: editingTenant.id }),
         });
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(`HTTP ${res.status}: ${text.slice(0, 80)}`);
+        }
         const data = await res.json();
         if (data.success) {
           notify(`Enterprise "${form.name}" updated successfully.`);
@@ -122,9 +126,13 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
       } else {
         const res = await fetch("/api/admin/tenants", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify(form),
         });
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(`HTTP ${res.status}: ${text.slice(0, 80)}`);
+        }
         const data = await res.json();
         if (data.success) {
           notify(`New enterprise "${form.name}" created.`);
@@ -146,9 +154,13 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
       setSaving(true);
       const res = await fetch("/api/admin/tenants", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({ id: t.id, setActive: true }),
       });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status}: ${text.slice(0, 80)}`);
+      }
       const data = await res.json();
       if (data.success) {
         localStorage.setItem("bizzpal_business_profile", JSON.stringify(t));
@@ -171,7 +183,12 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
     try {
       const res = await fetch(`/api/admin/tenants?businessId=${encodeURIComponent(t.id)}`, {
         method: "DELETE",
+        headers: { Accept: "application/json" },
       });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status}: ${text.slice(0, 80)}`);
+      }
       const data = await res.json();
       if (data.success) {
         notify(`Enterprise "${t.name}" deleted.`);

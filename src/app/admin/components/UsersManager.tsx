@@ -30,7 +30,12 @@ export function UsersManager({ users, onRefresh, notify }: UsersManagerProps) {
       setDeletingEmail(u.email);
       const res = await fetch(`/api/admin/tenants?userEmail=${encodeURIComponent(u.email)}`, {
         method: "DELETE",
+        headers: { Accept: "application/json" },
       });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status}: ${text.slice(0, 80)}`);
+      }
       const data = await res.json();
       if (data.success) {
         notify(`User account "${u.email}" removed.`);

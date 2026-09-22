@@ -44,6 +44,13 @@ import { TenantsManager } from "./components/TenantsManager";
 import { UsersManager } from "./components/UsersManager";
 import { PricingManager } from "./components/PricingManager";
 import { WebsiteCmsExtra } from "./components/WebsiteCmsExtra";
+import { defaultNavItems } from "@/config/seeds/defaultNav";
+import { defaultWidgets } from "@/config/seeds/defaultWidgets";
+import {
+  DEFAULT_TOOLS_CATALOG,
+  DEFAULT_SUBSCRIPTION_PLANS,
+  DEFAULT_DASHBOARD_FEATURES,
+} from "@/config/seeds/defaultCatalog";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<
@@ -60,13 +67,13 @@ export default function AdminPage() {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Platform dynamic configs
+  // Platform dynamic configs with resilient seed fallbacks
   const [websiteConfig, setWebsiteConfig] = useState<any>(null);
-  const [featuresConfig, setFeaturesConfig] = useState<any>(null);
-  const [navItems, setNavItems] = useState<NavItem[]>([]);
-  const [widgets, setWidgets] = useState<WidgetDef[]>([]);
-  const [tools, setTools] = useState<any[]>([]);
-  const [plans, setPlans] = useState<any[]>([]);
+  const [featuresConfig, setFeaturesConfig] = useState<any>(DEFAULT_DASHBOARD_FEATURES);
+  const [navItems, setNavItems] = useState<NavItem[]>(defaultNavItems);
+  const [widgets, setWidgets] = useState<WidgetDef[]>(defaultWidgets);
+  const [tools, setTools] = useState<any[]>(DEFAULT_TOOLS_CATALOG);
+  const [plans, setPlans] = useState<any[]>(DEFAULT_SUBSCRIPTION_PLANS);
 
   // Multi-tenant & user state
   const [tenants, setTenants] = useState<any[]>([]);
@@ -173,7 +180,10 @@ export default function AdminPage() {
   // Fetch tenants and registered users
   const fetchTenants = async () => {
     try {
-      const res = await fetch("/api/admin/tenants");
+      const res = await fetch("/api/admin/tenants", {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) return;
       const data = await res.json();
       if (data.success && data.data) {
         setTenants(data.data.businesses || []);
@@ -189,22 +199,32 @@ export default function AdminPage() {
   const fetchAllConfig = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/config");
+      const res = await fetch("/api/admin/config", {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Server returned HTTP ${res.status}${text ? `: ${text.slice(0, 80)}` : ""}`);
+      }
       const data = await res.json();
       if (data.success && data.data) {
-        setWebsiteConfig(data.data.website);
-        setFeaturesConfig(data.data.features);
-        setNavItems(data.data.nav || []);
-        setWidgets(data.data.widgets || []);
-        setTools(data.data.tools || []);
-        setPlans(data.data.plans || []);
-        setAuditLogs(data.data.auditLogs || []);
-        setVersion(data.data.version || 1);
+        if (data.data.website) setWebsiteConfig(data.data.website);
+        if (data.data.features) setFeaturesConfig(data.data.features);
+        setNavItems(Array.isArray(data.data.nav) && data.data.nav.length > 0 ? data.data.nav : defaultNavItems);
+        setWidgets(Array.isArray(data.data.widgets) && data.data.widgets.length > 0 ? data.data.widgets : defaultWidgets);
+        setTools(Array.isArray(data.data.tools) && data.data.tools.length > 0 ? data.data.tools : DEFAULT_TOOLS_CATALOG);
+        setPlans(Array.isArray(data.data.plans) && data.data.plans.length > 0 ? data.data.plans : DEFAULT_SUBSCRIPTION_PLANS);
+        if (Array.isArray(data.data.auditLogs)) setAuditLogs(data.data.auditLogs);
+        if (data.data.version) setVersion(data.data.version);
       }
       await fetchTenants();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load admin config", err);
-      notify("Failed to connect to platform database");
+      // Ensure seed defaults remain active so counters never display as (0)
+      setNavItems((prev) => (prev && prev.length > 0 ? prev : defaultNavItems));
+      setWidgets((prev) => (prev && prev.length > 0 ? prev : defaultWidgets));
+      setTools((prev) => (prev && prev.length > 0 ? prev : DEFAULT_TOOLS_CATALOG));
+      setPlans((prev) => (prev && prev.length > 0 ? prev : DEFAULT_SUBSCRIPTION_PLANS));
     } finally {
       setLoading(false);
     }
@@ -220,7 +240,10 @@ export default function AdminPage() {
       setSaving(true);
       const res = await fetch("/api/admin/config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({
           section: sectionName,
           payload,
@@ -228,13 +251,17 @@ export default function AdminPage() {
           actor: "Superadmin",
         }),
       });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Server returned HTTP ${res.status}${text ? `: ${text.slice(0, 80)}` : ""}`);
+      }
       const data = await res.json();
       if (data.success) {
         setVersion(data.version);
         if (data.auditLogs) setAuditLogs(data.auditLogs);
         notify(data.message || `Saved ${sectionName} successfully (v${data.version})`);
       } else {
-        notify(`Error: ${data.error}`);
+        notify(`Error: ${data.error || "Failed to save"}`);
       }
     } catch (err: any) {
       notify(`Save failed: ${err.message}`);
@@ -252,11 +279,35 @@ export default function AdminPage() {
 
     try {
       setSaving(true);
-      const res = await fetch("/api/admin/config", { method: "DELETE" });
+      const res = await fetch("/api/admin/config", {
+        method: "DELETE",
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Server returned HTTP ${res.status}${text ? `: ${text.slice(0, 80)}` : ""}`);
+      }
       const data = await res.json();
       if (data.success) {
+        if (data.data) {
+          if (data.data.website) setWebsiteConfig(data.data.website);
+          if (data.data.features) setFeaturesConfig(data.data.features);
+          setNavItems(data.data.nav || defaultNavItems);
+          setWidgets(data.data.widgets || defaultWidgets);
+          setTools(data.data.tools || DEFAULT_TOOLS_CATALOG);
+          setPlans(data.data.plans || DEFAULT_SUBSCRIPTION_PLANS);
+          if (data.data.auditLogs) setAuditLogs(data.data.auditLogs);
+          if (data.data.version) setVersion(data.data.version);
+        } else {
+          setNavItems(defaultNavItems);
+          setWidgets(defaultWidgets);
+          setTools(DEFAULT_TOOLS_CATALOG);
+          setPlans(DEFAULT_SUBSCRIPTION_PLANS);
+        }
         notify("Platform restored to default factory settings");
         fetchAllConfig();
+      } else {
+        notify(`Reset failed: ${data.error || "Failed to restore defaults"}`);
       }
     } catch (err: any) {
       notify(`Reset failed: ${err.message}`);

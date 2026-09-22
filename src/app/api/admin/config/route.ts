@@ -153,6 +153,12 @@ export async function DELETE() {
     setPlatformConfig("dashboard_nav", defaultNavItems);
     setPlatformConfig("dashboard_widgets", defaultWidgets);
     setPlatformConfig("tools_catalog", DEFAULT_TOOLS_CATALOG);
+    setPlatformConfig("subscription_plans", DEFAULT_SUBSCRIPTION_PLANS);
+    setPlatformConfig("dashboard_metrics", defaultMetrics);
+
+    // Keep in-memory config store in sync
+    platformConfigStore.setNav(defaultNavItems);
+    platformConfigStore.setWidgets(defaultWidgets);
 
     const resetLog: AuditLogItem = {
       id: `log_${Date.now()}`,
@@ -173,12 +179,25 @@ export async function DELETE() {
       version: nextVersion,
       auditLogs: updatedAuditLogs,
       message: "Reset all configurations to default values",
+      data: {
+        website: DEFAULT_WEBSITE_CONFIG,
+        features: DEFAULT_DASHBOARD_FEATURES,
+        nav: defaultNavItems,
+        widgets: defaultWidgets,
+        tools: DEFAULT_TOOLS_CATALOG,
+        plans: DEFAULT_SUBSCRIPTION_PLANS,
+        metrics: defaultMetrics,
+        auditLogs: updatedAuditLogs,
+        version: nextVersion,
+      },
+    }, {
+      headers: { "Content-Type": "application/json" }
     });
   } catch (error: any) {
     console.error("Admin config DELETE error:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
+      { success: false, error: error.message || "Failed to reset configurations" },
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
