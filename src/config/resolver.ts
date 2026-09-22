@@ -1,5 +1,4 @@
 import { platformConfigStore } from "./store";
-import { getPlatformConfig } from "@/lib/db";
 import { ThemeTokens } from "./schemas/theme";
 import { NavItem } from "./schemas/nav";
 import { WidgetDef } from "./schemas/widget";
@@ -31,10 +30,10 @@ export interface ResolvedPlatformConfig {
 }
 
 export function resolveTenantConfig(tenant?: Partial<TenantContext>): ResolvedPlatformConfig {
-  const currentVersion = getPlatformConfig("config_version", platformConfigStore.getVersion());
+  const currentVersion = platformConfigStore.getVersion();
   const theme = platformConfigStore.getTheme();
-  const allNav: NavItem[] = getPlatformConfig("dashboard_nav", platformConfigStore.getNav());
-  const allWidgets: WidgetDef[] = getPlatformConfig("dashboard_widgets", platformConfigStore.getWidgets());
+  const allNav: NavItem[] = platformConfigStore.getNav();
+  const allWidgets: WidgetDef[] = platformConfigStore.getWidgets();
   const allMetrics = platformConfigStore.getMetrics();
   const allAgents = platformConfigStore.getAgents();
   const allRules = platformConfigStore.getRules();
