@@ -309,14 +309,14 @@ function DashboardContent() {
 
       {/* Daily Executive Check-in Banner / Status */}
       {featureFlags.enableDailyCheckin !== false && (
-        <div className="p-4 sm:p-5 rounded-2xl border border-line/70 bg-surface/80 backdrop-blur-xl shadow-lg shadow-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-gold/5 to-transparent pointer-events-none" />
+        <div className="p-4 sm:p-5 rounded-2xl border border-white/[0.05] bg-surface/60 backdrop-blur-xl shadow-lg shadow-black/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-amber-500/[0.03] to-transparent pointer-events-none" />
           <div className="flex items-start gap-3.5 relative z-10">
             <div
-              className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
                 checkinData.isCompletedToday
-                  ? "bg-jade/10 border-jade/30 text-jade"
-                  : "bg-gold/10 border-gold/30 text-gold"
+                  ? "bg-emerald-500/10 text-emerald-400"
+                  : "bg-amber-500/10 text-amber-400"
               }`}
             >
               {checkinData.isCompletedToday ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
@@ -329,10 +329,10 @@ function DashboardContent() {
                     : "Daily Executive Pulse Check Pending"}
                 </span>
                 <span
-                  className={`text-[9px] px-2 py-0.2 rounded-full font-bold uppercase border ${
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase ${
                     checkinData.isCompletedToday
-                      ? "bg-jade/10 border-jade/30 text-jade"
-                      : "bg-gold/10 border-gold/30 text-gold"
+                      ? "bg-emerald-500/10 text-emerald-400"
+                      : "bg-amber-500/10 text-amber-400"
                   }`}
                 >
                   {checkinData.isCompletedToday ? `● Synced (${checkinData.todayCheckin?.source || "web"})` : "⚡ 60s Required"}
@@ -349,10 +349,10 @@ function DashboardContent() {
           <button
             type="button"
             onClick={() => setIsCheckInModalOpen(true)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold btn-tactile inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer relative z-10 ${
+            className={`px-4 py-2 rounded-xl text-xs font-semibold btn-tactile inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer relative z-10 ${
               checkinData.isCompletedToday
-                ? "bg-surface-2 border border-line text-text hover:border-line-strong"
-                : "btn-gold-gradient text-[#1a1206] shadow-md hover:brightness-110"
+                ? "bg-white/[0.04] text-text hover:bg-white/[0.08]"
+                : "btn-gold-gradient text-[#1a1206] font-bold shadow-md hover:brightness-110"
             }`}
           >
             <span>{checkinData.isCompletedToday ? "Review / Update Check-In" : "Complete 60s Check-In →"}</span>
@@ -361,29 +361,27 @@ function DashboardContent() {
       )}
 
       {/* Top Header & Executive Command Center */}
-      <div className="glass-card hairline-accent p-5 sm:p-6 space-y-5 rounded-3xl bg-surface/75 backdrop-blur-2xl border border-line/70 shadow-xl shadow-black/5 relative overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-96 h-32 bg-gold/5 blur-3xl pointer-events-none" />
-        
+      <div className="p-6 sm:p-7 space-y-6 rounded-3xl bg-surface/70 backdrop-blur-2xl border border-white/[0.06] shadow-xl shadow-black/20 relative overflow-hidden">
         {/* Live Status Beacon & Timeframe Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-line/60 relative z-10">
-          <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-surface-2/80 border border-line/70 text-[11px]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/[0.05] relative z-10">
+          <div className="inline-flex items-center gap-2.5 text-xs text-text-muted">
             <span className="beacon-dot" />
             <span className="font-semibold text-text">Autonomous Intelligence Engine</span>
-            <span className="text-line-strong">|</span>
+            <span className="text-white/20">•</span>
             {uploadedFileName ? (
               <>
-                <span className="text-jade font-semibold">● Custom Telemetry Synced</span>
-                <span className="text-line-strong">|</span>
-                <span className="text-text font-mono text-[10px]">{uploadedFileName}</span>
+                <span className="text-jade font-semibold">Custom Telemetry Synced</span>
+                <span className="text-white/20">•</span>
+                <span className="text-text font-mono text-[11px]">{uploadedFileName}</span>
               </>
             ) : (
-              <span className="text-gold font-medium font-mono">Telemetry Synced Live</span>
+              <span className="text-amber-400/90 font-medium font-mono text-[11px]">Telemetry Synced Live</span>
             )}
-            <span className="text-line-strong">|</span>
-            <span className="font-mono text-[10px] text-text-muted">v{baseConfig.version} Registry</span>
+            <span className="text-white/20">•</span>
+            <span className="font-mono text-[11px] text-text-muted">v{baseConfig.version} Registry</span>
           </div>
 
-          <div className="flex items-center gap-1.5 p-0.5 bg-surface-2/70 rounded-xl border border-line/70 text-xs">
+          <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.05] text-xs">
             {["Live Today", "7D Trend", "Month to Date", "Q3 Live"].map(tf => (
               <button
                 key={tf}
@@ -392,10 +390,10 @@ function DashboardContent() {
                   setSelectedTimeframe(tf);
                   notify(`Timeframe changed to ${tf}`);
                 }}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all btn-tactile cursor-pointer ${
+                className={`px-3 py-1 rounded-lg text-xs transition-all btn-tactile cursor-pointer ${
                   selectedTimeframe === tf
-                    ? "bg-gold/20 text-gold border border-gold/40 shadow-sm shadow-[0_2px_8px_-2px_var(--gold-glow)] font-bold"
-                    : "text-text-muted hover:text-text hover:bg-surface"
+                    ? "bg-amber-400/15 text-amber-300 font-semibold shadow-xs"
+                    : "text-text-muted hover:text-text hover:bg-white/[0.02]"
                 }`}
               >
                 {tf}
@@ -408,20 +406,20 @@ function DashboardContent() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-text tracking-tight font-sans">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight font-sans">
                 {companyName}
               </h1>
-              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/40 font-bold font-mono tracking-normal">
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 font-semibold font-mono tracking-normal">
                 {selectedIndustry.toUpperCase()} · Growth Plan
               </span>
               {uploadedFileName && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-jade/15 text-jade border border-jade/30 font-mono font-bold inline-flex items-center gap-1">
+                <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-jade/10 text-jade font-mono font-semibold inline-flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-jade" />
                   Uploaded Data Active
                 </span>
               )}
             </div>
-            <p className="text-xs sm:text-sm text-text-muted mt-1 max-w-2xl">
+            <p className="text-xs sm:text-sm text-text-muted mt-1.5 max-w-2xl leading-relaxed">
               Real-time enterprise dashboard synthesized by BizzPal AI. Cross-correlating cash reserves, unit economics, and operational playbooks.
             </p>
           </div>
@@ -432,7 +430,7 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setIsQuickInputModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer btn-gold-gradient text-[#1a1206] hover:brightness-110 shadow-md shadow-[0_8px_20px_-6px_var(--gold-glow)]"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer btn-gold-gradient text-[#1a1206] hover:brightness-110 shadow-md"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#1a1206]" />
               <span>+ Quick Business Input</span>
@@ -442,17 +440,17 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setIsUploadModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-gold/15 border-gold/40 text-gold hover:brightness-110 shadow-xs"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-text hover:text-white"
             >
-              <UploadCloud className="w-3.5 h-3.5 text-gold" />
+              <UploadCloud className="w-3.5 h-3.5 text-amber-400" />
               <span>Upload Business Data</span>
               {uploadedFileName && (
-                <span className="w-2 h-2 rounded-full bg-jade animate-pulse" title="Custom dataset active" />
+                <span className="w-1.5 h-1.5 rounded-full bg-jade animate-pulse" title="Custom dataset active" />
               )}
             </button>
 
             {/* Profile Switcher */}
-            <div className="flex items-center gap-1 p-1 bg-surface-2/70 rounded-xl border border-line/70">
+            <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.05]">
               {[
                 { ind: "saas", mod: "subscription", label: "B2B SaaS" },
                 { ind: "d2c", mod: "one-time", label: "D2C Brand" },
@@ -467,10 +465,10 @@ function DashboardContent() {
                       setSelectedIndustry(profile.ind as any);
                       setSelectedModel(profile.mod as any);
                     }}
-                    className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all btn-tactile ${
+                    className={`px-3 py-1.5 text-xs rounded-lg transition-all btn-tactile ${
                       isActive
-                        ? "bg-gold/20 text-gold shadow-sm border border-gold/40 font-bold"
-                        : "text-text-muted hover:text-text hover:bg-surface"
+                        ? "bg-white/[0.08] text-text font-semibold shadow-xs"
+                        : "text-text-muted hover:text-text hover:bg-white/[0.02]"
                     }`}
                   >
                     {profile.label}
@@ -483,13 +481,13 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setIsEditingLayout(!isEditingLayout)}
-              className={`px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-2 transition-all btn-tactile cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all btn-tactile cursor-pointer ${
                 isEditingLayout
-                  ? "btn-gold-gradient text-[#1a1206] border-gold shadow-lg shadow-[0_10px_24px_-6px_var(--gold-glow)] font-bold"
-                  : "bg-surface-2/80 border-line/70 text-text hover:bg-surface-2 hover:border-line-strong"
+                  ? "btn-gold-gradient text-[#1a1206] font-bold shadow-md"
+                  : "bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-text-muted hover:text-text"
               }`}
             >
-              <Sliders className="w-3.5 h-3.5 text-gold" />
+              <Sliders className="w-3.5 h-3.5 text-amber-400" />
               <span>{isEditingLayout ? "Exit Layout Editor" : "Customize Layout"}</span>
             </button>
           </div>
@@ -499,52 +497,52 @@ function DashboardContent() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 relative z-10">
           <Link
             href="/analytics"
-            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-gold/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[0_10px_24px_-8px_var(--gold-glow)] flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-gold transition-colors">Overall Health</span>
-              <span className="text-base font-extrabold text-text font-mono">82 / 100</span>
+              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-300 transition-colors">Overall Health</span>
+              <span className="text-lg font-bold text-text font-mono mt-0.5 block">82 / 100</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-jade/15 text-jade font-semibold font-mono border border-jade/30">
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold font-mono">
               Optimal
             </span>
           </Link>
 
           <Link
             href="/simulator"
-            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-gold/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[0_10px_24px_-8px_var(--gold-glow)] flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-gold transition-colors">Liquid Runway</span>
-              <span className="text-base font-extrabold text-gold font-mono">{liquidRunwayMo} mo</span>
+              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-300 transition-colors">Liquid Runway</span>
+              <span className="text-lg font-bold text-amber-400 font-mono mt-0.5 block">{liquidRunwayMo} mo</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold font-semibold font-mono border border-gold/30">
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 font-semibold font-mono">
               {Number(liquidRunwayMo) >= 6 ? "Safe Zone" : "Caution"}
             </span>
           </Link>
 
           <Link
             href="/tasks"
-            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-gold/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[0_10px_24px_-8px_var(--gold-glow)] flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-gold transition-colors">Execution Queue</span>
-              <span className="text-base font-extrabold text-text font-mono">3 Active</span>
+              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-300 transition-colors">Execution Queue</span>
+              <span className="text-lg font-bold text-text font-mono mt-0.5 block">3 Active</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold font-semibold font-mono border border-gold/30">
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 font-semibold font-mono">
               On Schedule
             </span>
           </Link>
 
           <Link
             href="/gaps"
-            className="p-3.5 rounded-2xl bg-surface-2/40 border border-line/70 hover:border-gold/40 hover:bg-surface-2/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[0_10px_24px_-8px_var(--gold-glow)] flex items-center justify-between transition-all duration-200 group cursor-pointer"
+            className="p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-white/[0.10] flex items-center justify-between transition-all duration-200 group cursor-pointer"
           >
             <div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block group-hover:text-gold transition-colors">Bottleneck Gaps</span>
-              <span className="text-base font-extrabold text-gold font-mono">3 Flagged</span>
+              <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-amber-300 transition-colors">Bottleneck Gaps</span>
+              <span className="text-lg font-bold text-amber-400 font-mono mt-0.5 block">3 Flagged</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold font-semibold font-mono border border-gold/30">
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 font-semibold font-mono">
               Action Ready
             </span>
           </Link>

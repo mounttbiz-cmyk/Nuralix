@@ -103,11 +103,11 @@ export function BriefingWidget({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.32, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-              className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-gold/30 transition-colors space-y-1"
+              className="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-colors space-y-1"
             >
               <div className="flex items-center gap-2">
                 <span className="text-xs">📈</span>
-                <span className="text-[11px] font-bold text-gold uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">
                   Revenue & Growth Trajectory
                 </span>
               </div>
@@ -120,16 +120,16 @@ export function BriefingWidget({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.32, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-              className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-line-strong transition-colors space-y-1"
+              className="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-colors space-y-1"
             >
               <div className="flex items-center gap-2">
                 <span className="text-xs">🛡️</span>
-                <span className="text-[11px] font-bold text-jade uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">
                   Capital Reserves & Buffer
                 </span>
               </div>
               <p className="text-xs text-text-muted leading-relaxed pl-5">
-                Net burn at <strong className="text-text font-bold">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-text font-bold">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-jade font-bold">{runwayMonths} month</strong> runway buffer.
+                Net burn at <strong className="text-text font-bold">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-text font-bold">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-emerald-400 font-bold">{runwayMonths} month</strong> runway buffer.
               </p>
             </motion.div>
 
@@ -137,11 +137,11 @@ export function BriefingWidget({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.32, delay: 0.19, ease: [0.22, 1, 0.36, 1] }}
-              className="p-3 rounded-xl bg-gradient-to-r from-gold/10 via-gold/5 to-transparent border border-gold/30 space-y-1"
+              className="p-3.5 rounded-xl bg-amber-500/[0.05] border border-amber-500/20 space-y-1"
             >
               <div className="flex items-center gap-2">
                 <span className="text-xs">⚡</span>
-                <span className="text-[11px] font-bold text-gold uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">
                   Strategic Directive (Immediate)
                 </span>
               </div>

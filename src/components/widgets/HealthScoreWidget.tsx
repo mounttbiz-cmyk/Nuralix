@@ -172,7 +172,7 @@ export function HealthScoreWidget({
           </div>
 
           <div className="flex-1 space-y-2 text-center @sm:text-left">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-jade/15 text-jade border border-jade/30 font-mono">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 font-mono">
               <TrendingUp className="w-3.5 h-3.5" />
               <span>+{delta}% vs last month</span>
             </div>
@@ -183,7 +183,7 @@ export function HealthScoreWidget({
         </div>
 
         {/* Component Breakdown with Progress Bars */}
-        <div className="space-y-2 pt-3 border-t border-line">
+        <div className="space-y-2 pt-3 border-t border-white/[0.05]">
           <div className="flex items-center justify-between text-[10px] font-bold uppercase text-text-muted/80 px-1 tracking-widest font-mono">
             <span>Category Performance</span>
             <span>Weight</span>
@@ -197,10 +197,10 @@ export function HealthScoreWidget({
                   key={comp.key}
                   type="button"
                   onClick={() => setSelectedComponent(isSelected ? null : comp.key)}
-                  className={`p-2.5 rounded-xl border text-left transition-all btn-tactile ${
+                  className={`p-2.5 rounded-xl text-left transition-all btn-tactile ${
                     isSelected
-                      ? "border-gold/50 bg-gold/15 shadow-sm ring-1 ring-gold/30"
-                      : "border-line bg-surface-2/60 hover:bg-surface-2 hover:border-line-strong"
+                      ? "bg-amber-400/15 border border-amber-400/40 shadow-xs"
+                      : "bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04]"
                   }`}
                 >
                   <div className="flex items-center justify-between text-[11px] text-text-muted">

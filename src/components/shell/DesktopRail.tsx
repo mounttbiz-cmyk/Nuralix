@@ -103,13 +103,13 @@ export function DesktopRail({
         <button
           type="button"
           onClick={onOpenSearch}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-surface-2 border border-line text-text-muted hover:text-text hover:border-gold/40 transition-all text-xs group cursor-pointer"
+          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-text-muted hover:text-text hover:border-white/[0.14] transition-all text-xs group cursor-pointer"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <Search className="w-3.5 h-3.5 text-text-muted group-hover:text-gold transition-colors shrink-0" />
+            <Search className="w-3.5 h-3.5 text-text-muted group-hover:text-amber-400 transition-colors shrink-0" />
             <span className="text-[11px] font-medium truncate">Search tools, pages…</span>
           </div>
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-surface border border-line text-text-muted font-mono font-semibold group-hover:border-gold/30 shrink-0">
+          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.04] text-text-muted font-mono font-semibold shrink-0">
             ⌘K
           </kbd>
         </button>
@@ -123,7 +123,7 @@ export function DesktopRail({
 
           return (
             <div key={group.key} className="space-y-1">
-              <div className="px-3 text-[10px] uppercase font-bold tracking-widest text-text-muted font-mono">
+              <div className="px-3 text-[10px] uppercase font-bold tracking-widest text-text-muted/70 font-mono">
                 {group.label}
               </div>
               <nav className="space-y-0.5">
@@ -135,25 +135,25 @@ export function DesktopRail({
                       href={item.href}
                       className={`relative flex items-center justify-between pl-3.5 pr-3 py-2 rounded-xl text-xs font-medium transition-all btn-tactile ${
                         isActive
-                          ? "bg-gold/[0.12] text-gold font-bold"
-                          : "text-text-muted hover:text-text hover:bg-surface-2/70"
+                          ? "bg-amber-400/10 text-amber-300 font-semibold"
+                          : "text-text-muted hover:text-text hover:bg-white/[0.03]"
                       }`}
                     >
                       {isActive && (
                         <span
-                          className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-gold"
+                          className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-amber-400"
                           aria-hidden="true"
                         />
                       )}
                       <div className="flex items-center gap-2.5">
                         <DynamicIcon
                           name={item.icon}
-                          className={`w-4 h-4 ${isActive ? "text-gold" : "text-text-muted group-hover:text-text"}`}
+                          className={`w-4 h-4 ${isActive ? "text-amber-400" : "text-text-muted group-hover:text-text"}`}
                         />
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30 font-mono font-bold">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-400/10 text-amber-300 font-mono font-semibold">
                           {item.badge}
                         </span>
                       )}
@@ -187,18 +187,18 @@ export function DesktopRail({
         </div>
 
         {/* User profile & logout */}
-        <div className="flex items-center justify-between p-2 rounded-xl bg-surface-2 border border-line text-xs">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-xs">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-light via-gold to-gold-dark text-[#1a1206] font-bold text-xs flex items-center justify-center ring-2 ring-line shadow-sm shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 text-[#1a1206] font-bold text-xs flex items-center justify-center shadow-sm shrink-0">
                 {initials}
               </div>
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-jade ring-2 ring-surface" />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#080C16]" />
             </div>
             <div className="truncate">
               <div className="font-semibold text-text truncate">{companyName}</div>
               <div className="text-[10px] text-text-muted flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-jade" />
+                <ShieldCheck className="w-3 h-3 text-emerald-400" />
                 <span>Verified Enterprise</span>
               </div>
             </div>
@@ -207,7 +207,7 @@ export function DesktopRail({
             type="button"
             onClick={handleLogout}
             title="Sign Out"
-            className="p-1.5 rounded-lg text-text-muted hover:text-rust hover:bg-surface transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-text-muted hover:text-rose-400 hover:bg-white/[0.04] transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
           </button>

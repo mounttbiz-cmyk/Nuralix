@@ -12,15 +12,15 @@ interface StatusBadgeProps {
 
 const toneClasses: Record<StatusTone, { pill: string; dot: string }> = {
   // green = live / verified
-  live: { pill: "bg-jade/10 text-jade border-jade/30", dot: "bg-jade" },
+  live: { pill: "bg-jade/10 text-jade", dot: "bg-jade" },
   // gold = AI / autonomous
-  ai: { pill: "bg-gold/10 text-gold border-gold/30", dot: "bg-gold" },
+  ai: { pill: "bg-gold/10 text-gold", dot: "bg-gold" },
   // amber = warning
-  warning: { pill: "bg-amber/10 text-amber border-amber/30", dot: "bg-amber" },
+  warning: { pill: "bg-amber/10 text-amber", dot: "bg-amber" },
   // red = critical
-  critical: { pill: "bg-rust/10 text-rust border-rust/30", dot: "bg-rust" },
+  critical: { pill: "bg-rust/10 text-rust", dot: "bg-rust" },
   // neutral = informational, no strong semantic color
-  neutral: { pill: "bg-surface-2 text-text-muted border-line", dot: "bg-text-muted" },
+  neutral: { pill: "bg-white/[0.05] text-text-muted", dot: "bg-text-muted" },
 };
 
 /**
@@ -31,7 +31,7 @@ export function StatusBadge({ label, tone = "neutral", pulse = false, className 
   const cfg = toneClasses[tone];
   return (
     <span
-      className={`inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border text-[10px] font-bold font-mono uppercase tracking-wider whitespace-nowrap ${cfg.pill} ${className}`}
+      className={`inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-[10px] font-semibold font-mono uppercase tracking-wider whitespace-nowrap ${cfg.pill} ${className}`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot} ${pulse ? "beacon-dot-current" : ""}`}
@@ -53,19 +53,19 @@ export function ProvenanceBadge({ type, citation }: ProvenanceBadgeProps) {
   const configs: Record<ProvenanceType, { label: string; className: string }> = {
     from_data: {
       label: "Verified Data",
-      className: "bg-jade/10 text-jade border-jade/30",
+      className: "bg-jade/10 text-jade",
     },
     benchmark: {
       label: "Industry Benchmark",
-      className: "bg-brass-soft/50 text-brass border-brass/30",
+      className: "bg-gold/10 text-gold",
     },
     estimate: {
       label: "BizzPal Estimate",
-      className: "bg-amber/10 text-amber border-amber/30",
+      className: "bg-amber/10 text-amber",
     },
     user: {
       label: "User Input",
-      className: "bg-surface-2 text-text-muted border-line",
+      className: "bg-white/[0.05] text-text-muted",
     },
   };
 
@@ -73,7 +73,7 @@ export function ProvenanceBadge({ type, citation }: ProvenanceBadgeProps) {
 
   return (
     <span
-      className={`inline-flex items-center h-6 px-2.5 rounded-full border text-[10px] font-bold font-mono uppercase tracking-wider whitespace-nowrap ${config.className}`}
+      className={`inline-flex items-center h-6 px-2.5 rounded-full text-[10px] font-semibold font-mono uppercase tracking-wider whitespace-nowrap ${config.className}`}
       title={citation || `Source: ${config.label}`}
     >
       {config.label}
