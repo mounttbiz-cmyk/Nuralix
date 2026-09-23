@@ -233,8 +233,17 @@ export default function SubscriptionPage() {
           </p>
         </div>
 
-        {/* 4 Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        {/* Plans Grid */}
+        <div
+          className={`grid grid-cols-1 gap-6 items-stretch mx-auto ${
+            {
+              1: "max-w-sm md:grid-cols-1",
+              2: "max-w-3xl md:grid-cols-2",
+              3: "max-w-6xl md:grid-cols-2 lg:grid-cols-3",
+              4: "max-w-7xl md:grid-cols-2 lg:grid-cols-4",
+            }[Math.min(plans.length, 4) as 1 | 2 | 3 | 4] ?? "max-w-7xl md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5"
+          }`}
+        >
           {plans.map(p => {
             const isStarter = p.id === "starter" || p.isPopular;
 
