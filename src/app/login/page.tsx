@@ -3,13 +3,39 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, ArrowRight, Sparkles, Lock, KeyRound, Building2, ExternalLink, Check, Copy, AlertTriangle, X } from "lucide-react";
+import {
+  ShieldCheck,
+  ArrowRight,
+  Sparkles,
+  Lock,
+  KeyRound,
+  Building2,
+  ExternalLink,
+  Check,
+  Copy,
+  AlertTriangle,
+  X,
+  Mail,
+  User,
+  Zap,
+  TrendingUp,
+  Cpu,
+  RefreshCw,
+  HelpCircle,
+} from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 import { useAuth } from "@/lib/firebase/authContext";
 import { auth, isFirebaseConfigured, firebaseConfig } from "@/lib/firebase/config";
-import { fetchSignInMethodsForEmail } from "firebase/auth";
 import { saveUserProfileToFirestore, getUserProfileFromFirestore } from "@/lib/firebase/firestore";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+
+interface AuthErrorInfo {
+  title?: string;
+  message: string;
+  code?: string;
+  type: "redirect" | "config" | "credentials" | "domain" | "general";
+  redirectUri?: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,16 +43,24 @@ export default function LoginPage() {
   const [authMode, setAuthMode] = useState<"register" | "signin">("register");
   const [isSuperadminMode, setIsSuperadminMode] = useState(false);
   const [showFirebaseModal, setShowFirebaseModal] = useState(false);
+  const [showRedirectGuide, setShowRedirectGuide] = useState(false);
 
-  // Close Firebase modal on Escape
-  useEscapeKey(() => setShowFirebaseModal(false), showFirebaseModal);
+  // Close modals on Escape
+  useEscapeKey(() => {
+    setShowFirebaseModal(false);
+    setShowRedirectGuide(false);
+  }, showFirebaseModal || showRedirectGuide);
+
   const [copiedEnv, setCopiedEnv] = useState(false);
+  const [copiedUri, setCopiedUri] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [adminPasscode, setAdminPasscode] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [errorInfo, setErrorInfo] = useState<AuthErrorInfo | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const activeRedirectUri = `https://${firebaseConfig.authDomain || "nuralix-24360.firebaseapp.com"}/__/auth/handler`;
 
   // Check URL query for auth mode and email flag
   React.useEffect(() => {
@@ -48,104 +82,191 @@ export default function LoginPage() {
   }, []);
 
   /**
-   * Helper: Check whether an account (Google or Email) has already been registered / used
+   * Parse any error into a rich, helpful, human-readable AuthErrorInfo
    */
-  const checkAccountExists = async (checkEmail: string, uid?: string): Promise<boolean> => {
-    if (!checkEmail) return false;
-    const normalizedEmail = checkEmail.trim().toLowerCase();
+  const parseAuthError = (err: any): AuthErrorInfo => {
+    const code = err?.code || "";
+    const rawMsg = err?.message || "";
 
-    // 1. Check local client cache
-    try {
-      const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
-      if (rawLocal) {
-        const list: string[] = JSON.parse(rawLocal);
-        if (Array.isArray(list) && list.map(e => e.toLowerCase()).includes(normalizedEmail)) {
-          return true;
-        }
-      }
-    } catch (e) {}
-
-    // 2. Check Firestore profile if uid is provided
-    if (uid && isFirebaseConfigured) {
-      try {
-        const profile = await getUserProfileFromFirestore(uid);
-        if (profile && (profile.email || profile.displayName || profile.createdAt)) {
-          return true;
-        }
-      } catch (e) {}
+    // 1. Google OAuth 400 redirect_uri_mismatch detection
+    if (
+      code === "auth/invalid-oauth-provider-response" ||
+      rawMsg.includes("redirect_uri_mismatch") ||
+      rawMsg.includes("Error 400") ||
+      rawMsg.includes("redirect_uri")
+    ) {
+      return {
+        title: "Google OAuth Setup Required (Error 400: redirect_uri_mismatch)",
+        message: `Your Google Cloud Web Client ID requires "${activeRedirectUri}" added to its Authorized redirect URIs.`,
+        code: "redirect_uri_mismatch",
+        type: "redirect",
+        redirectUri: activeRedirectUri,
+      };
     }
 
-    // 3. Check SQLite database via API
-    try {
-      const res = await fetch(`/api/auth/account-status?email=${encodeURIComponent(normalizedEmail)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.exists) {
-          return true;
-        }
-      }
-    } catch (e) {}
+    // 2. Google popup closed (often happens when user sees Error 400 in the Google popup)
+    if (code === "auth/popup-closed-by-user") {
+      return {
+        title: "Google Sign-In Cancelled or Blocked",
+        message: `The Google sign-in window was closed. If Google displayed "Error 400: redirect_uri_mismatch", please add the authorized redirect URI in Google Cloud Console, or use Work Email & Password below.`,
+        code,
+        type: "redirect",
+        redirectUri: activeRedirectUri,
+      };
+    }
 
-    return false;
+    if (code === "auth/popup-blocked") {
+      return {
+        title: "Popup Blocked",
+        message: "The Google Sign-In popup was blocked by your browser. Please allow popups for this site, or sign in using Work Email & Password below.",
+        code,
+        type: "general",
+      };
+    }
+
+    // 3. Provider not allowed
+    if (code === "auth/operation-not-allowed") {
+      return {
+        title: "Sign-In Method Not Enabled",
+        message: "This sign-in method is not enabled in your Firebase Console. Please go to Firebase Console → Authentication → Sign-in method and enable 'Email/Password' and 'Google'. Alternatively, click 'Instant Demo Mode' to access immediately.",
+        code,
+        type: "config",
+      };
+    }
+
+    // 4. Domain not authorized
+    if (code === "auth/unauthorized-domain") {
+      return {
+        title: "Domain Authorization Required",
+        message: "Your current domain is not yet authorized in Firebase. In Firebase Console → Authentication → Settings → Authorized domains, click 'Add domain' and add your current host.",
+        code,
+        type: "domain",
+      };
+    }
+
+    // 5. Email already in use
+    if (code === "auth/email-already-in-use") {
+      return {
+        title: "Account Already Exists",
+        message: "An account with this email address already exists. Please switch to 'Log In' to access your business dashboard.",
+        code,
+        type: "credentials",
+      };
+    }
+
+    // 6. Invalid credentials / wrong password
+    if (code === "auth/invalid-credential" || code === "auth/wrong-password") {
+      return {
+        title: "Invalid Credentials",
+        message: "Incorrect email or password. If you have not created an account yet, switch to 'Create Account'.",
+        code,
+        type: "credentials",
+      };
+    }
+
+    // 7. User not found
+    if (code === "auth/user-not-found") {
+      return {
+        title: "Account Not Found",
+        message: "No registered account found with this email. Please switch to 'Create Account' to register your business.",
+        code,
+        type: "credentials",
+      };
+    }
+
+    // 8. Weak password
+    if (code === "auth/weak-password") {
+      return {
+        title: "Weak Password",
+        message: "Password must be at least 6 characters long.",
+        code,
+        type: "credentials",
+      };
+    }
+
+    // 9. Network error
+    if (code === "auth/network-request-failed") {
+      return {
+        title: "Network Connection Error",
+        message: "Unable to reach Firebase servers. Please verify your internet connection or use Instant Demo Mode.",
+        code,
+        type: "general",
+      };
+    }
+
+    // 10. Extract any embedded (auth/code)
+    const authMatch = rawMsg.match(/\(auth\/([a-z0-9-]+)\)/i);
+    if (authMatch) {
+      const parsed = authMatch[1];
+      if (parsed === "operation-not-allowed") {
+        return {
+          title: "Provider Not Enabled",
+          message: "Please enable Email/Password or Google in Firebase Console → Authentication → Sign-in method.",
+          code: parsed,
+          type: "config",
+        };
+      }
+      if (parsed === "invalid-credential") {
+        return {
+          title: "Invalid Credentials",
+          message: "Incorrect credentials. Please verify your email and password or create a new account.",
+          code: parsed,
+          type: "credentials",
+        };
+      }
+      return {
+        title: "Authentication Error",
+        message: `Firebase returned (${parsed}). You can explore the platform right now using Instant Demo Mode.`,
+        code: parsed,
+        type: "general",
+      };
+    }
+
+    // 11. Clean message without reducing to bare "Error"
+    const cleaned = rawMsg
+      .replace(/^Firebase:\s*/i, "")
+      .replace(/^Error:\s*/i, "")
+      .replace(/FirebaseError:\s*/i, "")
+      .trim();
+
+    if (cleaned && cleaned.toLowerCase() !== "error") {
+      return {
+        title: "Authentication Notice",
+        message: cleaned,
+        code,
+        type: "general",
+      };
+    }
+
+    return {
+      title: "Authentication Notice",
+      message: "Unable to complete authentication with the cloud service. You can immediately access the AI Business OS with Instant Demo Mode.",
+      code,
+      type: "general",
+    };
   };
 
   /**
-   * Helper: Record an account as registered across SQLite and local cache
-   */
-  const recordRegisteredAccount = async (accountEmail: string, name?: string, prov?: string, uid?: string, bizProfile?: any) => {
-    if (!accountEmail) return;
-    const normalizedEmail = accountEmail.trim().toLowerCase();
-
-    // 1. Client-side local list
-    try {
-      const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
-      const list: string[] = rawLocal ? JSON.parse(rawLocal) : [];
-      if (!list.map(e => e.toLowerCase()).includes(normalizedEmail)) {
-        list.push(normalizedEmail);
-        localStorage.setItem("bizzpal_registered_accounts", JSON.stringify(list));
-      }
-    } catch (e) {}
-
-    // 2. Server-side SQLite ledger
-    try {
-      await fetch("/api/auth/account-status", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: normalizedEmail, name, provider: prov, uid, businessProfile: bizProfile }),
-      });
-    } catch (e) {}
-  };
-
-  /**
-   * Helper: Restore business details of old user account and navigate directly to dashboard
-   * OPTIMIZED FOR MAX SPEED: reads synchronous local storage, synthesizes immediately,
-   * pushes navigation to /dashboard (<50ms), and syncs with backend in background.
+   * Helper: Restore business details and navigate directly to dashboard
    */
   const restoreAndNavigateOldUser = async (userEmail: string, displayName?: string, uid?: string) => {
     const cleanEmail = (userEmail || "").trim().toLowerCase();
     let businessProfile: any = null;
 
-    // 1. Fast synchronous check: user-specific localStorage cache
     if (cleanEmail) {
       try {
         const localUserBiz = localStorage.getItem(`bizzpal_user_business_${cleanEmail}`);
-        if (localUserBiz) {
-          businessProfile = JSON.parse(localUserBiz);
-        }
-      } catch (e) {}
+        if (localUserBiz) businessProfile = JSON.parse(localUserBiz);
+      } catch (e) { }
     }
 
-    // 2. Fast synchronous check: general business profile in localStorage
     if (!businessProfile) {
       try {
         const existingStr = localStorage.getItem("bizzpal_business_profile");
-        if (existingStr) {
-          businessProfile = JSON.parse(existingStr);
-        }
-      } catch (e) {}
+        if (existingStr) businessProfile = JSON.parse(existingStr);
+      } catch (e) { }
     }
 
-    // 3. Fallback synthesis immediately
     if (!businessProfile) {
       const fallbackName = displayName || fullName || "Founder";
       businessProfile = {
@@ -157,21 +278,19 @@ export default function LoginPage() {
         annualRevenue: 6000000,
         burn: 150000,
         cash: 1200000,
-        teamSize: 10,
+        teamSize: 12,
         completedAt: new Date().toISOString(),
       };
     }
 
-    // Persist to localStorage synchronously
     localStorage.setItem("bizzpal_business_profile", JSON.stringify(businessProfile));
     if (cleanEmail) {
       localStorage.setItem(`bizzpal_user_business_${cleanEmail}`, JSON.stringify(businessProfile));
     }
 
-    // Direct navigation straight to dashboard - IMMEDIATE (<50ms)
     router.push("/dashboard");
 
-    // Asynchronous background sync with SQLite and Firestore (non-blocking)
+    // Background sync
     (async () => {
       try {
         const res = await fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`);
@@ -182,7 +301,7 @@ export default function LoginPage() {
             localStorage.setItem(`bizzpal_user_business_${cleanEmail}`, JSON.stringify(data.businessProfile));
           }
         }
-      } catch (e) {}
+      } catch (e) { }
 
       if (uid && isFirebaseConfigured) {
         try {
@@ -191,37 +310,85 @@ export default function LoginPage() {
             localStorage.setItem("bizzpal_business_profile", JSON.stringify(firestoreData.businessProfile));
             localStorage.setItem(`bizzpal_user_business_${cleanEmail}`, JSON.stringify(firestoreData.businessProfile));
           }
-        } catch (e) {}
+        } catch (e) { }
       }
-    })().catch(() => {});
+    })().catch(() => { });
   };
 
-  // Business Login/Registration handler with multi-layer account protection
+  /**
+   * Instant 1-Click Fast-Track Demo Founder Access
+   */
+  const handleInstantDemo = (targetName = "Alex Vance") => {
+    setLoading(true);
+    setErrorInfo(null);
+
+    const demoSession = {
+      id: `usr_demo_${Date.now()}`,
+      email: "founder@apexanalytics.io",
+      name: targetName,
+      role: "owner",
+      provider: "demo",
+      authenticatedAt: new Date().toISOString(),
+    };
+
+    const demoProfile = {
+      name: "Apex Analytics AI",
+      founderName: targetName,
+      industry: "saas",
+      industryLabel: "B2B SaaS & Enterprise AI",
+      revenue: 540000,
+      annualRevenue: 6480000,
+      burn: 145000,
+      cash: 1850000,
+      teamSize: 18,
+      completedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem("bizzpal_user_session", JSON.stringify(demoSession));
+    localStorage.setItem("bizzpal_business_profile", JSON.stringify(demoProfile));
+    localStorage.setItem(`bizzpal_user_business_${demoSession.email}`, JSON.stringify(demoProfile));
+
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 200);
+  };
+
+  /**
+   * Pre-fill sample credentials for rapid testing
+   */
+  const prefillSampleCredentials = () => {
+    setFullName("Alex Vance");
+    setEmail("founder@apexanalytics.io");
+    setPassword("bizzpal2026");
+    setErrorInfo(null);
+  };
+
+  /**
+   * Business Login / Registration handler
+   */
   const handleBusinessAuth = async (e?: React.FormEvent, provider: "google" | "email" | "demo" = "email") => {
     if (e) e.preventDefault();
     setLoading(true);
-    setError(null);
+    setErrorInfo(null);
 
-    // Instant demo intake flow
     if (provider === "demo") {
-      const userSession = {
-        id: `usr_demo_${Date.now()}`,
-        email: "demo.founder@bizzpal.io",
-        name: fullName || "Alex Vance",
-        role: "owner",
-        provider: "demo",
-        authenticatedAt: new Date().toISOString(),
-      };
-      localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
-      router.push("/onboarding");
+      handleInstantDemo();
       return;
     }
 
-    // When Firebase is configured with valid project credentials
     if (isFirebaseConfigured) {
       try {
         if (provider === "google") {
-          const googleRes = await signInWithGoogle();
+          let googleRes: any = null;
+          try {
+            googleRes = await signInWithGoogle();
+          } catch (gErr: any) {
+            setLoading(false);
+            const parsed = parseAuthError(gErr);
+            setErrorInfo(parsed);
+            return;
+          }
+
           if (!googleRes) {
             setLoading(false);
             return;
@@ -232,18 +399,18 @@ export default function LoginPage() {
           const userEmail = (authUser.email || "").trim().toLowerCase();
 
           if (authMode === "register") {
-            // User is in "Create Account" section
-            // In Firebase Auth, if !isGoogleNewUser, this Google account ALREADY exists in Firebase Console Users section
             if (!isGoogleNewUser) {
               await logout();
               if (userEmail) setEmail(userEmail);
-              setError("This Google account has been used before, so please go to Log In.");
+              setErrorInfo({
+                title: "Existing Account",
+                message: "This Google account is already registered. Please click 'Log In' to access your business.",
+                type: "credentials",
+              });
               setLoading(false);
               return;
             }
 
-            // User is brand new (or was deleted from Firebase Console) -> Allow registration!
-            // Clean any previous user's business profile from this browser so onboarding questions are presented!
             localStorage.removeItem("bizzpal_business_profile");
             localStorage.removeItem("bizzpal_onboarding_step");
 
@@ -257,45 +424,17 @@ export default function LoginPage() {
             };
             localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
 
-            // Instant navigation to onboarding registration process
             router.push("/onboarding?mode=new_signup");
 
-            // Record in SQLite and Firestore in background
-            recordRegisteredAccount(userEmail, authUser.displayName || fullName || "Founder", "google.com", authUser.uid).catch(() => {});
             saveUserProfileToFirestore(authUser.uid, {
               email: userEmail,
               displayName: authUser.displayName || fullName || "Founder",
               role: "owner",
               createdAt: new Date().toISOString(),
-            }).catch(() => {});
+            }).catch(() => { });
             return;
           } else {
-            // User is in "Log In" section
-            // In Firebase Auth, if isGoogleNewUser is true, this account was NOT previously registered in Firebase Console!
-            if (isGoogleNewUser) {
-              // Delete the newly-provisioned Google user so Firebase Console stays clean
-              try {
-                await authUser.delete();
-              } catch (delErr) {}
-              await logout();
-
-              // Clean any stale local / SQLite cache for this email
-              try {
-                const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
-                if (rawLocal) {
-                  const list: string[] = JSON.parse(rawLocal);
-                  localStorage.setItem("bizzpal_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== userEmail)));
-                }
-                fetch(`/api/auth/account-status?email=${encodeURIComponent(userEmail)}`, { method: "DELETE" }).catch(() => {});
-              } catch (e) {}
-
-              if (userEmail) setEmail(userEmail);
-              setError("No registered account found for this Google account. This account has not been registered yet, so please go to Create Account.");
-              setLoading(false);
-              return;
-            }
-
-            // Valid existing Google user logging in
+            // Log In mode
             const userSession = {
               id: authUser.uid,
               email: userEmail || email,
@@ -306,7 +445,6 @@ export default function LoginPage() {
             };
             localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
 
-            // Directly restore and navigate to dashboard!
             await restoreAndNavigateOldUser(userEmail, authUser.displayName || fullName || "Founder", authUser.uid);
             return;
           }
@@ -316,32 +454,35 @@ export default function LoginPage() {
         const cleanEmail = (email || "").trim().toLowerCase();
         if (authMode === "register") {
           if (!cleanEmail || !cleanEmail.includes("@")) {
-            setError("Please enter a valid work email address.");
+            setErrorInfo({
+              title: "Email Required",
+              message: "Please enter a valid work email address.",
+              type: "credentials",
+            });
             setLoading(false);
             return;
           }
           if (!password || password.length < 6) {
-            setError("Password must be at least 6 characters.");
+            setErrorInfo({
+              title: "Password Too Short",
+              message: "Password must be at least 6 characters long.",
+              type: "credentials",
+            });
             setLoading(false);
             return;
           }
 
-          // Directly call Firebase signUpWithEmail - Firebase Console is the single source of truth!
-          // No blocking pre-checks that would falsely reject accounts removed from Firebase.
           let authUser: any = null;
           try {
             authUser = await signUpWithEmail(cleanEmail, password, fullName);
           } catch (signUpErr: any) {
-            if (signUpErr?.code === "auth/email-already-in-use") {
-              setError("This account has been used before, so please go to Log In.");
-              setLoading(false);
-              return;
-            }
-            throw signUpErr;
+            setLoading(false);
+            const parsed = parseAuthError(signUpErr);
+            setErrorInfo(parsed);
+            return;
           }
 
           if (authUser) {
-            // Clean any previous user's business profile from this browser so onboarding questions are presented!
             localStorage.removeItem("bizzpal_business_profile");
             localStorage.removeItem("bizzpal_onboarding_step");
 
@@ -355,28 +496,33 @@ export default function LoginPage() {
             };
             localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
 
-            // Instant navigation to onboarding registration process
             router.push("/onboarding?mode=new_signup");
 
-            // Background updates
-            recordRegisteredAccount(cleanEmail, fullName || "Founder", "password", authUser.uid).catch(() => {});
             saveUserProfileToFirestore(authUser.uid, {
               email: cleanEmail,
               displayName: fullName || "Founder",
               role: "owner",
               createdAt: new Date().toISOString(),
-            }).catch(() => {});
+            }).catch(() => { });
             return;
           }
         } else {
           // authMode === "signin"
           if (!cleanEmail || !cleanEmail.includes("@")) {
-            setError("Please enter your registered work email address.");
+            setErrorInfo({
+              title: "Email Required",
+              message: "Please enter your registered work email address.",
+              type: "credentials",
+            });
             setLoading(false);
             return;
           }
           if (!password) {
-            setError("Please enter your password.");
+            setErrorInfo({
+              title: "Password Required",
+              message: "Please enter your password.",
+              type: "credentials",
+            });
             setLoading(false);
             return;
           }
@@ -394,145 +540,35 @@ export default function LoginPage() {
               };
               localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
 
-              // Old user logging in: directly go to dashboard & remember their details!
               await restoreAndNavigateOldUser(cleanEmail, authUser.displayName || fullName || "Founder", authUser.uid);
-              recordRegisteredAccount(cleanEmail, authUser.displayName || fullName || "Founder", "password", authUser.uid).catch(() => {});
               return;
             }
           } catch (signInErr: any) {
-            const code = signInErr?.code || "";
-            if (code === "auth/user-not-found") {
-              // Account does not exist in Firebase console (or was deleted)!
-              try {
-                const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
-                if (rawLocal) {
-                  const list: string[] = JSON.parse(rawLocal);
-                  localStorage.setItem("bizzpal_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== cleanEmail)));
-                }
-                fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`, { method: "DELETE" }).catch(() => {});
-              } catch (e) {}
-
-              setError("No registered account found with this email. This account has not been registered yet, so please go to Create Account.");
-              setLoading(false);
-              return;
-            }
-
-            if (code === "auth/invalid-credential") {
-              // Firebase v10 may return auth/invalid-credential when user does not exist in Firebase.
-              // Verify directly from Firebase users section using fetchSignInMethodsForEmail:
-              try {
-                if (auth) {
-                  const methods = await fetchSignInMethodsForEmail(auth, cleanEmail);
-                  if (!methods || methods.length === 0) {
-                    // Account was deleted or does not exist in Firebase Console!
-                    try {
-                      const rawLocal = localStorage.getItem("bizzpal_registered_accounts");
-                      if (rawLocal) {
-                        const list: string[] = JSON.parse(rawLocal);
-                        localStorage.setItem("bizzpal_registered_accounts", JSON.stringify(list.filter(e => e.toLowerCase() !== cleanEmail)));
-                      }
-                      fetch(`/api/auth/account-status?email=${encodeURIComponent(cleanEmail)}`, { method: "DELETE" }).catch(() => {});
-                    } catch (e) {}
-
-                    setError("No registered account found with this email. This account has not been registered yet, so please go to Create Account.");
-                    setLoading(false);
-                    return;
-                  }
-                }
-              } catch (fetchErr) {}
-
-              setError("Incorrect password. If you forgot your password or need a new account, please switch to Create Account.");
-              setLoading(false);
-              return;
-            }
-
-            throw signInErr;
+            setLoading(false);
+            const parsed = parseAuthError(signInErr);
+            setErrorInfo(parsed);
+            return;
           }
         }
       } catch (err: any) {
         setLoading(false);
-        const code = err.code || "";
-        const hostname = typeof window !== "undefined" ? window.location.hostname : "localhost";
-
-        if (code === "auth/unauthorized-domain") {
-          const isVercel = hostname.endsWith(".vercel.app");
-          const recommendedDomain = isVercel ? "vercel.app" : hostname;
-          setError(
-            `Domain authorization required in Firebase. In Firebase Console → Authentication → Settings → Authorized domains, click "Add domain" and enter "${recommendedDomain}". Alternatively, sign in with Email & Password below.`
-          );
-        } else if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
-          setError("Incorrect password or credentials. If you have not created an account yet, please switch to Create Account.");
-        } else if (code === "auth/email-already-in-use") {
-          setError("This account has been used before, so please go to Log In.");
-        } else if (code === "auth/popup-closed-by-user") {
-          setError("Google Sign-In popup was closed before completing.");
-        } else if (code === "auth/popup-blocked") {
-          setError("Popup was blocked by your browser. Please allow popups for this site.");
-        } else {
-          const rawMsg = err.message || "Authentication failed. Please try again.";
-          const cleanMsg = rawMsg.replace(/^Firebase:\s*/i, "").replace(/FirebaseError:\s*/i, "").replace(/\(auth\/[^)]+\)\.?/i, "").trim();
-          setError(cleanMsg || "Authentication failed. Please try again.");
-        }
+        const parsed = parseAuthError(err);
+        setErrorInfo(parsed);
         return;
       }
     } else {
-      // Fallback local session for dev/evaluation when keys are pending
-      const targetEmail = (provider === "google" ? (email || "founder@apexanalytics.io") : (email || "founder@mycompany.com")).trim().toLowerCase();
-      const accountExists = await checkAccountExists(targetEmail);
-
-      if (authMode === "register") {
-        if (accountExists) {
-          setError("This account has been used before, so please go to Log In.");
-          setLoading(false);
-          return;
-        }
-        localStorage.removeItem("bizzpal_business_profile");
-        localStorage.removeItem("bizzpal_onboarding_step");
-
-        await recordRegisteredAccount(targetEmail, fullName || (provider === "google" ? "Alex Vance" : "Founder"), provider);
-        const userSession = {
-          id: `usr_${Date.now()}`,
-          email: targetEmail,
-          name: fullName || (provider === "google" ? "Alex Vance" : "Founder"),
-          role: "owner",
-          provider,
-          authenticatedAt: new Date().toISOString(),
-        };
-        localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
-        router.push("/onboarding?mode=new_signup");
-      } else {
-        // authMode === "signin"
-        if (provider === "email" && email) {
-          if (!accountExists) {
-            setError("No registered account found with this email. This account has not been registered yet, so please go to Create Account.");
-            setLoading(false);
-            return;
-          }
-        }
-        const userSession = {
-          id: `usr_${Date.now()}`,
-          email: targetEmail,
-          name: fullName || (provider === "google" ? "Alex Vance" : "Founder"),
-          role: "owner",
-          provider,
-          authenticatedAt: new Date().toISOString(),
-        };
-        localStorage.setItem("bizzpal_user_session", JSON.stringify(userSession));
-        // Old user logging in: directly go to dashboard & remember their details!
-        await restoreAndNavigateOldUser(targetEmail, fullName || (provider === "google" ? "Alex Vance" : "Founder"));
-      }
-      setLoading(false);
+      // Local fallback
+      handleInstantDemo(fullName || "Founder");
     }
   };
 
-  // Developer Superadmin Login handler (§15 Developer Portal)
+  // Developer Superadmin Login handler
   const handleSuperadminLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    setErrorInfo(null);
 
     setTimeout(() => {
-      // Secure Developer Passcode Check
       if (adminPasscode === "bizzpal2026" || adminPasscode === "admin") {
         const adminSession = {
           id: "adm_platform_developer",
@@ -544,29 +580,52 @@ export default function LoginPage() {
         router.push("/admin");
       } else {
         setLoading(false);
-        setError("Invalid Developer authorization credentials. Default passcode is: bizzpal2026");
+        setErrorInfo({
+          title: "Developer Passcode Invalid",
+          message: "Incorrect developer passcode. The default passcode is: bizzpal2026",
+          type: "credentials",
+        });
       }
-    }, 500);
+    }, 400);
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col justify-between p-4 sm:p-6 lg:p-8 relative">
-      {/* Top Bar with Logo & Theme Switch */}
-      <div className="flex items-center justify-between max-w-6xl w-full mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-surface border border-line flex items-center justify-center p-1.5 shadow-sm">
+    <div className="min-h-screen bg-bg text-text relative flex flex-col justify-between overflow-x-hidden transition-colors duration-300">
+      {/* Ambient Lighting & Atmosphere */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Top-left warm amber aura */}
+        <div className="absolute top-[-15%] left-[-10%] w-[650px] h-[650px] rounded-full bg-amber-500/10 dark:bg-amber-500/[0.08] blur-[140px]" />
+        {/* Bottom-right cool indigo aura */}
+        <div className="absolute bottom-[-15%] right-[-10%] w-[650px] h-[650px] rounded-full bg-indigo-500/10 dark:bg-indigo-500/[0.06] blur-[150px]" />
+        {/* Architectural subtle micro-grid */}
+        <div
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+          style={{
+            backgroundImage: `radial-gradient(currentColor 1px, transparent 1px)`,
+            backgroundSize: "28px 28px",
+          }}
+        />
+      </div>
+
+      {/* Top Navigation Bar */}
+      <header className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
+        {/* Brand & AI Business OS Badge */}
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-surface/90 border border-line-strong flex items-center justify-center p-2 shadow-lg backdrop-blur-xl group hover:border-amber-500/50 transition-all">
             <Image
               src="/logo.png"
               alt="BizzPal Logo"
-              width={30}
-              height={30}
-              className="object-contain"
+              width={28}
+              height={28}
+              className="object-contain group-hover:scale-105 transition-transform"
               priority
             />
           </div>
-          <div>
-            <span className="font-extrabold text-base tracking-tight text-text font-sans">
-              Bizz<span
+
+          <div className="flex items-center gap-2.5">
+            <span className="font-extrabold text-lg tracking-tight text-text font-sans">
+              Bizz
+              <span
                 className="font-black"
                 style={{
                   background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
@@ -579,306 +638,572 @@ export default function LoginPage() {
                 Pal
               </span>
             </span>
-            <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-amber-400/15 text-amber-500 dark:text-amber-300 font-bold uppercase tracking-wider border border-amber-500/30">
-              AI Business OS
-            </span>
+
+            {/* High-End Executive "AI Business OS" Pill */}
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/10 via-amber-400/15 to-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-300 shadow-[0_0_12px_rgba(245,197,66,0.12)] backdrop-blur-md">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-400"></span>
+              </span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest leading-none">
+                AI Business OS
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="w-36">
-          <ThemeSwitch compact />
+        {/* Top Right Actions */}
+        <div className="flex items-center gap-3">
+          <div className="w-36">
+            <ThemeSwitch compact />
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main Login Card */}
-      <div className="max-w-md w-full mx-auto my-auto py-8">
-        <div className="p-6 sm:p-8 rounded-2xl border border-line bg-surface shadow-theme space-y-6">
-          {!isSuperadminMode ? (
-            /* Business Auth Form */
-            <>
-              {/* Error Alert */}
-              {error && (
-                <div className="p-3.5 rounded-xl bg-rust/10 border border-rust/30 text-rust text-xs font-medium space-y-2.5">
-                  <div className="flex items-start gap-2.5">
-                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <div className="flex-1 leading-relaxed">{error}</div>
-                  </div>
-                  {(error.includes("used before") || error.includes("already exists")) && (
-                    <div className="pl-6 pt-0.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAuthMode("signin");
-                          setError(null);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-brass text-white font-bold text-xs shadow hover:brightness-110 btn-tactile transition-all"
-                      >
-                        <span>Switch to Log In Now →</span>
-                      </button>
-                    </div>
-                  )}
-                  {(error.includes("not been registered") || error.includes("No registered account") || error.includes("Create Account")) && (
-                    <div className="pl-6 pt-0.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAuthMode("register");
-                          setError(null);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-brass text-white font-bold text-xs shadow hover:brightness-110 btn-tactile transition-all"
-                      >
-                        <span>Switch to Create Account Now →</span>
-                      </button>
-                    </div>
-                  )}
-                  {error.includes("Authorized domains") && (
-                    <div className="pl-6 pt-0.5">
-                      <a
-                        href="https://console.firebase.google.com/project/bizzpal-24360/authentication/settings"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rust/20 hover:bg-rust/30 text-rust font-semibold text-[11px] transition-colors"
-                      >
-                        <span>Open Firebase Authorized Domains</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Tab Switcher: Sign In vs Register */}
-              <div className="flex items-center p-1 rounded-xl bg-surface-2 border border-line">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode("register");
-                    setError(null);
-                  }}
-                  className={`flex-1 py-1.5 text-xs rounded-lg font-bold transition-all ${authMode === "register"
-                      ? "bg-surface text-text shadow-sm border border-line"
-                      : "text-text-muted hover:text-text"
-                    }`}
-                >
-                  Create Account
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode("signin");
-                    setError(null);
-                  }}
-                  className={`flex-1 py-1.5 text-xs rounded-lg font-bold transition-all ${authMode === "signin"
-                      ? "bg-surface text-text shadow-sm border border-line"
-                      : "text-text-muted hover:text-text"
-                    }`}
-                >
-                  Log In
-                </button>
+      {/* Main Dual-Column Content */}
+      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 my-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Left Column: AI Business OS Value & Executive Telemetry */}
+          <div className="hidden lg:flex lg:col-span-6 flex-col space-y-7 pr-4 lg:-translate-y-10">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-line text-text text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Next-Gen Enterprise Autonomous Architecture</span>
               </div>
 
-              <div className="space-y-1.5 text-center sm:text-left">
-                <h1 className="text-xl font-bold text-text tracking-tight font-sans">
-                  {authMode === "register" ? "Register Your Business" : "Log in to your Business OS"}
-                </h1>
-                <p className="text-xs text-text-muted leading-relaxed">
-                  {authMode === "register"
-                    ? "Create your founder profile to calibrate your custom AI executive team and company metrics."
-                    : "Autonomous executive AI, adaptive dashboards, and decision simulation tailored to your business."}
+              <h1 className="text-4xl xl:text-5xl font-extrabold text-text tracking-tight font-sans leading-[1.15]">
+                The Autonomous <br />
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    color: "#F5C542",
+                  }}
+                >
+                  AI Business OS
+                </span>{" "}
+                for Founders.
+              </h1>
+
+              <p className="text-sm text-text-muted leading-relaxed max-w-lg">
+                Calibrate a 24/7 AI C-Suite executive team — CEO, CFO, CMO, and CTO agents running on continuous
+                financial telemetry, Monte Carlo decision simulations, and automated strategic workflows.
+              </p>
+            </div>
+
+            {/* Feature Highlights Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+              <div className="p-3.5 rounded-2xl bg-surface/75 border border-line backdrop-blur-md space-y-1.5 hover:border-amber-500/30 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                  <Zap className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-text">Autonomous C-Suite</h3>
+                <p className="text-[11px] text-text-muted leading-relaxed">
+                  10 specialized executive agents continuously monitor growth, runway, and risk.
                 </p>
               </div>
 
-              {/* One-Click Google Auth */}
-              <button
-                id="btn-google-login"
-                type="button"
-                onClick={() => handleBusinessAuth(undefined, "google")}
-                disabled={loading}
-                className="w-full py-2.5 px-4 rounded-xl border border-line bg-surface-2 hover:bg-surface text-text font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-3 btn-tactile hover:border-line-strong"
-              >
-                {/* Official Google Icon SVG */}
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                  />
-                </svg>
-                <span>{authMode === "register" ? "Sign up with Google" : "Log in with Google"}</span>
-              </button>
-
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-line" />
-                <span className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
-                  or with email
-                </span>
-                <div className="flex-1 h-px bg-line" />
+              <div className="p-3.5 rounded-2xl bg-surface/75 border border-line backdrop-blur-md space-y-1.5 hover:border-amber-500/30 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-text">Decision Simulator</h3>
+                <p className="text-[11px] text-text-muted leading-relaxed">
+                  Real-time scenario forecasting for hiring, pricing models, and capital runway.
+                </p>
               </div>
 
-              {/* Email Form */}
-              <form onSubmit={e => handleBusinessAuth(e, "email")} className="space-y-3">
-                {authMode === "register" && (
-                  <div>
-                    <label className="text-xs font-semibold text-text block mb-1">
-                      Founder / Owner Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Alex Morgan"
-                      value={fullName}
-                      onChange={e => setFullName(e.target.value)}
-                      className="w-full text-xs px-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
-                    />
+              <div className="p-3.5 rounded-2xl bg-surface/75 border border-line backdrop-blur-md space-y-1.5 hover:border-amber-500/30 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                  <Cpu className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-text">Executive Intelligence</h3>
+                <p className="text-[11px] text-text-muted leading-relaxed">
+                  Multimodal AI reasoning engine with deep contextual company memory and adaptive synthesis.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-surface/75 border border-line backdrop-blur-md space-y-1.5 hover:border-amber-500/30 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-text">Strategic Execution</h3>
+                <p className="text-[11px] text-text-muted leading-relaxed">
+                  Turn C-Suite insights into automated operational workflows, delegations, and playbooks.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Luxury Glassmorphism Auth Card */}
+          <div className="w-full max-w-md mx-auto lg:col-span-6">
+            <div className="p-6 sm:p-8 rounded-3xl border border-line-strong/80 bg-surface/90 dark:bg-surface/80 backdrop-blur-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] space-y-5">
+              {!isSuperadminMode ? (
+                <>
+                  {/* Top Segmented Tab Switcher */}
+                  <div className="flex items-center p-1 rounded-2xl bg-surface-2 border border-line">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("register");
+                        setErrorInfo(null);
+                      }}
+                      className={`flex-1 py-2 text-xs rounded-xl font-bold transition-all ${authMode === "register"
+                        ? "bg-surface text-text shadow-sm border border-line"
+                        : "text-text-muted hover:text-text"
+                        }`}
+                    >
+                      Create Account
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("signin");
+                        setErrorInfo(null);
+                      }}
+                      className={`flex-1 py-2 text-xs rounded-xl font-bold transition-all ${authMode === "signin"
+                        ? "bg-surface text-text shadow-sm border border-line"
+                        : "text-text-muted hover:text-text"
+                        }`}
+                    >
+                      Log In
+                    </button>
                   </div>
-                )}
 
-                <div>
-                  <label className="text-xs font-semibold text-text block mb-1">
-                    Work Email Address *
-                  </label>
-                  <input
-                    id="input-login-email"
-                    type="email"
-                    required
-                    placeholder="e.g. founder@company.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
-                  />
-                </div>
+                  {/* Card Title & Subtitle */}
+                  <div className="space-y-1.5 text-center sm:text-left">
+                    <h2 className="text-xl font-bold text-text tracking-tight font-sans">
+                      {authMode === "register" ? "Register Your Business" : "Access your AI Business OS"}
+                    </h2>
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      {authMode === "register"
+                        ? "Create your founder profile to calibrate your autonomous AI executive team."
+                        : "Sign in to review executive intelligence, simulated runway, and strategic playbooks."}
+                    </p>
+                  </div>
 
-                <div>
-                  <label className="text-xs font-semibold text-text block mb-1">
-                    Password *
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="•••••••• (min 6 characters)"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brass"
-                  />
-                </div>
+                  {/* Rich Error Alert Banner */}
+                  {errorInfo && (
+                    <div className="p-4 rounded-2xl bg-rust/10 border border-rust/30 text-rust space-y-3 animate-fade-in">
+                      <div className="flex items-start gap-2.5">
+                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rust" />
+                        <div className="flex-1 space-y-1 text-xs">
+                          {errorInfo.title && <div className="font-bold text-rust">{errorInfo.title}</div>}
+                          <div className="leading-relaxed opacity-95">{errorInfo.message}</div>
+                        </div>
+                      </div>
 
+                      {/* Action buttons based on error type */}
+                      <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-rust/20 pl-6 text-xs">
+                        {/* If Google redirect_uri_mismatch */}
+                        {errorInfo.type === "redirect" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(activeRedirectUri);
+                                setCopiedUri(true);
+                                setTimeout(() => setCopiedUri(false), 2000);
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rust/20 hover:bg-rust/30 text-rust font-bold transition-colors"
+                            >
+                              {copiedUri ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>URI Copied!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3.5 h-3.5" />
+                                  <span>Copy Redirect URI</span>
+                                </>
+                              )}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setShowRedirectGuide(true)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rust/20 hover:bg-rust/30 text-rust font-bold transition-colors"
+                            >
+                              <span>View Fix Steps</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </button>
+                          </>
+                        )}
+
+                        {/* Account switchers */}
+                        {errorInfo.message.includes("already exists") && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuthMode("signin");
+                              setErrorInfo(null);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brass text-white font-bold transition-all shadow hover:brightness-110"
+                          >
+                            <span>Switch to Log In →</span>
+                          </button>
+                        )}
+
+                        {(errorInfo.message.includes("Account Not Found") ||
+                          errorInfo.message.includes("create an account") ||
+                          errorInfo.message.includes("switch to 'Create Account'")) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAuthMode("register");
+                                setErrorInfo(null);
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brass text-white font-bold transition-all shadow hover:brightness-110"
+                            >
+                              <span>Switch to Create Account →</span>
+                            </button>
+                          )}
+
+                        {/* Instant Demo Bypass */}
+                        <button
+                          type="button"
+                          onClick={() => handleInstantDemo()}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-500 dark:text-amber-300 font-bold transition-colors ml-auto"
+                        >
+                          <Zap className="w-3.5 h-3.5" />
+                          <span>Instant Demo Bypass →</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* One-Click Google Auth */}
+                  <button
+                    id="btn-google-login"
+                    type="button"
+                    onClick={() => handleBusinessAuth(undefined, "google")}
+                    disabled={loading}
+                    className="w-full py-2.5 px-4 rounded-xl border border-line bg-surface hover:bg-surface-2 text-text font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-3 hover:border-line-strong active:scale-[0.99]"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                      />
+                    </svg>
+                    <span>{authMode === "register" ? "Sign up with Google" : "Log in with Google"}</span>
+                  </button>
+
+                  {/* Divider */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-line" />
+                    <span className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
+                      or with work email
+                    </span>
+                    <div className="flex-1 h-px bg-line" />
+                  </div>
+
+                  {/* Email & Password Form */}
+                  <form onSubmit={e => handleBusinessAuth(e, "email")} className="space-y-3.5">
+                    {authMode === "register" && (
+                      <div>
+                        <label className="text-xs font-semibold text-text block mb-1">
+                          Founder / Owner Name *
+                        </label>
+                        <div className="relative flex items-center">
+                          <User className="w-3.5 h-3.5 text-text-muted absolute left-3.5" />
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Alex Morgan"
+                            value={fullName}
+                            onChange={e => setFullName(e.target.value)}
+                            className="w-full text-xs pl-9 pr-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="text-xs font-semibold text-text block mb-1">
+                        Work Email Address *
+                      </label>
+                      <div className="relative flex items-center">
+                        <Mail className="w-3.5 h-3.5 text-text-muted absolute left-3.5" />
+                        <input
+                          id="input-login-email"
+                          type="email"
+                          required
+                          placeholder="e.g. founder@company.com"
+                          value={email}
+                          onChange={e => setEmail(e.target.value)}
+                          className="w-full text-xs pl-9 pr-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold text-text block mb-1">
+                        Password *
+                      </label>
+                      <div className="relative flex items-center">
+                        <Lock className="w-3.5 h-3.5 text-text-muted absolute left-3.5" />
+                        <input
+                          type="password"
+                          required
+                          placeholder="•••••••• (min 6 characters)"
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          className="w-full text-xs pl-9 pr-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Primary Submit Button */}
+                    <button
+                      id="btn-login-email"
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-2.5 px-4 rounded-xl font-black text-xs shadow-lg transition-all mt-2 active:scale-[0.99] flex items-center justify-center gap-2"
+                      style={{
+                        background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #E5A922 100%)",
+                        color: "#000000",
+                      }}
+                    >
+                      {loading ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Processing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>
+                            {authMode === "register"
+                              ? "Create Account & Continue →"
+                              : "Log In to Business OS →"}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+
+                  {/* Fast-Track 1-Click Founder Demo Section */}
+                  <div className="pt-2 border-t border-line space-y-2">
+                    <div className="flex items-center justify-between text-[11px] text-text-muted">
+                      <span>Want immediate access without setup?</span>
+                      <button
+                        type="button"
+                        onClick={prefillSampleCredentials}
+                        className="text-amber-500 hover:underline font-semibold"
+                      >
+                        Fill sample credentials
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleInstantDemo()}
+                      disabled={loading}
+                      className="w-full py-2 px-3.5 rounded-xl bg-surface-2 hover:bg-surface border border-line hover:border-amber-500/40 text-text font-bold text-xs transition-all flex items-center justify-center gap-2 group shadow-sm"
+                    >
+                      <Zap className="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" />
+                      <span>⚡ Instant Founder Demo (1-Click Access)</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                /* Developer Superadmin Mode */
+                <form onSubmit={handleSuperadminLogin} className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-wider">
+                      <KeyRound className="w-3 h-3" />
+                      <span>Platform Developer Control Plane</span>
+                    </div>
+                    <h2 className="text-base font-bold text-text">Developer Authorization</h2>
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      Restricted to platform developers. Default developer passcode is: <code>bizzpal2026</code>
+                    </p>
+                  </div>
+
+                  {errorInfo && (
+                    <div className="p-3 rounded-xl bg-rust/10 border border-rust/30 text-rust text-xs font-medium">
+                      {errorInfo.message}
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-text block">Developer Passcode</label>
+                    <div className="relative flex items-center">
+                      <Lock className="w-3.5 h-3.5 text-text-muted absolute left-3.5" />
+                      <input
+                        type="password"
+                        placeholder="Enter developer passcode (bizzpal2026)"
+                        value={adminPasscode}
+                        onChange={e => setAdminPasscode(e.target.value)}
+                        className="w-full text-xs pl-9 pr-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-2">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-2.5 rounded-xl bg-amber-500 text-black font-extrabold text-xs shadow-md hover:brightness-110 transition-all"
+                    >
+                      {loading ? "Authenticating..." : "Authorize as Developer →"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsSuperadminMode(false)}
+                      className="w-full py-1.5 text-xs font-semibold text-text-muted hover:text-text text-center transition-colors"
+                    >
+                      Return to Business Auth
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/* Toggle to Developer Superadmin Portal */}
+            {!isSuperadminMode && (
+              <div className="text-center mt-4">
                 <button
-                  id="btn-login-email"
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-2.5 rounded-lg bg-brass text-white font-bold text-xs shadow-md hover:brightness-110 btn-tactile transition-all mt-2"
+                  type="button"
+                  onClick={() => setIsSuperadminMode(true)}
+                  className="text-[11px] text-text-muted hover:text-amber-500 transition-colors inline-flex items-center gap-1.5 font-medium"
                 >
-                  {loading
-                    ? authMode === "register"
-                      ? "Creating Account…"
-                      : "Logging in…"
-                    : authMode === "register"
-                      ? "Create Account & Continue →"
-                      : "Log In to Business OS →"}
-                </button>
-              </form>
-            </>
-          ) : (
-            /* Developer / Superadmin Portal Login */
-            <form onSubmit={handleSuperadminLogin} className="space-y-5">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber/15 text-amber text-[10px] font-bold uppercase tracking-wider">
                   <KeyRound className="w-3 h-3" />
-                  <span>Developer Control Plane Gate</span>
-                </div>
-                <h2 className="text-base font-bold text-text">Developer Authorization</h2>
-                <p className="text-xs text-text-muted">
-                  Superadmin control plane is restricted to platform developers. Normal dashboard users cannot view or access this portal.
-                </p>
-              </div>
-
-              {error && (
-                <div className="p-3 rounded-lg bg-rust/10 border border-rust/30 text-rust text-xs font-medium">
-                  {error}
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-text block">
-                  Developer Passcode
-                </label>
-                <div className="relative flex items-center">
-                  <Lock className="w-3.5 h-3.5 text-text-muted absolute left-3" />
-                  <input
-                    type="password"
-                    placeholder="Enter developer passcode (bizzpal2026)"
-                    value={adminPasscode}
-                    onChange={e => setAdminPasscode(e.target.value)}
-                    className="w-full text-xs pl-9 pr-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-2.5 rounded-lg bg-amber text-black font-bold text-xs shadow-md hover:brightness-110 btn-tactile"
-                >
-                  {loading ? "Verifying..." : "Authenticate as Superadmin"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsSuperadminMode(false)}
-                  className="w-full py-2 text-xs font-semibold text-text-muted hover:text-text text-center"
-                >
-                  Return to Business Log In
+                  <span>Platform Developer / Superadmin Portal</span>
                 </button>
               </div>
-            </form>
-          )}
-        </div>
-
-        {/* Developer Portal Access Toggle at bottom of Login */}
-        {!isSuperadminMode && (
-          <div className="text-center mt-4">
-            <button
-              type="button"
-              onClick={() => setIsSuperadminMode(true)}
-              className="text-[11px] text-text-muted hover:text-brass transition-colors inline-flex items-center gap-1 font-medium"
-            >
-              <KeyRound className="w-3 h-3" />
-              <span>Platform Developer / Superadmin Portal</span>
-            </button>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      </main>
 
-      {/* Footer Info */}
-      <div className="text-center text-[11px] text-text-muted max-w-md mx-auto">
-        <span>Protected by BizzPal Row-Level Security & Encrypted Tenancy.</span>
-      </div>
 
-      {/* Firebase Setup Guide Modal */}
-      {showFirebaseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-surface border border-line rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-5">
+      {/* Google OAuth redirect_uri_mismatch Help Modal */}
+      {showRedirectGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
+          <div className="bg-surface border border-line rounded-3xl max-w-lg w-full shadow-2xl p-6 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-line">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-text">Fix Google OAuth redirect_uri_mismatch</h3>
+                  <p className="text-[11px] text-text-muted">Error 400 resolution in Google Cloud Console</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRedirectGuide(false)}
+                className="p-1 rounded-lg text-text-muted hover:text-text hover:bg-surface-2 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-text-muted">
+              <p className="leading-relaxed">
+                Google blocks sign-in with <b>Error 400: redirect_uri_mismatch</b> when the Firebase OAuth handler is not
+                listed under Authorized redirect URIs in Google Cloud Console.
+              </p>
+
+              <div className="p-3.5 rounded-xl bg-surface-2 border border-line space-y-2">
+                <div className="font-semibold text-text flex items-center justify-between">
+                  <span>Required Authorized Redirect URI:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(activeRedirectUri);
+                      setCopiedUri(true);
+                      setTimeout(() => setCopiedUri(false), 2000);
+                    }}
+                    className="text-amber-500 font-bold text-[11px] hover:underline flex items-center gap-1"
+                  >
+                    {copiedUri ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedUri ? "Copied!" : "Copy URI"}</span>
+                  </button>
+                </div>
+                <code className="block p-2 rounded-lg bg-black/50 text-amber-400 font-mono text-[11px] break-all select-all">
+                  {activeRedirectUri}
+                </code>
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <h4 className="font-bold text-text text-[11px] uppercase tracking-wider">Follow these 3 steps:</h4>
+                <ol className="list-decimal pl-5 space-y-1.5 text-[11px] leading-relaxed">
+                  <li>
+                    Open{" "}
+                    <a
+                      href="https://console.cloud.google.com/apis/credentials"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-amber-500 font-semibold hover:underline inline-flex items-center gap-0.5"
+                    >
+                      Google Cloud Console Credentials <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  </li>
+                  <li>
+                    Click your <b>OAuth 2.0 Client ID (Web client)</b>.
+                  </li>
+                  <li>
+                    Scroll to <b>Authorized redirect URIs</b>, click <b>Add URI</b>, paste the URL above, and click <b>Save</b>.
+                  </li>
+                </ol>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-line flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRedirectGuide(false);
+                  handleInstantDemo();
+                }}
+                className="px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 font-bold text-xs transition-colors flex items-center gap-1.5"
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>Continue with Instant Demo</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowRedirectGuide(false)}
+                className="px-4 py-2 rounded-xl bg-surface-2 hover:bg-line text-text font-bold text-xs transition-all"
+              >
+                Done, Close Guide
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Firebase Setup Modal */}
+      {showFirebaseModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
+          <div className="bg-surface border border-line rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-line">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base">
                   🔥
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-text">Firebase Cloud Integration</h3>
-                  <p className="text-[11px] text-text-muted">Connect your Firebase Account & Project to BizzPal</p>
+                  <p className="text-[11px] text-text-muted">Connected Project & Status</p>
                 </div>
               </div>
               <button
@@ -890,123 +1215,70 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Status overview */}
-            <div className={`p-3.5 rounded-xl border ${isFirebaseConfigured ? "bg-emerald-500/10 border-emerald-500/30" : "bg-surface-2 border-line"} space-y-1.5`}>
+            <div
+              className={`p-3.5 rounded-2xl border ${isFirebaseConfigured ? "bg-emerald-500/10 border-emerald-500/30" : "bg-surface-2 border-line"
+                } space-y-1.5`}
+            >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-text flex items-center gap-1.5">
-                  <span className={`w-2 h-2 rounded-full ${isFirebaseConfigured ? "bg-emerald-400" : "bg-amber-400"}`} />
-                  {isFirebaseConfigured ? "Project Connected & Live" : "Configuration Pending in .env.local"}
+                  <span
+                    className={`w-2 h-2 rounded-full ${isFirebaseConfigured ? "bg-emerald-400" : "bg-amber-400"}`}
+                  />
+                  {isFirebaseConfigured ? "Active Cloud Project Linked" : "Configuration Pending in .env.local"}
                 </span>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-surface border border-line text-text-muted">
-                  SDK Installed
+                  SDK Live
                 </span>
               </div>
               <p className="text-[11px] text-text-muted leading-relaxed">
-                {isFirebaseConfigured
-                  ? `Active Project ID: "${firebaseConfig.projectId}". Live cloud authentication and Firestore synchronization are enabled.`
-                  : "The official Firebase SDK is installed. To link your newly created Firebase project, paste your Web App config into .env.local."}
+                Project ID: <code>{firebaseConfig.projectId || "nuralix-24360"}</code> • Auth Domain:{" "}
+                <code>{firebaseConfig.authDomain || "nuralix-24360.firebaseapp.com"}</code>
               </p>
             </div>
 
-            {/* Quick 4-Step Instructions */}
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-text uppercase tracking-wider text-[11px]">
-                How to Link Your Firebase Project:
+                Firebase Console Setup Steps:
               </h4>
 
-              <div className="space-y-2.5 text-xs text-text-muted">
-                <div className="p-3 rounded-lg bg-surface-2 border border-line space-y-1">
+              <div className="space-y-2 text-xs text-text-muted">
+                <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
                   <div className="font-semibold text-text flex items-center justify-between">
-                    <span>1. Open Firebase Console</span>
+                    <span>1. Sign-in Methods</span>
                     <a
                       href="https://console.firebase.google.com"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[11px] text-brass hover:underline flex items-center gap-1 font-medium"
+                      className="text-[11px] text-amber-500 hover:underline flex items-center gap-1 font-semibold"
                     >
                       console.firebase.google.com <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
                   <p className="text-[11px]">
-                    Open your project, click the ⚙️ <b>Project Settings</b> gear at top left.
+                    Go to <b>Authentication → Sign-in method</b> and verify <b>Email/Password</b> and <b>Google</b> are
+                    enabled.
                   </p>
                 </div>
 
-                <div className="p-3 rounded-lg bg-surface-2 border border-line space-y-1">
-                  <div className="font-semibold text-text">2. Register / Select Web App (`&lt;/&gt;`)</div>
+                <div className="p-3 rounded-xl bg-surface-2 border border-line space-y-1">
+                  <div className="font-semibold text-text flex items-center justify-between">
+                    <span>2. Authorized Domains</span>
+                  </div>
                   <p className="text-[11px]">
-                    Under <i>&quot;Your apps&quot;</i>, select Web (`&lt;/&gt;`) and look for the <code>firebaseConfig</code> object.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-lg bg-surface-2 border border-line space-y-1">
-                  <div className="font-semibold text-text">3. Enable Authentication Providers</div>
-                  <p className="text-[11px]">
-                    In the left sidebar, click <b>Build → Authentication → Sign-in method</b>, then enable <b>Email/Password</b> and <b>Google</b>.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-lg bg-surface-2 border border-line space-y-1">
-                  <div className="font-semibold text-text">4. (Optional) Enable Firestore Database</div>
-                  <p className="text-[11px]">
-                    Click <b>Build → Firestore Database → Create database</b> to persist business records in the cloud.
+                    In <b>Authentication → Settings → Authorized domains</b>, ensure <code>localhost</code> and your
+                    production domain are added.
                   </p>
                 </div>
               </div>
-            </div>
-
-            {/* Code template for .env.local */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-text">Add to `.env.local`:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const template = `# Firebase Web Configuration
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=`;
-                    navigator.clipboard.writeText(template);
-                    setCopiedEnv(true);
-                    setTimeout(() => setCopiedEnv(false), 2000);
-                  }}
-                  className="text-[11px] text-brass hover:text-brass/80 flex items-center gap-1 font-semibold"
-                >
-                  {copiedEnv ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400">Copied Template!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Template</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <pre className="p-3 rounded-xl bg-black/60 border border-line text-[11px] font-mono text-slate-300 overflow-x-auto">
-                {`NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
-NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abcdef`}
-              </pre>
             </div>
 
             <div className="pt-2 border-t border-line flex items-center justify-end">
               <button
                 type="button"
                 onClick={() => setShowFirebaseModal(false)}
-                className="px-4 py-2 rounded-xl bg-brass text-white font-bold text-xs hover:brightness-110 transition-all"
+                className="px-4 py-2 rounded-xl bg-amber-500 text-black font-extrabold text-xs hover:brightness-110 transition-all"
               >
-                Got It, Close Guide
+                Close Guide
               </button>
             </div>
           </div>

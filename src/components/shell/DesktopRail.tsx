@@ -99,9 +99,14 @@ export function DesktopRail({
               </span>
               <span className="text-[10px] text-amber-500 font-bold ml-1 -mt-2">™</span>
             </div>
-            <p className="text-[11px] text-text-muted truncate max-w-[150px] font-medium mt-1">
-              {companyName}
-            </p>
+            <div className="flex items-center gap-1.5 mt-1">
+              <p className="text-[11px] text-text-muted truncate max-w-[110px] font-medium">
+                {companyName}
+              </p>
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-500 dark:text-amber-400 font-bold tracking-wider shrink-0">
+                AI Business OS
+              </span>
+            </div>
           </div>
         </Link>
       </div>
