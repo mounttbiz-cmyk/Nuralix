@@ -21,11 +21,107 @@ interface PlanTier {
   features: string[];
   ctaLabel: string;
   isCurrent?: boolean;
+  actionType?: "self_serve" | "contact" | "custom_link";
+  contactEmail?: string;
+  customUrl?: string;
+  enabled?: boolean;
 }
+
+const DEFAULT_FALLBACK_PLANS: PlanTier[] = [
+  {
+    id: "free",
+    name: "BizzPal Free / Demo",
+    tagline: "Try BizzPal free to see how it works.",
+    price: "₹0",
+    period: "/forever",
+    color: "border-emerald-400/30 text-emerald-400",
+    badge: "Free Trial",
+    isPopular: false,
+    actionType: "self_serve",
+    features: [
+      "Business Dashboard",
+      "CEO AI Assistant (Astra)",
+      "Company Health Score",
+      "Profit & ROI Calculators",
+      "Save up to 5 Documents & SOPs",
+      "Daily Business Briefings",
+      "Task Manager",
+      "Free AI questions",
+    ],
+    ctaLabel: "Start Free & Open Dashboard",
+  },
+  {
+    id: "starter",
+    name: "Starter Business OS",
+    tagline: "For solo founders and early teams (1-5 people).",
+    price: "₹3,999",
+    period: "/month",
+    color: "border-cyan-400/30 text-cyan-400",
+    badge: "Most Popular",
+    isPopular: true,
+    actionType: "self_serve",
+    features: [
+      "All Free tier features",
+      "All 3 AI Executives (CEO, CFO, CMO)",
+      "Automated Daily 8:00 AM WhatsApp Briefings",
+      "Connect 3 Business Tools (Stripe, Slack, Zoho)",
+      "Cash Runway & Burn Alarm System",
+      "Unlimited AI Strategy Consultations",
+      "3 Team Member Seats",
+      "Email & WhatsApp Support",
+    ],
+    ctaLabel: "Activate Starter Plan",
+  },
+  {
+    id: "growth",
+    name: "Growth Scale",
+    tagline: "For expanding businesses ready to scale (5-30 people).",
+    price: "₹9,999",
+    period: "/month",
+    color: "border-violet-400/30 text-violet-400",
+    badge: "Recommended",
+    isPopular: false,
+    actionType: "self_serve",
+    features: [
+      "All Starter tier features",
+      "Scenario Planner & Simulator",
+      "Executive Playbooks & Growth Vectors",
+      "Connect Unlimited Tools & Bank Accounts",
+      "Weekly AI Strategic Audits",
+      "Custom KPI Dashboards & Role-based Access",
+      "10 Team Member Seats",
+      "Dedicated Account Manager",
+    ],
+    ctaLabel: "Activate Growth Scale",
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise Custom",
+    tagline: "For mid-market companies & conglomerates (30+ people).",
+    price: "Custom",
+    period: "/billed annually",
+    color: "border-amber-400/30 text-amber-400",
+    badge: "Enterprise",
+    isPopular: false,
+    actionType: "contact",
+    contactEmail: "sales@bizzpal.app",
+    features: [
+      "All Growth Scale features",
+      "Self-hosted / Dedicated Cloud Deployment",
+      "Custom AI Executive Models trained on your data",
+      "Custom ERP & Legacy Integrations",
+      "Enterprise SLA (99.9% uptime)",
+      "Unlimited Seats & Departments",
+      "SOC 2 Type II & ISO 27001 Compliance",
+      "24/7 Executive Hotline",
+    ],
+    ctaLabel: "Contact Enterprise Sales",
+  },
+];
 
 export default function SubscriptionPage() {
   const router = useRouter();
-  const { plan: currentPlan, activatePlan } = usePlanAccess();
+  const { plan: currentPlan, activatePlan, hasActivated } = usePlanAccess();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlanForModal, setSelectedPlanForModal] = useState<PlanTier | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -49,7 +145,7 @@ export default function SubscriptionPage() {
         const profile = profileStr ? JSON.parse(profileStr) : null;
         const userSession = {
           id: `usr_${Date.now()}`,
-          email: profile?.website ? `founder@${profile.website.replace(/^https?:\/\//, '')}` : "founder@mycompany.in",
+          email: profile?.website ? `founder@${profile.website.replace(/^https?:\/\//, "")}` : "founder@mycompany.in",
           name: profile?.founderName || "Founder",
           role: "owner",
           provider: "email",
@@ -67,99 +163,69 @@ export default function SubscriptionPage() {
     }, 600);
   };
 
-  const [plans, setPlans] = useState<PlanTier[]>([
-    {
-      id: "free",
-      name: "BizzPal Free / Demo",
-      tagline: "Try BizzPal free to see how it works.",
-      price: "₹0",
-      period: "/forever",
-      color: "border-emerald-400/30 text-emerald-400",
-      badge: "Free Trial",
-      features: [
-        "Business Dashboard",
-        "CEO AI Assistant (Astra)",
-        "Company Health Score",
-        "Profit & ROI Calculators",
-        "Save up to 5 Documents & SOPs",
-        "Daily Business Briefings",
-        "Task Manager",
-        "Free AI questions",
-      ],
-      ctaLabel: "Start Free & Open Dashboard",
-    },
-    {
-      id: "starter",
-      name: "Starter Business OS",
-      tagline: "For solo founders and early teams (1-5 people).",
-      price: "₹3,999",
-      period: "/month",
-      color: "border-cyan-400/30 text-cyan-400",
-      badge: "Most Popular",
-      isPopular: true,
-      features: [
-        "All Free tier features",
-        "All 3 AI Executives (CEO, CFO, CMO)",
-        "Automated Daily 8:00 AM WhatsApp Briefings",
-        "Connect 3 Business Tools (Stripe, Slack, Zoho)",
-        "Cash Runway & Burn Alarm System",
-        "Unlimited AI Strategy Consultations",
-        "3 Team Member Seats",
-        "Email & WhatsApp Support",
-      ],
-      ctaLabel: "Activate Starter Plan",
-    },
-    {
-      id: "growth",
-      name: "Growth Scale",
-      tagline: "For expanding businesses ready to scale (5-30 people).",
-      price: "₹9,999",
-      period: "/month",
-      color: "border-violet-400/30 text-violet-400",
-      badge: "Recommended",
-      features: [
-        "All Starter tier features",
-        "Scenario Planner & Simulator",
-        "Executive Playbooks & Growth Vectors",
-        "Connect Unlimited Tools & Bank Accounts",
-        "Weekly AI Strategic Audits",
-        "Custom KPI Dashboards & Role-based Access",
-        "10 Team Member Seats",
-        "Dedicated Account Manager",
-      ],
-      ctaLabel: "Activate Growth Scale",
-    },
-    {
-      id: "enterprise",
-      name: "Enterprise Custom",
-      tagline: "For mid-market companies & conglomerates (30+ people).",
-      price: "Custom",
-      period: "/billed annually",
-      color: "border-amber-400/30 text-amber-400",
-      badge: "Enterprise",
-      features: [
-        "All Growth Scale features",
-        "Self-hosted / Dedicated Cloud Deployment",
-        "Custom AI Executive Models trained on your data",
-        "Custom ERP & Legacy Integrations",
-        "Enterprise SLA (99.9% uptime)",
-        "Unlimited Seats & Departments",
-        "SOC 2 Type II & ISO 27001 Compliance",
-        "24/7 Executive Hotline",
-      ],
-      ctaLabel: "Contact Enterprise Sales",
-    },
-  ]);
+  const [plans, setPlans] = useState<PlanTier[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("bizzpal_subscription_plans");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.filter((p: any) => p.enabled !== false);
+          }
+        }
+      } catch {}
+    }
+    return DEFAULT_FALLBACK_PLANS;
+  });
 
-  useEffect(() => {
+  const loadPlans = () => {
     fetch("/api/public/config", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
         if (d.success && Array.isArray(d.plans) && d.plans.length > 0) {
-          setPlans(d.plans.filter((p: any) => p.enabled !== false));
+          const activePlans = d.plans.filter((p: any) => p.enabled !== false);
+          setPlans(activePlans);
+          try {
+            localStorage.setItem("bizzpal_subscription_plans", JSON.stringify(d.plans));
+          } catch {}
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadPlans();
+
+    // Listen for live updates when Superadmin edits plans in another tab or window
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "bizzpal_subscription_plans" && e.newValue) {
+        try {
+          const updated = JSON.parse(e.newValue);
+          if (Array.isArray(updated)) {
+            setPlans(updated.filter((p: any) => p.enabled !== false));
+          }
+        } catch {}
+      }
+    };
+
+    const handleCustomSync = () => {
+      try {
+        const cached = localStorage.getItem("bizzpal_subscription_plans");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) {
+            setPlans(parsed.filter((p: any) => p.enabled !== false));
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("bizzpal_config_updated", handleCustomSync);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("bizzpal_config_updated", handleCustomSync);
+    };
   }, []);
 
   return (
@@ -234,9 +300,14 @@ export default function SubscriptionPage() {
           }`}
         >
           {plans.map(p => {
-            const isStarter = p.id === "starter" || p.isPopular;
+            const isPopular = Boolean(p.isPopular);
+            const isCurrent = currentPlan === p.id;
+            const isContact =
+              p.actionType === "contact" ||
+              p.price.toLowerCase().includes("custom") ||
+              p.ctaLabel.toLowerCase().includes("contact");
 
-            const accent = isStarter
+            const accent = isPopular
               ? { text: "text-blue-600 dark:text-blue-400", icon: "text-blue-500" }
               : { text: "text-text", icon: "text-blue-500/70" };
 
@@ -244,19 +315,19 @@ export default function SubscriptionPage() {
               <div
                 key={p.id}
                 className={`group rounded-3xl border p-7 sm:p-8 flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
-                  isStarter
+                  isPopular
                     ? "bg-surface border-blue-500/50 shadow-[0_20px_50px_-12px_rgba(59,130,246,0.25)] ring-1 ring-blue-500/20 lg:scale-[1.04] lg:-translate-y-2 z-10"
                     : "bg-surface border-line hover:border-blue-500/30 shadow-sm hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1.5"
                 }`}
               >
-                {isStarter && (
+                {isPopular && (
                   <div className="pointer-events-none absolute inset-x-0 -top-24 h-40 bg-blue-400/15 blur-3xl" />
                 )}
 
                 {p.badge && (
                   <div
                     className={`absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-b-xl text-[10px] font-extrabold uppercase tracking-wider ${
-                      isStarter
+                      isPopular
                         ? "bg-blue-500 text-white shadow-md shadow-blue-500/30"
                         : "bg-surface-2 text-text-muted border border-line border-t-0"
                     }`}
@@ -282,23 +353,45 @@ export default function SubscriptionPage() {
 
                   <button
                     type="button"
-                    disabled={p.id === currentPlan}
                     onClick={() => {
-                      if (p.id === "free" || p.isCurrent) {
+                      if (isCurrent) {
+                        ensureSessionAndOpenDashboard(p.id, p.name);
+                        return;
+                      }
+
+                      if (p.actionType === "custom_link" && p.customUrl) {
+                        window.open(p.customUrl, "_blank");
+                        return;
+                      }
+
+                      if (isContact) {
+                        const email = p.contactEmail || "sales@bizzpal.app";
+                        window.location.href = `mailto:${email}?subject=${encodeURIComponent(`Enterprise plan enquiry — ${p.name}`)}`;
+                        return;
+                      }
+
+                      if (p.id === "free") {
                         ensureSessionAndOpenDashboard(p.id, p.name);
                       } else {
                         setSelectedPlanForModal(p);
                       }
                     }}
-                    className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all btn-tactile cursor-pointer text-center disabled:cursor-default disabled:opacity-70 ${
-                      p.id === currentPlan
-                        ? "bg-surface-2 border border-line text-text-muted"
-                        : isStarter
+                    className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all btn-tactile cursor-pointer text-center ${
+                      isCurrent
+                        ? "bg-surface-2 border border-line text-emerald-500 dark:text-emerald-400 hover:bg-surface flex items-center justify-center gap-1.5"
+                        : isPopular
                         ? "bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 hover:brightness-105"
                         : "bg-surface-2 hover:bg-blue-500/10 border border-line-strong hover:border-blue-500/40 text-text"
                     }`}
                   >
-                    {p.id === currentPlan ? "Current Plan" : p.ctaLabel}
+                    {isCurrent ? (
+                      <>
+                        <Check className="w-4 h-4 text-emerald-500" />
+                        <span>Current Plan (Active)</span>
+                      </>
+                    ) : (
+                      p.ctaLabel || "Select Plan"
+                    )}
                   </button>
 
                   {/* Features List */}

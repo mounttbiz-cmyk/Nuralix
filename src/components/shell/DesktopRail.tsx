@@ -62,8 +62,28 @@ export function DesktopRail({
   };
 
   const [isQuickInputOpen, setIsQuickInputOpen] = React.useState(false);
-  const { hasPlanLevel } = usePlanAccess();
+  const { plan: currentPlan, hasPlanLevel } = usePlanAccess();
   const [lockedItem, setLockedItem] = React.useState<NavItem | null>(null);
+  const [planBadgeLabel, setPlanBadgeLabel] = React.useState<string>("Active Workspace");
+
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem("bizzpal_subscription_plans");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const match = parsed.find((p: any) => p.id === currentPlan);
+        if (match?.name) {
+          setPlanBadgeLabel(match.name);
+          return;
+        }
+      }
+    } catch {}
+    if (currentPlan === "free") setPlanBadgeLabel("Free Plan");
+    else if (currentPlan === "starter") setPlanBadgeLabel("Starter OS");
+    else if (currentPlan === "growth") setPlanBadgeLabel("Growth Plan");
+    else if (currentPlan === "enterprise") setPlanBadgeLabel("Enterprise");
+    else setPlanBadgeLabel("Active Workspace");
+  }, [currentPlan]);
 
   return (
     <aside className="hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-surface/95 backdrop-blur-2xl border-r border-line select-none z-30 transition-colors">
@@ -234,8 +254,8 @@ export function DesktopRail({
             <div className="truncate">
               <div className="font-semibold text-text truncate">{companyName}</div>
               <div className="text-[10px] text-text-muted flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
-                <span>Verified Enterprise</span>
+                <ShieldCheck className="w-3 h-3 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                <span className="truncate">{planBadgeLabel}</span>
               </div>
             </div>
           </div>

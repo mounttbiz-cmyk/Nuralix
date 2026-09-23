@@ -5,12 +5,6 @@ import Link from "next/link";
 import { Lock, X, Sparkles } from "lucide-react";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
-const PLAN_LABEL: Record<string, string> = {
-  starter: "Starter Business OS",
-  growth: "Growth Scale",
-  enterprise: "Enterprise Custom",
-};
-
 interface UpgradeModalProps {
   featureLabel: string;
   requiredPlan: string;
@@ -19,7 +13,39 @@ interface UpgradeModalProps {
 
 export function UpgradeModal({ featureLabel, requiredPlan, onClose }: UpgradeModalProps) {
   useEscapeKey(onClose, true);
-  const planLabel = PLAN_LABEL[requiredPlan] || requiredPlan;
+
+  const [planLabel, setPlanLabel] = React.useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("bizzpal_subscription_plans");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const match = parsed.find((p: any) => p.id === requiredPlan);
+          if (match?.name) return match.name;
+        }
+      } catch {}
+    }
+    const fallbackMap: Record<string, string> = {
+      starter: "Starter Business OS",
+      growth: "Growth Scale",
+      enterprise: "Enterprise Custom",
+      free: "BizzPal Free",
+    };
+    return fallbackMap[requiredPlan] || requiredPlan;
+  });
+
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem("bizzpal_subscription_plans");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const match = parsed.find((p: any) => p.id === requiredPlan);
+        if (match?.name) {
+          setPlanLabel(match.name);
+        }
+      }
+    } catch {}
+  }, [requiredPlan]);
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
