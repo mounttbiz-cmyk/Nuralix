@@ -628,10 +628,10 @@ export default function LoginPage() {
               <span
                 className="font-black"
                 style={{
-                  background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
+                  background: "linear-gradient(135deg, #F7ECD1 0%, #DFBA73 50%, #A37C2C 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
-                  color: "#F5C542",
+                  color: "#DFBA73",
                   display: "inline-block",
                 }}
               >
@@ -675,10 +675,10 @@ export default function LoginPage() {
                 The Autonomous <br />
                 <span
                   style={{
-                    background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
+                    background: "linear-gradient(135deg, #F7ECD1 0%, #DFBA73 50%, #A37C2C 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
-                    color: "#F5C542",
+                    color: "#DFBA73",
                   }}
                 >
                   AI Business OS
@@ -973,11 +973,7 @@ export default function LoginPage() {
                       id="btn-login-email"
                       type="submit"
                       disabled={loading}
-                      className="w-full py-2.5 px-4 rounded-xl font-black text-xs shadow-lg transition-all mt-2 active:scale-[0.99] flex items-center justify-center gap-2"
-                      style={{
-                        background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #E5A922 100%)",
-                        color: "#000000",
-                      }}
+                      className="w-full py-2.5 px-4 rounded-xl font-bold text-xs shadow-lg transition-all mt-2 active:scale-[0.99] flex items-center justify-center gap-2 btn-gold-gradient cursor-pointer"
                     >
                       {loading ? (
                         <>

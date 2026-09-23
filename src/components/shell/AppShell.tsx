@@ -190,11 +190,11 @@ export function AppShell({
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col md:flex-row relative overflow-x-hidden selection:bg-text/15 selection:text-text">
-      {/* Ambient subtle executive background depth */}
-      <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-blue-500/[0.03] via-transparent to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />
-      <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-slate-500/[0.03] via-transparent to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />
-      <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-slate-200/40 to-transparent blur-3xl pointer-events-none -z-10 dark:hidden block" />
+    <div className="min-h-screen bg-bg text-text flex flex-col md:flex-row relative overflow-x-hidden selection:bg-gold/25 selection:text-gold-light">
+      {/* Ambient subtle champagne gold background depth — restrained and luxurious, not overpowering */}
+      <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-gold/[0.04] via-transparent to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />
+      <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-gold/[0.03] via-transparent to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />
+      <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-gold/[0.03] to-transparent blur-3xl pointer-events-none -z-10 dark:hidden block" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-slate-200/30 to-transparent blur-3xl pointer-events-none -z-10 dark:hidden block" />
 
       {/* Desktop Left Rail (lg+) */}
@@ -214,7 +214,7 @@ export function AppShell({
       {/* Main Column */}
       <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0 md:ml-16 lg:ml-64 relative">
         {/* Ambient Top Glow specific to main column */}
-        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-surface/50 to-transparent pointer-events-none z-0" />
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-gold/[0.02] to-transparent pointer-events-none z-0" />
         
         {/* Mobile Header (xs/sm) */}
         <MobileHeader
@@ -240,20 +240,20 @@ export function AppShell({
         </main>
       </div>
 
-      {/* Floating AI Executive Launcher Button (Desktop & Tablet) - Sleek Executive Monochrome */}
+      {/* Floating AI Executive Launcher Button (Desktop & Tablet) - Signature BizzPal Champagne Gold */}
       {features.enableAiCopilot && pathname !== "/chat" && (
         <button
           type="button"
           onClick={() => setChatOpen(true)}
           aria-label="Open AI Workspace"
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-text text-bg shadow-2xl hover:scale-105 active:scale-95 transition-all text-xs font-bold font-sans cursor-pointer group border border-line-strong hover:opacity-95"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full btn-gold-gradient shadow-2xl hover:scale-105 active:scale-95 transition-all text-xs font-bold font-sans cursor-pointer group"
         >
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-bg opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-bg" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-950/40 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-950" />
           </span>
-          <MessageSquare className="w-4 h-4 text-bg group-hover:rotate-6 transition-transform" />
-          <span className="font-bold tracking-wide text-bg">Ask Executive AI</span>
+          <MessageSquare className="w-4 h-4 text-[#120E05] group-hover:rotate-6 transition-transform" />
+          <span className="font-bold tracking-wide text-[#120E05]">Ask Executive AI</span>
         </button>
       )}
 

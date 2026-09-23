@@ -5,31 +5,31 @@
 @tailwind utilities;
 
 :root, [data-theme="dark"] {
-  /* High-end Cosmic Obsidian & Executive Platinum Palette */
-  --bg:          #08090D;   /* Deepest midnight obsidian void */
-  --surface:     #10131B;   /* Elevated obsidian surface */
-  --surface-2:   #171B26;   /* Interactive slate layer */
-  --line:        rgba(255, 255, 255, 0.08);   /* Neutral structural hairline */
-  --line-strong: rgba(255, 255, 255, 0.16);   /* Neutral emphasized hairline */
-  --text:        #FFFFFF;   /* Crisp diamond white */
+  /* BizzPal Signature Champagne Gold & Warm Obsidian Palette */
+  --bg:          #08090C;   /* Deep luxury obsidian void */
+  --surface:     #0F1218;   /* Elevated warm obsidian surface */
+  --surface-2:   #161922;   /* Interactive slate layer */
+  --line:        rgba(255, 255, 255, 0.08);   /* Subtle neutral structural hairline */
+  --line-strong: rgba(255, 255, 255, 0.16);   /* Emphasized hairline */
+  --text:        #F8F9FA;   /* Crisp diamond white */
   --text-muted:  #94A3B8;   /* Clean slate muted text */
   
-  /* Refined, quiet metallic accents — no loud mustard/yellow tint */
-  --gold:        #FFFFFF;   /* Clean white primary emphasis */
-  --gold-light:  #FFFFFF;
-  --gold-dark:   #CBD5E1;
-  --gold-glow:   rgba(255, 255, 255, 0.08);
-  --brass:       #FFFFFF;
-  --brass-soft:  rgba(255, 255, 255, 0.06);
-  --cyan:        #38BDF8;   /* Subtle executive cyan */
+  /* Tasteful Champagne Gold & Luxury Brass — warm, rich, and balanced (NOT loud yellow/mustard) */
+  --gold:        #DFBA73;   /* Refined Metallic Champagne Gold */
+  --gold-light:  #F7ECD1;   /* Soft Champagne shimmer */
+  --gold-dark:   #A37C2C;   /* Burnished deep bronze gold */
+  --gold-glow:   rgba(223, 186, 115, 0.20);
+  --brass:       #DFBA73;   /* Warm luxury brass */
+  --brass-soft:  rgba(223, 186, 115, 0.12);
+  --cyan:        #38BDF8;   /* Crisp executive cyan */
   --cyan-soft:   rgba(56, 189, 248, 0.08);
-  --violet:      #818CF8;   /* Subtle executive slate-violet */
-  --violet-soft: rgba(129, 140, 248, 0.08);
+  --violet:      #A78BFA;   /* Subtle executive violet */
+  --violet-soft: rgba(167, 139, 250, 0.08);
   --jade:        #10B981;   /* Live operational emerald */
   --rust:        #F43F5E;   /* Crimson alert */
-  --amber:       #F59E0B;   /* Amber warning */
+  --amber:       #F59E0B;   /* Warm amber */
   --shadow:      0 12px 36px 0 rgba(0, 0, 0, 0.6);
-  --grid:        rgba(255, 255, 255, 0.02);
+  --grid:        rgba(223, 186, 115, 0.02);
 
   /* Motion tokens (§4.1) */
   --dur-instant: 90ms;
@@ -46,21 +46,21 @@
 [data-theme="light"] {
   --bg:          #F8FAFC;   /* Crisp neutral clean platinum */
   --surface:     #FFFFFF;   /* Pure crisp white card surface */
-  --surface-2:   #F1F5F9;   /* Clean subtle elevated slate surface */
+  --surface-2:   #F1F5F9;   /* Clean elevated surface */
   --line:        #E2E8F0;   /* Clean neutral slate border */
   --line-strong: #CBD5E1;   /* Defined border */
   --text:        #0F172A;   /* Crisp deep obsidian slate text */
   --text-muted:  #64748B;   /* Slate neutral muted text */
-  --gold:        #0F172A;   /* Crisp obsidian primary emphasis */
-  --gold-light:  #334155;
-  --gold-dark:   #020617;
-  --gold-glow:   rgba(15, 23, 42, 0.06);
-  --brass:       #0F172A;
-  --brass-soft:  rgba(15, 23, 42, 0.05);
+  --gold:        #9B7624;   /* Refined antique champagne brass, readable & elegant */
+  --gold-light:  #BD9946;
+  --gold-dark:   #735411;
+  --gold-glow:   rgba(155, 118, 36, 0.12);
+  --brass:       #9B7624;
+  --brass-soft:  rgba(155, 118, 36, 0.08);
   --cyan:        #0284C7;
   --cyan-soft:   rgba(2, 132, 199, 0.06);
-  --violet:      #4F46E5;
-  --violet-soft: rgba(79, 70, 229, 0.06);
+  --violet:      #6366F1;
+  --violet-soft: rgba(99, 102, 241, 0.06);
   --jade:        #059669;
   --rust:        #E11D48;
   --amber:       #D97706;
@@ -149,11 +149,19 @@ body, [data-surface] {
   font-variant-numeric: tabular-nums;
 }
 
-/* Shared primary-CTA executive fill matching Linear/Apple/Vercel standard */
+/* Signature BizzPal Champagne Gold metallic button fill */
 .btn-gold-gradient {
-  background-color: var(--text) !important;
-  color: var(--bg) !important;
-  background-image: none !important;
+  background-image: linear-gradient(135deg, #F7ECD1 0%, #DFBA73 50%, #A37C2C 100%) !important;
+  color: #120E05 !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 14px -2px rgba(223, 186, 115, 0.3) !important;
+}
+
+[data-theme="light"] .btn-gold-gradient {
+  background-image: linear-gradient(135deg, #DFBA73 0%, #BD9946 50%, #9B7624 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(155, 118, 36, 0.3) !important;
+  box-shadow: 0 4px 12px -2px rgba(155, 118, 36, 0.25) !important;
 }
 
 /* Tactile micro-interactions (§4.3) */

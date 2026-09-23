@@ -113,14 +113,14 @@ export function HealthScoreWidget({
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (displayScore / 100) * circumference;
-  const strokeColor = displayScore >= 80 ? "#10B981" : displayScore >= 70 ? "#38BDF8" : "#F43F5E";
+  const strokeColor = displayScore >= 80 ? "var(--gold)" : displayScore >= 70 ? "#38BDF8" : "#F43F5E";
 
   return (
     <ContainerTile span={2} id="widget_health_score">
       <div className="space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-line/60">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-surface-2 border border-line flex items-center justify-center text-text">
+            <div className="w-8 h-8 rounded-xl bg-gold/10 border border-gold/25 flex items-center justify-center text-gold">
               <Activity className="w-4 h-4" />
             </div>
             <div>
@@ -165,7 +165,7 @@ export function HealthScoreWidget({
               <span className="text-3xl sm:text-4xl font-black num-tabular text-text font-mono leading-none tracking-tight">
                 <AnimatedNumber value={String(displayScore)} />
               </span>
-              <span className="text-[10px] text-emerald-500 dark:text-emerald-400 font-bold font-mono mt-1 uppercase tracking-wider">
+              <span className="text-[10px] text-gold font-bold font-mono mt-1 uppercase tracking-wider">
                 {displayScore >= 80 ? "Optimal" : displayScore >= 70 ? "Stable" : "Needs Review"}
               </span>
             </div>

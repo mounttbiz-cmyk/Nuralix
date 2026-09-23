@@ -759,17 +759,17 @@ export default function AdminPage() {
                     <span
                       className="font-black ml-0.5"
                       style={{
-                        background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
+                        background: "linear-gradient(135deg, #F7ECD1 0%, #DFBA73 50%, #A37C2C 100%)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
-                        color: "#F5C542",
+                        color: "#DFBA73",
                         display: "inline-block",
                       }}
                     >
                       Pal
                     </span>
                   </span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-400/15 text-amber-500 dark:text-amber-300 font-mono font-bold border border-amber-500/30">PRO</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gold/15 text-gold font-mono font-bold border border-gold/30">PRO</span>
                 </h1>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

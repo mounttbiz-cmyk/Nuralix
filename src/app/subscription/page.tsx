@@ -276,7 +276,7 @@ export default function SubscriptionPage() {
       {/* Main Container */}
       <div className="max-w-7xl w-full mx-auto my-auto py-12 space-y-12">
         <div className="text-center space-y-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/25 text-gold text-xs font-bold uppercase tracking-wider">
             <Tag className="w-3.5 h-3.5" />
             <span>Plans & Pricing</span>
           </div>
@@ -308,27 +308,27 @@ export default function SubscriptionPage() {
               p.ctaLabel.toLowerCase().includes("contact");
 
             const accent = isPopular
-              ? { text: "text-blue-600 dark:text-blue-400", icon: "text-blue-500" }
-              : { text: "text-text", icon: "text-blue-500/70" };
+              ? { text: "text-gold", icon: "text-gold" }
+              : { text: "text-text", icon: "text-emerald-500/80" };
 
             return (
               <div
                 key={p.id}
                 className={`group rounded-3xl border p-7 sm:p-8 flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
                   isPopular
-                    ? "bg-surface border-blue-500/50 shadow-[0_20px_50px_-12px_rgba(59,130,246,0.25)] ring-1 ring-blue-500/20 lg:scale-[1.04] lg:-translate-y-2 z-10"
-                    : "bg-surface border-line hover:border-blue-500/30 shadow-sm hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1.5"
+                    ? "bg-surface border-gold/40 shadow-[0_20px_50px_-12px_var(--gold-glow)] ring-1 ring-gold/20 lg:scale-[1.04] lg:-translate-y-2 z-10"
+                    : "bg-surface border-line hover:border-gold/30 shadow-sm hover:shadow-lg hover:shadow-gold/5 hover:-translate-y-1.5"
                 }`}
               >
                 {isPopular && (
-                  <div className="pointer-events-none absolute inset-x-0 -top-24 h-40 bg-blue-400/15 blur-3xl" />
+                  <div className="pointer-events-none absolute inset-x-0 -top-24 h-40 bg-gold/[0.08] blur-3xl" />
                 )}
 
                 {p.badge && (
                   <div
                     className={`absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-b-xl text-[10px] font-extrabold uppercase tracking-wider ${
                       isPopular
-                        ? "bg-blue-500 text-white shadow-md shadow-blue-500/30"
+                        ? "btn-gold-gradient shadow-md"
                         : "bg-surface-2 text-text-muted border border-line border-t-0"
                     }`}
                   >
@@ -380,8 +380,8 @@ export default function SubscriptionPage() {
                       isCurrent
                         ? "bg-surface-2 border border-line text-emerald-500 dark:text-emerald-400 hover:bg-surface flex items-center justify-center gap-1.5"
                         : isPopular
-                        ? "bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 hover:brightness-105"
-                        : "bg-surface-2 hover:bg-blue-500/10 border border-line-strong hover:border-blue-500/40 text-text"
+                        ? "btn-gold-gradient shadow-md hover:brightness-105 active:scale-[0.98]"
+                        : "bg-surface-2 hover:bg-surface border border-line-strong hover:border-gold/30 text-text"
                     }`}
                   >
                     {isCurrent ? (
@@ -468,7 +468,7 @@ export default function SubscriptionPage() {
                     setSelectedPlanForModal(null);
                   }, 800);
                 }}
-                className="px-4 py-2 rounded-lg bg-brass text-white font-bold btn-tactile hover:brightness-110 cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 rounded-xl btn-gold-gradient font-bold btn-tactile hover:brightness-105 cursor-pointer disabled:opacity-50 shadow-md"
               >
                 {isProcessing ? "Activating OS…" : `Confirm & Launch OS`}
               </button>

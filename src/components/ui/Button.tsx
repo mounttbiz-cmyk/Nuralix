@@ -20,9 +20,9 @@ const sizeClasses: Record<ButtonSize, string> = {
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
-  // Primary: sleek high-contrast executive CTA
+  // Primary: signature BizzPal champagne gold CTA
   primary:
-    "bg-text text-bg font-bold shadow-md hover:opacity-90 active:scale-[0.98] border border-transparent disabled:opacity-50 disabled:pointer-events-none",
+    "btn-gold-gradient font-bold shadow-md hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none",
   // Secondary: 1px border, transparent/surface background, text-colored.
   secondary:
     "bg-surface-2/60 border border-line hover:border-line-strong hover:bg-surface-2 text-text font-semibold disabled:opacity-50 disabled:pointer-events-none",

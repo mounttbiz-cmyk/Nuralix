@@ -38,16 +38,16 @@ export function MobileHeader({
             <span
               className="font-black ml-0.5"
               style={{
-                background: "linear-gradient(135deg, #FFE58F 0%, #F5C542 50%, #B8860B 100%)",
+                background: "linear-gradient(135deg, #F7ECD1 0%, #DFBA73 50%, #A37C2C 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                color: "#F5C542",
+                color: "#DFBA73",
                 display: "inline-block",
               }}
             >
               Pal
             </span>
-            <span className="text-[9px] text-amber-500 font-bold ml-0.5 -mt-1">™</span>
+            <span className="text-[9px] text-gold/80 font-bold ml-0.5 -mt-1">™</span>
           </span>
           <span className="text-[10px] text-text-muted leading-tight truncate max-w-[120px]">
             {companyName}

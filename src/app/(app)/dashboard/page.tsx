@@ -352,7 +352,7 @@ function DashboardContent() {
             className={`px-4 py-2 rounded-xl text-xs font-semibold btn-tactile inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer relative z-10 ${
               checkinData.isCompletedToday
                 ? "bg-surface-2 text-text hover:bg-surface-2/80 border border-line"
-                : "bg-text text-bg font-bold shadow-md hover:opacity-90 active:scale-[0.98]"
+                : "btn-gold-gradient font-bold shadow-md hover:brightness-105 active:scale-[0.98]"
             }`}
           >
             <span>{checkinData.isCompletedToday ? "Review / Update Check-In" : "Complete 60s Check-In →"}</span>
@@ -430,9 +430,9 @@ function DashboardContent() {
             <button
               type="button"
               onClick={() => setIsQuickInputModalOpen(true)}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer bg-text text-bg hover:opacity-90 shadow-md active:scale-[0.98]"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer btn-gold-gradient hover:brightness-105 shadow-md active:scale-[0.98]"
             >
-              <Sparkles className="w-3.5 h-3.5 text-bg" />
+              <Sparkles className="w-3.5 h-3.5" />
               <span>+ Quick Business Input</span>
             </button>
 
@@ -483,11 +483,11 @@ function DashboardContent() {
               onClick={() => setIsEditingLayout(!isEditingLayout)}
               className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all btn-tactile cursor-pointer ${
                 isEditingLayout
-                  ? "bg-text text-bg font-bold shadow-md"
+                  ? "btn-gold-gradient font-bold shadow-md"
                   : "bg-surface-2 hover:bg-surface border border-line text-text-muted hover:text-text"
               }`}
             >
-              <Sliders className={`w-3.5 h-3.5 ${isEditingLayout ? "text-bg" : "text-text-muted"}`} />
+              <Sliders className="w-3.5 h-3.5" />
               <span>{isEditingLayout ? "Exit Layout Editor" : "Customize Layout"}</span>
             </button>
           </div>
