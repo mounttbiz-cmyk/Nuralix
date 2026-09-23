@@ -24,7 +24,7 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
   const [lockedItem, setLockedItem] = React.useState<NavItem | null>(null);
 
   return (
-    <aside className="glass-panel hidden md:flex lg:hidden flex-col items-center w-16 h-screen fixed inset-y-0 left-0 bg-surface/95 backdrop-blur-2xl border-r border-line select-none z-30 py-3 transition-colors">
+    <aside className="hidden md:flex lg:hidden flex-col items-center w-16 h-screen fixed inset-y-0 left-0 bg-surface/95 backdrop-blur-2xl border-r border-line select-none z-30 py-3 transition-colors">
       {/* Brand Icon with Ribbon Logo */}
       <Link
         href="/dashboard"

@@ -203,24 +203,36 @@ body, [data-surface] {
 
 /* ============================================================
    Liquid Glass (Apple-style frosted panels) — DARK MODE ONLY,
-   scoped strictly to the app dashboard & superadmin surfaces.
-   Opt-in via .glass-panel on top-level surfaces only (sidebar,
-   header, page-level cards, modals) — NOT a blanket override of
-   every bg-surface utility, which double-glasses nested chips
-   and badges and makes them look like boxes stacked in boxes.
-   Light mode is completely untouched.
+   scoped strictly to the app dashboard & superadmin surfaces
+   via [data-glass-scope="app"]. Light mode is left untouched.
    ============================================================ */
-[data-theme="dark"] [data-glass-scope="app"] .glass-panel {
-  background-color: color-mix(in srgb, var(--surface) 62%, transparent) !important;
-  backdrop-filter: blur(32px) saturate(160%);
-  -webkit-backdrop-filter: blur(32px) saturate(160%);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.07), 0 16px 48px -20px rgba(0, 0, 0, 0.6);
+[data-theme="dark"] [data-glass-scope="app"] {
+  --glass-blur: blur(28px) saturate(150%);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.09);
+  --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
 }
 
-[data-theme="dark"] [data-glass-scope="app"] .glass-panel-2 {
-  background-color: color-mix(in srgb, var(--surface-2) 55%, transparent) !important;
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+[data-theme="dark"] [data-glass-scope="app"] .bg-surface,
+[data-theme="dark"] [data-glass-scope="app"] .bg-surface-2,
+[data-theme="dark"] [data-glass-scope="app"] [class*="bg-surface/"],
+[data-theme="dark"] [data-glass-scope="app"] [class*="bg-surface-2/"] {
+  background-color: color-mix(in srgb, var(--surface) 68%, transparent) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+[data-theme="dark"] [data-glass-scope="app"] .border-line,
+[data-theme="dark"] [data-glass-scope="app"] .border-line-strong {
+  border-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+/* Rounded surfaces (cards, panels, modals, dropdowns) get the signature
+   top hairline sheen that sells the "liquid glass" refraction look. */
+[data-theme="dark"] [data-glass-scope="app"] [class*="rounded-"].bg-surface,
+[data-theme="dark"] [data-glass-scope="app"] [class*="rounded-"].bg-surface-2,
+[data-theme="dark"] [data-glass-scope="app"] [class*="rounded-"][class*="bg-surface/"],
+[data-theme="dark"] [data-glass-scope="app"] [class*="rounded-"][class*="bg-surface-2/"] {
+  box-shadow: var(--glass-highlight), 0 12px 40px -16px rgba(0, 0, 0, 0.55);
 }
 
 /* Soft ambient card top sheen — disabled harsh yellow line */

@@ -86,7 +86,7 @@ export function DesktopRail({
   }, [currentPlan]);
 
   return (
-    <aside className="glass-panel hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-surface/95 backdrop-blur-2xl border-r border-line select-none z-30 transition-colors">
+    <aside className="hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-surface/95 backdrop-blur-2xl border-r border-line select-none z-30 transition-colors">
       {/* Quick Business Input Modal */}
       <QuickBusinessInputModal
         isOpen={isQuickInputOpen}
