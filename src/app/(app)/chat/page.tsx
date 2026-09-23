@@ -6,7 +6,6 @@ import { ChatMarkdown } from "@/components/shell/ChatMarkdown";
 import {
   Sparkles,
   Send,
-  Wrench,
   ArrowRight,
   TrendingUp,
   CreditCard,
@@ -25,11 +24,9 @@ import {
   PanelRightClose,
   PanelRightOpen,
   Search,
-  Activity,
-  Zap,
   Clock,
-  ShieldAlert,
   Info,
+  MessageSquare,
 } from "lucide-react";
 import { parseNaturalBusinessInput, ExtractedBusinessRecord } from "@/lib/intake/nlpParser";
 import { emitBusinessDataUpdated } from "@/lib/upload/events";
@@ -703,11 +700,11 @@ export default function ChatWorkspacePage() {
                 ))}
               </div>
 
-              {/* Dossier Toggle Button */}
+              {/* Chat History Toggle Button */}
               <button
                 type="button"
                 onClick={() => setShowDossier(prev => !prev)}
-                title={showDossier ? "Hide Executive Dossier" : "Show Executive Dossier"}
+                title={showDossier ? "Hide Chat History" : "Show Chat History"}
                 className={`p-2 rounded-lg border text-xs transition-all cursor-pointer ${
                   showDossier
                     ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30"
@@ -727,7 +724,8 @@ export default function ChatWorkspacePage() {
               return (
                 <div
                   key={msg.id}
-                  className={`flex gap-3 max-w-3xl ${isUser ? "ml-auto flex-row-reverse" : "mr-auto"}`}
+                  id={msg.id}
+                  className={`flex gap-3 max-w-3xl scroll-mt-4 ${isUser ? "ml-auto flex-row-reverse" : "mr-auto"}`}
                 >
                   <div
                     className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 border mt-0.5 shadow-sm ${
@@ -912,92 +910,56 @@ export default function ChatWorkspacePage() {
         </section>
 
         {/* ============================================================ */}
-        {/* RIGHT COLUMN: EXECUTIVE DOSSIER & CONNECTED TELEMETRY */}
+        {/* RIGHT COLUMN: CHAT HISTORY */}
         {/* ============================================================ */}
         {showDossier && (
-          <aside className="hidden xl:flex w-72 lg:w-80 shrink-0 bg-surface border border-line rounded-2xl flex-col overflow-y-auto p-4 shadow-theme space-y-4 animate-fade-in">
+          <aside className="hidden xl:flex w-72 lg:w-80 shrink-0 bg-surface border border-line rounded-2xl flex-col overflow-y-auto p-4 shadow-theme space-y-3 animate-fade-in">
             {/* Header */}
             <div className="flex items-center justify-between pb-2 border-b border-line">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs font-bold text-text font-sans">Executive Dossier</span>
+                <MessageSquare className="w-4 h-4 text-cyan-400" />
+                <span className="text-xs font-bold text-text font-sans">Chat History</span>
               </div>
               <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-surface-2 border border-line text-text-muted uppercase">
-                {activeAgent.role}
+                {currentMessages.length} msgs
               </span>
             </div>
 
-            {/* Strategic Mandate */}
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted block">
-                Strategic Mandate
-              </span>
-              <p className="text-[11px] text-text-muted leading-relaxed bg-surface-2/50 p-3 rounded-xl border border-line">
-                {activeAgent.summary}
+            {currentMessages.length === 0 ? (
+              <p className="text-[11px] text-text-muted leading-relaxed p-3 rounded-xl bg-surface-2/50 border border-line">
+                No messages yet with {activeAgent.name}. Start the conversation to see your history here.
               </p>
-            </div>
-
-            {/* Monitored KPIs */}
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center justify-between">
-                <span>Monitored Metrics</span>
-                <Activity className="w-3 h-3 text-jade" />
-              </span>
+            ) : (
               <div className="space-y-1.5">
-                {activeAgent.kpis.map((kpi, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-2 rounded-lg bg-surface-2/40 border border-line text-xs"
-                  >
-                    <span className="text-[11px] font-medium text-text">{kpi}</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-jade/15 text-jade border border-jade/30 font-bold uppercase">
-                      Healthy
-                    </span>
-                  </div>
-                ))}
+                {currentMessages.map(msg => {
+                  const isUser = msg.sender === "user";
+                  const preview = msg.content.replace(/\s+/g, " ").trim();
+                  return (
+                    <button
+                      key={msg.id}
+                      type="button"
+                      onClick={() => {
+                        document.getElementById(msg.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }}
+                      className="w-full text-left p-2.5 rounded-xl bg-surface-2/40 hover:bg-surface-2 border border-line hover:border-cyan-500/30 transition-all group"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className={`text-[10px] font-bold uppercase tracking-wide ${isUser ? "text-brass" : "text-cyan-400"}`}>
+                          {isUser ? "You" : activeAgent.name}
+                        </span>
+                        <span className="text-[9px] text-text-muted font-mono shrink-0 flex items-center gap-1">
+                          <Clock className="w-2.5 h-2.5" />
+                          {msg.timestamp}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-text-muted leading-snug line-clamp-2 group-hover:text-text transition-colors">
+                        {preview}
+                      </p>
+                    </button>
+                  );
+                })}
               </div>
-            </div>
-
-            {/* Connected Data Feeds */}
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center justify-between">
-                <span>Active Telemetry Bridges</span>
-                <Zap className="w-3 h-3 text-cyan-400" />
-              </span>
-              <div className="space-y-1.5">
-                {activeAgent.telemetryFeeds.map((feed, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-2 rounded-lg bg-surface-2/40 border border-line text-xs"
-                  >
-                    <span className="text-[11px] text-text-muted">{feed}</span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Strategic Playbooks */}
-            <div className="space-y-2 pt-2 border-t border-line">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted block">
-                Direct Action Playbooks
-              </span>
-              <div className="space-y-1.5">
-                {activeAgent.quickTools.map((tool, idx) => (
-                  <Link
-                    key={idx}
-                    href={tool.href}
-                    className="w-full p-2 rounded-xl bg-surface-2 hover:bg-surface border border-line hover:border-cyan-500/30 text-text transition-all flex items-center justify-between text-xs group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Wrench className="w-3 h-3 text-cyan-400 group-hover:rotate-12 transition-transform" />
-                      <span className="text-[11px] font-semibold">{tool.name}</span>
-                    </div>
-                    <ArrowRight className="w-3 h-3 text-text-muted group-hover:text-cyan-400 transition-colors" />
-                  </Link>
-                ))}
-              </div>
-            </div>
+            )}
           </aside>
         )}
       </div>
