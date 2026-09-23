@@ -144,10 +144,10 @@ export function parseNaturalBusinessInput(text: string): ExtractedBusinessRecord
   if (teamSize !== undefined) parts.push(`${teamSize} team headcount`);
   if (hireMatch && hireMatch[1]) parts.push(`+${hireMatch[1]} new hires`);
 
-  // If no specific numeric metric was extracted, preserve as operational update note
+  // If nothing concrete was extracted, this isn't a business data statement — treat it as
+  // a normal question/message instead of forcing it into the operational ledger flow.
   if (matchedFields.length === 0) {
-    matchedFields.push("operationalNotes");
-    parts.push("Daily operational milestone recorded");
+    return null;
   }
 
   return {
