@@ -190,7 +190,7 @@ export function AppShell({
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col md:flex-row relative overflow-x-hidden selection:bg-gold/25 selection:text-gold-light">
+    <div data-glass-scope="app" className="min-h-screen bg-bg text-text flex flex-col md:flex-row relative overflow-x-hidden selection:bg-gold/25 selection:text-gold-light">
       {/* Ambient subtle champagne gold background depth — restrained and luxurious, not overpowering */}
       <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-gold/[0.04] via-transparent to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-gold/[0.03] via-transparent to-transparent blur-3xl pointer-events-none -z-10 dark:block hidden" />

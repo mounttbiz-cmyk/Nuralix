@@ -59,7 +59,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-bg text-text antialiased">
+    <div data-glass-scope="app" className="min-h-screen bg-bg text-text antialiased">
       {children}
     </div>
   );
