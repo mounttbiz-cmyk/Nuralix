@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const { message, agentId, companyProfile, model = "auto" } = await req.json();
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+    const apiKey = process.env.GEMINI_API_KEY || "";
 
     // 1. Multi-Model Intelligent Orchestration
     let resolvedModelKey = model;
@@ -101,7 +101,7 @@ Instructions:
 2. Ground your advice in the company fundamentals above.
 3. Keep the tone sharp, crisp, and high-impact. Avoid fluff.`;
 
-    if (apiKey && !apiKey.startsWith("AQ.Ab8RN6II2q5b4Am47x7X5No6OIw8BxQlRDE-iSmZi-Z9--BTLA-invalid")) {
+    if (apiKey) {
       try {
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         const resp = await fetch(geminiUrl, {
