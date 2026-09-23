@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Check, ArrowRight, Sparkles, CheckCircle2, X, Building2, Zap } from "lucide-react";
+import { Check, ArrowRight, Sparkles, CheckCircle2, X, Building2, Zap, Crown } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
@@ -221,8 +221,8 @@ export default function SubscriptionPage() {
       {/* Main Container */}
       <div className="max-w-7xl w-full mx-auto my-auto py-8 space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brass-soft border border-brass/30 text-brass text-[11px] font-bold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brass-soft border border-brass/35 text-brass text-[11px] font-bold uppercase tracking-wider shadow-sm">
+            <Crown className="w-4 h-4 text-amber-500" />
             <span>Plans & Pricing</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight font-sans">
@@ -235,82 +235,119 @@ export default function SubscriptionPage() {
 
         {/* 4 Plans Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
-          {plans.map(p => (
-            <div
-              key={p.id}
-              className={`rounded-2xl border p-5 sm:p-6 flex flex-col justify-between transition-all relative ${
-                p.isPopular
-                  ? "bg-surface border-brass shadow-2xl ring-2 ring-brass/30 scale-[1.02]"
-                  : "bg-surface/80 border-line hover:border-line-strong shadow-theme"
-              }`}
-            >
-              {p.badge && (
-                <div
-                  className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm ${
-                    p.isPopular
-                      ? "bg-brass text-white shadow-brass/30"
-                      : "bg-surface-2 border border-line text-text-muted"
-                  }`}
-                >
-                  {p.badge}
-                </div>
-              )}
+          {plans.map(p => {
+            const isStarter = p.id === "starter" || p.isPopular;
+            const isGrowth = p.id === "growth";
+            const isEnterprise = p.id === "enterprise";
+            const isFree = p.id === "free";
 
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-bold text-text">{p.name}</h3>
-                  <p className="text-[11px] text-text-muted mt-0.5 min-h-[2rem] leading-relaxed">
-                    {p.tagline}
-                  </p>
+            return (
+              <div
+                key={p.id}
+                className={`rounded-2xl border p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 relative ${
+                  isStarter
+                    ? "bg-surface border-amber-500/80 shadow-[0_12px_36px_rgba(245,197,66,0.18)] ring-2 ring-amber-500/30 scale-[1.02] lg:-translate-y-1.5"
+                    : isGrowth
+                    ? "bg-surface/95 border-indigo-500/35 hover:border-indigo-500/60 shadow-lg shadow-indigo-500/5 hover:shadow-indigo-500/15 backdrop-blur-xl hover:-translate-y-1"
+                    : isEnterprise
+                    ? "bg-surface/95 border-violet-500/35 hover:border-violet-500/60 shadow-lg shadow-violet-500/5 hover:shadow-violet-500/15 backdrop-blur-xl hover:-translate-y-1"
+                    : "bg-surface/95 border-emerald-500/30 hover:border-emerald-500/50 shadow-lg shadow-emerald-500/5 hover:shadow-emerald-500/15 backdrop-blur-xl hover:-translate-y-1"
+                }`}
+              >
+                {p.badge && (
+                  <div
+                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm ${
+                      isStarter
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-black font-extrabold shadow-md shadow-amber-500/25"
+                        : isGrowth
+                        ? "bg-indigo-500/15 border border-indigo-500/35 text-indigo-600 dark:text-indigo-400 font-bold"
+                        : isEnterprise
+                        ? "bg-violet-500/15 border border-violet-500/35 text-violet-600 dark:text-violet-300 font-bold"
+                        : "bg-emerald-500/15 border border-emerald-500/35 text-emerald-600 dark:text-emerald-400 font-bold"
+                    }`}
+                  >
+                    {p.badge}
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-text">{p.name}</h3>
+                    <p className="text-[11px] text-text-muted mt-0.5 min-h-[2rem] leading-relaxed">
+                      {p.tagline}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-line flex items-baseline gap-1">
+                    <span
+                      className={`text-2xl sm:text-3xl font-extrabold font-mono tracking-tight ${
+                        isStarter
+                          ? "text-amber-500 dark:text-amber-400"
+                          : isGrowth
+                          ? "text-indigo-600 dark:text-indigo-400"
+                          : isEnterprise
+                          ? "text-violet-600 dark:text-violet-400"
+                          : "text-emerald-600 dark:text-emerald-400"
+                      }`}
+                    >
+                      {p.price}
+                    </span>
+                    <span className="text-xs text-text-muted">{p.period}</span>
+                  </div>
+
+                  {/* Features List */}
+                  <div className="pt-2 border-t border-line space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted block">
+                      Capabilities Included:
+                    </span>
+                    <ul className="space-y-2 text-xs">
+                      {p.features.map((feat, fIdx) => (
+                        <li key={fIdx} className="flex items-start gap-2">
+                          <CheckCircle2
+                            className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${
+                              isStarter
+                                ? "text-amber-500"
+                                : isGrowth
+                                ? "text-indigo-500"
+                                : isEnterprise
+                                ? "text-violet-500"
+                                : "text-emerald-500"
+                            }`}
+                          />
+                          <span className="text-text text-[11px] leading-tight">{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
-                <div className="pt-2 border-t border-line flex items-baseline gap-1">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-text font-mono tracking-tight">
-                    {p.price}
-                  </span>
-                  <span className="text-xs text-text-muted">{p.period}</span>
-                </div>
-
-                {/* Features List */}
-                <div className="pt-2 border-t border-line space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted block">
-                    Capabilities Included:
-                  </span>
-                  <ul className="space-y-2 text-xs">
-                    {p.features.map((feat, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-jade shrink-0 mt-0.5" />
-                        <span className="text-text text-[11px] leading-tight">{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* Action Button */}
+                <div className="pt-5 mt-4 border-t border-line">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (p.id === "free" || p.isCurrent) {
+                        ensureSessionAndOpenDashboard(p.id, p.name);
+                      } else {
+                        setSelectedPlanForModal(p);
+                      }
+                    }}
+                    className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs transition-all btn-tactile cursor-pointer text-center ${
+                      isStarter
+                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-black font-extrabold shadow-md hover:shadow-amber-500/30 hover:brightness-105"
+                        : isGrowth
+                        ? "bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-md shadow-indigo-500/25 hover:brightness-105"
+                        : isEnterprise
+                        ? "bg-surface-2 hover:bg-violet-500/15 border border-line-strong hover:border-violet-500/50 text-text font-bold"
+                        : "bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/35 text-emerald-600 dark:text-emerald-300 font-bold"
+                    }`}
+                  >
+                    {p.ctaLabel}
+                  </button>
                 </div>
               </div>
-
-              {/* Action Button */}
-              <div className="pt-5 mt-4 border-t border-line">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (p.id === "free" || p.isCurrent) {
-                      ensureSessionAndOpenDashboard(p.id, p.name);
-                    } else {
-                      setSelectedPlanForModal(p);
-                    }
-                  }}
-                  className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs transition-all btn-tactile cursor-pointer text-center ${
-                    p.isPopular
-                      ? "bg-brass text-white shadow-md hover:brightness-110"
-                      : p.isCurrent
-                      ? "bg-surface-2 border border-brass text-brass hover:bg-brass-soft"
-                      : "bg-surface-2 hover:bg-surface border border-line text-text hover:border-line-strong"
-                  }`}
-                >
-                  {p.ctaLabel}
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -320,7 +357,7 @@ export default function SubscriptionPage() {
           <div className="w-full max-w-md p-6 rounded-2xl border border-line bg-surface shadow-2xl space-y-4 animate-scale-up">
             <div className="flex items-center justify-between pb-3 border-b border-line">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-brass" />
+                <Crown className="w-4 h-4 text-amber-500" />
                 <h3 className="text-sm font-bold text-text">Confirm Subscription</h3>
               </div>
               <button
@@ -375,11 +412,6 @@ export default function SubscriptionPage() {
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <div className="text-center text-[11px] text-text-muted pt-4">
-        BizzPal OS v3 · Enterprise Capability Matrix
-      </div>
     </div>
   );
 }

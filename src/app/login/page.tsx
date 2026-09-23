@@ -610,20 +610,20 @@ export default function LoginPage() {
       {/* Top Navigation Bar */}
       <header className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
         {/* Brand & AI Business OS Badge */}
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-surface/90 border border-line-strong flex items-center justify-center p-2 shadow-lg backdrop-blur-xl group hover:border-amber-500/50 transition-all">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-surface/90 border border-line-strong flex items-center justify-center p-2 shadow-lg backdrop-blur-xl group hover:border-amber-500/50 transition-all">
             <Image
               src="/logo.png"
               alt="BizzPal Logo"
-              width={28}
-              height={28}
+              width={34}
+              height={34}
               className="object-contain group-hover:scale-105 transition-transform"
               priority
             />
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <span className="font-extrabold text-lg tracking-tight text-text font-sans">
+          <div className="flex items-center gap-3">
+            <span className="font-black text-2xl tracking-tight text-text font-sans leading-none">
               Bizz
               <span
                 className="font-black"
@@ -640,12 +640,12 @@ export default function LoginPage() {
             </span>
 
             {/* High-End Executive "AI Business OS" Pill */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/10 via-amber-400/15 to-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-300 shadow-[0_0_12px_rgba(245,197,66,0.12)] backdrop-blur-md">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/10 via-amber-400/15 to-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-300 shadow-[0_0_12px_rgba(245,197,66,0.12)] backdrop-blur-md">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-400"></span>
               </span>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest leading-none">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-widest leading-none">
                 AI Business OS
               </span>
             </div>
