@@ -8,7 +8,7 @@ interface ProviderAttempt {
 
 async function callGemini(apiKey: string, prompt: string): Promise<string | null> {
   const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -31,7 +31,7 @@ async function callGroq(apiKey: string, prompt: string): Promise<string | null> 
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-20b",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
       max_tokens: 800,
@@ -50,7 +50,7 @@ async function callOpenRouter(apiKey: string, prompt: string): Promise<string | 
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "meta-llama/llama-3.3-70b-instruct:free",
+      model: "qwen/qwen3.8-27b:free",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
       max_tokens: 800,
@@ -88,7 +88,7 @@ async function callCohere(apiKey: string, prompt: string): Promise<string | null
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "command-r",
+      model: "command-a-03-2025",
       message: prompt,
       temperature: 0.7,
       max_tokens: 800,
