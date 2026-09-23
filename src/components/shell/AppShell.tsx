@@ -197,6 +197,11 @@ export function AppShell({
       <div className="fixed top-0 left-1/4 w-[650px] h-[350px] bg-gradient-to-br from-gold/[0.03] to-transparent blur-3xl pointer-events-none -z-10 dark:hidden block" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-gradient-to-tl from-slate-200/30 to-transparent blur-3xl pointer-events-none -z-10 dark:hidden block" />
 
+      {/* Vivid color blobs the liquid-glass panels refract — dark mode only, sit above the base ambient glow */}
+      <div className="glass-ambient fixed top-[-10%] left-[8%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-amber-400/25 via-orange-400/10 to-transparent blur-[110px] pointer-events-none -z-10 dark:block hidden" />
+      <div className="glass-ambient fixed top-[15%] right-[5%] w-[500px] h-[500px] rounded-full bg-gradient-to-bl from-violet-500/20 via-fuchsia-500/10 to-transparent blur-[110px] pointer-events-none -z-10 dark:block hidden" />
+      <div className="glass-ambient fixed bottom-[-15%] left-[30%] w-[700px] h-[500px] rounded-full bg-gradient-to-t from-cyan-400/15 via-blue-500/10 to-transparent blur-[120px] pointer-events-none -z-10 dark:block hidden" />
+
       {/* Desktop Left Rail (lg+) */}
       <DesktopRail
         navItems={items}
