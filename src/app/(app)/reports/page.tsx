@@ -698,7 +698,10 @@ export default function ReportsPage() {
                     <span className="text-[10px] text-text-muted">Burn, Runway & Solvency</span>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono text-emerald-500">DeepSeek R1</span>
+                <span className="text-[10px] font-mono text-emerald-500 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Active
+                </span>
               </div>
 
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-surface-2 border border-line">
@@ -711,7 +714,10 @@ export default function ReportsPage() {
                     <span className="text-[10px] text-text-muted">Pipeline, Inbound & CAC</span>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono text-purple-400">Claude 3.5</span>
+                <span className="text-[10px] font-mono text-purple-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                  Active
+                </span>
               </div>
             </div>
           </div>

@@ -162,7 +162,7 @@ const DEFAULT_WORKFLOWS: WorkflowItem[] = [
         stepNumber: 3,
         stageName: "AI Reasoning & Rules",
         title: "ICP Scoring & Deal Structuring",
-        subtitle: "Elena (Marketing AI) & Claude 3.5 evaluate fit score & suggested ACV",
+        subtitle: "Elena (Marketing AI) evaluates fit score & suggested ACV",
         telemetryData: "Score: 94/100 (Tier 1 ICP). Recommended contract ACV: ₹8,50,000/yr",
         icon: "🧠",
         status: "completed",
@@ -233,7 +233,7 @@ const DEFAULT_WORKFLOWS: WorkflowItem[] = [
       {
         stepNumber: 3,
         stageName: "AI Reasoning & Rules",
-        title: "DeepSeek R1 Solvency Reasoning",
+        title: "Solvency Reasoning",
         subtitle: "Simulate cash reserve preservation and draft remediation directive",
         telemetryData: "Directive: Deprecate redundant seats; recover ₹7.8L annualized; preserve 15.2mo runway.",
         icon: "🧠",

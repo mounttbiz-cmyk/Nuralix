@@ -101,40 +101,9 @@ async function callCohere(apiKey: string, prompt: string): Promise<string | null
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, agentId, companyProfile, model = "auto" } = await req.json();
+    const { message, agentId, companyProfile } = await req.json();
 
-    // 1. Multi-Model Intelligent Orchestration
-    let resolvedModelKey = model;
-    let routingReason = "Directly selected by executive user";
-
-    if (model === "auto") {
-      const lower = message.toLowerCase();
-      if (lower.includes("burn") || lower.includes("runway") || lower.includes("break-even") || lower.includes("math") || lower.includes("margin") || lower.includes("tax") || lower.includes("inr") || lower.includes("calculate")) {
-        resolvedModelKey = "deepseek-r1";
-        routingReason = "Auto-routed to DeepSeek R1 for mathematical rigor & financial unit economics";
-      } else if (lower.includes("doc") || lower.includes("contract") || lower.includes("pdf") || lower.includes("transcript") || lower.includes("audit") || lower.includes("policy")) {
-        resolvedModelKey = "gemini-1-5";
-        routingReason = "Auto-routed to Gemini 1.5 Pro for massive document processing & multi-page context";
-      } else if (lower.includes("code") || lower.includes("api") || lower.includes("sql") || lower.includes("schema") || lower.includes("architecture")) {
-        resolvedModelKey = "claude-3-5";
-        routingReason = "Auto-routed to Claude 3.5 Sonnet for system architecture & nuanced technical logic";
-      } else {
-        resolvedModelKey = "gemini-flash";
-        routingReason = "Auto-routed to Gemini Flash for sub-second executive operational speed";
-      }
-    }
-
-    const modelNameMap: Record<string, string> = {
-      "auto": "Astra Router (Dynamic Multi-Model)",
-      "gemini-flash": "Google Gemini 2.0 Flash",
-      "gemini-1-5": "Google Gemini 1.5 Pro",
-      "deepseek-r1": "DeepSeek R1 Reasoning",
-      "claude-3-5": "Anthropic Claude 3.5 Sonnet",
-    };
-
-    const modelDisplayName = modelNameMap[resolvedModelKey] || "BizzPal Intelligence Engine";
-
-    // 2. Executive Agent Personas
+    // Executive Agent Personas
     const agentRoles: Record<string, { title: string; focus: string; tone: string }> = {
       ceo: {
         title: "Astra (CEO AI)",
@@ -186,7 +155,7 @@ Company Context:
 - Team Size: ${teamSize} FTEs
 `;
 
-    const systemPrompt = `You are ${activeRole.title} powered by ${modelDisplayName} in the BizzPal Enterprise Business OS.
+    const systemPrompt = `You are ${activeRole.title}, an executive AI advisor in the BizzPal Enterprise Business OS.
 Your Focus: ${activeRole.focus}
 Your Tone: ${activeRole.tone}
 
@@ -245,15 +214,7 @@ Instructions:
             success: true,
             agent: activeRole.title,
             text: generatedText,
-            provider: modelDisplayName,
-            modelUsed: modelDisplayName,
-            modelKey: resolvedModelKey,
-            routingReason,
-            reasoningTelemetry: [
-              `Parsed user intent: verified against ${companyProfile?.name || "enterprise"} telemetry`,
-              `Model routing: ${routingReason}`,
-              `Live inference via ${provider.name} · Evaluation complete`,
-            ],
+            provider: "bizzpal-ai",
           });
         }
       } catch (err) {
@@ -276,15 +237,7 @@ Instructions:
       success: true,
       agent: activeRole.title,
       text: fallbackResponses[agentId] || fallbackResponses.ceo,
-      provider: modelDisplayName,
-      modelUsed: modelDisplayName,
-      modelKey: resolvedModelKey,
-      routingReason,
-      reasoningTelemetry: [
-        `Parsed user intent: verified against ${companyProfile?.name || "enterprise"} telemetry`,
-        `Model routing: ${routingReason}`,
-        `Model latency: 280ms · Deterministic fallback engaged`,
-      ],
+      provider: "bizzpal-ai",
     });
   } catch (error) {
     return NextResponse.json(
