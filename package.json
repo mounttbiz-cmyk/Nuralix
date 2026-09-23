@@ -23,6 +23,8 @@
     "postprocessing": "^6.39.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.6.0",
     "three": "^0.170.0",
     "zod": "^3.24.2"

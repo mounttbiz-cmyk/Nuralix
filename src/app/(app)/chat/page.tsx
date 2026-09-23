@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { ChatMarkdown } from "@/components/shell/ChatMarkdown";
 import {
   Sparkles,
   Send,
@@ -882,7 +883,11 @@ export default function ChatWorkspacePage() {
                           : "bg-surface-2/70 border border-line text-text rounded-tl-none"
                       }`}
                     >
-                      <div className="whitespace-pre-wrap">{msg.content}</div>
+                      {isUser ? (
+                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                      ) : (
+                        <ChatMarkdown content={msg.content} />
+                      )}
 
                       {/* Structured Day-to-Day Input Card */}
                       {msg.structuredRecord && (
