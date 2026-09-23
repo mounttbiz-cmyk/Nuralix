@@ -107,7 +107,7 @@ export function BriefingWidget({
             >
               <div className="flex items-center gap-2">
                 <span className="text-xs">📈</span>
-                <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-text uppercase tracking-wider font-mono">
                   Revenue & Growth Trajectory
                 </span>
               </div>
@@ -137,11 +137,11 @@ export function BriefingWidget({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.32, delay: 0.19, ease: [0.22, 1, 0.36, 1] }}
-              className="p-3.5 rounded-xl bg-amber-500/[0.05] border border-amber-500/20 space-y-1"
+              className="p-3.5 rounded-xl bg-surface-2/60 border border-line space-y-1"
             >
               <div className="flex items-center gap-2">
                 <span className="text-xs">⚡</span>
-                <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">
+                <span className="text-[11px] font-bold text-text uppercase tracking-wider font-mono">
                   Strategic Directive (Immediate)
                 </span>
               </div>
@@ -156,7 +156,7 @@ export function BriefingWidget({
         <div className="pt-3 border-t border-line/60 flex items-center justify-between text-xs">
           <Link
             href="/chat"
-            className="inline-flex items-center gap-1.5 text-gold hover:brightness-110 font-semibold text-xs btn-tactile cursor-pointer group"
+            className="inline-flex items-center gap-1.5 text-text hover:opacity-80 font-semibold text-xs btn-tactile cursor-pointer group"
           >
             <span>Ask Astra to elaborate</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />

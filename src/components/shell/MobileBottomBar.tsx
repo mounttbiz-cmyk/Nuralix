@@ -53,11 +53,11 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
                 key={tab.id}
                 href={tab.href}
                 className={`relative flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 rounded-xl transition-all btn-tactile ${
-                  isActive ? "text-gold font-semibold" : "text-text-muted hover:text-text"
+                  isActive ? "text-text font-bold" : "text-text-muted hover:text-text"
                 }`}
               >
                 {isActive && (
-                  <span className="absolute top-0 w-6 h-[2px] rounded-full bg-gold" aria-hidden="true" />
+                  <span className="absolute top-0 w-6 h-[2px] rounded-full bg-text" aria-hidden="true" />
                 )}
                 <DynamicIcon name={tab.icon} className="w-5 h-5 mb-0.5" />
                 <span className="text-[10px] tracking-tight">{tab.label}</span>
@@ -70,7 +70,7 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
             type="button"
             onClick={() => setMoreOpen(!moreOpen)}
             className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 rounded-xl transition-all btn-tactile ${
-              moreOpen ? "text-gold font-semibold" : "text-text-muted hover:text-text"
+              moreOpen ? "text-text font-bold" : "text-text-muted hover:text-text"
             }`}
             aria-expanded={moreOpen}
             aria-label="More navigation links"

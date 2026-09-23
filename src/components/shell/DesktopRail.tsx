@@ -127,7 +127,7 @@ export function DesktopRail({
               <p className="text-[11px] text-text-muted truncate max-w-[110px] font-medium">
                 {companyName}
               </p>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-500 dark:text-amber-400 font-bold tracking-wider shrink-0">
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-surface-2 border border-line text-text-muted font-semibold tracking-wider shrink-0">
                 AI Business OS
               </span>
             </div>
@@ -191,25 +191,25 @@ export function DesktopRail({
                       href={item.href}
                       className={`relative flex items-center justify-between pl-3.5 pr-3 py-2 rounded-xl text-xs font-medium transition-all btn-tactile ${
                         isActive
-                          ? "bg-amber-400/10 text-amber-300 font-semibold"
-                          : "text-text-muted hover:text-text hover:bg-white/[0.03]"
+                          ? "bg-surface-2 text-text font-bold border border-line shadow-xs"
+                          : "text-text-muted hover:text-text hover:bg-surface-2/60"
                       }`}
                     >
                       {isActive && (
                         <span
-                          className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-amber-400"
+                          className="absolute left-0 top-2 bottom-2 w-[2.5px] rounded-r-full bg-text"
                           aria-hidden="true"
                         />
                       )}
                       <div className="flex items-center gap-2.5">
                         <DynamicIcon
                           name={item.icon}
-                          className={`w-4 h-4 ${isActive ? "text-amber-400" : "text-text-muted group-hover:text-text"}`}
+                          className={`w-4 h-4 ${isActive ? "text-text" : "text-text-muted group-hover:text-text"}`}
                         />
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-400/10 text-amber-300 font-mono font-semibold">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-surface-2 border border-line text-text-muted font-mono font-semibold">
                           {item.badge}
                         </span>
                       )}
@@ -246,7 +246,7 @@ export function DesktopRail({
         <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-2 border border-line text-xs">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 text-[#1a1206] font-bold text-xs flex items-center justify-center shadow-sm shrink-0">
+              <div className="w-8 h-8 rounded-full bg-surface-2 border border-line-strong text-text font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
                 {initials}
               </div>
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-surface" />

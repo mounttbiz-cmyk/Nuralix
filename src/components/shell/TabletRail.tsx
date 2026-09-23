@@ -78,13 +78,13 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
               title={item.label}
               className={`relative flex items-center justify-center w-10 h-10 rounded-xl transition-all btn-tactile group ${
                 isActive
-                  ? "bg-gold/[0.14] text-gold border border-gold/40 shadow-sm shadow-[0_4px_12px_-4px_var(--gold-glow)]"
+                  ? "bg-surface-2 text-text border border-line shadow-xs font-bold"
                   : "text-text-muted hover:text-text hover:bg-surface-2"
               }`}
             >
-              <DynamicIcon name={item.icon} className={`w-5 h-5 ${isActive ? "text-gold" : "text-text-muted"}`} />
+              <DynamicIcon name={item.icon} className={`w-5 h-5 ${isActive ? "text-text" : "text-text-muted"}`} />
               {item.badge && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-gold ring-2 ring-surface" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-text ring-2 ring-surface" />
               )}
             </Link>
           );

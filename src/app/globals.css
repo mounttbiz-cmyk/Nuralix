@@ -5,31 +5,31 @@
 @tailwind utilities;
 
 :root, [data-theme="dark"] {
-  /* High-end Cosmic Obsidian & Royal 3D Gold Palette matching BizzPal Logo */
-  --bg:          #060709;   /* Deepest midnight obsidian void */
-  --surface:     #0D0F15;   /* Elevated obsidian surface with rich warm metallic depth */
-  --surface-2:   #151822;   /* Interactive metallic layer */
-  --line:        rgba(255, 255, 255, 0.07);   /* Neutral structural hairline, not gold */
-  --line-strong: rgba(255, 255, 255, 0.14);   /* Neutral emphasized hairline */
-  --text:        #FFFFFF;   /* Crisp diamond white matching "Bizz" in logo */
-  --text-muted:  #9E988D;   /* Champagne slate muted */
+  /* High-end Cosmic Obsidian & Executive Platinum Palette */
+  --bg:          #08090D;   /* Deepest midnight obsidian void */
+  --surface:     #10131B;   /* Elevated obsidian surface */
+  --surface-2:   #171B26;   /* Interactive slate layer */
+  --line:        rgba(255, 255, 255, 0.08);   /* Neutral structural hairline */
+  --line-strong: rgba(255, 255, 255, 0.16);   /* Neutral emphasized hairline */
+  --text:        #FFFFFF;   /* Crisp diamond white */
+  --text-muted:  #94A3B8;   /* Clean slate muted text */
   
-  /* Primary Metallic Gold & Champagne Brass accents directly from BizzPal Logo */
-  --gold:        #F5C542;   /* 3D Liquid Gold */
-  --gold-light:  #FFE58F;   /* Champagne highlight shimmer */
-  --gold-dark:   #B8860B;   /* Deep burnished gold */
-  --gold-glow:   rgba(245, 197, 66, 0.25);
-  --brass:       #F5C542;   /* Primary accent maps to luxury metallic gold */
-  --brass-soft:  rgba(245, 197, 66, 0.14);
-  --cyan:        #F5C542;   /* Remap legacy cyan tokens to radiant BizzPal gold */
-  --cyan-soft:   rgba(245, 197, 66, 0.12);
-  --violet:      #C59B27;   /* Secondary metallic brass */
-  --violet-soft: rgba(197, 155, 39, 0.12);
+  /* Refined, quiet metallic accents — no loud mustard/yellow tint */
+  --gold:        #FFFFFF;   /* Clean white primary emphasis */
+  --gold-light:  #FFFFFF;
+  --gold-dark:   #CBD5E1;
+  --gold-glow:   rgba(255, 255, 255, 0.08);
+  --brass:       #FFFFFF;
+  --brass-soft:  rgba(255, 255, 255, 0.06);
+  --cyan:        #38BDF8;   /* Subtle executive cyan */
+  --cyan-soft:   rgba(56, 189, 248, 0.08);
+  --violet:      #818CF8;   /* Subtle executive slate-violet */
+  --violet-soft: rgba(129, 140, 248, 0.08);
   --jade:        #10B981;   /* Live operational emerald */
   --rust:        #F43F5E;   /* Crimson alert */
-  --amber:       #F5C542;   /* Warm Gold */
+  --amber:       #F59E0B;   /* Amber warning */
   --shadow:      0 12px 36px 0 rgba(0, 0, 0, 0.6);
-  --grid:        rgba(245, 197, 66, 0.03);
+  --grid:        rgba(255, 255, 255, 0.02);
 
   /* Motion tokens (§4.1) */
   --dur-instant: 90ms;
@@ -44,26 +44,26 @@
 }
 
 [data-theme="light"] {
-  --bg:          #F8FAFC;   /* Crisp neutral clean platinum - zero pink hue */
+  --bg:          #F8FAFC;   /* Crisp neutral clean platinum */
   --surface:     #FFFFFF;   /* Pure crisp white card surface */
   --surface-2:   #F1F5F9;   /* Clean subtle elevated slate surface */
   --line:        #E2E8F0;   /* Clean neutral slate border */
   --line-strong: #CBD5E1;   /* Defined border */
   --text:        #0F172A;   /* Crisp deep obsidian slate text */
   --text-muted:  #64748B;   /* Slate neutral muted text */
-  --gold:        #AB8A2C;   /* Muted antique gold, not orange */
-  --gold-light:  #C9A94A;
-  --gold-dark:   #8A6D1F;
-  --gold-glow:   rgba(171, 138, 44, 0.15);
-  --brass:       #AB8A2C;
-  --brass-soft:  rgba(171, 138, 44, 0.10);
-  --cyan:        #AB8A2C;   /* Remap to muted gold */
-  --cyan-soft:   rgba(171, 138, 44, 0.08);
-  --violet:      #8A6D1F;
-  --violet-soft: rgba(138, 109, 31, 0.08);
+  --gold:        #0F172A;   /* Crisp obsidian primary emphasis */
+  --gold-light:  #334155;
+  --gold-dark:   #020617;
+  --gold-glow:   rgba(15, 23, 42, 0.06);
+  --brass:       #0F172A;
+  --brass-soft:  rgba(15, 23, 42, 0.05);
+  --cyan:        #0284C7;
+  --cyan-soft:   rgba(2, 132, 199, 0.06);
+  --violet:      #4F46E5;
+  --violet-soft: rgba(79, 70, 229, 0.06);
   --jade:        #059669;
   --rust:        #E11D48;
-  --amber:       #AB8A2C;
+  --amber:       #D97706;
   --shadow:      0 1px 3px rgba(0, 0, 0, 0.04), 0 6px 20px rgba(0, 0, 0, 0.05);
   --grid:        #F1F5F9;
 }
@@ -149,10 +149,11 @@ body, [data-surface] {
   font-variant-numeric: tabular-nums;
 }
 
-/* Shared primary-CTA gold gradient fill, matching the Button component's
-   "primary" variant, for spots that can't use the React component directly. */
+/* Shared primary-CTA executive fill matching Linear/Apple/Vercel standard */
 .btn-gold-gradient {
-  background-image: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+  background-color: var(--text) !important;
+  color: var(--bg) !important;
+  background-image: none !important;
 }
 
 /* Tactile micro-interactions (§4.3) */

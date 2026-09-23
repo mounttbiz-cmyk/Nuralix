@@ -20,9 +20,9 @@ const sizeClasses: Record<ButtonSize, string> = {
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
-  // Primary: gold gradient fill — the single highest-emphasis CTA style in the app.
+  // Primary: sleek high-contrast executive CTA
   primary:
-    "text-[#1a1206] font-bold shadow-lg shadow-[var(--gold-glow)] hover:brightness-110 hover:shadow-xl active:brightness-95 border border-transparent disabled:opacity-50 disabled:pointer-events-none",
+    "bg-text text-bg font-bold shadow-md hover:opacity-90 active:scale-[0.98] border border-transparent disabled:opacity-50 disabled:pointer-events-none",
   // Secondary: 1px border, transparent/surface background, text-colored.
   secondary:
     "bg-surface-2/60 border border-line hover:border-line-strong hover:bg-surface-2 text-text font-semibold disabled:opacity-50 disabled:pointer-events-none",
@@ -32,11 +32,6 @@ const variantClasses: Record<ButtonVariant, string> = {
   // Danger: reserved for destructive actions (delete, reset).
   danger:
     "bg-transparent border border-transparent hover:bg-rust/10 text-text-muted hover:text-rust font-semibold disabled:opacity-50 disabled:pointer-events-none",
-};
-
-const primaryGradientStyle: React.CSSProperties = {
-  backgroundImage:
-    "linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark))",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -60,7 +55,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={`inline-flex items-center justify-center font-sans transition-all btn-tactile cursor-pointer ${sizeClasses[size]} ${variantClasses[variant]} ${
           fullWidth ? "w-full" : ""
         } ${className}`}
-        style={variant === "primary" ? { ...primaryGradientStyle, ...style } : style}
+        style={style}
         {...props}
       >
         {icon && iconPosition === "left" && icon}
