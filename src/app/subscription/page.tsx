@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Check, ArrowRight, Sparkles, CheckCircle2, X, Building2, Zap, Crown } from "lucide-react";
+import { Check, ArrowRight, Sparkles, CheckCircle2, X, Building2, Zap, Crown, Tag } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
@@ -219,110 +219,69 @@ export default function SubscriptionPage() {
       </div>
 
       {/* Main Container */}
-      <div className="max-w-7xl w-full mx-auto my-auto py-8 space-y-8">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brass-soft border border-brass/35 text-brass text-[11px] font-bold uppercase tracking-wider shadow-sm">
-            <Crown className="w-4 h-4 text-amber-500" />
+      <div className="max-w-7xl w-full mx-auto my-auto py-12 space-y-12">
+        <div className="text-center space-y-4 max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
+            <Tag className="w-3.5 h-3.5" />
             <span>Plans & Pricing</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight font-sans">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-text tracking-tight font-sans leading-tight">
             Choose the Plan That Fits Your Business
           </h1>
-          <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
+          <p className="text-sm sm:text-base text-text-muted leading-relaxed max-w-xl mx-auto">
             Start free to see what BizzPal can do, or choose a plan with more tools, AI executives, and automated workflows.
           </p>
         </div>
 
         {/* 4 Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {plans.map(p => {
             const isStarter = p.id === "starter" || p.isPopular;
-            const isGrowth = p.id === "growth";
-            const isEnterprise = p.id === "enterprise";
-            const isFree = p.id === "free";
+
+            const accent = isStarter
+              ? { text: "text-blue-600 dark:text-blue-400", icon: "text-blue-500" }
+              : { text: "text-text", icon: "text-blue-500/70" };
 
             return (
               <div
                 key={p.id}
-                className={`rounded-2xl border p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 relative ${
+                className={`group rounded-3xl border p-7 sm:p-8 flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
                   isStarter
-                    ? "bg-surface border-amber-500/80 shadow-[0_12px_36px_rgba(245,197,66,0.18)] ring-2 ring-amber-500/30 scale-[1.02] lg:-translate-y-1.5"
-                    : isGrowth
-                    ? "bg-surface/95 border-indigo-500/35 hover:border-indigo-500/60 shadow-lg shadow-indigo-500/5 hover:shadow-indigo-500/15 backdrop-blur-xl hover:-translate-y-1"
-                    : isEnterprise
-                    ? "bg-surface/95 border-violet-500/35 hover:border-violet-500/60 shadow-lg shadow-violet-500/5 hover:shadow-violet-500/15 backdrop-blur-xl hover:-translate-y-1"
-                    : "bg-surface/95 border-emerald-500/30 hover:border-emerald-500/50 shadow-lg shadow-emerald-500/5 hover:shadow-emerald-500/15 backdrop-blur-xl hover:-translate-y-1"
+                    ? "bg-surface border-blue-500/50 shadow-[0_20px_50px_-12px_rgba(59,130,246,0.25)] ring-1 ring-blue-500/20 lg:scale-[1.04] lg:-translate-y-2 z-10"
+                    : "bg-surface border-line hover:border-blue-500/30 shadow-sm hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1.5"
                 }`}
               >
+                {isStarter && (
+                  <div className="pointer-events-none absolute inset-x-0 -top-24 h-40 bg-blue-400/15 blur-3xl" />
+                )}
+
                 {p.badge && (
                   <div
-                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm ${
+                    className={`absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-b-xl text-[10px] font-extrabold uppercase tracking-wider ${
                       isStarter
-                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-black font-extrabold shadow-md shadow-amber-500/25"
-                        : isGrowth
-                        ? "bg-indigo-500/15 border border-indigo-500/35 text-indigo-600 dark:text-indigo-400 font-bold"
-                        : isEnterprise
-                        ? "bg-violet-500/15 border border-violet-500/35 text-violet-600 dark:text-violet-300 font-bold"
-                        : "bg-emerald-500/15 border border-emerald-500/35 text-emerald-600 dark:text-emerald-400 font-bold"
+                        ? "bg-blue-500 text-white shadow-md shadow-blue-500/30"
+                        : "bg-surface-2 text-text-muted border border-line border-t-0"
                     }`}
                   >
                     {p.badge}
                   </div>
                 )}
 
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-bold text-text">{p.name}</h3>
-                    <p className="text-[11px] text-text-muted mt-0.5 min-h-[2rem] leading-relaxed">
+                <div className="space-y-6 pt-5">
+                  <div className="space-y-1.5">
+                    <h3 className="text-lg font-extrabold text-text tracking-tight">{p.name}</h3>
+                    <p className="text-[13px] text-text-muted leading-relaxed min-h-[2.5rem]">
                       {p.tagline}
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-line flex items-baseline gap-1">
-                    <span
-                      className={`text-2xl sm:text-3xl font-extrabold font-mono tracking-tight ${
-                        isStarter
-                          ? "text-amber-500 dark:text-amber-400"
-                          : isGrowth
-                          ? "text-indigo-600 dark:text-indigo-400"
-                          : isEnterprise
-                          ? "text-violet-600 dark:text-violet-400"
-                          : "text-emerald-600 dark:text-emerald-400"
-                      }`}
-                    >
+                  <div className="flex items-baseline gap-1.5">
+                    <span className={`text-4xl font-extrabold tracking-tight ${accent.text}`}>
                       {p.price}
                     </span>
-                    <span className="text-xs text-text-muted">{p.period}</span>
+                    <span className="text-sm text-text-muted font-medium">{p.period}</span>
                   </div>
 
-                  {/* Features List */}
-                  <div className="pt-2 border-t border-line space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted block">
-                      Capabilities Included:
-                    </span>
-                    <ul className="space-y-2 text-xs">
-                      {p.features.map((feat, fIdx) => (
-                        <li key={fIdx} className="flex items-start gap-2">
-                          <CheckCircle2
-                            className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${
-                              isStarter
-                                ? "text-amber-500"
-                                : isGrowth
-                                ? "text-indigo-500"
-                                : isEnterprise
-                                ? "text-violet-500"
-                                : "text-emerald-500"
-                            }`}
-                          />
-                          <span className="text-text text-[11px] leading-tight">{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Action Button */}
-                <div className="pt-5 mt-4 border-t border-line">
                   <button
                     type="button"
                     onClick={() => {
@@ -332,18 +291,29 @@ export default function SubscriptionPage() {
                         setSelectedPlanForModal(p);
                       }
                     }}
-                    className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs transition-all btn-tactile cursor-pointer text-center ${
+                    className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all btn-tactile cursor-pointer text-center ${
                       isStarter
-                        ? "bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-black font-extrabold shadow-md hover:shadow-amber-500/30 hover:brightness-105"
-                        : isGrowth
-                        ? "bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-md shadow-indigo-500/25 hover:brightness-105"
-                        : isEnterprise
-                        ? "bg-surface-2 hover:bg-violet-500/15 border border-line-strong hover:border-violet-500/50 text-text font-bold"
-                        : "bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/35 text-emerald-600 dark:text-emerald-300 font-bold"
+                        ? "bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 hover:brightness-105"
+                        : "bg-surface-2 hover:bg-blue-500/10 border border-line-strong hover:border-blue-500/40 text-text"
                     }`}
                   >
                     {p.ctaLabel}
                   </button>
+
+                  {/* Features List */}
+                  <div className="pt-6 border-t border-line space-y-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted/80 block">
+                      What's included
+                    </span>
+                    <ul className="space-y-2.5">
+                      {p.features.map((feat, fIdx) => (
+                        <li key={fIdx} className="flex items-start gap-2.5">
+                          <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${accent.icon}`} />
+                          <span className="text-text text-[13px] leading-snug">{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             );
