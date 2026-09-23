@@ -64,6 +64,21 @@ export async function getUserProfileFromFirestore(userId: string) {
 }
 
 /**
+ * Persists the user's active subscription plan to Firestore
+ */
+export async function saveUserPlanToFirestore(userId: string, planId: string) {
+  return saveUserProfileToFirestore(userId, { subscriptionPlan: planId });
+}
+
+/**
+ * Reads the user's active subscription plan from Firestore
+ */
+export async function getUserPlanFromFirestore(userId: string): Promise<string | null> {
+  const profile = await getUserProfileFromFirestore(userId);
+  return (profile?.subscriptionPlan as string) || null;
+}
+
+/**
  * Records a business daily check-in in Firestore and Realtime Database
  */
 export async function recordCheckInToFirestore(companyId: string, checkInData: Record<string, any>) {

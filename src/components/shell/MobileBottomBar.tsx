@@ -5,9 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavItem } from "@/config/schemas/nav";
 import { DynamicIcon } from "./DynamicIcon";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X, Sun, Moon, Lock } from "lucide-react";
 import { useTheme } from "@/lib/theme/ThemeProvider";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { usePlanAccess } from "@/lib/hooks/usePlanAccess";
+import { UpgradeModal } from "./UpgradeModal";
 
 interface MobileBottomBarProps {
   navItems: NavItem[];
@@ -17,6 +19,8 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { hasPlanLevel } = usePlanAccess();
+  const [lockedItem, setLockedItem] = useState<NavItem | null>(null);
 
   // Close drawer on Escape
   useEscapeKey(() => setMoreOpen(false), moreOpen);
@@ -105,6 +109,26 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
             <div className="grid grid-cols-2 gap-2">
               {secondaryItems.map(item => {
                 const isActive = pathname === item.href;
+                const isLocked = !hasPlanLevel(item.requiredPlan);
+
+                if (isLocked) {
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setMoreOpen(false);
+                        setLockedItem(item);
+                      }}
+                      className="flex items-center gap-2.5 p-3 rounded-xl border border-line bg-surface-2/20 text-text-muted/60 text-xs font-medium"
+                    >
+                      <DynamicIcon name={item.icon} className="w-4 h-4 text-text-muted/50" />
+                      <span className="flex-1 text-left">{item.label}</span>
+                      <Lock className="w-3 h-3 shrink-0" />
+                    </button>
+                  );
+                }
+
                 return (
                   <Link
                     key={item.id}
@@ -148,6 +172,14 @@ export function MobileBottomBar({ navItems }: MobileBottomBarProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {lockedItem && (
+        <UpgradeModal
+          featureLabel={lockedItem.label}
+          requiredPlan={lockedItem.requiredPlan || "starter"}
+          onClose={() => setLockedItem(null)}
+        />
       )}
     </>
   );

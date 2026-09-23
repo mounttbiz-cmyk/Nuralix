@@ -6,9 +6,11 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NavItem } from "@/config/schemas/nav";
 import { DynamicIcon } from "./DynamicIcon";
-import { Sun, Moon, Globe, Search } from "lucide-react";
+import { Sun, Moon, Globe, Search, Lock } from "lucide-react";
 import { useTheme } from "@/lib/theme/ThemeProvider";
 import { WEBSITE_URL } from "@/config/urls";
+import { usePlanAccess } from "@/lib/hooks/usePlanAccess";
+import { UpgradeModal } from "./UpgradeModal";
 
 interface TabletRailProps {
   navItems: NavItem[];
@@ -18,6 +20,8 @@ interface TabletRailProps {
 export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
   const pathname = usePathname();
   const { resolvedTheme, cycleTheme } = useTheme();
+  const { hasPlanLevel } = usePlanAccess();
+  const [lockedItem, setLockedItem] = React.useState<NavItem | null>(null);
 
   return (
     <aside className="hidden md:flex lg:hidden flex-col items-center w-16 h-screen fixed inset-y-0 left-0 bg-surface/95 backdrop-blur-2xl border-r border-line select-none z-30 py-3 transition-colors">
@@ -50,6 +54,23 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
       <nav className="flex-1 flex flex-col items-center gap-2 overflow-y-auto w-full px-2">
         {navItems.map(item => {
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          const isLocked = !hasPlanLevel(item.requiredPlan);
+
+          if (isLocked) {
+            return (
+              <button
+                key={item.id}
+                type="button"
+                title={`${item.label} (upgrade required)`}
+                onClick={() => setLockedItem(item)}
+                className="relative flex items-center justify-center w-10 h-10 rounded-xl text-text-muted/40 hover:text-text-muted hover:bg-surface-2 transition-all cursor-pointer"
+              >
+                <DynamicIcon name={item.icon} className="w-5 h-5 text-text-muted/40" />
+                <Lock className="w-2.5 h-2.5 absolute bottom-1 right-1 text-text-muted/60" />
+              </button>
+            );
+          }
+
           return (
             <Link
               key={item.id}
@@ -85,6 +106,14 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
           )}
         </button>
       </div>
+
+      {lockedItem && (
+        <UpgradeModal
+          featureLabel={lockedItem.label}
+          requiredPlan={lockedItem.requiredPlan || "starter"}
+          onClose={() => setLockedItem(null)}
+        />
+      )}
     </aside>
   );
 }

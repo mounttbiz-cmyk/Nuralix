@@ -27,6 +27,8 @@ import {
 import { Suspense } from "react";
 import { createPortal } from "react-dom";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { usePlanAccess } from "@/lib/hooks/usePlanAccess";
+import { UpgradeModal } from "@/components/shell/UpgradeModal";
 
 // Format numbers using Indian comma numbering (e.g. 12,00,000 / 3,00,000)
 const formatINR = (val: string | number): string => {
@@ -47,7 +49,7 @@ interface BusinessTool {
   name: string;
   category: "finance" | "sales" | "marketing" | "operations" | "strategy";
   description: string;
-  requiredPlan: "Starter" | "Professional" | "Enterprise";
+  requiredPlan: "free" | "starter" | "growth" | "enterprise";
   badge: string;
   hasInteractiveCalculator?: boolean;
 }
@@ -59,7 +61,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Profit Calculator",
     category: "finance",
     description: "Calculate gross, operating, and net margins with loaded Indian payroll & overheads.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Unit Economics",
     hasInteractiveCalculator: true,
   },
@@ -68,7 +70,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Cash Flow Forecast",
     category: "finance",
     description: "Multi-month forward cash projections incorporating collections, net burn, and tax outlays.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Runway Guard",
     hasInteractiveCalculator: true,
   },
@@ -77,7 +79,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Break-Even Calculator",
     category: "finance",
     description: "Determine exact monthly transaction volume and revenue required to reach zero net burn.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Solvency",
     hasInteractiveCalculator: true,
   },
@@ -86,7 +88,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Pricing Simulator",
     category: "finance",
     description: "Model tiered packaging, discounting thresholds, and margin impacts on Indian buyers.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Revenue Ops",
   },
   {
@@ -94,7 +96,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "ROI Calculator",
     category: "finance",
     description: "Evaluate software licenses, capital expenditure, and vendor investments payback periods.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Capital Efficiency",
     hasInteractiveCalculator: true,
   },
@@ -103,7 +105,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Budget Planner",
     category: "finance",
     description: "Departmental allocation limits across engineering, marketing, sales, and administration.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Allocation",
   },
   {
@@ -111,7 +113,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Business Loan & Equipment EMI Calculator",
     category: "finance",
     description: "Calculate commercial loan EMIs, interest outlays, amortization schedules, and monthly debt-burn impact.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Debt & Financing",
     hasInteractiveCalculator: true,
   },
@@ -120,7 +122,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "GST & Tax Offset Calculator",
     category: "finance",
     description: "Calculate forward/reverse GST amounts, CGST+SGST vs IGST split, and net Input Tax Credit (ITC) balance.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Tax Compliance",
     hasInteractiveCalculator: true,
   },
@@ -129,7 +131,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Working Capital & Cash Cycle (CCC) Calculator",
     category: "finance",
     description: "Measure Days Sales Outstanding (DSO), Inventory (DIO), and Payables (DPO) to unlock trapped cash.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Liquidity Velocity",
     hasInteractiveCalculator: true,
   },
@@ -140,7 +142,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Sales Forecast",
     category: "sales",
     description: "Weighted pipeline forecasting by deal stage, historical velocity, and deal probabilities.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Pipeline",
   },
   {
@@ -148,7 +150,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Lead Scoring Matrix",
     category: "sales",
     description: "Algorithmic ICP fit and engagement scoring to prioritize high-value inbound prospects.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Conversion",
     hasInteractiveCalculator: true,
   },
@@ -157,7 +159,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Pipeline Analyzer",
     category: "sales",
     description: "Detect deal slippage, stage bottlenecks, and sales cycle deceleration across reps.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Velocity",
   },
   {
@@ -165,7 +167,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Deal Simulator",
     category: "sales",
     description: "Simulate multi-year enterprise contracts, SLA guarantees, and payment milestones.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Enterprise",
   },
   {
@@ -173,7 +175,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Customer Lifetime Value (LTV)",
     category: "sales",
     description: "Cohort retention modeling, expansion revenue, and gross margin-adjusted customer value.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Retention",
     hasInteractiveCalculator: true,
   },
@@ -182,7 +184,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Discount & Margin Sensitivity Calculator",
     category: "sales",
     description: "Analyze how contract discounting erodes gross profit and calculate the extra volume required to break even.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Margin Defense",
     hasInteractiveCalculator: true,
   },
@@ -191,7 +193,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Net Revenue Retention (NRR) & Churn Calculator",
     category: "sales",
     description: "Model gross vs net revenue retention, logo vs expansion churn, and forward ARR impact.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Retention Ops",
     hasInteractiveCalculator: true,
   },
@@ -202,7 +204,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Campaign Analyzer",
     category: "marketing",
     description: "Performance diagnostics across Google, LinkedIn, Meta, and organic content pipelines.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Attribution",
   },
   {
@@ -210,7 +212,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "CAC Calculator",
     category: "marketing",
     description: "Calculate fully loaded Customer Acquisition Cost including team salaries and tools.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Acquisition",
     hasInteractiveCalculator: true,
   },
@@ -219,7 +221,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "ROAS Calculator",
     category: "marketing",
     description: "Direct return on ad spend versus organic pipeline contribution and payback cycles.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Ad Efficiency",
     hasInteractiveCalculator: true,
   },
@@ -228,7 +230,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Marketing Forecast",
     category: "marketing",
     description: "Predict MQL and SQL generation curves based on current budget allocation scenarios.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Demand Gen",
   },
   {
@@ -236,7 +238,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Competitor Analyzer",
     category: "marketing",
     description: "Evaluate competitor positioning, feature parity, pricing gaps, and keyword capture.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Market Intel",
   },
 
@@ -246,7 +248,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Capacity Planner",
     category: "operations",
     description: "Evaluate team bandwidth, billable utilization rates, and operational strain thresholds.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Fulfillment",
     hasInteractiveCalculator: true,
   },
@@ -255,7 +257,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Inventory Simulator",
     category: "operations",
     description: "Holding cost, re-order trigger levels, and working capital cash lockup simulations.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Supply Chain",
   },
   {
@@ -263,7 +265,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Workforce Planner",
     category: "operations",
     description: "FTE capacity modeling against annual growth targets and onboarding ramp lags.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Staffing",
   },
   {
@@ -271,7 +273,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Process Analyzer",
     category: "operations",
     description: "Map end-to-end client delivery workflows to pinpoint handoff friction and delays.",
-    requiredPlan: "Enterprise",
+    requiredPlan: "enterprise",
     badge: "SLA Guard",
   },
   {
@@ -279,7 +281,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Employee Fully-Loaded Cost Calculator",
     category: "operations",
     description: "Calculate true cost per hire including PF, health benefits, equipment, SaaS, and minimum billable rate.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Talent Economics",
     hasInteractiveCalculator: true,
   },
@@ -290,7 +292,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "SWOT Analyzer",
     category: "strategy",
     description: "Interactive Strengths, Weaknesses, Opportunities, and Threats strategic mapping matrix.",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Strategic Matrix",
     hasInteractiveCalculator: true,
   },
@@ -299,7 +301,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Market Entry Simulator",
     category: "strategy",
     description: "Simulate entry costs, localized competition, and payback for new domestic or global markets.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Expansion",
   },
   {
@@ -307,7 +309,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Scenario Planner",
     category: "strategy",
     description: "Macro stress-testing: inflation, demand contraction, and competitor price wars.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Risk Defense",
   },
   {
@@ -315,7 +317,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Hiring Simulator",
     category: "strategy",
     description: "Fully loaded Indian payroll simulation including provident fund, benefits, and revenue lag.",
-    requiredPlan: "Professional",
+    requiredPlan: "growth",
     badge: "Talent Ops",
     hasInteractiveCalculator: true,
   },
@@ -324,7 +326,7 @@ const TOOLS_CATALOG: BusinessTool[] = [
     name: "Expansion Simulator",
     category: "strategy",
     description: "Capital requirements and projected ROI for opening new branch offices or enterprise teams.",
-    requiredPlan: "Enterprise",
+    requiredPlan: "enterprise",
     badge: "Scale Vector",
   },
 ];
@@ -349,6 +351,8 @@ function ToolsContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [lockedTool, setLockedTool] = useState<BusinessTool | null>(null);
+  const { hasPlanLevel } = usePlanAccess();
 
   useEffect(() => {
     setMounted(true);
@@ -423,11 +427,16 @@ function ToolsContent() {
     if (toolParam) {
       const tool = toolsList.find(t => t.id === toolParam);
       if (tool && (tool as any).enabled !== false) {
-        setActiveToolId(toolParam);
-        setSelectedCategory(tool.category);
+        if (hasPlanLevel(tool.requiredPlan)) {
+          setActiveToolId(toolParam);
+          setSelectedCategory(tool.category);
+        } else {
+          setLockedTool(tool);
+          setSelectedCategory(tool.category);
+        }
       }
     }
-  }, [searchParams, toolsList]);
+  }, [searchParams, toolsList, hasPlanLevel]);
 
   // Interactive Calculator State (Profit & Margin) - dynamically hydrated
   const [calcRevenue, setCalcRevenue] = useState(1200000);
@@ -749,7 +758,7 @@ function ToolsContent() {
                     </p>
                     <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[10px] text-slate-400">
                       <span>Category: <strong className="uppercase text-slate-600 dark:text-slate-300">{activeTool.category}</strong></span>
-                      <span>Required Plan: <strong className="text-slate-600 dark:text-slate-300">{activeTool.requiredPlan}+</strong></span>
+                      <span>Required Plan: <strong className="text-slate-600 dark:text-slate-300">{activeTool.requiredPlan.charAt(0).toUpperCase() + activeTool.requiredPlan.slice(1)}+</strong></span>
                     </div>
                   </div>
 
@@ -1802,10 +1811,14 @@ function ToolsContent() {
 
       {/* Tools Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredTools.map(tool => (
+        {filteredTools.map(tool => {
+          const locked = !hasPlanLevel(tool.requiredPlan);
+          return (
           <div
             key={tool.id}
-            className="p-4 rounded-xl border border-line bg-surface hover:border-line-strong transition-all flex flex-col justify-between shadow-xs group"
+            className={`p-4 rounded-xl border border-line bg-surface hover:border-line-strong transition-all flex flex-col justify-between shadow-xs group ${
+              locked ? "opacity-60" : ""
+            }`}
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
@@ -1813,15 +1826,18 @@ function ToolsContent() {
                   {tool.badge}
                 </span>
                 <span
-                  className={`text-[9px] px-1.5 py-0.2 rounded font-semibold border ${
-                    tool.requiredPlan === "Starter"
+                  className={`text-[9px] px-1.5 py-0.2 rounded font-semibold border inline-flex items-center gap-1 ${
+                    tool.requiredPlan === "starter"
                       ? "text-blue-400 bg-blue-400/10 border-blue-400/20"
-                      : tool.requiredPlan === "Professional"
+                      : tool.requiredPlan === "growth"
                       ? "text-purple-400 bg-purple-400/10 border-purple-400/20"
-                      : "text-amber-400 bg-amber-400/10 border-amber-400/20"
+                      : tool.requiredPlan === "enterprise"
+                      ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
+                      : "text-emerald-400 bg-emerald-400/10 border-emerald-400/20"
                   }`}
                 >
-                  {tool.requiredPlan}+
+                  {locked && <Lock className="w-2.5 h-2.5" />}
+                  {tool.requiredPlan.charAt(0).toUpperCase() + tool.requiredPlan.slice(1)}+
                 </span>
               </div>
 
@@ -1838,11 +1854,22 @@ function ToolsContent() {
             <div className="pt-4 mt-3 border-t border-line flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setActiveToolId(tool.id)}
-                className="text-xs font-semibold text-brass hover:underline inline-flex items-center gap-1 cursor-pointer"
+                onClick={() => (locked ? setLockedTool(tool) : setActiveToolId(tool.id))}
+                className={`text-xs font-semibold inline-flex items-center gap-1 cursor-pointer ${
+                  locked ? "text-text-muted hover:text-text" : "text-brass hover:underline"
+                }`}
               >
-                <span>{tool.hasInteractiveCalculator ? "Launch Calculator" : "Inspect Tool"}</span>
-                <ChevronRight className="w-3 h-3" />
+                {locked ? (
+                  <>
+                    <Lock className="w-3 h-3" />
+                    <span>Unlock Tool</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{tool.hasInteractiveCalculator ? "Launch Calculator" : "Inspect Tool"}</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </>
+                )}
               </button>
               <Link
                 href={`/chat?message=${encodeURIComponent(`Evaluate our ${tool.name} benchmarks and recommend optimizations.`)}`}
@@ -1853,8 +1880,17 @@ function ToolsContent() {
               </Link>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
+
+      {lockedTool && (
+        <UpgradeModal
+          featureLabel={lockedTool.name}
+          requiredPlan={lockedTool.requiredPlan}
+          onClose={() => setLockedTool(null)}
+        />
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Check, ArrowRight, Sparkles, CheckCircle2, X, Building2, Zap, Crown, Tag } from "lucide-react";
 import { ThemeSwitch } from "@/components/shell/ThemeSwitch";
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+import { usePlanAccess } from "@/lib/hooks/usePlanAccess";
 
 interface PlanTier {
   id: string;
@@ -24,24 +25,13 @@ interface PlanTier {
 
 export default function SubscriptionPage() {
   const router = useRouter();
-  const [currentPlan, setCurrentPlan] = useState<string>("free");
+  const { plan: currentPlan, activatePlan } = usePlanAccess();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlanForModal, setSelectedPlanForModal] = useState<PlanTier | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   // Close Plan modal on Escape
   useEscapeKey(() => setSelectedPlanForModal(null), Boolean(selectedPlanForModal));
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("bizzpal_subscription_plan");
-      if (saved) {
-        setCurrentPlan(saved);
-      }
-    } catch (e) {
-      // ignore
-    }
-  }, []);
 
   const notify = (msg: string) => {
     setToast(msg);
@@ -50,8 +40,7 @@ export default function SubscriptionPage() {
 
   const ensureSessionAndOpenDashboard = (planId: string, planName: string) => {
     try {
-      localStorage.setItem("bizzpal_subscription_plan", planId);
-      setCurrentPlan(planId);
+      activatePlan(planId);
 
       // Guarantee user session is active so AuthGuard always admits the user to dashboard
       let session = localStorage.getItem("bizzpal_user_session");
@@ -293,6 +282,7 @@ export default function SubscriptionPage() {
 
                   <button
                     type="button"
+                    disabled={p.id === currentPlan}
                     onClick={() => {
                       if (p.id === "free" || p.isCurrent) {
                         ensureSessionAndOpenDashboard(p.id, p.name);
@@ -300,13 +290,15 @@ export default function SubscriptionPage() {
                         setSelectedPlanForModal(p);
                       }
                     }}
-                    className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all btn-tactile cursor-pointer text-center ${
-                      isStarter
+                    className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all btn-tactile cursor-pointer text-center disabled:cursor-default disabled:opacity-70 ${
+                      p.id === currentPlan
+                        ? "bg-surface-2 border border-line text-text-muted"
+                        : isStarter
                         ? "bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 hover:brightness-105"
                         : "bg-surface-2 hover:bg-blue-500/10 border border-line-strong hover:border-blue-500/40 text-text"
                     }`}
                   >
-                    {p.ctaLabel}
+                    {p.id === currentPlan ? "Current Plan" : p.ctaLabel}
                   </button>
 
                   {/* Features List */}

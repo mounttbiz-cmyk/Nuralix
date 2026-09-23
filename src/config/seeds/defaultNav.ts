@@ -42,6 +42,7 @@ export const defaultNavItems: NavItem[] = [
     badge: "PRO",
     mobileTab: false,
     group: "core",
+    requiredPlan: "growth",
     enabled: true,
   },
 
@@ -65,6 +66,7 @@ export const defaultNavItems: NavItem[] = [
     order: 6,
     mobileTab: false,
     group: "intelligence",
+    requiredPlan: "growth",
     enabled: true,
   },
   {
@@ -75,6 +77,7 @@ export const defaultNavItems: NavItem[] = [
     order: 7,
     mobileTab: false,
     group: "intelligence",
+    requiredPlan: "growth",
     enabled: true,
   },
   {
@@ -127,6 +130,7 @@ export const defaultNavItems: NavItem[] = [
     order: 12,
     mobileTab: false,
     group: "management",
+    requiredPlan: "starter",
     enabled: true,
   },
   {
@@ -137,6 +141,7 @@ export const defaultNavItems: NavItem[] = [
     order: 13,
     mobileTab: false,
     group: "management",
+    requiredPlan: "growth",
     enabled: true,
   },
 
@@ -159,6 +164,7 @@ export const defaultNavItems: NavItem[] = [
     order: 15,
     mobileTab: false,
     group: "system",
+    requiredPlan: "starter",
     enabled: true,
   },
   {

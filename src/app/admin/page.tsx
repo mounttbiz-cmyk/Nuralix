@@ -141,7 +141,7 @@ export default function AdminPage() {
     name: string;
     category: "finance" | "sales" | "marketing" | "operations" | "strategy";
     description: string;
-    requiredPlan: "Starter" | "Professional" | "Enterprise";
+    requiredPlan: "free" | "starter" | "growth" | "enterprise";
     badge: string;
     hasInteractiveCalculator: boolean;
     enabled: boolean;
@@ -150,7 +150,7 @@ export default function AdminPage() {
     name: "",
     category: "finance",
     description: "",
-    requiredPlan: "Starter",
+    requiredPlan: "starter",
     badge: "Core",
     hasInteractiveCalculator: false,
     enabled: true,
@@ -582,7 +582,7 @@ export default function AdminPage() {
         name: t.name,
         category: t.category,
         description: t.description,
-        requiredPlan: t.requiredPlan || "Starter",
+        requiredPlan: t.requiredPlan || "starter",
         badge: t.badge || "Core",
         hasInteractiveCalculator: Boolean(t.hasInteractiveCalculator),
         enabled: t.enabled !== false,
@@ -594,7 +594,7 @@ export default function AdminPage() {
         name: "",
         category: "finance",
         description: "",
-        requiredPlan: "Starter",
+        requiredPlan: "starter",
         badge: "New",
         hasInteractiveCalculator: false,
         enabled: true,
@@ -2397,7 +2397,7 @@ export default function AdminPage() {
                 </div>
 
                 <div className="flex items-center justify-between text-[10px] text-text-muted pt-2 border-t border-line/60">
-                  <span>Required Plan: <b className="text-text font-semibold">{t.requiredPlan}</b></span>
+                  <span>Required Plan: <b className="text-text font-semibold">{t.requiredPlan.charAt(0).toUpperCase() + t.requiredPlan.slice(1)}</b></span>
                   <span>Badge: <b className="text-text font-mono">{t.badge}</b></span>
                 </div>
               </div>
@@ -2774,9 +2774,10 @@ export default function AdminPage() {
                     onChange={(e) => setToolForm({ ...toolForm, requiredPlan: e.target.value as any })}
                     className="w-full px-2.5 py-2 rounded-xl bg-surface-2 border border-line text-text"
                   >
-                    <option value="Starter">Starter</option>
-                    <option value="Professional">Professional</option>
-                    <option value="Enterprise">Enterprise</option>
+                    <option value="free">Free</option>
+                    <option value="starter">Starter</option>
+                    <option value="growth">Growth</option>
+                    <option value="enterprise">Enterprise</option>
                   </select>
                 </div>
               </div>
