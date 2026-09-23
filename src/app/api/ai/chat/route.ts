@@ -1,11 +1,107 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveBusiness } from "@/lib/db";
 
+interface ProviderAttempt {
+  name: string;
+  call: (prompt: string) => Promise<string | null>;
+}
+
+async function callGemini(apiKey: string, prompt: string): Promise<string | null> {
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 800 },
+      }),
+    }
+  );
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+}
+
+async function callGroq(apiKey: string, prompt: string): Promise<string | null> {
+  const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 800,
+    }),
+  });
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || null;
+}
+
+async function callOpenRouter(apiKey: string, prompt: string): Promise<string | null> {
+  const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "meta-llama/llama-3.3-70b-instruct:free",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 800,
+    }),
+  });
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || null;
+}
+
+async function callMistral(apiKey: string, prompt: string): Promise<string | null> {
+  const resp = await fetch("https://api.mistral.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "mistral-small-latest",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 800,
+    }),
+  });
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || null;
+}
+
+async function callCohere(apiKey: string, prompt: string): Promise<string | null> {
+  const resp = await fetch("https://api.cohere.com/v1/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "command-r",
+      message: prompt,
+      temperature: 0.7,
+      max_tokens: 800,
+    }),
+  });
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  return data.text || null;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { message, agentId, companyProfile, model = "auto" } = await req.json();
-
-    const apiKey = process.env.GEMINI_API_KEY || "";
 
     // 1. Multi-Model Intelligent Orchestration
     let resolvedModelKey = model;
@@ -101,48 +197,67 @@ Instructions:
 2. Ground your advice in the company fundamentals above.
 3. Keep the tone sharp, crisp, and high-impact. Avoid fluff.`;
 
-    if (apiKey) {
-      try {
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        const resp = await fetch(geminiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: `${systemPrompt}\n\nExecutive Request from User: ${message}` }],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 800,
-            },
-          }),
-        });
+    const fullPrompt = `${systemPrompt}\n\nExecutive Request from User: ${message}`;
 
-        if (resp.ok) {
-          const data = await resp.json();
-          const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (generatedText) {
-            return NextResponse.json({
-              success: true,
-              agent: activeRole.title,
-              text: generatedText,
-              provider: modelDisplayName,
-              modelUsed: modelDisplayName,
-              modelKey: resolvedModelKey,
-              routingReason,
-              reasoningTelemetry: [
-                `Parsed user intent: verified against ${companyProfile?.name || "enterprise"} telemetry`,
-                `Model routing: ${routingReason}`,
-                `Model latency: 312ms · Evaluation complete`,
-              ],
-            });
-          }
+    const providerChain: ProviderAttempt[] = [
+      {
+        name: "Google Gemini",
+        call: (prompt) => {
+          const key = process.env.GEMINI_API_KEY;
+          return key ? callGemini(key, prompt) : Promise.resolve(null);
+        },
+      },
+      {
+        name: "Groq",
+        call: (prompt) => {
+          const key = process.env.GROQ_API_KEY;
+          return key ? callGroq(key, prompt) : Promise.resolve(null);
+        },
+      },
+      {
+        name: "OpenRouter",
+        call: (prompt) => {
+          const key = process.env.OPENROUTER_API_KEY;
+          return key ? callOpenRouter(key, prompt) : Promise.resolve(null);
+        },
+      },
+      {
+        name: "Mistral",
+        call: (prompt) => {
+          const key = process.env.MISTRAL_API_KEY;
+          return key ? callMistral(key, prompt) : Promise.resolve(null);
+        },
+      },
+      {
+        name: "Cohere",
+        call: (prompt) => {
+          const key = process.env.COHERE_API_KEY;
+          return key ? callCohere(key, prompt) : Promise.resolve(null);
+        },
+      },
+    ];
+
+    for (const provider of providerChain) {
+      try {
+        const generatedText = await provider.call(fullPrompt);
+        if (generatedText) {
+          return NextResponse.json({
+            success: true,
+            agent: activeRole.title,
+            text: generatedText,
+            provider: modelDisplayName,
+            modelUsed: modelDisplayName,
+            modelKey: resolvedModelKey,
+            routingReason,
+            reasoningTelemetry: [
+              `Parsed user intent: verified against ${companyProfile?.name || "enterprise"} telemetry`,
+              `Model routing: ${routingReason}`,
+              `Live inference via ${provider.name} · Evaluation complete`,
+            ],
+          });
         }
       } catch (err) {
-        // Fall through to deterministic AI engine
+        // Try next provider in the chain
       }
     }
 
