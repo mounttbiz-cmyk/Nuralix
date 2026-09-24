@@ -37,6 +37,10 @@ interface Tenant {
   cashOnHand: number;
   runwayMonths: string;
   connectedTools: string[];
+  ownerEmail?: string | null;
+  ownerName?: string | null;
+  authProvider?: string | null;
+  isRegisteredUser?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -229,7 +233,8 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
     (t) =>
       t.name.toLowerCase().includes(search.toLowerCase()) ||
       t.founderName.toLowerCase().includes(search.toLowerCase()) ||
-      t.industryLabel.toLowerCase().includes(search.toLowerCase())
+      t.industryLabel.toLowerCase().includes(search.toLowerCase()) ||
+      (t.ownerEmail && t.ownerEmail.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -330,13 +335,33 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold font-semibold border border-gold/20">
                     {t.industryLabel}
                   </span>
+                  {t.isRegisteredUser ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-semibold border border-cyan-500/30">
+                      User Account
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-2 text-text-muted font-medium border border-line">
+                      Enterprise
+                    </span>
+                  )}
                   {idx === 0 && <StatusBadge label="Active Tenant" tone="live" />}
                 </div>
 
                 <div className="flex items-center gap-3 text-xs text-text-muted flex-wrap">
                   <span>
                     Founder: <strong className="text-text font-medium">{t.founderName}</strong>
+                    {t.ownerEmail && (
+                      <span className="ml-1 text-[11px] text-text-muted font-mono">({t.ownerEmail})</span>
+                    )}
                   </span>
+                  {t.authProvider && (
+                    <>
+                      <span>•</span>
+                      <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 bg-surface-2 rounded border border-line">
+                        via {t.authProvider}
+                      </span>
+                    </>
+                  )}
                   <span>•</span>
                   <span>Team: {t.teamSize} members</span>
                   {t.website && (

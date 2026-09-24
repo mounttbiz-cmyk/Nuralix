@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, setPlatformConfig } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +7,86 @@ export async function GET() {
   try {
     const businesses = db.prepare("SELECT * FROM businesses ORDER BY updated_at DESC").all() as any[];
     const users = db.prepare("SELECT id, email, name, provider, business_profile, created_at FROM registered_users ORDER BY created_at DESC").all() as any[];
+
+    // Ensure every registered user has a corresponding enterprise in businesses
+    const existingBizIds = new Set(businesses.map((b) => b.id));
+    const now = new Date().toISOString();
+
+    for (const u of users) {
+      if (!u.email) continue;
+      const cleanEmail = u.email.trim().toLowerCase();
+      const expectedBizId = `biz_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+      // Check if user has an enterprise matching their generated ID, or founder name
+      const alreadyHasBiz = businesses.some(
+        (b) => b.id === expectedBizId || (b.founder_name && b.founder_name.toLowerCase() === (u.name || "").toLowerCase())
+      );
+
+      if (!alreadyHasBiz && !existingBizIds.has(expectedBizId)) {
+        let p: any = {};
+        if (u.business_profile) {
+          try {
+            p = typeof u.business_profile === "string" ? JSON.parse(u.business_profile) : u.business_profile;
+          } catch {}
+        }
+        const bizName = p.name || (u.name ? `${u.name}'s Enterprise` : `${cleanEmail.split('@')[0]}'s Enterprise`);
+        const founder = u.name || p.founderName || "Founder";
+        const createdAt = u.created_at || now;
+
+        try {
+          db.prepare(`
+            INSERT INTO businesses (
+              id, name, founder_name, industry, industry_label, website, team_size,
+              annual_revenue, monthly_revenue, monthly_burn, cash_on_hand,
+              connected_tools, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).run(
+            expectedBizId,
+            bizName,
+            founder,
+            p.industry || "saas",
+            p.industryLabel || "Technology & Services",
+            p.website || "",
+            Number(p.teamSize || 1),
+            Number(p.annualRevenue || (p.revenue ? p.revenue * 12 : 0)),
+            Number(p.monthlyRevenue || p.revenue || 0),
+            Number(p.monthlyBurn || p.burn || 0),
+            Number(p.cashOnHand || p.cash || 0),
+            JSON.stringify(p.connectedTools || []),
+            createdAt,
+            createdAt
+          );
+
+          existingBizIds.add(expectedBizId);
+          businesses.push({
+            id: expectedBizId,
+            name: bizName,
+            founder_name: founder,
+            industry: p.industry || "saas",
+            industry_label: p.industryLabel || "Technology & Services",
+            website: p.website || "",
+            team_size: p.teamSize || 1,
+            annual_revenue: p.annualRevenue || (p.revenue ? p.revenue * 12 : 0),
+            monthly_revenue: p.monthlyRevenue || p.revenue || 0,
+            monthly_burn: p.monthlyBurn || p.burn || 0,
+            cash_on_hand: p.cashOnHand || p.cash || 0,
+            connected_tools: JSON.stringify(p.connectedTools || []),
+            created_at: createdAt,
+            updated_at: createdAt,
+          });
+        } catch (insertErr) {
+          console.warn("Could not backfill user enterprise:", insertErr);
+        }
+      }
+    }
+
+    // Map user details to each business
+    const userByEmail: Record<string, any> = {};
+    const userByName: Record<string, any> = {};
+    for (const u of users) {
+      if (u.email) userByEmail[u.email.toLowerCase()] = u;
+      if (u.name) userByName[u.name.toLowerCase()] = u;
+    }
 
     // Calculate aggregated platform metrics for the Superadmin dashboard
     let totalAnnualRev = 0;
@@ -32,6 +112,21 @@ export async function GET() {
         connectedToolsList = JSON.parse(b.connected_tools || "[]");
       } catch {}
 
+      // Find associated user record if any
+      let matchingUser: any = null;
+      if (b.id && b.id.startsWith("biz_")) {
+        const emailSlug = b.id.replace("biz_", "");
+        for (const em of Object.keys(userByEmail)) {
+          if (em.replace(/[^a-zA-Z0-9]/g, '_') === emailSlug) {
+            matchingUser = userByEmail[em];
+            break;
+          }
+        }
+      }
+      if (!matchingUser && b.founder_name) {
+        matchingUser = userByName[b.founder_name.toLowerCase()] || null;
+      }
+
       return {
         id: b.id,
         name: b.name || "Untitled Enterprise",
@@ -46,6 +141,10 @@ export async function GET() {
         cashOnHand: cash,
         runwayMonths: runwayMo,
         connectedTools: connectedToolsList,
+        ownerEmail: matchingUser?.email || null,
+        ownerName: matchingUser?.name || null,
+        authProvider: matchingUser?.provider || null,
+        isRegisteredUser: Boolean(matchingUser),
         createdAt: b.created_at,
         updatedAt: b.updated_at,
       };
@@ -63,7 +162,7 @@ export async function GET() {
           createdAt: u.created_at,
         })),
         stats: {
-          totalBusinesses: businesses.length,
+          totalBusinesses: formattedBusinesses.length,
           totalUsers: users.length,
           totalAnnualRevenue: totalAnnualRev,
           totalMonthlyRevenue: totalMonthlyRev,
@@ -131,14 +230,37 @@ export async function PUT(request: Request) {
       id
     );
 
-    // If setActive requested, touch the updated_at timestamp so it sorts first in getActiveBusiness()
+    // If setActive requested, mark as active tenant in platform settings & touch updated_at
     if (setActive) {
       db.prepare("UPDATE businesses SET updated_at = ? WHERE id = ?").run(now, id);
+      setPlatformConfig("active_tenant_id", id);
+      try {
+        const { setFirestoreConfig } = require("@/lib/firebase/firestoreService");
+        setFirestoreConfig("active_tenant_id", id);
+      } catch {}
     }
+
+    // Mirror to Firestore
+    try {
+      const { saveFirestoreBusinessRecord } = require("@/lib/firebase/firestoreService");
+      saveFirestoreBusinessRecord(id, {
+        name,
+        founderName,
+        industry,
+        industryLabel,
+        annualRevenue,
+        monthlyRevenue,
+        monthlyBurn,
+        cashOnHand,
+        teamSize,
+        website,
+        updatedAt: now,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,
-      message: `Business "${name || id}" updated successfully in SQLite.`,
+      message: `Business "${name || id}" updated successfully.`,
     });
   } catch (error: any) {
     console.error("Superadmin tenants PUT error:", error);

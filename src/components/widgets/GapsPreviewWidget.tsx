@@ -1,34 +1,79 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ContainerTile } from "../ui/ContainerTile";
 import { AlertTriangle, ArrowRight, ShieldAlert } from "lucide-react";
 import Link from "next/link";
+import { useBusinessDataSync } from "@/lib/upload/events";
 
 export function GapsPreviewWidget() {
+  const [companyName, setCompanyName] = useState("Enterprise");
+  const [founderName, setFounderName] = useState("Founder");
+  const [monthlyRev, setMonthlyRev] = useState(500000);
+  const [monthlyBurn, setMonthlyBurn] = useState(150000);
+  const [cashOnHand, setCashOnHand] = useState(1200000);
+
+  const applyProfile = (p: any) => {
+    if (!p) return;
+    if (p.name) setCompanyName(p.name);
+    if (p.founderName) setFounderName(p.founderName);
+    if (p.revenue !== undefined) setMonthlyRev(Number(p.revenue));
+    else if (p.monthlyRevenue !== undefined) setMonthlyRev(Number(p.monthlyRevenue));
+    if (p.burn !== undefined) setMonthlyBurn(Number(p.burn));
+    else if (p.monthlyBurn !== undefined) setMonthlyBurn(Number(p.monthlyBurn));
+    if (p.cash !== undefined) setCashOnHand(Number(p.cash));
+    else if (p.cashOnHand !== undefined) setCashOnHand(Number(p.cashOnHand));
+  };
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("bizzpal_business_profile");
+      if (saved) {
+        applyProfile(JSON.parse(saved));
+      } else {
+        fetch("/api/business/intake")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && d.business) {
+              applyProfile(d.business);
+            }
+          })
+          .catch(() => {});
+      }
+    } catch {}
+  }, []);
+
+  useBusinessDataSync((metrics) => {
+    applyProfile(metrics);
+  });
+
+  const runwayMo = monthlyBurn > 0 ? Number((cashOnHand / monthlyBurn).toFixed(1)) : 18;
+
   const topGaps = [
     {
-      id: "gap_1",
-      title: "One customer represents 38% of total revenue",
-      severity: "critical",
-      category: "Risk",
-      impact: "₹1,85,000/mo at risk",
-      effort: "project",
-    },
-    {
-      id: "gap_2",
-      title: "CAC payback period exceeds 14 months (benchmark: 12)",
-      severity: "high",
-      category: "Growth",
-      impact: "Trapping ₹2,40,000 working capital",
+      id: "gap_runway",
+      title: runwayMo < 12
+        ? `Liquid runway sits at ${runwayMo} months (<12.0 mo standard target)`
+        : `Burn rate of ₹${monthlyBurn.toLocaleString("en-IN")}/mo warrants efficiency audit`,
+      severity: runwayMo < 6 ? "critical" : runwayMo < 10 ? "high" : "medium",
+      category: "Runway & Risk",
+      impact: `₹${monthlyBurn.toLocaleString("en-IN")}/mo net burn`,
       effort: "quick win",
     },
     {
-      id: "gap_3",
-      title: "Founder is primary closer for 75% of sales deals",
+      id: "gap_concentration",
+      title: `Top enterprise client represents ~36% of ${companyName}'s ARR`,
+      severity: "high",
+      category: "Revenue Growth",
+      impact: `₹${Math.round(monthlyRev * 0.36).toLocaleString("en-IN")}/mo exposure`,
+      effort: "project",
+    },
+    {
+      id: "gap_founder_bottleneck",
+      title: `${founderName} remains primary closer for >70% of enterprise pipeline`,
       severity: "high",
       category: "Operations",
-      impact: "Growth capped at founder bandwidth",
+      impact: "Growth capped at founder calendar bandwidth",
       effort: "quick win",
     },
   ];

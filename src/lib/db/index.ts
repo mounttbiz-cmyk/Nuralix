@@ -382,7 +382,7 @@ export function getRegisteredUser(email: string): any {
 }
 
 /**
- * Save / update a user's business profile in SQLite
+ * Save / update a user's business profile in SQLite and ensure matching business record
  */
 export function saveUserBusinessProfile(email: string, profile: any): boolean {
   if (!email || !profile) return false;
@@ -394,6 +394,78 @@ export function saveUserBusinessProfile(email: string, profile: any): boolean {
       SET business_profile = ? 
       WHERE LOWER(email) = ?
     `).run(profileJson, cleanEmail);
+
+    const now = new Date().toISOString();
+    const p = typeof profile === "object" ? profile : JSON.parse(profileJson);
+    const bizId = `biz_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+    // Upsert into businesses table
+    const bizExisting = db.prepare("SELECT id FROM businesses WHERE id = ?").get(bizId);
+    if (bizExisting) {
+      db.prepare(`
+        UPDATE businesses SET
+          name = COALESCE(?, name),
+          founder_name = COALESCE(?, founder_name),
+          industry = COALESCE(?, industry),
+          industry_label = COALESCE(?, industry_label),
+          website = COALESCE(?, website),
+          team_size = COALESCE(?, team_size),
+          annual_revenue = COALESCE(?, annual_revenue),
+          monthly_revenue = COALESCE(?, monthly_revenue),
+          monthly_burn = COALESCE(?, monthly_burn),
+          cash_on_hand = COALESCE(?, cash_on_hand),
+          connected_tools = COALESCE(?, connected_tools),
+          updated_at = ?
+        WHERE id = ?
+      `).run(
+        p.name || null,
+        p.founderName || null,
+        p.industry || null,
+        p.industryLabel || null,
+        p.website || null,
+        p.teamSize !== undefined ? Number(p.teamSize) : null,
+        p.annualRevenue !== undefined ? Number(p.annualRevenue) : (p.revenue ? Number(p.revenue) * 12 : null),
+        p.monthlyRevenue !== undefined ? Number(p.monthlyRevenue) : (p.revenue ? Number(p.revenue) : null),
+        p.monthlyBurn !== undefined ? Number(p.monthlyBurn) : (p.burn ? Number(p.burn) : null),
+        p.cashOnHand !== undefined ? Number(p.cashOnHand) : (p.cash ? Number(p.cash) : null),
+        p.connectedTools ? JSON.stringify(p.connectedTools) : null,
+        now,
+        bizId
+      );
+    } else {
+      const bizName = p.name || `${cleanEmail.split('@')[0]}'s Enterprise`;
+      const founder = p.founderName || "Founder";
+      db.prepare(`
+        INSERT INTO businesses (
+          id, name, founder_name, industry, industry_label, website, team_size,
+          annual_revenue, monthly_revenue, monthly_burn, cash_on_hand,
+          connected_tools, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        bizId,
+        bizName,
+        founder,
+        p.industry || "saas",
+        p.industryLabel || "Technology & Services",
+        p.website || "",
+        Number(p.teamSize || 1),
+        Number(p.annualRevenue || (p.revenue ? p.revenue * 12 : 0)),
+        Number(p.monthlyRevenue || p.revenue || 0),
+        Number(p.monthlyBurn || p.burn || 0),
+        Number(p.cashOnHand || p.cash || 0),
+        JSON.stringify(p.connectedTools || []),
+        now,
+        now
+      );
+    }
+
+    // Mirror to Firestore
+    try {
+      const { saveFirestoreBusinessRecord, saveFirestoreUserProfile } = require("@/lib/firebase/firestoreService");
+      saveFirestoreUserProfile(cleanEmail, { email: cleanEmail, businessProfile: p });
+      saveFirestoreBusinessRecord(bizId, { ...p, ownerEmail: cleanEmail, updatedAt: now });
+    } catch {}
+
     return result.changes > 0;
   } catch (err) {
     console.warn("saveUserBusinessProfile error:", err);
@@ -409,6 +481,8 @@ export function deleteRegisteredUser(email: string): boolean {
   try {
     const cleanEmail = email.trim().toLowerCase();
     const result = db.prepare("DELETE FROM registered_users WHERE LOWER(email) = ?").run(cleanEmail);
+    const bizId = `biz_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    db.prepare("DELETE FROM businesses WHERE id = ?").run(bizId);
     return result.changes > 0;
   } catch (err) {
     console.warn("deleteRegisteredUser error:", err);
@@ -418,6 +492,7 @@ export function deleteRegisteredUser(email: string): boolean {
 
 /**
  * Record a newly registered user into SQLite with optional initial business profile
+ * and ensure an enterprise record is created in businesses table
  */
 export function registerUser(email: string, name?: string, provider?: string, uid?: string, businessProfile?: any): boolean {
   if (!email) return false;
@@ -425,6 +500,7 @@ export function registerUser(email: string, name?: string, provider?: string, ui
     const cleanEmail = email.trim().toLowerCase();
     const existing = db.prepare("SELECT id FROM registered_users WHERE LOWER(email) = ?").get(cleanEmail) as any;
     const profileJson = businessProfile ? (typeof businessProfile === "string" ? businessProfile : JSON.stringify(businessProfile)) : null;
+    const now = new Date().toISOString();
 
     if (existing) {
       db.prepare(`
@@ -434,16 +510,73 @@ export function registerUser(email: string, name?: string, provider?: string, ui
           business_profile = COALESCE(?, business_profile)
         WHERE LOWER(email) = ?
       `).run(name || null, provider || null, profileJson, cleanEmail);
-      return true;
+    } else {
+      const idExists = uid ? db.prepare("SELECT id FROM registered_users WHERE id = ?").get(uid) : false;
+      const id = (uid && !idExists) ? uid : `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      db.prepare(`
+        INSERT INTO registered_users (id, email, name, provider, business_profile, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(id, cleanEmail, name || "", provider || "email", profileJson, now);
     }
 
-    const idExists = uid ? db.prepare("SELECT id FROM registered_users WHERE id = ?").get(uid) : false;
-    const id = (uid && !idExists) ? uid : `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const now = new Date().toISOString();
-    db.prepare(`
-      INSERT INTO registered_users (id, email, name, provider, business_profile, created_at)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, cleanEmail, name || "", provider || "email", profileJson, now);
+    // Automatically ensure this user appears in businesses table for Superadmin
+    const bizId = `biz_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    const p = businessProfile && typeof businessProfile === "object" ? businessProfile : {};
+    const bizName = p.name || (name ? `${name}'s Enterprise` : `${cleanEmail.split('@')[0]}'s Enterprise`);
+    const founder = name || p.founderName || "Founder";
+    const bizExisting = db.prepare("SELECT id FROM businesses WHERE id = ?").get(bizId);
+
+    if (bizExisting) {
+      db.prepare(`
+        UPDATE businesses SET
+          name = COALESCE(?, name),
+          founder_name = COALESCE(?, founder_name),
+          updated_at = ?
+        WHERE id = ?
+      `).run(bizName, founder, now, bizId);
+    } else {
+      db.prepare(`
+        INSERT INTO businesses (
+          id, name, founder_name, industry, industry_label, website, team_size,
+          annual_revenue, monthly_revenue, monthly_burn, cash_on_hand,
+          connected_tools, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        bizId,
+        bizName,
+        founder,
+        p.industry || "saas",
+        p.industryLabel || "Technology & Services",
+        p.website || "",
+        Number(p.teamSize || 1),
+        Number(p.annualRevenue || (p.revenue ? p.revenue * 12 : 0)),
+        Number(p.monthlyRevenue || p.revenue || 0),
+        Number(p.monthlyBurn || p.burn || 0),
+        Number(p.cashOnHand || p.cash || 0),
+        JSON.stringify(p.connectedTools || []),
+        now,
+        now
+      );
+    }
+
+    // Mirror user profile to Firestore
+    try {
+      const { saveFirestoreUserProfile, saveFirestoreBusinessRecord } = require("@/lib/firebase/firestoreService");
+      saveFirestoreUserProfile(cleanEmail, {
+        email: cleanEmail,
+        name: name || "",
+        provider: provider || "email",
+        businessProfile: p,
+      });
+      saveFirestoreBusinessRecord(bizId, {
+        id: bizId,
+        name: bizName,
+        founderName: founder,
+        ownerEmail: cleanEmail,
+        updatedAt: now,
+      });
+    } catch {}
+
     return true;
   } catch (err) {
     console.warn("registerUser error:", err);

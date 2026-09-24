@@ -233,25 +233,36 @@ function DashboardContent() {
 
   // Read saved business profile if available from localStorage or backend SQLite database
   useEffect(() => {
-    try {
-      const savedProfileStr = localStorage.getItem("bizzpal_business_profile");
-      if (savedProfileStr) {
-        applyProfileData(JSON.parse(savedProfileStr));
-      } else {
-        // Fetch real enterprise record from database API
-        fetch("/api/business/intake")
-          .then(r => r.json())
-          .then(d => {
-            if (d.success && d.business) {
-              applyProfileData(d.business);
-              localStorage.setItem("bizzpal_business_profile", JSON.stringify(d.business));
-            }
-          })
-          .catch(() => {});
+    const handleProfileSync = () => {
+      try {
+        const savedProfileStr = localStorage.getItem("bizzpal_business_profile");
+        if (savedProfileStr) {
+          applyProfileData(JSON.parse(savedProfileStr));
+        } else {
+          // Fetch real enterprise record from database API
+          fetch("/api/business/intake")
+            .then(r => r.json())
+            .then(d => {
+              if (d.success && d.business) {
+                applyProfileData(d.business);
+                localStorage.setItem("bizzpal_business_profile", JSON.stringify(d.business));
+              }
+            })
+            .catch(() => {});
+        }
+      } catch (e) {
+        // ignore
       }
-    } catch (e) {
-      // ignore
-    }
+    };
+
+    handleProfileSync();
+    window.addEventListener("storage", handleProfileSync);
+    window.addEventListener("bizzpal_business_data_updated", handleProfileSync);
+
+    return () => {
+      window.removeEventListener("storage", handleProfileSync);
+      window.removeEventListener("bizzpal_business_data_updated", handleProfileSync);
+    };
   }, []);
 
   useBusinessDataSync(metrics => {

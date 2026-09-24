@@ -316,65 +316,12 @@ export default function LoginPage() {
   };
 
   /**
-   * Instant 1-Click Fast-Track Demo Founder Access
-   */
-  const handleInstantDemo = (targetName = "Alex Vance") => {
-    setLoading(true);
-    setErrorInfo(null);
-
-    const demoSession = {
-      id: `usr_demo_${Date.now()}`,
-      email: "founder@apexanalytics.io",
-      name: targetName,
-      role: "owner",
-      provider: "demo",
-      authenticatedAt: new Date().toISOString(),
-    };
-
-    const demoProfile = {
-      name: "Apex Analytics AI",
-      founderName: targetName,
-      industry: "saas",
-      industryLabel: "B2B SaaS & Enterprise AI",
-      revenue: 540000,
-      annualRevenue: 6480000,
-      burn: 145000,
-      cash: 1850000,
-      teamSize: 18,
-      completedAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem("bizzpal_user_session", JSON.stringify(demoSession));
-    localStorage.setItem("bizzpal_business_profile", JSON.stringify(demoProfile));
-    localStorage.setItem(`bizzpal_user_business_${demoSession.email}`, JSON.stringify(demoProfile));
-
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 200);
-  };
-
-  /**
-   * Pre-fill sample credentials for rapid testing
-   */
-  const prefillSampleCredentials = () => {
-    setFullName("Alex Vance");
-    setEmail("founder@apexanalytics.io");
-    setPassword("bizzpal2026");
-    setErrorInfo(null);
-  };
-
-  /**
    * Business Login / Registration handler
    */
-  const handleBusinessAuth = async (e?: React.FormEvent, provider: "google" | "email" | "demo" = "email") => {
+  const handleBusinessAuth = async (e?: React.FormEvent, provider: "google" | "email" = "email") => {
     if (e) e.preventDefault();
     setLoading(true);
     setErrorInfo(null);
-
-    if (provider === "demo") {
-      handleInstantDemo();
-      return;
-    }
 
     if (isFirebaseConfigured) {
       try {
@@ -557,8 +504,11 @@ export default function LoginPage() {
         return;
       }
     } else {
-      // Local fallback
-      handleInstantDemo(fullName || "Founder");
+      setLoading(false);
+      setErrorInfo({
+        message: "Authentication service is not configured. Please ensure your environment credentials are set.",
+        type: "config"
+      });
     }
   };
 
@@ -874,16 +824,6 @@ export default function LoginPage() {
                               <span>Switch to Create Account →</span>
                             </button>
                           )}
-
-                        {/* Instant Demo Bypass */}
-                        <button
-                          type="button"
-                          onClick={() => handleInstantDemo()}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-500 dark:text-amber-300 font-bold transition-colors ml-auto"
-                        >
-                          <Zap className="w-3.5 h-3.5" />
-                          <span>Instant Demo Bypass →</span>
-                        </button>
                       </div>
                     </div>
                   )}
@@ -1005,30 +945,6 @@ export default function LoginPage() {
                       )}
                     </button>
                   </form>
-
-                  {/* Fast-Track 1-Click Founder Demo Section */}
-                  <div className="pt-2 border-t border-line space-y-2">
-                    <div className="flex items-center justify-between text-[11px] text-text-muted">
-                      <span>Want immediate access without setup?</span>
-                      <button
-                        type="button"
-                        onClick={prefillSampleCredentials}
-                        className="text-amber-500 hover:underline font-semibold"
-                      >
-                        Fill sample credentials
-                      </button>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleInstantDemo()}
-                      disabled={loading}
-                      className="w-full py-2 px-3.5 rounded-xl bg-surface-2 hover:bg-surface border border-line hover:border-amber-500/40 text-text font-bold text-xs transition-all flex items-center justify-center gap-2 group shadow-sm"
-                    >
-                      <Zap className="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" />
-                      <span>⚡ Instant Founder Demo (1-Click Access)</span>
-                    </button>
-                  </div>
                 </>
               ) : (
                 /* Developer Superadmin Mode */
@@ -1177,19 +1093,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-line flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowRedirectGuide(false);
-                  handleInstantDemo();
-                }}
-                className="px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 font-bold text-xs transition-colors flex items-center gap-1.5"
-              >
-                <Zap className="w-3.5 h-3.5" />
-                <span>Continue with Instant Demo</span>
-              </button>
-
+            <div className="pt-3 border-t border-line flex items-center justify-end">
               <button
                 type="button"
                 onClick={() => setShowRedirectGuide(false)}
