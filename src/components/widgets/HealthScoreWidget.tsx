@@ -14,45 +14,85 @@ interface HealthScoreProps {
 }
 
 export function HealthScoreWidget({
-  score: propScore = 78,
-  delta = 4.2,
+  score: propScore,
+  delta,
 }: HealthScoreProps) {
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
-  const [runwayMo, setRunwayMo] = useState("7.2");
-  const [revPerHead, setRevPerHead] = useState("₹18.4L");
-  const [industryName, setIndustryName] = useState("B2B SaaS");
-  const [financialScore, setFinancialScore] = useState(82);
-  const [teamScore, setTeamScore] = useState(88);
-  const [overallScore, setOverallScore] = useState(propScore);
+  const [runwayMo, setRunwayMo] = useState("0.0");
+  const [revPerHead, setRevPerHead] = useState("₹0");
+  const [industryName, setIndustryName] = useState("Enterprise");
+  const [financialScore, setFinancialScore] = useState(50);
+  const [growthScore, setGrowthScore] = useState(50);
+  const [customerScore, setCustomerScore] = useState(50);
+  const [opsScore, setOpsScore] = useState(50);
+  const [teamScore, setTeamScore] = useState(50);
+  const [isFresh, setIsFresh] = useState(true);
   const [isUploaded, setIsUploaded] = useState(false);
 
   const applyProfile = (saved: any) => {
     if (!saved) return;
-    const cash = Number(saved.cash || saved.cashOnHand || 1200000);
-    const burn = Number(saved.burn || saved.monthlyBurn || saved.monthlyNetBurn || 150000);
-    const annRev = Number(saved.annualRevenue || (saved.revenue ? saved.revenue * 12 : 6000000));
-    const team = Number(saved.teamSize || 15);
+    const cash = Number(saved.cash || saved.cashOnHand || 0);
+    const burn = Number(saved.burn || saved.monthlyBurn || saved.monthlyNetBurn || 0);
+    const mRev = Number(saved.revenue || saved.monthlyRevenue || 0);
+    const annRev = Number(saved.annualRevenue || (mRev > 0 ? mRev * 12 : 0));
+    const team = Number(saved.teamSize || (mRev > 0 ? 1 : 0));
+    const margin = Number(saved.grossMargin || 0);
 
+    const hasAnyData = cash > 0 || burn > 0 || mRev > 0 || team > 0;
+    setIsFresh(!hasAnyData);
+
+    // 1. Financial vector
     if (burn > 0) {
       const rVal = Number((cash / burn).toFixed(1));
       setRunwayMo(String(rVal));
-      if (rVal >= 12) setFinancialScore(92);
-      else if (rVal >= 8) setFinancialScore(84);
-      else if (rVal >= 5) setFinancialScore(74);
-      else setFinancialScore(55);
+      if (rVal >= 18) setFinancialScore(95);
+      else if (rVal >= 12) setFinancialScore(90);
+      else if (rVal >= 8) setFinancialScore(82);
+      else if (rVal >= 5) setFinancialScore(70);
+      else if (rVal >= 3) setFinancialScore(55);
+      else setFinancialScore(35);
+    } else if (cash > 0) {
+      setRunwayMo("18+");
+      setFinancialScore(92);
+    } else {
+      setRunwayMo("0.0");
+      setFinancialScore(hasAnyData ? 50 : 50);
     }
 
-    if (annRev && team) {
+    // 2. Growth vector
+    if (mRev >= 1000000) setGrowthScore(92);
+    else if (mRev >= 500000) setGrowthScore(85);
+    else if (mRev >= 100000) setGrowthScore(76);
+    else if (mRev > 0) setGrowthScore(68);
+    else setGrowthScore(50);
+
+    // 3. Customer vector
+    if (mRev >= 500000) setCustomerScore(88);
+    else if (mRev > 0) setCustomerScore(78);
+    else setCustomerScore(50);
+
+    // 4. Operations vector
+    if (margin >= 75) setOpsScore(88);
+    else if (margin >= 50) setOpsScore(78);
+    else if (mRev > 0) setOpsScore(70);
+    else setOpsScore(50);
+
+    // 5. Team vector
+    if (annRev > 0 && team > 0) {
       const rph = Math.round(annRev / Math.max(1, team));
       if (rph >= 10000000) {
         setRevPerHead(`₹${(rph / 10000000).toFixed(1)}Cr`);
         setTeamScore(92);
       } else if (rph >= 100000) {
         setRevPerHead(`₹${(rph / 100000).toFixed(1)}L`);
-        setTeamScore(rph >= 2500000 ? 90 : rph >= 1500000 ? 86 : 78);
+        setTeamScore(rph >= 2500000 ? 90 : rph >= 1000000 ? 82 : 72);
       } else {
         setRevPerHead(`₹${rph.toLocaleString("en-IN")}`);
+        setTeamScore(65);
       }
+    } else {
+      setRevPerHead(team > 0 ? `${team} FTE` : "0 FTE");
+      setTeamScore(team > 0 ? 60 : 50);
     }
 
     if (saved.industry) {
@@ -66,7 +106,7 @@ export function HealthScoreWidget({
         finance: "Financial Services & Wealth",
         real_estate: "Real Estate & Property",
       };
-      setIndustryName(names[saved.industry] || saved.industry.toUpperCase());
+      setIndustryName(names[saved.industry] || saved.industryLabel || saved.industry.toUpperCase());
     }
 
     if (saved.isUploadedData) {
@@ -99,21 +139,27 @@ export function HealthScoreWidget({
   });
 
   // Calculate dynamic weighted score
-  const displayScore = Math.round(financialScore * 0.25 + 68 * 0.2 + 84 * 0.2 + 71 * 0.2 + teamScore * 0.15);
+  const displayScore = Math.round(
+    financialScore * 0.25 +
+    growthScore * 0.20 +
+    customerScore * 0.20 +
+    opsScore * 0.20 +
+    teamScore * 0.15
+  );
 
   const components = [
-    { key: "financial", name: "Financial", score: financialScore, weight: "25%", detail: `Gross margins (82%), verified runway ${runwayMo} mo.` },
-    { key: "growth", name: "Growth", score: 68, weight: "20%", detail: "CAC payback benchmark within normal deviation." },
-    { key: "customer", name: "Customer", score: 84, weight: "20%", detail: "Logo retention 94%, NRR 108%." },
-    { key: "operations", name: "Operations", score: 71, weight: "20%", detail: "Workflow throughput calibrated to headcount." },
-    { key: "team", name: "Team", score: teamScore, weight: "15%", detail: `Revenue/head at ${revPerHead}, operational efficiency optimal.` },
+    { key: "financial", name: "Financial", score: financialScore, weight: "25%", detail: runwayMo !== "0.0" ? `Runway buffer: ${runwayMo} mo.` : "Cash & burn telemetry unrecorded." },
+    { key: "growth", name: "Growth", score: growthScore, weight: "20%", detail: growthScore > 50 ? "Verified revenue run-rate trajectory." : "Awaiting revenue stream data." },
+    { key: "customer", name: "Customer", score: customerScore, weight: "20%", detail: customerScore > 50 ? "Contract pipeline active." : "Awaiting client telemetry." },
+    { key: "operations", name: "Operations", score: opsScore, weight: "20%", detail: opsScore > 50 ? "Operating margins mapped." : "Baseline operational telemetry." },
+    { key: "team", name: "Team", score: teamScore, weight: "15%", detail: revPerHead !== "₹0" ? `Annual productivity ${revPerHead}/head.` : "Headcount unrecorded." },
   ];
 
   // SVG circular gauge calculation
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (displayScore / 100) * circumference;
-  const strokeColor = displayScore >= 80 ? "var(--gold)" : displayScore >= 70 ? "#38BDF8" : "#F43F5E";
+  const strokeColor = displayScore >= 80 ? "var(--gold)" : displayScore >= 65 ? "#38BDF8" : "#F43F5E";
 
   return (
     <ContainerTile span={2} id="widget_health_score">
@@ -132,7 +178,7 @@ export function HealthScoreWidget({
               </p>
             </div>
           </div>
-          <ProvenanceBadge type={isUploaded ? "from_data" : "estimate"} />
+          <ProvenanceBadge type={isUploaded ? "from_data" : isFresh ? "benchmark" : "estimate"} />
         </div>
 
         {/* Circular Gauge + Hero Score */}
@@ -166,7 +212,7 @@ export function HealthScoreWidget({
                 <AnimatedNumber value={String(displayScore)} />
               </span>
               <span className="text-[10px] text-gold font-bold font-mono mt-1 uppercase tracking-wider">
-                {displayScore >= 80 ? "Optimal" : displayScore >= 70 ? "Stable" : "Needs Review"}
+                {displayScore >= 80 ? "Optimal" : displayScore >= 65 ? "Stable" : "Calibrating"}
               </span>
             </div>
           </div>
@@ -174,10 +220,10 @@ export function HealthScoreWidget({
           <div className="flex-1 space-y-2 text-center @sm:text-left">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 font-mono">
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>+{delta}% vs last month</span>
+              <span>{isFresh ? "Baseline Initiated" : "+ Live Calibrated"}</span>
             </div>
             <p className="text-xs text-text-muted leading-relaxed">
-              Composite telemetry synthesized across cash runway, revenue per FTE, and 24 operational benchmarks for {industryName}.
+              Composite telemetry synthesized across cash runway, revenue per FTE, and operational benchmarks for {industryName}.
             </p>
           </div>
         </div>

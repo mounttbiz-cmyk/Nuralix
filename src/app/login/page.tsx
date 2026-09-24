@@ -272,13 +272,16 @@ export default function LoginPage() {
       businessProfile = {
         name: `${fallbackName}'s Enterprise`,
         founderName: fallbackName,
-        industry: "saas",
-        industryLabel: "B2B SaaS & Cloud Platforms",
-        revenue: 500000,
-        annualRevenue: 6000000,
-        burn: 150000,
-        cash: 1200000,
-        teamSize: 12,
+        industry: "it_tech",
+        industryLabel: "IT & Technology Services",
+        revenue: 0,
+        monthlyRevenue: 0,
+        annualRevenue: 0,
+        burn: 0,
+        monthlyBurn: 0,
+        cash: 0,
+        cashOnHand: 0,
+        teamSize: 1,
         completedAt: new Date().toISOString(),
       };
     }

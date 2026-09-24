@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
-import { db, DEFAULT_BUSINESS_ID } from "@/lib/db";
+import { db, DEFAULT_BUSINESS_ID, getPlatformConfig, getActiveBusiness } from "@/lib/db";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    let bizId = searchParams.get("businessId");
+
+    if (!bizId) {
+      bizId = getPlatformConfig("active_tenant_id", null) || getActiveBusiness()?.id || DEFAULT_BUSINESS_ID;
+    }
+
     const tasks = db
       .prepare("SELECT * FROM tasks WHERE business_id = ? ORDER BY created_at DESC")
-      .all(DEFAULT_BUSINESS_ID) as any[];
+      .all(bizId) as any[];
 
     return NextResponse.json({
       success: true,
+      businessId: bizId,
       tasks: tasks.map(t => ({
         id: t.id,
         title: t.title,
@@ -27,12 +35,13 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { title, owner = "Founder", gap = "General Execution", priority = "medium", status = "todo" } = body;
+    const { businessId, title, owner = "Founder", gap = "General Execution", priority = "medium", status = "todo" } = body;
 
     if (!title || !title.trim()) {
       return NextResponse.json({ error: "Task title is required" }, { status: 400 });
     }
 
+    const targetBizId = businessId || getPlatformConfig("active_tenant_id", null) || getActiveBusiness()?.id || DEFAULT_BUSINESS_ID;
     const taskId = `task_${Date.now()}`;
     const now = new Date().toISOString();
 
@@ -41,7 +50,7 @@ export async function POST(req: Request) {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       taskId,
-      DEFAULT_BUSINESS_ID,
+      targetBizId,
       title.trim(),
       owner,
       gap,

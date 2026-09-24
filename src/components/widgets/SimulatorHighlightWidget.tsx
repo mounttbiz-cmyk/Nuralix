@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ContainerTile } from "../ui/ContainerTile";
 import { ProvenanceBadge } from "../ui/Badge";
 import { Compass, Play, ArrowRight, TrendingUp } from "lucide-react";
@@ -9,6 +9,24 @@ import Link from "next/link";
 export function SimulatorHighlightWidget() {
   const [isRunning, setIsRunning] = useState(false);
   const [iterations, setIterations] = useState(1000);
+  const [industryName, setIndustryName] = useState("Technology");
+  const [companyName, setCompanyName] = useState("Enterprise");
+  const [monthlyRev, setMonthlyRev] = useState(0);
+
+  useEffect(() => {
+    try {
+      const p = localStorage.getItem("bizzpal_business_profile");
+      if (p) {
+        const parsed = JSON.parse(p);
+        if (parsed.name) setCompanyName(parsed.name);
+        if (parsed.industryLabel) setIndustryName(parsed.industryLabel);
+        else if (parsed.industry === "it_tech") setIndustryName("IT & Technology Services");
+        else if (parsed.industry === "saas") setIndustryName("B2B SaaS");
+        if (parsed.revenue) setMonthlyRev(Number(parsed.revenue));
+        else if (parsed.monthlyRevenue) setMonthlyRev(Number(parsed.monthlyRevenue));
+      }
+    } catch {}
+  }, []);
 
   const runMonteCarlo = () => {
     setIsRunning(true);
@@ -23,6 +41,12 @@ export function SimulatorHighlightWidget() {
     }, 80);
   };
 
+  const isIT = industryName.toLowerCase().includes("it") || industryName.toLowerCase().includes("tech");
+  const scenarioTitle = isIT ? "Decision Simulator: Delivery Consultant Expansion" : "Decision Simulator: Key Role Expansion";
+  const scenarioSubtitle = isIT
+    ? `Ramp-up: 3 months · Billing target: ₹${monthlyRev > 0 ? Math.round(monthlyRev * 0.4).toLocaleString("en-IN") : "2.5L"}/mo · Margin threshold: 65%`
+    : `Ramp-up: 4 months · Target quota: ₹${monthlyRev > 0 ? Math.round(monthlyRev * 0.5).toLocaleString("en-IN") : "5.0L"}/mo`;
+
   return (
     <ContainerTile span={4} id="widget_simulator_highlight">
       <div className="space-y-4">
@@ -35,14 +59,14 @@ export function SimulatorHighlightWidget() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-sans">
-                  Decision Simulator: Sales AE Expansion
+                  {scenarioTitle}
                 </h2>
                 <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 font-mono font-semibold">
                   Monte Carlo (1,000 runs)
                 </span>
               </div>
               <p className="text-[11px] text-text-muted">
-                Ramp-up: 4 months · Salary: ₹15L loaded · Expected quota: ₹60L ARR
+                {scenarioSubtitle}
               </p>
             </div>
           </div>

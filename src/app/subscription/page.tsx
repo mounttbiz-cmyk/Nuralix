@@ -30,7 +30,7 @@ interface PlanTier {
 const DEFAULT_FALLBACK_PLANS: PlanTier[] = [
   {
     id: "free",
-    name: "BizzPal Free / Demo",
+    name: "BizzPal Starter Free",
     tagline: "Try BizzPal free to see how it works.",
     price: "₹0",
     period: "/forever",

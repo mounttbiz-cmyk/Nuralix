@@ -26,13 +26,13 @@ interface KpiItem {
 }
 
 export function KpiGridWidget() {
-  const [industryLabel, setIndustryLabel] = useState("IT & Technology Services");
-  const [monthlyRev, setMonthlyRev] = useState(500000);
-  const [annualRev, setAnnualRev] = useState(6000000);
-  const [burn, setBurn] = useState(150000);
-  const [cash, setCash] = useState(1200000);
-  const [teamSize, setTeamSize] = useState(15);
-  const [grossMarginVal, setGrossMarginVal] = useState(82.4);
+  const [industryLabel, setIndustryLabel] = useState("Enterprise");
+  const [monthlyRev, setMonthlyRev] = useState(0);
+  const [annualRev, setAnnualRev] = useState(0);
+  const [burn, setBurn] = useState(0);
+  const [cash, setCash] = useState(0);
+  const [teamSize, setTeamSize] = useState(0);
+  const [grossMarginVal, setGrossMarginVal] = useState(0);
   const [isUploaded, setIsUploaded] = useState(false);
   const [sparklinePoints, setSparklinePoints] = useState<string | null>(null);
 
@@ -40,15 +40,16 @@ export function KpiGridWidget() {
     if (!p) return;
     if (p.industryLabel) setIndustryLabel(p.industryLabel);
     else if (p.industry) setIndustryLabel(p.industry);
-    if (p.revenue !== undefined) setMonthlyRev(Number(p.revenue));
-    else if (p.monthlyRevenue !== undefined) setMonthlyRev(Number(p.monthlyRevenue));
-    if (p.annualRevenue !== undefined) setAnnualRev(Number(p.annualRevenue));
-    if (p.burn !== undefined) setBurn(Number(p.burn));
-    else if (p.monthlyBurn !== undefined) setBurn(Number(p.monthlyBurn));
-    if (p.cash !== undefined) setCash(Number(p.cash));
-    else if (p.cashOnHand !== undefined) setCash(Number(p.cashOnHand));
-    if (p.teamSize !== undefined) setTeamSize(Number(p.teamSize));
-    if (p.grossMargin !== undefined) setGrossMarginVal(Number(p.grossMargin));
+    if (p.revenue !== undefined && p.revenue !== null) setMonthlyRev(Number(p.revenue));
+    else if (p.monthlyRevenue !== undefined && p.monthlyRevenue !== null) setMonthlyRev(Number(p.monthlyRevenue));
+    if (p.annualRevenue !== undefined && p.annualRevenue !== null) setAnnualRev(Number(p.annualRevenue));
+    else if (p.revenue) setAnnualRev(Number(p.revenue) * 12);
+    if (p.burn !== undefined && p.burn !== null) setBurn(Number(p.burn));
+    else if (p.monthlyBurn !== undefined && p.monthlyBurn !== null) setBurn(Number(p.monthlyBurn));
+    if (p.cash !== undefined && p.cash !== null) setCash(Number(p.cash));
+    else if (p.cashOnHand !== undefined && p.cashOnHand !== null) setCash(Number(p.cashOnHand));
+    if (p.teamSize !== undefined && p.teamSize !== null) setTeamSize(Number(p.teamSize));
+    if (p.grossMargin !== undefined && p.grossMargin !== null) setGrossMarginVal(Number(p.grossMargin));
     if (p.isUploadedData) setIsUploaded(true);
 
     if (Array.isArray(p.trend) && p.trend.length > 1) {
@@ -105,69 +106,72 @@ export function KpiGridWidget() {
     applyProfile(metrics);
   });
 
-  const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : "18+";
-  const revPerHead = Math.round(annualRev / (teamSize || 1));
+  const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : cash > 0 ? "18+" : "0.0";
+  const effectiveTeam = teamSize || (monthlyRev > 0 ? 1 : 0);
+  const revPerHead = effectiveTeam > 0 ? Math.round((annualRev || monthlyRev * 12) / effectiveTeam) : 0;
+
+  const isFresh = monthlyRev === 0 && burn === 0 && cash === 0;
 
   const kpis: KpiItem[] = [
     {
       id: "mrr",
       label: "Monthly Recurring Revenue",
       value: `₹${monthlyRev.toLocaleString("en-IN")}`,
-      delta: "+6.4%",
+      delta: isFresh ? "Baseline" : "+ Verified",
       direction: "up",
-      sentiment: "positive",
-      basis: "vs last month",
+      sentiment: monthlyRev > 0 ? "positive" : "negative",
+      basis: monthlyRev > 0 ? "active operating billings" : "awaiting billings",
       color: "#00D9FF",
       gradientId: "grad-mrr",
       icon: <DollarSign className="w-4 h-4 text-cyan-400" />,
       points: sparklinePoints || "0,20 15,16 30,17 45,9 60,7 75,3",
       areaPoints: sparklinePoints ? `${sparklinePoints} 75,25 0,25` : "0,20 15,16 30,17 45,9 60,7 75,3 75,25 0,25",
-      provenance: "from_data",
+      provenance: isUploaded ? "from_data" : "estimate",
     },
     {
       id: "runway",
       label: "Estimated Cash Runway",
       value: `${runwayMonths} mo`,
-      delta: "+0.8 mo",
+      delta: isFresh ? "Baseline" : burn > 0 ? `${runwayMonths} mo buffer` : "Zero Burn",
       direction: "up",
-      sentiment: Number(runwayMonths) >= 6 ? "positive" : "negative",
-      basis: "liquid capital",
+      sentiment: Number(runwayMonths) >= 6 || runwayMonths === "18+" ? "positive" : "negative",
+      basis: burn > 0 ? `₹${burn.toLocaleString("en-IN")}/mo net burn` : "awaiting burn data",
       color: "#F59E0B",
       gradientId: "grad-runway",
       icon: <Clock className="w-4 h-4 text-amber-400" />,
       points: "0,19 15,18 30,14 45,13 60,9 75,5",
       areaPoints: "0,19 15,18 30,14 45,13 60,9 75,5 75,25 0,25",
-      provenance: "from_data",
+      provenance: isUploaded ? "from_data" : "estimate",
     },
     {
       id: "rev_head",
       label: "Annual Revenue / Head",
-      value: `₹${revPerHead.toLocaleString("en-IN")}`,
-      delta: "+8.2%",
+      value: revPerHead > 0 ? `₹${revPerHead.toLocaleString("en-IN")}` : "₹0",
+      delta: isFresh ? "Baseline" : effectiveTeam > 0 ? `${effectiveTeam} FTE` : "Unassigned",
       direction: "up",
-      sentiment: "positive",
-      basis: `${teamSize} team members`,
+      sentiment: revPerHead > 0 ? "positive" : "negative",
+      basis: effectiveTeam > 0 ? `${effectiveTeam} team members` : "awaiting headcount",
       color: "#8B5CF6",
       gradientId: "grad-revhead",
       icon: <Users className="w-4 h-4 text-violet-400" />,
       points: "0,18 15,15 30,16 45,10 60,8 75,4",
       areaPoints: "0,18 15,15 30,16 45,10 60,8 75,4 75,25 0,25",
-      provenance: "from_data",
+      provenance: isUploaded ? "from_data" : "estimate",
     },
     {
       id: "gross_margin",
       label: "Gross Margin Efficiency",
-      value: `${grossMarginVal}%`,
-      delta: "+2.3%",
+      value: grossMarginVal > 0 ? `${grossMarginVal}%` : "—",
+      delta: isFresh ? "Baseline" : grossMarginVal > 0 ? "Optimal" : "Pending",
       direction: "up",
-      sentiment: "positive",
-      basis: "top 10% quartile",
+      sentiment: grossMarginVal >= 50 ? "positive" : "negative",
+      basis: grossMarginVal > 0 ? `tailored for ${industryLabel}` : "awaiting COGS data",
       color: "#10B981",
       gradientId: "grad-margin",
       icon: <Percent className="w-4 h-4 text-emerald-400" />,
       points: "0,17 15,14 30,15 45,11 60,7 75,3",
       areaPoints: "0,17 15,14 30,15 45,11 60,7 75,3 75,25 0,25",
-      provenance: isUploaded ? "from_data" : "benchmark",
+      provenance: isUploaded ? "from_data" : "estimate",
     },
   ];
 

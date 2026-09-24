@@ -26,7 +26,7 @@ export interface SubscriptionPlan {
 export const DEFAULT_SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
     id: "free",
-    name: "BizzPal Free / Demo",
+    name: "BizzPal Starter Free",
     tagline: "Try BizzPal free to see how it works.",
     price: "₹0",
     period: "/forever",

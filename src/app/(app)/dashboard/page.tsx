@@ -47,10 +47,10 @@ function DashboardContent() {
   });
   const [selectedTimeframe, setSelectedTimeframe] = useState("Live Today");
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  const [liquidRunwayMo, setLiquidRunwayMo] = useState("8.0");
-  const [overallHealthScore, setOverallHealthScore] = useState(82);
-  const [activeTaskCount, setActiveTaskCount] = useState(3);
-  const [bottleneckGapCount, setBottleneckGapCount] = useState(3);
+  const [liquidRunwayMo, setLiquidRunwayMo] = useState("0.0");
+  const [overallHealthScore, setOverallHealthScore] = useState(50);
+  const [activeTaskCount, setActiveTaskCount] = useState(0);
+  const [bottleneckGapCount, setBottleneckGapCount] = useState(0);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isQuickInputModalOpen, setIsQuickInputModalOpen] = useState(false);
 
@@ -74,13 +74,19 @@ function DashboardContent() {
   // Fetch Live Tasks Count
   const refreshTasksCount = async () => {
     try {
-      const res = await fetch("/api/tasks");
+      const activeBizId = typeof window !== "undefined" ? localStorage.getItem("bizzpal_active_business_id") : null;
+      const url = activeBizId ? `/api/tasks?businessId=${encodeURIComponent(activeBizId)}` : "/api/tasks";
+      const res = await fetch(url);
       const data = await res.json();
       if (data.success && Array.isArray(data.tasks)) {
         const active = data.tasks.filter((t: any) => t.status !== "done").length;
         setActiveTaskCount(active);
+      } else {
+        setActiveTaskCount(0);
       }
-    } catch {}
+    } catch {
+      setActiveTaskCount(0);
+    }
   };
 
   // Fetch Check-In Status
@@ -207,6 +213,9 @@ function DashboardContent() {
     }
     const cash = Number(saved.cash || saved.cashOnHand || 0);
     const burn = Number(saved.burn || saved.monthlyBurn || saved.monthlyNetBurn || 0);
+    const rev = Number(saved.revenue || saved.monthlyRevenue || 0);
+    const hasData = cash > 0 || burn > 0 || rev > 0;
+
     let rMonths = 0;
     if (burn > 0) {
       rMonths = Number((cash / burn).toFixed(1));
@@ -219,16 +228,20 @@ function DashboardContent() {
     }
 
     // Dynamically compute health score
-    let score = 70;
-    if (rMonths >= 12) score += 15;
-    else if (rMonths >= 6) score += 10;
-    else if (rMonths < 3) score -= 15;
+    if (!hasData) {
+      setOverallHealthScore(50);
+    } else {
+      let score = 65;
+      if (rMonths >= 12) score += 15;
+      else if (rMonths >= 6) score += 10;
+      else if (rMonths < 3 && burn > 0) score -= 15;
 
-    const rev = Number(saved.revenue || saved.monthlyRevenue || 0);
-    if (rev > 500000) score += 10;
-    else if (rev > 100000) score += 5;
+      if (rev > 500000) score += 12;
+      else if (rev > 100000) score += 8;
+      else if (rev > 0) score += 4;
 
-    setOverallHealthScore(Math.min(98, Math.max(40, score)));
+      setOverallHealthScore(Math.min(98, Math.max(40, score)));
+    }
   };
 
   // Read saved business profile if available from localStorage or backend SQLite database
@@ -255,13 +268,29 @@ function DashboardContent() {
       }
     };
 
+    const handleGapsCount = (e: any) => {
+      if (e.detail && typeof e.detail.count === "number") {
+        setBottleneckGapCount(e.detail.count);
+      }
+    };
+
+    const handleTasksRefresh = () => {
+      refreshTasksCount();
+    };
+
     handleProfileSync();
     window.addEventListener("storage", handleProfileSync);
     window.addEventListener("bizzpal_business_data_updated", handleProfileSync);
+    window.addEventListener("bizzpal_gaps_count", handleGapsCount);
+    window.addEventListener("bizzpal_task_created", handleTasksRefresh);
+    window.addEventListener("bizzpal_task_updated", handleTasksRefresh);
 
     return () => {
       window.removeEventListener("storage", handleProfileSync);
       window.removeEventListener("bizzpal_business_data_updated", handleProfileSync);
+      window.removeEventListener("bizzpal_gaps_count", handleGapsCount);
+      window.removeEventListener("bizzpal_task_created", handleTasksRefresh);
+      window.removeEventListener("bizzpal_task_updated", handleTasksRefresh);
     };
   }, []);
 

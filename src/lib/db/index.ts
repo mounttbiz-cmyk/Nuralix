@@ -587,7 +587,7 @@ export function registerUser(email: string, name?: string, provider?: string, ui
 // Default business ID for single-tenant local workspace
 export const DEFAULT_BUSINESS_ID = "biz_enterprise_01";
 
-// Ensure default business exists
+// Ensure default business exists with clean, fresh baseline metrics (no hardcoded fake values)
 const existingBiz = db.prepare("SELECT id FROM businesses WHERE id = ?").get(DEFAULT_BUSINESS_ID);
 if (!existingBiz) {
   const now = new Date().toISOString();
@@ -605,16 +605,16 @@ if (!existingBiz) {
     )
   `).run(
     DEFAULT_BUSINESS_ID,
-    "BizzPal Enterprise",
+    "My Enterprise",
     "saas",
-    "B2B SaaS & Cloud Platforms",
+    "Technology & Services",
     "Founder",
-    "bizzpal.in",
-    15,
-    6000000,
-    500000,
-    150000,
-    1200000,
+    "",
+    1,
+    0,
+    0,
+    0,
+    0,
     JSON.stringify([]),
     0,
     0,
@@ -652,24 +652,6 @@ for (const tool of DEFAULT_TOOLS) {
       tool.category,
       new Date().toISOString()
     );
-  }
-}
-
-// Ensure initial seed tasks exist
-const taskCountRow = db.prepare("SELECT COUNT(*) as count FROM tasks WHERE business_id = ?").get(DEFAULT_BUSINESS_ID) as { count: number };
-if (taskCountRow.count === 0) {
-  const initialTasks = [
-    { id: "task_1", title: "Audit discretionary SaaS tool spend for ₹12,000/mo savings", status: "todo", owner: "Marcus (CFO Copilot)", gap: "Cash Runway", priority: "high" },
-    { id: "task_2", title: "Draft enterprise SLA & multi-year contract for top account", status: "in_progress", owner: "Astra (CEO Copilot)", gap: "Client Concentration", priority: "critical" },
-    { id: "task_3", title: "Launch secondary customer acquisition sprint on LinkedIn", status: "todo", owner: "Growth Lead", gap: "Channel Concentration", priority: "medium" },
-    { id: "task_4", title: "Document core operational handover & runbooks", status: "done", owner: "Executive Owner", gap: "Governance", priority: "high" },
-  ];
-
-  for (const t of initialTasks) {
-    db.prepare(`
-      INSERT INTO tasks (id, business_id, title, owner, gap, priority, status, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(t.id, DEFAULT_BUSINESS_ID, t.title, t.owner, t.gap, t.priority, t.status, new Date().toISOString());
   }
 }
 

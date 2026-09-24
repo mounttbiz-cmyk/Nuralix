@@ -50,13 +50,13 @@ export function UploadDataModal({ isOpen, onClose, onSuccess }: UploadDataModalP
   const [manualForm, setManualForm] = useState({
     name: "Your Enterprise",
     founderName: "Executive Founder",
-    industry: "saas",
-    monthlyRevenue: 500000,
-    annualRevenue: 6000000,
-    monthlyBurn: 150000,
-    cashOnHand: 1200000,
-    teamSize: 10,
-    grossMargin: 80,
+    industry: "it_tech",
+    monthlyRevenue: 0,
+    annualRevenue: 0,
+    monthlyBurn: 0,
+    cashOnHand: 0,
+    teamSize: 1,
+    grossMargin: 0,
   });
 
   // Active / History State
@@ -74,13 +74,13 @@ export function UploadDataModal({ isOpen, onClose, onSuccess }: UploadDataModalP
         setManualForm({
           name: saved.name || "Your Enterprise",
           founderName: saved.founderName || "Executive Founder",
-          industry: saved.industry || "saas",
-          monthlyRevenue: Number(saved.revenue || saved.monthlyRevenue) || 500000,
-          annualRevenue: Number(saved.annualRevenue) || 6000000,
-          monthlyBurn: Number(saved.burn || saved.monthlyBurn) || 150000,
-          cashOnHand: Number(saved.cash || saved.cashOnHand) || 1200000,
-          teamSize: Number(saved.teamSize) || 10,
-          grossMargin: Number(saved.grossMargin) || 80,
+          industry: saved.industry || "it_tech",
+          monthlyRevenue: Number(saved.revenue || saved.monthlyRevenue || 0),
+          annualRevenue: Number(saved.annualRevenue || (saved.revenue ? saved.revenue * 12 : 0)),
+          monthlyBurn: Number(saved.burn || saved.monthlyBurn || 0),
+          cashOnHand: Number(saved.cash || saved.cashOnHand || 0),
+          teamSize: Number(saved.teamSize || 1),
+          grossMargin: Number(saved.grossMargin || 0),
         });
       }
     } catch {}

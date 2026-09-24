@@ -163,10 +163,10 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
       const existing = savedProfileStr ? JSON.parse(savedProfileStr) : {};
 
       // 2. Compute updated metrics
-      const currentMonthlyRev = Number(existing.revenue || existing.monthlyRevenue) || 500000;
-      const currentBurn = Number(existing.burn || existing.monthlyBurn) || 150000;
-      const currentCash = Number(existing.cash || existing.cashOnHand) || 1200000;
-      const currentTeam = Number(existing.teamSize) || 14;
+      const currentMonthlyRev = Number(existing.revenue || existing.monthlyRevenue || 0);
+      const currentBurn = Number(existing.burn || existing.monthlyBurn || 0);
+      const currentCash = Number(existing.cash || existing.cashOnHand || 0);
+      const currentTeam = Number(existing.teamSize || 1);
 
       const newMonthlyRev = record.dailyRevenue
         ? Math.round(record.dailyRevenue * 30)

@@ -21,9 +21,9 @@ export function BriefingWidget({
   const [companyName, setCompanyName] = useState(propCompanyName);
   const [founderName, setFounderName] = useState("Founder");
   const [industryLabel, setIndustryLabel] = useState("Technology");
-  const [monthlyRev, setMonthlyRev] = useState(500000);
-  const [burn, setBurn] = useState(150000);
-  const [cash, setCash] = useState(1200000);
+  const [monthlyRev, setMonthlyRev] = useState(0);
+  const [burn, setBurn] = useState(0);
+  const [cash, setCash] = useState(0);
   const [isUploaded, setIsUploaded] = useState(false);
 
   const applyProfile = (p: any) => {
@@ -32,12 +32,12 @@ export function BriefingWidget({
     if (p.founderName) setFounderName(p.founderName);
     if (p.industryLabel) setIndustryLabel(p.industryLabel);
     else if (p.industry) setIndustryLabel(p.industry);
-    if (p.revenue !== undefined) setMonthlyRev(Number(p.revenue));
-    else if (p.monthlyRevenue !== undefined) setMonthlyRev(Number(p.monthlyRevenue));
-    if (p.burn !== undefined) setBurn(Number(p.burn));
-    else if (p.monthlyBurn !== undefined) setBurn(Number(p.monthlyBurn));
-    if (p.cash !== undefined) setCash(Number(p.cash));
-    else if (p.cashOnHand !== undefined) setCash(Number(p.cashOnHand));
+    if (p.revenue !== undefined && p.revenue !== null) setMonthlyRev(Number(p.revenue));
+    else if (p.monthlyRevenue !== undefined && p.monthlyRevenue !== null) setMonthlyRev(Number(p.monthlyRevenue));
+    if (p.burn !== undefined && p.burn !== null) setBurn(Number(p.burn));
+    else if (p.monthlyBurn !== undefined && p.monthlyBurn !== null) setBurn(Number(p.monthlyBurn));
+    if (p.cash !== undefined && p.cash !== null) setCash(Number(p.cash));
+    else if (p.cashOnHand !== undefined && p.cashOnHand !== null) setCash(Number(p.cashOnHand));
     if (p.isUploadedData) setIsUploaded(true);
   };
 
@@ -65,14 +65,8 @@ export function BriefingWidget({
     applyProfile(metrics);
   });
 
-  const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : "18+";
-
-  const briefingLines = [
-    `Monthly operating revenues for ${companyName} are holding at ₹${monthlyRev.toLocaleString("en-IN")}, maintaining solid unit economics in ${industryLabel}.`,
-    `Monthly net burn sits at ₹${burn.toLocaleString("en-IN")} against ₹${cash.toLocaleString("en-IN")} liquid bank reserves, preserving ${runwayMonths} months of verified runway.`,
-    `Capital efficiency remains in the top quartile. Discretionary software tooling and vendor subscriptions are under active watch by Marcus (CFO AI).`,
-    `Priority directive for ${founderName}: Dilute top-client concentration below 25% by advancing secondary deal pipelines in the next 60 days.`,
-  ];
+  const isFresh = monthlyRev === 0 && burn === 0 && cash === 0;
+  const runwayMonths = burn > 0 ? (cash / burn).toFixed(1) : cash > 0 ? "Infinite (Zero Burn)" : "0.0";
 
   return (
     <ContainerTile span={2} id="widget_daily_briefing">
@@ -87,17 +81,17 @@ export function BriefingWidget({
               <div>
                 <h2 className="text-xs font-bold text-text uppercase tracking-wider font-sans flex items-center gap-1.5">
                   <span>Executive AI Briefing</span>
-                  <StatusBadge label="Autonomous" tone="ai" />
+                  <StatusBadge label={isFresh ? "Calibrating" : "Autonomous"} tone="ai" />
                 </h2>
                 <span className="text-[10px] text-text-muted">
                   Synthesized by {ceoName} (Chief Executive AI)
                 </span>
               </div>
             </div>
-            <StatusBadge label="Live Feed" tone="live" pulse />
+            <StatusBadge label={isFresh ? "Fresh Baseline" : "Live Feed"} tone={isFresh ? "neutral" : "live"} pulse={!isFresh} />
           </div>
 
-          {/* Structured Intelligence Cards — fade + slide in as they mount */}
+          {/* Structured Intelligence Cards */}
           <div className="py-3 space-y-2.5">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -112,7 +106,15 @@ export function BriefingWidget({
                 </span>
               </div>
               <p className="text-xs text-text-muted leading-relaxed pl-5">
-                Monthly operating revenue for <strong className="text-text font-bold">{companyName}</strong> is stable at <strong className="text-text font-bold">₹{monthlyRev.toLocaleString("en-IN")}</strong> with healthy top-quartile gross margins for {industryLabel}.
+                {monthlyRev > 0 ? (
+                  <>
+                    Monthly operating revenue for <strong className="text-text font-bold">{companyName}</strong> is verified at <strong className="text-text font-bold">₹{monthlyRev.toLocaleString("en-IN")}</strong> in {industryLabel}.
+                  </>
+                ) : (
+                  <>
+                    Operating revenue for <strong className="text-text font-bold">{companyName}</strong> is currently at baseline zero. Input your current monthly billings to track real growth trajectory.
+                  </>
+                )}
               </p>
             </motion.div>
 
@@ -129,7 +131,15 @@ export function BriefingWidget({
                 </span>
               </div>
               <p className="text-xs text-text-muted leading-relaxed pl-5">
-                Net burn at <strong className="text-text font-bold">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-text font-bold">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves maintains a secure <strong className="text-emerald-400 font-bold">{runwayMonths} month</strong> runway buffer.
+                {cash > 0 || burn > 0 ? (
+                  <>
+                    Net burn at <strong className="text-text font-bold">₹{burn.toLocaleString("en-IN")}</strong> against <strong className="text-text font-bold">₹{cash.toLocaleString("en-IN")}</strong> in bank reserves yields <strong className="text-emerald-400 font-bold">{runwayMonths} months</strong> of liquid runway.
+                  </>
+                ) : (
+                  <>
+                    Cash reserves and burn rate uncalibrated. Record bank balances and recurring costs to establish real-time runway forecasting.
+                  </>
+                )}
               </p>
             </motion.div>
 
@@ -146,7 +156,11 @@ export function BriefingWidget({
                 </span>
               </div>
               <p className="text-xs text-text leading-relaxed pl-5 font-medium">
-                Dilute top-client concentration below 25% by advancing secondary deal pipelines within the next 60 days.
+                {isFresh ? (
+                  `Execute Quick Business Input to seed verified operational figures for ${companyName}.`
+                ) : (
+                  `Maintain margin discipline and monitor cash conversion cycles across ${industryLabel} contracts.`
+                )}
               </p>
             </motion.div>
           </div>

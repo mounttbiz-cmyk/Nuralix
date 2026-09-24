@@ -9,20 +9,20 @@ import { useBusinessDataSync } from "@/lib/upload/events";
 export function GapsPreviewWidget() {
   const [companyName, setCompanyName] = useState("Enterprise");
   const [founderName, setFounderName] = useState("Founder");
-  const [monthlyRev, setMonthlyRev] = useState(500000);
-  const [monthlyBurn, setMonthlyBurn] = useState(150000);
-  const [cashOnHand, setCashOnHand] = useState(1200000);
+  const [monthlyRev, setMonthlyRev] = useState(0);
+  const [monthlyBurn, setMonthlyBurn] = useState(0);
+  const [cashOnHand, setCashOnHand] = useState(0);
 
   const applyProfile = (p: any) => {
     if (!p) return;
     if (p.name) setCompanyName(p.name);
     if (p.founderName) setFounderName(p.founderName);
-    if (p.revenue !== undefined) setMonthlyRev(Number(p.revenue));
-    else if (p.monthlyRevenue !== undefined) setMonthlyRev(Number(p.monthlyRevenue));
-    if (p.burn !== undefined) setMonthlyBurn(Number(p.burn));
-    else if (p.monthlyBurn !== undefined) setMonthlyBurn(Number(p.monthlyBurn));
-    if (p.cash !== undefined) setCashOnHand(Number(p.cash));
-    else if (p.cashOnHand !== undefined) setCashOnHand(Number(p.cashOnHand));
+    if (p.revenue !== undefined && p.revenue !== null) setMonthlyRev(Number(p.revenue));
+    else if (p.monthlyRevenue !== undefined && p.monthlyRevenue !== null) setMonthlyRev(Number(p.monthlyRevenue));
+    if (p.burn !== undefined && p.burn !== null) setMonthlyBurn(Number(p.burn));
+    else if (p.monthlyBurn !== undefined && p.monthlyBurn !== null) setMonthlyBurn(Number(p.monthlyBurn));
+    if (p.cash !== undefined && p.cash !== null) setCashOnHand(Number(p.cash));
+    else if (p.cashOnHand !== undefined && p.cashOnHand !== null) setCashOnHand(Number(p.cashOnHand));
   };
 
   useEffect(() => {
@@ -47,36 +47,50 @@ export function GapsPreviewWidget() {
     applyProfile(metrics);
   });
 
-  const runwayMo = monthlyBurn > 0 ? Number((cashOnHand / monthlyBurn).toFixed(1)) : 18;
+  const runwayMo = monthlyBurn > 0 ? Number((cashOnHand / monthlyBurn).toFixed(1)) : cashOnHand > 0 ? 18 : 0;
+  const isFresh = monthlyRev === 0 && monthlyBurn === 0 && cashOnHand === 0;
 
-  const topGaps = [
-    {
-      id: "gap_runway",
-      title: runwayMo < 12
-        ? `Liquid runway sits at ${runwayMo} months (<12.0 mo standard target)`
-        : `Burn rate of ₹${monthlyBurn.toLocaleString("en-IN")}/mo warrants efficiency audit`,
-      severity: runwayMo < 6 ? "critical" : runwayMo < 10 ? "high" : "medium",
-      category: "Runway & Risk",
-      impact: `₹${monthlyBurn.toLocaleString("en-IN")}/mo net burn`,
-      effort: "quick win",
-    },
-    {
+  const topGaps: any[] = [];
+
+  if (monthlyBurn > 0) {
+    if (runwayMo < 6) {
+      topGaps.push({
+        id: "gap_runway_critical",
+        title: `Liquid runway compressed at ${runwayMo} months (<6.0 mo safety buffer)`,
+        severity: "critical",
+        category: "Runway & Risk",
+        impact: `₹${monthlyBurn.toLocaleString("en-IN")}/mo burn`,
+        effort: "immediate",
+      });
+    } else if (runwayMo < 12) {
+      topGaps.push({
+        id: "gap_runway_warning",
+        title: `Runway buffer at ${runwayMo} months (<12.0 mo target baseline)`,
+        severity: "medium",
+        category: "Runway & Risk",
+        impact: `₹${monthlyBurn.toLocaleString("en-IN")}/mo burn`,
+        effort: "quick win",
+      });
+    }
+  }
+
+  if (monthlyRev > 0) {
+    topGaps.push({
       id: "gap_concentration",
-      title: `Top enterprise client represents ~36% of ${companyName}'s ARR`,
-      severity: "high",
+      title: `Top client pipeline concentration audit recommended for ${companyName}`,
+      severity: "medium",
       category: "Revenue Growth",
-      impact: `₹${Math.round(monthlyRev * 0.36).toLocaleString("en-IN")}/mo exposure`,
+      impact: `₹${monthlyRev.toLocaleString("en-IN")}/mo volume`,
       effort: "project",
-    },
-    {
-      id: "gap_founder_bottleneck",
-      title: `${founderName} remains primary closer for >70% of enterprise pipeline`,
-      severity: "high",
-      category: "Operations",
-      impact: "Growth capped at founder calendar bandwidth",
-      effort: "quick win",
-    },
-  ];
+    });
+  }
+
+  // Notify dashboard page of live gap count
+  useEffect(() => {
+    try {
+      window.dispatchEvent(new CustomEvent("bizzpal_gaps_count", { detail: { count: topGaps.length } }));
+    } catch {}
+  }, [topGaps.length]);
 
   return (
     <ContainerTile span={2} id="widget_top_gaps">
@@ -96,42 +110,57 @@ export function GapsPreviewWidget() {
                 </span>
               </div>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-rust/15 text-rust font-semibold font-mono border border-rust/30">
-              3 Identified
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold font-mono border ${
+              topGaps.length > 0
+                ? "bg-rust/15 text-rust border-rust/30"
+                : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+            }`}>
+              {topGaps.length} {topGaps.length === 1 ? "Identified" : "Identified"}
             </span>
           </div>
 
           <div className="space-y-2.5 pt-3">
-            {topGaps.map(gap => (
-              <div
-                key={gap.id}
-                className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-line-strong hover:bg-surface-2/70 transition-all space-y-1.5 group cursor-pointer"
-              >
-                <div className="flex items-start justify-between gap-2.5">
-                  <span className="text-xs font-semibold text-text leading-snug group-hover:text-brass transition-colors">
-                    {gap.title}
-                  </span>
-                  <span
-                    className={`text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase font-mono tracking-wide shrink-0 ${
-                      gap.severity === "critical"
-                        ? "bg-rust/20 text-rust border border-rust/30"
-                        : "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30"
-                    }`}
-                  >
-                    {gap.severity}
-                  </span>
+            {topGaps.length === 0 ? (
+              <div className="p-4 rounded-xl bg-surface-2/30 border border-line text-center space-y-1.5">
+                <div className="text-xs font-semibold text-text">
+                  No Critical Bottlenecks Flagged
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-text-muted">
-                  <span className="font-mono text-text font-medium">{gap.impact}</span>
-                  <span className="text-line-strong">·</span>
-                  <span className="px-1.5 py-0.2 rounded bg-surface border border-line text-[10px] capitalize font-medium">
-                    {gap.effort}
-                  </span>
-                  <span className="text-line-strong">·</span>
-                  <span className="text-cyan-600 dark:text-cyan-400 text-[10px] font-medium">{gap.category}</span>
-                </div>
+                <p className="text-[11px] text-text-muted leading-relaxed">
+                  Enterprise telemetry is clear. Autonomous watchdogs are monitoring cash runway, revenue concentration, and pipeline velocity.
+                </p>
               </div>
-            ))}
+            ) : (
+              topGaps.map(gap => (
+                <div
+                  key={gap.id}
+                  className="p-3 rounded-xl bg-surface-2/40 border border-line hover:border-line-strong hover:bg-surface-2/70 transition-all space-y-1.5 group cursor-pointer"
+                >
+                  <div className="flex items-start justify-between gap-2.5">
+                    <span className="text-xs font-semibold text-text leading-snug group-hover:text-brass transition-colors">
+                      {gap.title}
+                    </span>
+                    <span
+                      className={`text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase font-mono tracking-wide shrink-0 ${
+                        gap.severity === "critical"
+                          ? "bg-rust/20 text-rust border border-rust/30"
+                          : "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30"
+                      }`}
+                    >
+                      {gap.severity}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] text-text-muted">
+                    <span className="font-mono text-text font-medium">{gap.impact}</span>
+                    <span className="text-line-strong">·</span>
+                    <span className="px-1.5 py-0.2 rounded bg-surface border border-line text-[10px] capitalize font-medium">
+                      {gap.effort}
+                    </span>
+                    <span className="text-line-strong">·</span>
+                    <span className="text-cyan-600 dark:text-cyan-400 text-[10px] font-medium">{gap.category}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
