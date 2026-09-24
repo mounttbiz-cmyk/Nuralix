@@ -127,6 +127,25 @@ export async function POST(req: Request) {
       );
     }
 
+    // 1b. Mirror to Firestore so data remains persistent on Vercel
+    try {
+      const { saveFirestoreBusinessRecord } = require("@/lib/firebase/firestoreService");
+      saveFirestoreBusinessRecord(DEFAULT_BUSINESS_ID, {
+        name,
+        industry,
+        industryLabel,
+        founderName,
+        website,
+        teamSize,
+        annualRevenue: finalAnnualRevenue,
+        monthlyRevenue: finalMonthlyRevenue,
+        monthlyBurn: finalMonthlyBurn,
+        cashOnHand: finalCashOnHand,
+        connectedTools,
+        updatedAt: now,
+      }).catch(() => {});
+    } catch {}
+
     // 2. Update integrations according to intake branching logic
     // For each selected tool: mark as pending_connection unless already connected
     // For unselected tools or if noIntegrations is true: mark not_connected

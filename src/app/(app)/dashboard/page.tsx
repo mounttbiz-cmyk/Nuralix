@@ -48,6 +48,9 @@ function DashboardContent() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("Live Today");
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [liquidRunwayMo, setLiquidRunwayMo] = useState("8.0");
+  const [overallHealthScore, setOverallHealthScore] = useState(82);
+  const [activeTaskCount, setActiveTaskCount] = useState(3);
+  const [bottleneckGapCount, setBottleneckGapCount] = useState(3);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isQuickInputModalOpen, setIsQuickInputModalOpen] = useState(false);
 
@@ -67,6 +70,18 @@ function DashboardContent() {
 
   // Close daily check-in modal on Escape
   useEscapeKey(() => setIsCheckInModalOpen(false), isCheckInModalOpen);
+
+  // Fetch Live Tasks Count
+  const refreshTasksCount = async () => {
+    try {
+      const res = await fetch("/api/tasks");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.tasks)) {
+        const active = data.tasks.filter((t: any) => t.status !== "done").length;
+        setActiveTaskCount(active);
+      }
+    } catch {}
+  };
 
   // Fetch Check-In Status
   const refreshCheckinStatus = async () => {
@@ -95,6 +110,7 @@ function DashboardContent() {
   useEffect(() => {
     let mounted = true;
     refreshCheckinStatus();
+    refreshTasksCount();
 
     const fetchConfig = () => {
       // Instant client-side hydration from Superadmin edits in localStorage
@@ -191,13 +207,28 @@ function DashboardContent() {
     }
     const cash = Number(saved.cash || saved.cashOnHand || 0);
     const burn = Number(saved.burn || saved.monthlyBurn || saved.monthlyNetBurn || 0);
+    let rMonths = 0;
     if (burn > 0) {
-      setLiquidRunwayMo((cash / burn).toFixed(1));
+      rMonths = Number((cash / burn).toFixed(1));
+      setLiquidRunwayMo(rMonths.toFixed(1));
     } else if (cash > 0) {
       setLiquidRunwayMo("18+");
+      rMonths = 18;
     } else {
       setLiquidRunwayMo("0.0");
     }
+
+    // Dynamically compute health score
+    let score = 70;
+    if (rMonths >= 12) score += 15;
+    else if (rMonths >= 6) score += 10;
+    else if (rMonths < 3) score -= 15;
+
+    const rev = Number(saved.revenue || saved.monthlyRevenue || 0);
+    if (rev > 500000) score += 10;
+    else if (rev > 100000) score += 5;
+
+    setOverallHealthScore(Math.min(98, Math.max(40, score)));
   };
 
   // Read saved business profile if available from localStorage or backend SQLite database
@@ -388,6 +419,9 @@ function DashboardContent() {
                 type="button"
                 onClick={() => {
                   setSelectedTimeframe(tf);
+                  try {
+                    window.dispatchEvent(new CustomEvent("bizzpal_timeframe_changed", { detail: { timeframe: tf } }));
+                  } catch {}
                   notify(`Timeframe changed to ${tf}`);
                 }}
                 className={`px-3 py-1 rounded-lg text-xs transition-all btn-tactile cursor-pointer ${
@@ -462,8 +496,25 @@ function DashboardContent() {
                     key={profile.ind}
                     type="button"
                     onClick={() => {
-                      setSelectedIndustry(profile.ind as any);
-                      setSelectedModel(profile.mod as any);
+                      const newInd = profile.ind as any;
+                      const newMod = profile.mod as any;
+                      setSelectedIndustry(newInd);
+                      setSelectedModel(newMod);
+
+                      // Update local profile and broadcast
+                      try {
+                        const existing = localStorage.getItem("bizzpal_business_profile");
+                        const parsed = existing ? JSON.parse(existing) : {};
+                        const updated = {
+                          ...parsed,
+                          industry: newInd,
+                          industryLabel: profile.label,
+                          businessModel: newMod,
+                        };
+                        localStorage.setItem("bizzpal_business_profile", JSON.stringify(updated));
+                        window.dispatchEvent(new CustomEvent("bizzpal_business_data_updated", { detail: updated }));
+                        notify(`Switched to ${profile.label} operating context`);
+                      } catch {}
                     }}
                     className={`px-3 py-1.5 text-xs rounded-lg transition-all btn-tactile ${
                       isActive
@@ -501,10 +552,14 @@ function DashboardContent() {
           >
             <div>
               <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-text transition-colors">Overall Health</span>
-              <span className="text-lg font-bold text-text font-mono mt-0.5 block">82 / 100</span>
+              <span className="text-lg font-bold text-text font-mono mt-0.5 block">{overallHealthScore} / 100</span>
             </div>
-            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 font-semibold font-mono border border-emerald-500/20">
-              Optimal
+            <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-semibold font-mono border ${
+              overallHealthScore >= 75
+                ? "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border-emerald-500/20"
+                : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+            }`}>
+              {overallHealthScore >= 75 ? "Optimal" : "Monitor"}
             </span>
           </Link>
 
@@ -527,7 +582,7 @@ function DashboardContent() {
           >
             <div>
               <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-text transition-colors">Execution Queue</span>
-              <span className="text-lg font-bold text-text font-mono mt-0.5 block">3 Active</span>
+              <span className="text-lg font-bold text-text font-mono mt-0.5 block">{activeTaskCount} Active</span>
             </div>
             <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-surface-2 text-text-muted font-semibold font-mono border border-line">
               On Schedule
@@ -540,7 +595,7 @@ function DashboardContent() {
           >
             <div>
               <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium block group-hover:text-text transition-colors">Bottleneck Gaps</span>
-              <span className="text-lg font-bold text-text font-mono mt-0.5 block">3 Flagged</span>
+              <span className="text-lg font-bold text-text font-mono mt-0.5 block">{bottleneckGapCount} Flagged</span>
             </div>
             <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-surface-2 text-text-muted font-semibold font-mono border border-line">
               Action Ready

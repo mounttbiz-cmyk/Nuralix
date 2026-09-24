@@ -13,13 +13,20 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    setTimeout(() => {
-      if (passcode === "bizzpal2026" || passcode === "admin") {
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
         const adminSession = {
           id: "adm_platform_developer",
           role: "platform_admin",
@@ -28,10 +35,13 @@ export default function AdminLoginPage() {
         localStorage.setItem("bizzpal_admin_session", JSON.stringify(adminSession));
         router.push("/admin");
       } else {
-        setLoading(false);
-        setError("Invalid Superadmin credentials. (Default passcode is: bizzpal2026)");
+        setError(data.error || "Invalid Superadmin credentials.");
       }
-    }, 500);
+    } catch {
+      setError("Network or server error during authentication.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

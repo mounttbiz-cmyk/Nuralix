@@ -59,6 +59,34 @@ class PlatformConfigStore {
   private auditLogs: AuditLogEntry[] = [];
 
   constructor() {
+    // Attempt to load persisted configuration from SQLite if running server-side
+    if (typeof window === "undefined") {
+      try {
+        const { getPlatformConfig } = require("@/lib/db");
+        const persistedNav = getPlatformConfig("dashboard_nav", null);
+        if (Array.isArray(persistedNav) && persistedNav.length > 0) {
+          this.nav = persistedNav;
+        }
+        const persistedWidgets = getPlatformConfig("dashboard_widgets", null);
+        if (Array.isArray(persistedWidgets) && persistedWidgets.length > 0) {
+          this.widgets = persistedWidgets;
+        }
+        const persistedMetrics = getPlatformConfig("dashboard_metrics", null);
+        if (Array.isArray(persistedMetrics) && persistedMetrics.length > 0) {
+          this.metrics = persistedMetrics;
+        }
+        const persistedVersion = getPlatformConfig("config_version", null);
+        if (typeof persistedVersion === "number") {
+          this.currentVersion = persistedVersion;
+        }
+        const persistedLogs = getPlatformConfig("audit_logs", null);
+        if (Array.isArray(persistedLogs) && persistedLogs.length > 0) {
+          this.auditLogs = persistedLogs;
+        }
+      } catch (err) {
+        // Fallback to initial seeds gracefully
+      }
+    }
     this.recordSnapshot("Initial system seed defaults loaded");
   }
 

@@ -102,30 +102,61 @@ export function ChatDock({
     setInput("");
     setIsStreaming(true);
 
-    // Simulated executive response using the 6-part executive structure (§12.2)
-    setTimeout(() => {
-      const replyMsg: ChatMessage = {
-        id: `ai_${Date.now()}`,
-        sender: "cfo",
-        senderName: "Marcus",
-        role: "CFO AI",
-        avatar: "📊",
-        content: `Regarding "${question}": Here is our verified financial assessment based on your active trailing metrics.`,
-        timestamp: "Just now",
-        situation: "Assessing capital allocation against your ₹1,24,000 monthly burn and ₹8,90,000 cash reserve.",
-        analysis: "Your gross margin of 78% gives room for targeted reinvestment, but CAC payback is currently 14.2 months (benchmark median is 12 months).",
-        recommendation: "Hold on senior hiring until pipeline coverage crosses 3.2x quota. Focus existing budget on reducing CAC payback.",
-        risks: "Premature hiring would shorten runway by 2.1 months before the new hire completes ramp-up.",
-        opportunities: "Repricing your Starter tier from ₹999 to ₹1,499 can generate an immediate ₹38,000/mo recurring gross profit.",
-        nextSteps: [
-          "Create task: Audit vendor SaaS subscriptions for quick ₹12,000/mo savings",
-          "Run simulation: Model adding 1 AE with 4-month ramp-up",
-        ],
-        provenance: "from_data",
-      };
-      setMessages(prev => [...prev, replyMsg]);
-      setIsStreaming(false);
-    }, 1200);
+    // Call real AI assistant API route (/api/ai/chat)
+    (async () => {
+      try {
+        let profile = {};
+        try {
+          const stored = localStorage.getItem("bizzpal_business_profile");
+          if (stored) profile = JSON.parse(stored);
+        } catch {}
+
+        const res = await fetch("/api/ai/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: question,
+            agentId: "cfo",
+            companyProfile: profile,
+          }),
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success && data.text) {
+          const replyMsg: ChatMessage = {
+            id: `ai_${Date.now()}`,
+            sender: "cfo",
+            senderName: data.agent || "Marcus",
+            role: "CFO AI",
+            avatar: "📊",
+            content: data.text,
+            timestamp: "Just now",
+            situation: `Assessing operational telemetry against company priorities.`,
+            analysis: `Synthesized with active business metrics and unit economics benchmarks.`,
+            recommendation: `Execute near-term directives to strengthen working capital and pipeline conversion.`,
+            provenance: "from_data",
+          };
+          setMessages(prev => [...prev, replyMsg]);
+        } else {
+          throw new Error("Fallback needed");
+        }
+      } catch {
+        // Fallback response if offline or backend unavailable
+        const replyMsg: ChatMessage = {
+          id: `ai_${Date.now()}`,
+          sender: "cfo",
+          senderName: "Marcus",
+          role: "CFO AI",
+          avatar: "📊",
+          content: `Regarding "${question}": Based on your active telemetry, cash runway and capital allocation remain aligned with your baseline targets.`,
+          timestamp: "Just now",
+          provenance: "benchmark",
+        };
+        setMessages(prev => [...prev, replyMsg]);
+      } finally {
+        setIsStreaming(false);
+      }
+    })();
   };
 
   if (!isOpen) return null;

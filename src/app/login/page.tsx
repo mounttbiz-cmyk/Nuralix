@@ -563,13 +563,20 @@ export default function LoginPage() {
   };
 
   // Developer Superadmin Login handler
-  const handleSuperadminLogin = (e: React.FormEvent) => {
+  const handleSuperadminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorInfo(null);
 
-    setTimeout(() => {
-      if (adminPasscode === "bizzpal2026" || adminPasscode === "admin") {
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode: adminPasscode }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
         const adminSession = {
           id: "adm_platform_developer",
           role: "platform_admin",
@@ -579,14 +586,21 @@ export default function LoginPage() {
         localStorage.setItem("bizzpal_admin_session", JSON.stringify(adminSession));
         router.push("/admin");
       } else {
-        setLoading(false);
         setErrorInfo({
           title: "Developer Passcode Invalid",
-          message: "Incorrect developer passcode. The default passcode is: bizzpal2026",
+          message: data.error || "Incorrect developer passcode.",
           type: "credentials",
         });
       }
-    }, 400);
+    } catch {
+      setErrorInfo({
+        title: "Authentication Error",
+        message: "Network error validating developer passcode.",
+        type: "credentials",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

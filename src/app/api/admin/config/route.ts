@@ -11,6 +11,7 @@ import { defaultNavItems } from "@/config/seeds/defaultNav";
 import { defaultWidgets } from "@/config/seeds/defaultWidgets";
 import { defaultMetrics } from "@/config/seeds/defaultMetrics";
 import { platformConfigStore } from "@/config/store";
+import { setFirestoreConfig, getFirestoreConfig } from "@/lib/firebase/firestoreService";
 
 export const dynamic = "force-dynamic";
 
@@ -102,30 +103,54 @@ export async function POST(request: Request) {
     // Update the targeted section
     if (section === "website" && payload) {
       setPlatformConfig("website_config", payload);
+      setFirestoreConfig("website_config", payload).catch(() => {});
     } else if (section === "features" && payload) {
       setPlatformConfig("dashboard_features", payload);
+      setFirestoreConfig("dashboard_features", payload).catch(() => {});
     } else if (section === "nav" && payload) {
       setPlatformConfig("dashboard_nav", payload);
+      setFirestoreConfig("dashboard_nav", payload).catch(() => {});
       // Synchronize in-memory store
       if (Array.isArray(payload)) {
         platformConfigStore.setNav(payload);
       }
     } else if (section === "widgets" && payload) {
       setPlatformConfig("dashboard_widgets", payload);
+      setFirestoreConfig("dashboard_widgets", payload).catch(() => {});
       if (Array.isArray(payload)) {
         platformConfigStore.setWidgets(payload);
       }
     } else if (section === "tools" && payload) {
       setPlatformConfig("tools_catalog", payload);
+      setFirestoreConfig("tools_catalog", payload).catch(() => {});
     } else if (section === "plans" && payload) {
       setPlatformConfig("subscription_plans", payload);
+      setFirestoreConfig("subscription_plans", payload).catch(() => {});
     } else if (section === "all" && payload) {
-      if (payload.website) setPlatformConfig("website_config", payload.website);
-      if (payload.features) setPlatformConfig("dashboard_features", payload.features);
-      if (payload.nav) setPlatformConfig("dashboard_nav", payload.nav);
-      if (payload.widgets) setPlatformConfig("dashboard_widgets", payload.widgets);
-      if (payload.tools) setPlatformConfig("tools_catalog", payload.tools);
-      if (payload.plans) setPlatformConfig("subscription_plans", payload.plans);
+      if (payload.website) {
+        setPlatformConfig("website_config", payload.website);
+        setFirestoreConfig("website_config", payload.website).catch(() => {});
+      }
+      if (payload.features) {
+        setPlatformConfig("dashboard_features", payload.features);
+        setFirestoreConfig("dashboard_features", payload.features).catch(() => {});
+      }
+      if (payload.nav) {
+        setPlatformConfig("dashboard_nav", payload.nav);
+        setFirestoreConfig("dashboard_nav", payload.nav).catch(() => {});
+      }
+      if (payload.widgets) {
+        setPlatformConfig("dashboard_widgets", payload.widgets);
+        setFirestoreConfig("dashboard_widgets", payload.widgets).catch(() => {});
+      }
+      if (payload.tools) {
+        setPlatformConfig("tools_catalog", payload.tools);
+        setFirestoreConfig("tools_catalog", payload.tools).catch(() => {});
+      }
+      if (payload.plans) {
+        setPlatformConfig("subscription_plans", payload.plans);
+        setFirestoreConfig("subscription_plans", payload.plans).catch(() => {});
+      }
     } else {
       return NextResponse.json(
         { success: false, error: "Invalid section or missing payload" },
@@ -137,6 +162,7 @@ export async function POST(request: Request) {
     const updatedAuditLogs = [newLog, ...currentAuditLogs].slice(0, 100);
     setPlatformConfig("audit_logs", updatedAuditLogs);
     setPlatformConfig("config_version", nextVersion);
+    setFirestoreConfig("config_version", nextVersion).catch(() => {});
 
     return NextResponse.json({
       success: true,

@@ -28,20 +28,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         localStorage.setItem("bizzpal_user_session", JSON.stringify(autoSession));
         setChecked(true);
       } else {
-        // Auto-provision demo session so dashboard & settings are immediately accessible
-        const demoSession = {
-          id: `usr_demo_${Date.now()}`,
-          email: "founder@bizzpal.ai",
-          name: "Founder",
-          role: "owner",
-          provider: "demo",
-          authenticatedAt: new Date().toISOString(),
-        };
-        localStorage.setItem("bizzpal_user_session", JSON.stringify(demoSession));
-        setChecked(true);
+        // Unauthenticated - redirect to /login
+        router.replace("/login");
       }
     } catch (e) {
-      setChecked(true);
+      router.replace("/login");
     }
   }, [router]);
 

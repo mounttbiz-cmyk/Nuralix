@@ -700,9 +700,12 @@ export default function AdminPage() {
     }
   })();
 
-  const handleAdminLogout = () => {
+  const handleAdminLogout = async () => {
+    try {
+      await fetch("/api/admin/auth", { method: "DELETE" });
+    } catch {}
     localStorage.removeItem("bizzpal_admin_session");
-    window.location.href = "/login";
+    window.location.href = "/admin/login";
   };
 
   return (

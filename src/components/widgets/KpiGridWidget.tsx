@@ -84,6 +84,23 @@ export function KpiGridWidget() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleTimeframe = (e: any) => {
+      const tf = e.detail?.timeframe;
+      if (tf === "7D Trend") {
+        setSparklinePoints("0,16 15,12 30,15 45,8 60,6 75,2");
+      } else if (tf === "Month to Date") {
+        setSparklinePoints("0,22 15,18 30,14 45,11 60,9 75,4");
+      } else if (tf === "Q3 Live") {
+        setSparklinePoints("0,20 15,19 30,13 45,10 60,5 75,1");
+      } else {
+        setSparklinePoints("0,20 15,16 30,17 45,9 60,7 75,3");
+      }
+    };
+    window.addEventListener("bizzpal_timeframe_changed", handleTimeframe);
+    return () => window.removeEventListener("bizzpal_timeframe_changed", handleTimeframe);
+  }, []);
+
   useBusinessDataSync(metrics => {
     applyProfile(metrics);
   });

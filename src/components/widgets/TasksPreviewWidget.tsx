@@ -42,10 +42,45 @@ export function TasksPreviewWidget() {
     },
   ]);
 
-  const toggleTask = (id: string) => {
+  React.useEffect(() => {
+    fetch("/api/tasks")
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.tasks) && d.tasks.length > 0) {
+          setTasks(
+            d.tasks.slice(0, 4).map((t: any) => ({
+              id: t.id,
+              title: t.title,
+              owner: t.owner || "Founder",
+              due: t.priority === "high" ? "Today" : "This Week",
+              completed: t.status === "done",
+              source: t.gap || "General",
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const toggleTask = async (id: string) => {
+    const current = tasks.find(t => t.id === id);
+    if (!current) return;
+    const nextCompleted = !current.completed;
+
     setTasks(prev =>
-      prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t))
+      prev.map(t => (t.id === id ? { ...t, completed: nextCompleted } : t))
     );
+
+    try {
+      await fetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          status: nextCompleted ? "done" : "todo",
+        }),
+      });
+    } catch {}
   };
 
   return (
