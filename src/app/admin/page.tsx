@@ -21,7 +21,8 @@ import {
   ExternalLink,
   Check,
   X,
-  Sparkles,
+  Film,
+  Type,
   Eye,
   EyeOff,
   ShieldCheck,
@@ -867,11 +868,11 @@ export default function AdminPage() {
             {[
               { id: "website_sections", tab: "website", sub: "sections", label: "Section Visibility", icon: Eye, badge: "14" },
               { id: "website_hero", tab: "website", sub: "hero", label: "Hero Copy & CTAs", icon: Globe },
-              { id: "website_scenes", tab: "website", sub: "scenes", label: "Story Scenes (01-07)", icon: Sparkles, badge: "7" },
+              { id: "website_scenes", tab: "website", sub: "scenes", label: "Story Scenes (01-07)", icon: Film, badge: "7" },
               { id: "website_about", tab: "website", sub: "about_solutions", label: "About & Solutions", icon: Layers },
               { id: "website_contact", tab: "website", sub: "contact", label: "Contact & Channels", icon: MessageSquare },
               { id: "website_nav", tab: "website", sub: "nav_brand", label: "Navbar Links & Brand", icon: Globe },
-              { id: "website_vision", tab: "website", sub: "vision_words", label: "Vision Kinetic Words", icon: Sparkles },
+              { id: "website_vision", tab: "website", sub: "vision_words", label: "Vision Kinetic Words", icon: Type },
               { id: "website_announcement", tab: "website", sub: "announcement", label: "Announcement Bar", icon: Megaphone },
             ].map((item) => {
               const Icon = item.icon;

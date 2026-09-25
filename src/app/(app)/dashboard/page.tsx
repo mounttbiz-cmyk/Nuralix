@@ -459,18 +459,14 @@ function DashboardContent() {
           <div className="inline-flex items-center gap-2.5 text-xs text-text-muted">
             <span className="beacon-dot" />
             <span className="font-semibold text-text">Autonomous Intelligence Engine</span>
-            <span className="text-text-muted/40">•</span>
-            {uploadedFileName ? (
+            {uploadedFileName && (
               <>
+                <span className="text-text-muted/40">•</span>
                 <span className="text-jade font-semibold">Custom Telemetry Synced</span>
                 <span className="text-text-muted/40">•</span>
                 <span className="text-text font-mono text-[11px]">{uploadedFileName}</span>
               </>
-            ) : (
-              <span className="text-text-muted font-medium font-mono text-[11px]">Telemetry Synced Live</span>
             )}
-            <span className="text-text-muted/40">•</span>
-            <span className="font-mono text-[11px] text-text-muted">v{baseConfig.version} Registry</span>
           </div>
 
           <div className="flex items-center gap-1 p-1 bg-surface-2 rounded-xl border border-line text-xs">
@@ -527,7 +523,7 @@ function DashboardContent() {
               onClick={() => setIsQuickInputModalOpen(true)}
               className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all btn-tactile cursor-pointer btn-gold-gradient hover:brightness-105 shadow-md active:scale-[0.98]"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sliders className="w-3.5 h-3.5" />
               <span>+ Quick Business Input</span>
             </button>
 

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { ContainerTile } from "../ui/ContainerTile";
 import { ProvenanceBadge, StatusBadge } from "../ui/Badge";
 import { AnimatedNumber } from "../ui/AnimatedNumber";
-import { TrendingUp, TrendingDown, HelpCircle, MessageSquare, DollarSign, Clock, Users, Percent, Sparkles } from "lucide-react";
+import { TrendingUp, TrendingDown, HelpCircle, MessageSquare, DollarSign, Clock, Users, Percent, BarChart2 } from "lucide-react";
 import Link from "next/link";
 
 import { useBusinessDataSync } from "@/lib/upload/events";
@@ -181,7 +181,7 @@ export function KpiGridWidget() {
         <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-line/60">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold">
-              <Sparkles className="w-4 h-4" />
+              <BarChart2 className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-xs font-bold text-text uppercase tracking-wider font-sans">
@@ -214,16 +214,13 @@ export function KpiGridWidget() {
                 style={{ backgroundColor: kpi.color }}
               />
 
-              <div className="flex items-start justify-between relative z-10">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-surface/80 border border-line">
-                    {kpi.icon}
-                  </div>
-                  <span className="text-xs text-text-muted font-medium truncate max-w-[130px]">
-                    {kpi.label}
-                  </span>
+              <div className="flex items-center gap-2.5 relative z-10 w-full min-w-0">
+                <div className="p-1.5 rounded-lg bg-surface/80 border border-line shrink-0">
+                  {kpi.icon}
                 </div>
-                <ProvenanceBadge type={kpi.provenance} />
+                <span className="text-xs text-text font-medium leading-snug">
+                  {kpi.label}
+                </span>
               </div>
 
               {/* Value and SVG Sparkline with Gradient Fill */}

@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { PortalModal } from "@/components/ui/PortalModal";
 import {
-  Sparkles,
+  Sliders,
+  Cpu,
   Mic,
   MicOff,
   Send,
@@ -334,7 +335,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
         >
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-brass/15 border border-brass/30 flex items-center justify-center text-brass">
-              <Sparkles className="w-4 h-4" />
+              <Sliders className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -461,7 +462,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold text-brass uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" />
+                      <Cpu className="w-3.5 h-3.5" />
                       AI Parsed Operational Telemetry
                     </span>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface border border-line text-text font-semibold">

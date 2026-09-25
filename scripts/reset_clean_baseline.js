@@ -39,8 +39,8 @@ db.prepare(`
 console.log("Reset biz_enterprise_01 to clean 0 baseline.");
 
 // 4. Clean tasks
-db.prepare("DELETE FROM tasks WHERE business_id = 'biz_enterprise_01' OR business_id LIKE '%test%'").run();
-console.log("Purged test tasks.");
+db.prepare("DELETE FROM tasks").run();
+console.log("Purged all tasks.");
 
 // 5. Verify
 const biz = db.prepare("SELECT * FROM businesses").all();

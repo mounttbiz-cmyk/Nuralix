@@ -633,10 +633,6 @@ export default function LoginPage() {
           {/* Left Column: AI Business OS Value & Executive Telemetry */}
           <div className="hidden lg:flex lg:col-span-6 flex-col space-y-7 pr-4 lg:-translate-y-10">
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-line text-text text-xs font-semibold">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Next-Gen Enterprise Autonomous Architecture</span>
-              </div>
 
               <h1 className="text-4xl xl:text-5xl font-extrabold text-text tracking-tight font-sans leading-[1.15]">
                 The Autonomous <br />

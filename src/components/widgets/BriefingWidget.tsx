@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ContainerTile } from "../ui/ContainerTile";
 import { StatusBadge } from "../ui/Badge";
-import { Sparkles, ArrowRight, TrendingUp, ShieldCheck, Zap } from "lucide-react";
+import { BrainCircuit, LineChart, ArrowRight, TrendingUp, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 
 import { useBusinessDataSync } from "@/lib/upload/events";
@@ -76,7 +76,7 @@ export function BriefingWidget({
           <div className="flex items-center justify-between pb-3 border-b border-line/60">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/40 flex items-center justify-center text-gold shadow-sm shadow-[0_4px_12px_-4px_var(--gold-glow)]">
-                <Sparkles className="w-4 h-4" />
+                <BrainCircuit className="w-4 h-4" />
               </div>
               <div>
                 <h2 className="text-xs font-bold text-text uppercase tracking-wider font-sans flex items-center gap-1.5">
@@ -100,7 +100,7 @@ export function BriefingWidget({
               className="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-colors space-y-1"
             >
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
+                <LineChart className="w-3.5 h-3.5 text-blue-400" />
                 <span className="text-[11px] font-bold text-text uppercase tracking-wider font-mono">
                   Revenue & Growth Trajectory
                 </span>

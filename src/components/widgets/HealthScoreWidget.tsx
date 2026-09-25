@@ -178,7 +178,6 @@ export function HealthScoreWidget({
               </p>
             </div>
           </div>
-          <ProvenanceBadge type={isUploaded ? "from_data" : isFresh ? "benchmark" : "estimate"} />
         </div>
 
         {/* Circular Gauge + Hero Score */}
@@ -219,7 +218,7 @@ export function HealthScoreWidget({
 
           <div className="flex-1 space-y-2 text-center @sm:text-left">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 font-mono">
-              <TrendingUp className="w-3.5 h-3.5" />
+              <ShieldCheck className="w-3.5 h-3.5" />
               <span>{isFresh ? "Baseline Initiated" : "+ Live Calibrated"}</span>
             </div>
             <p className="text-xs text-text-muted leading-relaxed">

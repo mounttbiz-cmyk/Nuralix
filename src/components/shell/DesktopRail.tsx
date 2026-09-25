@@ -124,14 +124,9 @@ export function DesktopRail({
               </span>
               <span className="text-[10px] text-gold/80 font-bold ml-1 -mt-2">™</span>
             </div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <p className="text-[11px] text-text-muted truncate max-w-[110px] font-medium">
-                {companyName}
-              </p>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-surface-2 border border-line text-text-muted font-semibold tracking-wider shrink-0">
-                AI Business OS
-              </span>
-            </div>
+            <p className="text-[11px] text-text-muted truncate max-w-[180px] font-medium mt-0.5">
+              {companyName}
+            </p>
           </div>
         </Link>
       </div>
@@ -235,7 +230,7 @@ export function DesktopRail({
           size="md"
           fullWidth
           onClick={() => setIsQuickInputOpen(true)}
-          icon={<Sparkles className="w-3.5 h-3.5" />}
+          icon={<Sliders className="w-3.5 h-3.5" />}
         >
           Quick Business Input
         </Button>
