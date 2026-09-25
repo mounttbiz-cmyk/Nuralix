@@ -21,9 +21,25 @@ export async function GET() {
     let widgets = getPlatformConfig("dashboard_widgets", defaultWidgets);
     let plans = getPlatformConfig("subscription_plans", DEFAULT_SUBSCRIPTION_PLANS);
 
+    const sanitizeNav = (items: any[]) => items.map(item => ({
+      ...item,
+      icon: (item.id === "nav_chat" || item.label === "AI Workspace") ? "BrainCircuit"
+        : (item.id === "nav_strategy" || item.label === "Growth Strategy") ? "Target"
+        : (item.id === "nav_playbooks" || item.label === "Executive Playbooks") ? "BookOpen"
+        : (item.id === "nav_analytics" || item.label === "Adaptive Analytics") ? "BarChart3"
+        : item.icon,
+      badge: ((item.id === "nav_strategy" || item.label === "Growth Strategy") && item.badge === "NEW") ||
+             ((item.id === "nav_playbooks" || item.label === "Executive Playbooks") && item.badge === "PRO")
+        ? undefined
+        : item.badge,
+    }));
+
     // If database had empty sets, seed with defaults
     if (!Array.isArray(nav) || nav.length === 0) {
       nav = defaultNavItems;
+      setPlatformConfig("dashboard_nav", nav);
+    } else {
+      nav = sanitizeNav(nav);
       setPlatformConfig("dashboard_nav", nav);
     }
 

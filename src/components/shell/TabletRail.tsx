@@ -52,7 +52,18 @@ export function TabletRail({ navItems, onOpenSearch }: TabletRailProps) {
 
       {/* Icon Navigation list */}
       <nav className="flex-1 flex flex-col items-center gap-2 overflow-y-auto w-full px-2">
-        {navItems.map(item => {
+        {navItems.map(rawItem => {
+          const isWorkspace = rawItem.id === "nav_chat" || rawItem.label.toLowerCase().includes("workspace");
+          const isStrategy = rawItem.id === "nav_strategy" || rawItem.label.toLowerCase().includes("strategy");
+          const isPlaybooks = rawItem.id === "nav_playbooks" || rawItem.label.toLowerCase().includes("playbook");
+          const isAnalytics = rawItem.id === "nav_analytics" || rawItem.label.toLowerCase().includes("analytics");
+
+          const item = {
+            ...rawItem,
+            icon: isWorkspace ? "BrainCircuit" : isStrategy ? "Target" : isPlaybooks ? "BookOpen" : isAnalytics ? "BarChart3" : rawItem.icon,
+            badge: (isStrategy && rawItem.badge === "NEW") || (isPlaybooks && rawItem.badge === "PRO") ? undefined : rawItem.badge,
+          };
+
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
           const isLocked = !hasPlanLevel(item.requiredPlan);
 

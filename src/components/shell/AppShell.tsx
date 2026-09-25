@@ -20,6 +20,21 @@ interface AppShellProps {
   industry?: string;
 }
 
+function sanitizeNavItems(list: NavItem[]): NavItem[] {
+  return list.map(item => {
+    const isWorkspace = item.id === "nav_chat" || item.label.toLowerCase().includes("workspace");
+    const isStrategy = item.id === "nav_strategy" || item.label.toLowerCase().includes("strategy");
+    const isPlaybooks = item.id === "nav_playbooks" || item.label.toLowerCase().includes("playbook");
+    const isAnalytics = item.id === "nav_analytics" || item.label.toLowerCase().includes("analytics");
+
+    return {
+      ...item,
+      icon: isWorkspace ? "BrainCircuit" : isStrategy ? "Target" : isPlaybooks ? "BookOpen" : isAnalytics ? "BarChart3" : item.icon,
+      badge: (isStrategy && item.badge === "NEW") || (isPlaybooks && item.badge === "PRO") ? undefined : item.badge,
+    };
+  });
+}
+
 export function AppShell({
   children,
   navItems,
@@ -50,7 +65,7 @@ export function AppShell({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const [items, setItems] = useState<NavItem[]>(navItems);
+  const [items, setItems] = useState<NavItem[]>(() => sanitizeNavItems(navItems || []));
   const [features, setFeatures] = useState<{
     enableAiCopilot: boolean;
     enableDailyCheckin: boolean;
@@ -68,7 +83,7 @@ export function AppShell({
   // Sync navItems prop if changes
   React.useEffect(() => {
     if (navItems && navItems.length > 0) {
-      setItems(navItems.filter(item => item.enabled !== false));
+      setItems(sanitizeNavItems(navItems.filter(item => item.enabled !== false)));
     }
   }, [navItems]);
 
@@ -84,7 +99,9 @@ export function AppShell({
           if (savedNav) {
             const parsedNav = JSON.parse(savedNav);
             if (mounted && Array.isArray(parsedNav) && parsedNav.length > 0) {
-              setItems(parsedNav.filter((n: NavItem) => n.enabled !== false));
+              const cleaned = sanitizeNavItems(parsedNav.filter((n: NavItem) => n.enabled !== false));
+              setItems(cleaned);
+              localStorage.setItem("bizzpal_dashboard_nav", JSON.stringify(cleaned));
             }
           }
           const savedFeatures = localStorage.getItem("bizzpal_dashboard_features");
@@ -104,9 +121,10 @@ export function AppShell({
           if (!mounted) return;
           if (d.success) {
             if (Array.isArray(d.nav) && d.nav.length > 0) {
-              setItems(d.nav.filter((n: NavItem) => n.enabled !== false));
+              const cleaned = sanitizeNavItems(d.nav.filter((n: NavItem) => n.enabled !== false));
+              setItems(cleaned);
               try {
-                localStorage.setItem("bizzpal_dashboard_nav", JSON.stringify(d.nav));
+                localStorage.setItem("bizzpal_dashboard_nav", JSON.stringify(cleaned));
               } catch {}
             }
             if (d.features) {
