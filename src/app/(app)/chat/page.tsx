@@ -344,9 +344,9 @@ export default function ChatWorkspacePage() {
       const savedProfileStr = localStorage.getItem("bizzpal_business_profile");
       const existing = savedProfileStr ? JSON.parse(savedProfileStr) : {};
 
-      const currentMonthlyRev = Number(existing.revenue || existing.monthlyRevenue) || 500000;
-      const currentBurn = Number(existing.burn || existing.monthlyBurn) || 150000;
-      const currentCash = Number(existing.cash || existing.cashOnHand) || 1200000;
+      const currentMonthlyRev = Number(existing.revenue || existing.monthlyRevenue) || 0;
+      const currentBurn = Number(existing.burn || existing.monthlyBurn) || 0;
+      const currentCash = Number(existing.cash || existing.cashOnHand) || 0;
 
       const newMonthlyRev = record.dailyRevenue
         ? Math.round(record.dailyRevenue * 30)
@@ -501,7 +501,7 @@ export default function ChatWorkspacePage() {
         agentName: activeAgent.name + ` (${activeAgent.role})`,
         avatar: activeAgent.avatar,
         timestamp: "Just now",
-        content: `Acknowledged for ${companyProfile?.name || "Apex Analytics"}. Based on current financial reserves (₹${Number(companyProfile?.cash || 1200000).toLocaleString("en-IN")}), I recommend maintaining strict capital discipline while executing on this initiative.`,
+        content: `Acknowledged for ${companyProfile?.name || "your enterprise"}.${companyProfile?.cash ? ` Based on current financial reserves (₹${Number(companyProfile.cash).toLocaleString("en-IN")}),` : ""} I recommend maintaining strict capital discipline while executing on this initiative.`,
         provider: "bizzpal-ai",
       };
       setConversations(prev => ({
@@ -553,15 +553,15 @@ export default function ChatWorkspacePage() {
         <div className="flex items-center gap-3 text-xs bg-surface-2/60 border border-line px-3 py-1.5 rounded-xl text-text-muted shrink-0">
           <div className="flex items-center gap-1.5 font-semibold text-text">
             <Building2 className="w-3.5 h-3.5 text-brass" />
-            <span>{companyProfile?.name || "Apex Analytics"}</span>
+            <span>{companyProfile?.name || "My Enterprise"}</span>
           </div>
           <span>·</span>
           <span className="font-mono text-[11px] text-jade">
-            ₹{Number(companyProfile?.revenue || 500000).toLocaleString("en-IN")}/mo
+            ₹{Number(companyProfile?.revenue || 0).toLocaleString("en-IN")}/mo
           </span>
           <span>·</span>
           <span className="text-[11px] font-mono text-cyan-400">
-            Runway {companyProfile?.cash ? (companyProfile.cash / (companyProfile.burn || 150000)).toFixed(1) : "7.2"}mo
+            Runway {companyProfile?.burn && companyProfile?.cash ? (companyProfile.cash / companyProfile.burn).toFixed(1) : (companyProfile?.cash ? "18+" : "0.0")}mo
           </span>
         </div>
       </div>

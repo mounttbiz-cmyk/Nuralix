@@ -128,15 +128,15 @@ export async function POST(req: Request) {
 
     // Update main business record with uploaded metrics
     const currentBiz = db.prepare("SELECT * FROM businesses WHERE id = ?").get(DEFAULT_BUSINESS_ID) as any;
-    const finalName = metrics.name || currentBiz?.name || "Apex Analytics";
+    const finalName = metrics.name || currentBiz?.name || "My Enterprise";
     const finalIndustry = metrics.industry || currentBiz?.industry || "saas";
     const finalIndustryLabel = metrics.industryLabel || currentBiz?.industry_label || "B2B SaaS & Cloud Platforms";
     const finalFounder = metrics.founderName || currentBiz?.founder_name || "Founder";
-    const finalTeamSize = metrics.teamSize ?? currentBiz?.team_size ?? 15;
-    const finalMonthlyRev = metrics.monthlyRevenue ?? currentBiz?.monthly_revenue ?? 500000;
+    const finalTeamSize = metrics.teamSize ?? currentBiz?.team_size ?? 1;
+    const finalMonthlyRev = metrics.monthlyRevenue ?? currentBiz?.monthly_revenue ?? 0;
     const finalAnnualRev = metrics.annualRevenue ?? (finalMonthlyRev * 12);
-    const finalBurn = metrics.monthlyBurn ?? currentBiz?.monthly_burn ?? 150000;
-    const finalCash = metrics.cashOnHand ?? currentBiz?.cash_on_hand ?? 1200000;
+    const finalBurn = metrics.monthlyBurn ?? currentBiz?.monthly_burn ?? 0;
+    const finalCash = metrics.cashOnHand ?? currentBiz?.cash_on_hand ?? 0;
 
     db.prepare(`
       UPDATE businesses SET
@@ -203,15 +203,15 @@ export async function DELETE() {
     // Reset default business values
     db.prepare(`
       UPDATE businesses SET
-        name = 'BizzPal Enterprise',
+        name = 'My Enterprise',
         industry = 'saas',
         industry_label = 'B2B SaaS & Cloud Platforms',
         founder_name = 'Founder',
-        team_size = 15,
-        annual_revenue = 6000000,
-        monthly_revenue = 500000,
-        monthly_burn = 150000,
-        cash_on_hand = 1200000,
+        team_size = 1,
+        annual_revenue = 0,
+        monthly_revenue = 0,
+        monthly_burn = 0,
+        cash_on_hand = 0,
         updated_at = ?
       WHERE id = ?
     `).run(now, DEFAULT_BUSINESS_ID);
@@ -220,16 +220,16 @@ export async function DELETE() {
       success: true,
       message: "Restored baseline enterprise business data",
       business: {
-        name: "BizzPal Enterprise",
+        name: "My Enterprise",
         industry: "saas",
         industryLabel: "B2B SaaS & Cloud Platforms",
         founderName: "Founder",
-        teamSize: 15,
-        annualRevenue: 6000000,
-        monthlyRevenue: 500000,
-        monthlyBurn: 150000,
-        cashOnHand: 1200000,
-        runwayMonths: 8.0,
+        teamSize: 1,
+        annualRevenue: 0,
+        monthlyRevenue: 0,
+        monthlyBurn: 0,
+        cashOnHand: 0,
+        runwayMonths: 0,
       },
     });
   } catch (error: any) {

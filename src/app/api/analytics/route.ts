@@ -23,11 +23,11 @@ export async function GET() {
       } catch {}
     }
 
-    const monthlyRev = uploadedMonthlyRev || biz?.monthlyRevenue || 500000;
-    const monthlyBurn = uploadedBurn || biz?.monthlyBurn || 150000;
-    const cashReserve = uploadedCash || biz?.cashOnHand || 1200000;
-    const teamSize = biz?.teamSize || 10;
-    const runwayMonths = monthlyBurn > 0 ? Number((cashReserve / monthlyBurn).toFixed(1)) : 18;
+    const monthlyRev = uploadedMonthlyRev || biz?.monthlyRevenue || 0;
+    const monthlyBurn = uploadedBurn || biz?.monthlyBurn || 0;
+    const cashReserve = uploadedCash || biz?.cashOnHand || 0;
+    const teamSize = biz?.teamSize || 1;
+    const runwayMonths = monthlyBurn > 0 ? Number((cashReserve / monthlyBurn).toFixed(1)) : (cashReserve > 0 ? 18 : 0);
 
     // Dynamically calculate 6-month historical & projected revenue curve
     const months = ["Apr", "May", "Jun", "Jul", "Aug", "Sep"];

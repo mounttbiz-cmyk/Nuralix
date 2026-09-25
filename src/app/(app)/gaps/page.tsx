@@ -174,9 +174,9 @@ export default function GapsPage() {
       const savedStr = localStorage.getItem("bizzpal_business_profile");
       if (savedStr) {
         const saved = JSON.parse(savedStr);
-        const cash = Number(saved.cash || saved.cashOnHand) || 1200000;
-        const burn = Number(saved.burn || saved.monthlyBurn) || 150000;
-        const actualRunway = burn > 0 ? (cash / burn).toFixed(1) : "18+";
+        const cash = Number(saved.cash || saved.cashOnHand || 0);
+        const burn = Number(saved.burn || saved.monthlyBurn || 0);
+        const actualRunway = burn > 0 ? (cash / burn).toFixed(1) : cash > 0 ? "24.0+" : "0.0";
 
         setGaps(prev =>
           prev.map(g => {

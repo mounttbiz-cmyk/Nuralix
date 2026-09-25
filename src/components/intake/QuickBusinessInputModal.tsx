@@ -49,13 +49,35 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
 
   // Structured Form State
   const [formData, setFormData] = useState({
-    dailyRevenue: "",
-    dailyOrders: "",
-    dailyExpenses: "",
+    companyName: "",
+    founderName: "",
+    monthlyRevenue: "",
+    monthlyBurn: "",
     cashOnHand: "",
     teamSize: "",
     operationalNotes: "",
   });
+
+  // Hydrate active enterprise profile into form on open
+  useEffect(() => {
+    if (isOpen) {
+      try {
+        const stored = localStorage.getItem("bizzpal_business_profile");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setFormData(prev => ({
+            ...prev,
+            companyName: parsed.name && !parsed.name.includes("Acme") ? parsed.name : "",
+            founderName: parsed.founderName && !parsed.founderName.includes("Test") ? parsed.founderName : "",
+            monthlyRevenue: parsed.revenue || parsed.monthlyRevenue ? String(parsed.revenue || parsed.monthlyRevenue) : "",
+            monthlyBurn: parsed.burn || parsed.monthlyBurn ? String(parsed.burn || parsed.monthlyBurn) : "",
+            cashOnHand: parsed.cash || parsed.cashOnHand ? String(parsed.cash || parsed.cashOnHand) : "",
+            teamSize: parsed.teamSize ? String(parsed.teamSize) : "1",
+          }));
+        }
+      } catch {}
+    }
+  }, [isOpen]);
 
   // Example Prompt Pills
   const EXAMPLE_PROMPTS = [
@@ -144,6 +166,10 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
 
   // Commit Business Input
   const handleCommitRecord = async (dataToCommit?: {
+    companyName?: string;
+    founderName?: string;
+    monthlyRevenue?: number;
+    monthlyBurn?: number;
     dailyRevenue?: number;
     dailyOrders?: number;
     dailyExpenses?: number;
@@ -168,15 +194,19 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
       const currentCash = Number(existing.cash || existing.cashOnHand || 0);
       const currentTeam = Number(existing.teamSize || 1);
 
-      const newMonthlyRev = record.dailyRevenue
+      const newMonthlyRev = record.monthlyRevenue !== undefined
+        ? record.monthlyRevenue
+        : record.dailyRevenue
         ? Math.round(record.dailyRevenue * 30)
         : currentMonthlyRev;
 
-      const newBurn = record.dailyExpenses
+      const newBurn = record.monthlyBurn !== undefined
+        ? record.monthlyBurn
+        : record.dailyExpenses
         ? Math.round(record.dailyExpenses * 30)
         : currentBurn;
 
-      const newCash = record.cashOnHand
+      const newCash = record.cashOnHand !== undefined
         ? record.cashOnHand
         : (record.dailyRevenue ? currentCash + record.dailyRevenue : currentCash);
 
@@ -185,6 +215,8 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
 
       const updatedProfile = {
         ...existing,
+        name: record.companyName || existing.name || "My Enterprise",
+        founderName: record.founderName || existing.founderName || "Founder",
         revenue: newMonthlyRev,
         monthlyRevenue: newMonthlyRev,
         annualRevenue: newAnnualRev,
@@ -213,6 +245,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: updatedProfile.name,
+            founderName: updatedProfile.founderName,
             monthlyRevenue: newMonthlyRev,
             annualRevenue: newAnnualRev,
             monthlyBurn: newBurn,
@@ -267,11 +300,12 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleCommitRecord({
-      dailyRevenue: formData.dailyRevenue ? Number(formData.dailyRevenue) : undefined,
-      dailyOrders: formData.dailyOrders ? Number(formData.dailyOrders) : undefined,
-      dailyExpenses: formData.dailyExpenses ? Number(formData.dailyExpenses) : undefined,
-      cashOnHand: formData.cashOnHand ? Number(formData.cashOnHand) : undefined,
-      teamSize: formData.teamSize ? Number(formData.teamSize) : undefined,
+      companyName: formData.companyName.trim() || undefined,
+      founderName: formData.founderName.trim() || undefined,
+      monthlyRevenue: formData.monthlyRevenue !== "" ? Number(formData.monthlyRevenue) : undefined,
+      monthlyBurn: formData.monthlyBurn !== "" ? Number(formData.monthlyBurn) : undefined,
+      cashOnHand: formData.cashOnHand !== "" ? Number(formData.cashOnHand) : undefined,
+      teamSize: formData.teamSize !== "" ? Number(formData.teamSize) : undefined,
       notes: formData.operationalNotes,
     });
   };
@@ -280,7 +314,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
 
   // Determine if primary save button should be enabled
   const canSaveNatural = naturalText.trim().length > 0;
-  const canSaveForm = Boolean(formData.dailyRevenue || formData.dailyOrders || formData.dailyExpenses || formData.cashOnHand || formData.teamSize || formData.operationalNotes);
+  const canSaveForm = Boolean(formData.companyName || formData.monthlyRevenue !== "" || formData.monthlyBurn !== "" || formData.cashOnHand !== "" || formData.teamSize !== "" || formData.operationalNotes);
   const isSaveActive = activeTab === "natural" || activeTab === "voice" ? canSaveNatural : canSaveForm;
 
   return (
@@ -539,39 +573,65 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-text block mb-1">
-                    Today's Revenue (₹)
+                    Company / Business Name
                   </label>
                   <input
-                    type="number"
-                    value={formData.dailyRevenue}
-                    onChange={e => setFormData({ ...formData, dailyRevenue: e.target.value })}
-                    placeholder="e.g. 85000"
+                    type="text"
+                    value={formData.companyName}
+                    onChange={e => setFormData({ ...formData, companyName: e.target.value })}
+                    placeholder="e.g. Nexus Technologies"
                     className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
                     style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                   />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-text block mb-1">
-                    Orders / Transactions Count
+                    Founder / Lead Name
                   </label>
                   <input
-                    type="number"
-                    value={formData.dailyOrders}
-                    onChange={e => setFormData({ ...formData, dailyOrders: e.target.value })}
-                    placeholder="e.g. 42"
+                    type="text"
+                    value={formData.founderName}
+                    onChange={e => setFormData({ ...formData, founderName: e.target.value })}
+                    placeholder="e.g. Alex Morgan"
                     className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
                     style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                   />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-text block mb-1">
-                    Today's Operating Expenses (₹)
+                    Monthly Revenue (₹)
                   </label>
                   <input
                     type="number"
-                    value={formData.dailyExpenses}
-                    onChange={e => setFormData({ ...formData, dailyExpenses: e.target.value })}
-                    placeholder="e.g. 15000"
+                    value={formData.monthlyRevenue}
+                    onChange={e => setFormData({ ...formData, monthlyRevenue: e.target.value })}
+                    placeholder="e.g. 500000"
+                    className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-text block mb-1">
+                    Monthly Operating Burn (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.monthlyBurn}
+                    onChange={e => setFormData({ ...formData, monthlyBurn: e.target.value })}
+                    placeholder="e.g. 150000"
+                    className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
+                    style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-text block mb-1">
+                    Cash on Hand / Bank Reserves (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.cashOnHand}
+                    onChange={e => setFormData({ ...formData, cashOnHand: e.target.value })}
+                    placeholder="e.g. 1000000"
                     className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
                     style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                   />
@@ -584,20 +644,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                     type="number"
                     value={formData.teamSize}
                     onChange={e => setFormData({ ...formData, teamSize: e.target.value })}
-                    placeholder="e.g. 16"
-                    className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
-                    style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-bold text-text block mb-1">
-                    Liquid Bank Reserves (₹) (Optional)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.cashOnHand}
-                    onChange={e => setFormData({ ...formData, cashOnHand: e.target.value })}
-                    placeholder="e.g. 1200000"
+                    placeholder="e.g. 8"
                     className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
                     style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                   />
@@ -612,7 +659,7 @@ export function QuickBusinessInputModal({ isOpen, onClose, onSuccess }: QuickBus
                   type="text"
                   value={formData.operationalNotes}
                   onChange={e => setFormData({ ...formData, operationalNotes: e.target.value })}
-                  placeholder="e.g. Hired 2 engineers today, closing 3 enterprise demos."
+                  placeholder="e.g. Closing 3 enterprise pilots and expanding outbound sales."
                   className="w-full px-3 py-2 rounded-lg border border-line text-xs text-text focus:ring-1 focus:ring-brass focus:outline-none"
                   style={{ backgroundColor: "var(--surface-2)", color: "var(--text)" }}
                 />

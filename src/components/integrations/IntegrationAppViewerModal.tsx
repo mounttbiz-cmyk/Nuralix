@@ -639,7 +639,7 @@ export function IntegrationAppViewerModal({
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. client@acme.com, colleague@yourcompany.com"
+                            placeholder="e.g. client@company.com, colleague@yourcompany.com"
                             value={newMeetingAttendees}
                             onChange={e => setNewMeetingAttendees(e.target.value)}
                             className="w-full px-3 py-2 rounded-lg bg-surface border border-line text-text text-xs focus:ring-1 focus:ring-brass"

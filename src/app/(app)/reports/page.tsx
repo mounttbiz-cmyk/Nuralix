@@ -339,13 +339,13 @@ export default function ReportsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedBriefingId, setSelectedBriefingId] = useState("briefing-current");
-  const [companyName, setCompanyName] = useState("Enterprise Organization");
-  const [founderName, setFounderName] = useState("Executive");
+  const [companyName, setCompanyName] = useState("My Enterprise");
+  const [founderName, setFounderName] = useState("Founder");
   const [industryName, setIndustryName] = useState("Technology & Enterprise Services");
-  const [annualRevenue, setAnnualRevenue] = useState(6000000);
-  const [teamSize, setTeamSize] = useState(10);
-  const [burn, setBurn] = useState(150000);
-  const [cash, setCash] = useState(1200000);
+  const [annualRevenue, setAnnualRevenue] = useState(0);
+  const [teamSize, setTeamSize] = useState(1);
+  const [burn, setBurn] = useState(0);
+  const [cash, setCash] = useState(0);
 
   const [decisions, setDecisions] = useState<LeadershipDecision[]>(INITIAL_DECISIONS);
   const [activeNotification, setActiveNotification] = useState<string | null>(null);

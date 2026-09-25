@@ -139,10 +139,10 @@ export async function POST(req: NextRequest) {
     const companyName = resolvedProfile.name || "Enterprise";
     const founderName = resolvedProfile.founderName || resolvedProfile.founder_name || "Founder";
     const industry = resolvedProfile.industryLabel || resolvedProfile.industry_label || resolvedProfile.industry || "Enterprise";
-    const monthlyRev = Number(resolvedProfile.revenue || resolvedProfile.monthly_revenue || resolvedProfile.monthlyRevenue || 500000);
-    const monthlyBurn = Number(resolvedProfile.burn || resolvedProfile.monthly_burn || resolvedProfile.monthlyBurn || 150000);
-    const cashReserves = Number(resolvedProfile.cash || resolvedProfile.cash_on_hand || resolvedProfile.cashOnHand || 1200000);
-    const teamSize = resolvedProfile.teamSize || resolvedProfile.team_size || 10;
+    const monthlyRev = Number(resolvedProfile.revenue || resolvedProfile.monthly_revenue || resolvedProfile.monthlyRevenue || 0);
+    const monthlyBurn = Number(resolvedProfile.burn || resolvedProfile.monthly_burn || resolvedProfile.monthlyBurn || 0);
+    const cashReserves = Number(resolvedProfile.cash || resolvedProfile.cash_on_hand || resolvedProfile.cashOnHand || 0);
+    const teamSize = resolvedProfile.teamSize || resolvedProfile.team_size || 1;
 
     const companyContext = `
 Company Context:
@@ -223,13 +223,20 @@ Instructions:
     }
 
     // High-fidelity fallback deterministic executive responses
+    const curCash = Number(companyProfile?.cash ?? companyProfile?.cashOnHand ?? cashReserves);
+    const curBurn = Number(companyProfile?.burn ?? companyProfile?.monthlyBurn ?? monthlyBurn);
+    const curTeam = Number(companyProfile?.teamSize ?? teamSize);
+    const curAnnRev = Number(companyProfile?.annualRevenue ?? (monthlyRev * 12));
+    const calcRunway = curBurn > 0 ? (curCash / curBurn).toFixed(1) : (curCash > 0 ? "18+" : "0.0");
+    const revPerEmp = curTeam > 0 && curAnnRev > 0 ? Math.round(curAnnRev / curTeam) : 0;
+
     const fallbackResponses: Record<string, string> = {
-      ceo: `Acknowledged. Based on ${companyProfile?.name || "our company"}'s current operations in ${companyProfile?.industryLabel || "our sector"}, our strategic imperative is capital-efficient scaling. With liquid reserves at ₹${Number(companyProfile?.cash || 1200000).toLocaleString("en-IN")}, our cash runway provides solid operational flexibility. I recommend concentrating leadership mindshare on client retention and pipeline closing over the next 60 days.`,
-      cfo: `Financial assessment: monthly net burn is ₹${Number(companyProfile?.burn || 150000).toLocaleString("en-IN")} against ₹${Number(companyProfile?.cash || 1200000).toLocaleString("en-IN")} in bank reserves. This yields a runway of ${((companyProfile?.cash || 1200000) / (companyProfile?.burn || 150000)).toFixed(1)} months. To extend solvency, vendor subscriptions should be rationalized while accelerating invoice collection cycles.`,
-      marketing: `Target CAC should be strictly benchmarked under 25% of annual client value. For ${companyProfile?.name || "our company"}, prioritizing high-intent organic search and account-based outreach will deliver a 3.4x ROAS compared to uncalibrated ad spend.`,
-      sales: `Deal velocity audit indicates positive contract momentum. I recommend introducing rigorous stage-gate qualification in our pipeline: route sub-threshold leads to automated touchpoints while focusing senior sales rep capacity on high-LTV enterprise accounts.`,
-      hr: `For a team of ${companyProfile?.teamSize || 10} FTEs, revenue per employee currently stands at ₹${(Number(companyProfile?.annualRevenue || 6000000) / Number(companyProfile?.teamSize || 10)).toLocaleString("en-IN")}. Before adding new headcount, let's automate routine operational workflows to keep unit economics lean.`,
-      operations: `Operational capacity review shows 82.4% gross margin efficiency. We can eliminate 4.5 hours of manual reporting per week by linking our automated execution workflows directly to our Google Workspace, Stripe, and Slack channels.`,
+      ceo: `Acknowledged. Based on ${companyProfile?.name || companyName}'s current operations in ${companyProfile?.industryLabel || industry}, our strategic imperative is capital-efficient scaling. With liquid reserves at ₹${curCash.toLocaleString("en-IN")}, our cash runway stands at ${calcRunway} months. I recommend concentrating leadership mindshare on client retention and pipeline closing over the next 60 days.`,
+      cfo: `Financial assessment: monthly net burn is ₹${curBurn.toLocaleString("en-IN")} against ₹${curCash.toLocaleString("en-IN")} in bank reserves. This yields a runway of ${calcRunway} months. To optimize solvency, ensure operating cash flows remain protected while accelerating invoice collection cycles.`,
+      marketing: `Target CAC should be strictly benchmarked under 25% of annual client value. For ${companyProfile?.name || companyName}, prioritizing high-intent organic search and account-based outreach will deliver high ROAS compared to uncalibrated ad spend.`,
+      sales: `Deal velocity audit indicates pipeline opportunities. I recommend introducing rigorous stage-gate qualification in our pipeline: route sub-threshold leads to automated touchpoints while focusing senior sales rep capacity on high-LTV enterprise accounts.`,
+      hr: `For a team of ${curTeam} FTEs, revenue per employee currently stands at ₹${revPerEmp.toLocaleString("en-IN")}. Before adding new headcount, let's automate routine operational workflows to keep unit economics lean.`,
+      operations: `Operational capacity review shows strong delivery efficiency. We can eliminate manual reporting overhead by linking automated execution workflows directly to our connected tools.`,
       strategy: `Defensibility audit: Our competitive moat strengthens through integrated operational telemetry and rapid automated execution. I recommend documenting core standard operating procedures in our Knowledge Hub to ensure rapid scaling and quality control.`,
     };
 

@@ -41,10 +41,10 @@ export default function BusinessProfileSettingsPage() {
   const [website, setWebsite] = useState("");
   const [industry, setIndustry] = useState("saas");
   const [industryLabel, setIndustryLabel] = useState("B2B SaaS & Cloud Platforms");
-  const [teamSize, setTeamSize] = useState<number | string>(10);
-  const [monthlyRevenue, setMonthlyRevenue] = useState<number | string>(500000);
-  const [monthlyBurn, setMonthlyBurn] = useState<number | string>(150000);
-  const [cashOnHand, setCashOnHand] = useState<number | string>(1200000);
+  const [teamSize, setTeamSize] = useState<number | string>(1);
+  const [monthlyRevenue, setMonthlyRevenue] = useState<number | string>(0);
+  const [monthlyBurn, setMonthlyBurn] = useState<number | string>(0);
+  const [cashOnHand, setCashOnHand] = useState<number | string>(0);
   const [provider, setProvider] = useState("email");
 
   // UI state
@@ -506,7 +506,7 @@ export default function BusinessProfileSettingsPage() {
                 type="number"
                 value={monthlyBurn}
                 onChange={(e) => setMonthlyBurn(e.target.value)}
-                placeholder="150000"
+                placeholder="0"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text text-xs focus:outline-none focus:border-brass focus:ring-1 focus:ring-brass transition-all"
               />
               <span className="text-[10px] text-text-muted block">
@@ -521,7 +521,7 @@ export default function BusinessProfileSettingsPage() {
                 type="number"
                 value={cashOnHand}
                 onChange={(e) => setCashOnHand(e.target.value)}
-                placeholder="1200000"
+                placeholder="0"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-line bg-surface-2 text-text text-xs focus:outline-none focus:border-brass focus:ring-1 focus:ring-brass transition-all"
               />
               <span className="text-[10px] text-text-muted block">

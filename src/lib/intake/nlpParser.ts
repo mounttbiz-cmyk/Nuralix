@@ -10,6 +10,10 @@
 export interface ExtractedBusinessRecord {
   rawText: string;
   detectedAt: string;
+  companyName?: string;
+  founderName?: string;
+  monthlyRevenue?: number;
+  monthlyBurn?: number;
   dailyRevenue?: number;
   dailyOrders?: number;
   dailyExpenses?: number;

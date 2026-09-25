@@ -130,12 +130,12 @@ export default function GrowthStrategyPage() {
   const [formMilestones, setFormMilestones] = useState<string[]>([""]);
 
   // Loaded Business Profile Context
-  const [companyName, setCompanyName] = useState("Enterprise Organization");
-  const [founderName, setFounderName] = useState("Executive");
-  const [annualRevenue, setAnnualRevenue] = useState(6000000);
-  const [monthlyRevenue, setMonthlyRevenue] = useState(500000);
-  const [monthlyBurn, setMonthlyBurn] = useState(150000);
-  const [cashOnHand, setCashOnHand] = useState(1200000);
+  const [companyName, setCompanyName] = useState("My Enterprise");
+  const [founderName, setFounderName] = useState("Founder");
+  const [annualRevenue, setAnnualRevenue] = useState(0);
+  const [monthlyRevenue, setMonthlyRevenue] = useState(0);
+  const [monthlyBurn, setMonthlyBurn] = useState(0);
+  const [cashOnHand, setCashOnHand] = useState(0);
 
   const applyBusinessProfile = (p: any) => {
     if (!p) return;

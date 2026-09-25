@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ContainerTile } from "../ui/ContainerTile";
 import { StatusBadge } from "../ui/Badge";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, TrendingUp, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 
 import { useBusinessDataSync } from "@/lib/upload/events";
@@ -100,7 +100,7 @@ export function BriefingWidget({
               className="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-colors space-y-1"
             >
               <div className="flex items-center gap-2">
-                <span className="text-xs">📈</span>
+                <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
                 <span className="text-[11px] font-bold text-text uppercase tracking-wider font-mono">
                   Revenue & Growth Trajectory
                 </span>
@@ -125,7 +125,7 @@ export function BriefingWidget({
               className="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition-colors space-y-1"
             >
               <div className="flex items-center gap-2">
-                <span className="text-xs">🛡️</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                 <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">
                   Capital Reserves & Buffer
                 </span>
@@ -150,7 +150,7 @@ export function BriefingWidget({
               className="p-3.5 rounded-xl bg-gold/[0.06] border border-gold/25 space-y-1"
             >
               <div className="flex items-center gap-2">
-                <span className="text-xs">⚡</span>
+                <Zap className="w-3.5 h-3.5 text-gold" />
                 <span className="text-[11px] font-bold text-gold uppercase tracking-wider font-mono">
                   Strategic Directive (Immediate)
                 </span>

@@ -87,14 +87,14 @@ interface DynamicQuestionParams {
 function getQuestionsForType(bType: string, params: DynamicQuestionParams): DynamicQuestion[] {
   const cName = params.companyName?.trim() || "Your Company";
   const fName = params.founderName?.trim() || "Founder";
-  const teamNum = Number(params.teamSize) || 10;
+  const teamNum = Number(params.teamSize) || 1;
   const teamLabel = `${teamNum} team member${teamNum === 1 ? "" : "s"}`;
-  const annRevNum = Number(params.annualRevenue) || 6000000;
-  const monthlyRevNum = Number(params.monthlyRevenue) || Math.round(annRevNum / 12);
-  const revLabel = `₹${monthlyRevNum.toLocaleString("en-IN")}/mo`;
-  const burnNum = Number(params.monthlyBurn) || 150000;
-  const cashNum = Number(params.cashOnHand) || 1200000;
-  const runwayMonths = burnNum > 0 ? (cashNum / burnNum).toFixed(1) : "18+";
+  const annRevNum = Number(params.annualRevenue) || 0;
+  const monthlyRevNum = Number(params.monthlyRevenue) || (annRevNum > 0 ? Math.round(annRevNum / 12) : 0);
+  const revLabel = monthlyRevNum > 0 ? `₹${monthlyRevNum.toLocaleString("en-IN")}/mo` : "Pre-revenue / Setting up";
+  const burnNum = Number(params.monthlyBurn) || 0;
+  const cashNum = Number(params.cashOnHand) || 0;
+  const runwayMonths = burnNum > 0 ? (cashNum / burnNum).toFixed(1) : "0.0";
 
   switch (bType) {
     case "it":
@@ -1379,11 +1379,11 @@ export default function OnboardingPage() {
           customBusinessType: selectedCategories.includes("other") ? customBusinessType.trim() : "",
           businessModel,
           currency: "INR",
-          teamSize: Number(teamSize) || 10,
-          annualRevenue: Number(annualRevenue) || 6000000,
-          revenue: Number(monthlyRevenue) || (Number(annualRevenue) ? Math.round(Number(annualRevenue) / 12) : 500000),
-          burn: Number(monthlyBurn) || 150000,
-          cash: Number(cashOnHand) || 1200000,
+          teamSize: Number(teamSize) || 1,
+          annualRevenue: Number(annualRevenue) || 0,
+          revenue: Number(monthlyRevenue) || (Number(annualRevenue) ? Math.round(Number(annualRevenue) / 12) : 0),
+          burn: Number(monthlyBurn) || 0,
+          cash: Number(cashOnHand) || 0,
           needs: selectedNeeds.length > 0 ? selectedNeeds : ["extend_runway"],
           connectedTools: noIntegrations ? [] : selectedTools,
           noIntegrations,

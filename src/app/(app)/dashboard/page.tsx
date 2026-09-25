@@ -39,11 +39,11 @@ function DashboardContent() {
         const p = localStorage.getItem("bizzpal_business_profile");
         if (p) {
           const parsed = JSON.parse(p);
-          if (parsed.name) return parsed.name;
+          if (parsed.name && !parsed.name.includes("Acme")) return parsed.name;
         }
       } catch {}
     }
-    return "BizzPal Enterprise";
+    return "My Enterprise";
   });
   const [selectedTimeframe, setSelectedTimeframe] = useState("Live Today");
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -205,7 +205,13 @@ function DashboardContent() {
   const applyProfileData = (saved: any) => {
     if (!saved) return;
     if (saved.industry) setSelectedIndustry(saved.industry);
-    if (saved.name) setCompanyName(saved.name);
+    if (saved.name) {
+      if (saved.name.includes("Acme")) {
+        setCompanyName("My Enterprise");
+      } else {
+        setCompanyName(saved.name);
+      }
+    }
     if (saved.isUploadedData && saved.sourceFileName) {
       setUploadedFileName(saved.sourceFileName);
     } else {
@@ -250,7 +256,22 @@ function DashboardContent() {
       try {
         const savedProfileStr = localStorage.getItem("bizzpal_business_profile");
         if (savedProfileStr) {
-          applyProfileData(JSON.parse(savedProfileStr));
+          const parsed = JSON.parse(savedProfileStr);
+          if (parsed.name && parsed.name.includes("Acme")) {
+            localStorage.removeItem("bizzpal_business_profile");
+            localStorage.removeItem("bizzpal_user_session");
+            fetch("/api/business/intake")
+              .then(r => r.json())
+              .then(d => {
+                if (d.success && d.business) {
+                  applyProfileData(d.business);
+                  localStorage.setItem("bizzpal_business_profile", JSON.stringify(d.business));
+                }
+              })
+              .catch(() => {});
+            return;
+          }
+          applyProfileData(parsed);
         } else {
           // Fetch real enterprise record from database API
           fetch("/api/business/intake")

@@ -73,12 +73,13 @@ export function DesktopRail({
         const parsed = JSON.parse(raw);
         const match = parsed.find((p: any) => p.id === currentPlan);
         if (match?.name) {
-          setPlanBadgeLabel(match.name);
+          const cleaned = match.name.replace(/\s*\/\s*Demo/gi, "").replace(/Demo/gi, "").trim();
+          setPlanBadgeLabel(cleaned || "Starter Free");
           return;
         }
       }
     } catch {}
-    if (currentPlan === "free") setPlanBadgeLabel("Free Plan");
+    if (currentPlan === "free") setPlanBadgeLabel("Starter Free");
     else if (currentPlan === "starter") setPlanBadgeLabel("Starter OS");
     else if (currentPlan === "growth") setPlanBadgeLabel("Growth Plan");
     else if (currentPlan === "enterprise") setPlanBadgeLabel("Enterprise");

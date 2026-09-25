@@ -367,10 +367,10 @@ export default function ExecutivePlaybooksPage() {
   const [activePlaybook, setActivePlaybook] = useState<Playbook | null>(null);
   const [executingId, setExecutingId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [companyName, setCompanyName] = useState("Enterprise Organization");
-  const [runwayMonths, setRunwayMonths] = useState("8.0");
-  const [monthlyBurn, setMonthlyBurn] = useState(150000);
-  const [cashOnHand, setCashOnHand] = useState(1200000);
+  const [companyName, setCompanyName] = useState("My Enterprise");
+  const [runwayMonths, setRunwayMonths] = useState("0.0");
+  const [monthlyBurn, setMonthlyBurn] = useState(0);
+  const [cashOnHand, setCashOnHand] = useState(0);
 
   // Custom Playbook Modal
   const [isCreateOpen, setIsCreateOpen] = useState(false);

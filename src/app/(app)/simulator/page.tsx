@@ -70,8 +70,8 @@ function generateSimulation(
   const q = query.trim().toLowerCase();
   const cName = profile.companyName || "Enterprise Organization";
   const fName = profile.founderName || "Founder";
-  const burn = profile.burn || 150000;
-  const cash = profile.cash || 1200000;
+  const burn = profile.burn || 0;
+  const cash = profile.cash || 0;
 
   // 1. IT Guy / IT Specialist / Sysadmin query
   if (
@@ -509,12 +509,12 @@ const PRESET_QUERIES = [
 export default function SimulatorPage() {
   // Business Profile Context
   const [profile, setProfile] = useState<CompanyProfileContext>({
-    companyName: "Enterprise Organization",
-    founderName: "Executive",
-    burn: 150000,
-    cash: 1200000,
-    revenue: 500000,
-    teamSize: 10,
+    companyName: "My Enterprise",
+    founderName: "Founder",
+    burn: 0,
+    cash: 0,
+    revenue: 0,
+    teamSize: 1,
   });
 
   // Query & Simulation State

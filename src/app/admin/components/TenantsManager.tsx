@@ -498,7 +498,7 @@ export function TenantsManager({ tenants, stats, onRefresh, notify }: TenantsMan
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Acme Technologies"
+                    placeholder="e.g. Nexa Systems"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-line text-text focus:outline-none focus:border-gold font-semibold"
