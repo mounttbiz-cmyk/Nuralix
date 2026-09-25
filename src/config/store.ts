@@ -65,7 +65,9 @@ class PlatformConfigStore {
         const { getPlatformConfig } = require("@/lib/db");
         const persistedNav = getPlatformConfig("dashboard_nav", null);
         if (Array.isArray(persistedNav) && persistedNav.length > 0) {
-          this.nav = persistedNav;
+          const existingIds = new Set(persistedNav.map((n: any) => n.id));
+          const missingDefaults = defaultNavItems.filter(item => !existingIds.has(item.id));
+          this.nav = [...persistedNav, ...missingDefaults].sort((a, b) => a.order - b.order);
         }
         const persistedWidgets = getPlatformConfig("dashboard_widgets", null);
         if (Array.isArray(persistedWidgets) && persistedWidgets.length > 0) {

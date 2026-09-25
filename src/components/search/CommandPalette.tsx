@@ -27,7 +27,8 @@ import {
   X,
   Clock,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Database
 } from "lucide-react";
 
 export interface SearchItem {
@@ -188,6 +189,16 @@ const STATIC_SEARCH_ITEMS: SearchItem[] = [
     href: "/tools",
     icon: <Wrench className="w-4 h-4 text-amber-400" />,
     keywords: ["tools", "calculators", "catalog", "utilities", "all tools"],
+  },
+  {
+    id: "nav_datapal",
+    title: "DataPal™ Extraction Engine",
+    category: "Pages & Navigation",
+    description: "Extract verified business contacts, directories, phone numbers, and digital gap leads across India.",
+    badge: "New",
+    href: "/datapal",
+    icon: <Database className="w-4 h-4 text-indigo-400" />,
+    keywords: ["datapal", "data", "scraper", "leads", "contacts", "phone", "email", "extract", "directories", "b2b", "outreach"],
   },
   {
     id: "nav_reports",

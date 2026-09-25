@@ -660,6 +660,34 @@ function ToolsContent() {
         </div>
       </div>
 
+      {/* DataPal Featured Spotlight Banner */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-surface to-violet-950/40 border border-indigo-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-extrabold text-text">DataPal™ Business Data Extraction</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                New Integration
+              </span>
+            </div>
+            <p className="text-xs text-text-muted mt-0.5">
+              Extract, verify, and filter business contacts across India with AI pitch analysis & direct Excel export.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/datapal"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition-all shrink-0 cursor-pointer"
+        >
+          <span>Launch DataPal Studio</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+
       {/* Category Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
         {categories.map(cat => (
